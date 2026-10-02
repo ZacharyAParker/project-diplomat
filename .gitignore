@@ -15,3 +15,5 @@ saves/
 Thumbs.db
 .vscode/
 .idea/
+
+apps/web/src/generated/

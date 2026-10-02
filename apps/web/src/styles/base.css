@@ -1,0 +1,179 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  scroll-padding-block: var(--space-6);
+}
+
+body {
+  margin: 0;
+  min-height: 100dvh;
+  font-family: var(--font-text);
+  font-size: var(--size-text);
+  line-height: 1.55;
+  font-variant-numeric: oldstyle-nums;
+  text-rendering: optimizeLegibility;
+  overflow-wrap: break-word;
+}
+
+body,
+[data-theme] {
+  color: var(--ink);
+  background-color: var(--paper);
+}
+
+h1,
+h2,
+h3,
+h4 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 700;
+  line-height: 1.12;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+  overflow-wrap: anywhere;
+}
+
+h1 {
+  font-size: var(--size-h1);
+}
+
+h2 {
+  font-size: var(--size-h2);
+}
+
+h3 {
+  font-size: var(--size-h3);
+  line-height: 1.25;
+}
+
+p,
+ul,
+ol,
+dl,
+dd,
+figure,
+fieldset,
+blockquote {
+  margin: 0;
+  padding: 0;
+}
+
+p {
+  text-wrap: pretty;
+}
+
+ul,
+ol {
+  list-style: none;
+}
+
+fieldset {
+  border: 0;
+  min-width: 0;
+}
+
+legend {
+  padding: 0;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+svg {
+  display: block;
+}
+
+a {
+  color: inherit;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.18em;
+}
+
+a:hover {
+  text-decoration-thickness: 2px;
+}
+
+:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 3px;
+}
+
+/* A heading only takes focus when a screen hands it over, and a ring round a headline
+   after a mouse click would be noise. Keyboard users still get one. */
+h1:focus:not(:focus-visible),
+h2:focus:not(:focus-visible) {
+  outline: none;
+}
+
+::selection {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* The label style used everywhere a thing is named and not said: section heads,
+   datelines, field labels. Capitals with air between them, never bold display type. */
+.label {
+  font-family: var(--font-text);
+  font-size: var(--size-label);
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  font-variant-numeric: lining-nums;
+}
+
+.soft {
+  color: var(--ink-soft);
+}
+
+.small {
+  font-size: var(--size-small);
+}
+
+.lede {
+  font-size: var(--size-lede);
+  line-height: 1.45;
+}
+
+.figures {
+  font-variant-numeric: lining-nums tabular-nums;
+}
+
+.measure {
+  max-width: var(--measure);
+}
+
+.stack > * + * {
+  margin-top: var(--stack, var(--space-4));
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+}

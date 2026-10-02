@@ -1,0 +1,87 @@
+/*
+  Every colour, size and gap in the app comes from here. The day edition is the default
+  and the night edition is the same set of names with different values, so a component
+  never needs to know which one it is in. Setting data-theme on any element re-themes
+  everything inside it, which is how the kit shows both side by side.
+*/
+
+:root {
+  --font-display: 'Besley', Rockwell, 'Clarendon', Georgia, serif;
+  --font-text: 'Source Serif 4', 'Iowan Old Style', 'Palatino Linotype', Georgia, serif;
+
+  --size-label: 0.75rem;
+  --size-small: 0.9375rem;
+  --size-text: 1.0625rem;
+  --size-lede: 1.25rem;
+  --size-h3: 1.1875rem;
+  --size-h2: clamp(1.375rem, 1.2rem + 0.9vw, 1.75rem);
+  --size-h1: clamp(1.875rem, 1.3rem + 2.8vw, 3rem);
+  --size-plate: clamp(1.75rem, 1.1rem + 3.6vw, 3.5rem);
+
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+  --space-8: 4.5rem;
+
+  --gutter: clamp(1rem, 0.4rem + 3vw, 2.5rem);
+  --page: 72rem;
+  --measure: 34rem;
+  --tap: 2.75rem;
+
+  --veil: rgb(10 12 14 / 0.6);
+
+  --hair: 1px;
+  --heavy: 3px;
+
+  --turn: 220ms;
+  --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+:root,
+[data-theme='light'] {
+  color-scheme: light;
+  --paper: #ecebe6;
+  --sheet: #f8f7f3;
+  --ink: #17191c;
+  --ink-soft: #4b4f55;
+  --rule: #17191c;
+  --rule-soft: #c2c1b9;
+  --wash: rgb(23 25 28 / 0.06);
+  --accent: #a3122a;
+  --on-accent: #ffffff;
+  --good: #1c5a41;
+  --bad: #a3122a;
+  --buff: #dfd3b4;
+  --flag-edge: rgb(23 25 28 / 0.35);
+}
+
+[data-theme='dark'] {
+  color-scheme: dark;
+  --paper: #14181d;
+  --sheet: #1c2128;
+  --ink: #e8e4da;
+  --ink-soft: #a9aca6;
+  --rule: #e8e4da;
+  --rule-soft: #3a414b;
+  --wash: rgb(232 228 218 / 0.08);
+  --accent: #e5596c;
+  --on-accent: #14181d;
+  --good: #86c9a6;
+  --bad: #f07f8c;
+  --buff: #3b3628;
+  --flag-edge: rgb(232 228 218 / 0.4);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --turn: 0ms;
+  }
+}
+
+[data-motion='reduced'] {
+  --turn: 0ms;
+}
