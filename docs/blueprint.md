@@ -1,6 +1,6 @@
 # Project Diplomat: blueprint
 
-Last updated 2026-10-01. No code yet. "Project Diplomat" is a codename until I pick a real name
+Last updated 2026-10-02. Version 0.1.0 is out: the single-player game, in the browser. "Project Diplomat" is a codename until I pick a real name
 (section 12).
 
 This is the plan. The reading behind it is in `research/`:
@@ -299,15 +299,17 @@ style, and worked examples.
 packages/engine    pure TypeScript: (state, decisions, seed) -> (state, events)
 packages/content   pack schema, validator, starter packs
 packages/ai        provider interface, back ends, prompts, output validators
-apps/local         local server + SQLite + web UI on localhost   <- ships first
+apps/web           the game as a browser app, saves in the browser      <- shipped in 0.1.0
+apps/local         local server + SQLite, needed for the AI layer       <- later
 apps/hosted        Cloudflare Workers + D1 + Queues              <- group and public worlds, later
 ```
 
 - **The engine has no platform imports.** It can be replayed, tested and rebalanced, and it runs
   unchanged on a laptop or a Worker.
-- **Single-player runs locally and opens in the browser.** It has to run locally anyway: a web page
-  can't start the player's Claude Code or Codex. A small local server serves the interface and owns
-  the save. No desktop packaging for now.
+- **Single-player runs entirely in the browser.** For 0.1.0 I dropped the local server: the engine
+  runs client-side and saves live in the browser, with export and import. It's less to go wrong. The
+  local server comes back with the AI layer, because a web page can't start the player's Claude Code
+  or Codex, and that's when saves move to SQLite. No desktop packaging for now.
 - **One schema, two homes.** SQLite locally, D1 when hosted. Hosted ticks run from a scheduled
   trigger through a queue, in idempotent chunks keyed by tick number.
 - **A world is configuration:** clock (player-paced or scheduled), membership (solo, invite, open),

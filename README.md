@@ -16,35 +16,47 @@ Set in a fictional present day. "Project Diplomat" is a codename until I settle 
 
 ## Status
 
-Early. There's a working rules engine and a first pack of dilemmas, and no interface yet. You can
-watch a nation play itself in the terminal.
+Version 0.1.0: the single-player game, playable in the browser. See the
+[changelog](CHANGELOG.md) for what's in it and what isn't.
 
-What exists:
+- Found a nation, give it a flag, and answer a few questions about its character.
+- Each morning there's a front page, then a desk with the day's dilemmas. Every option shows what
+  it will do before you pick it, and every change tells you why afterwards.
+- There's an election every 45 days, and now and then a crisis that runs for several days.
+- Everything that happens goes in a permanent record. Saves live in your browser, and you can
+  export and import them.
+- The core pack has 95 dilemmas and four crises.
 
-- The engine: indicators, factions, policies, traits, a cabinet, promises, delayed consequences,
-  a weekly budget, governments that fall, and multi-day situations.
-- A core pack: 33 dilemmas and one situation (a drought), plus a validator that enforces the
-  house rules.
-- Prompts for the optional AI layer. No provider code yet.
+Not in yet: other nations, treaties and disputes, and the optional AI layer (the prompts are
+written, nothing calls them).
 
-What doesn't: a playable interface, other nations, treaties, disputes, saving.
-
-## Try it
+## Play it
 
 Needs Node 24 or later and pnpm.
 
 ```
 pnpm install
-pnpm validate          # check the core pack
-pnpm simulate          # one 60-day story with random choices
-pnpm simulate 90 42    # 90 days, seed 42
-pnpm simulate 60 --runs 200   # averages across 200 seeds, for balance
+pnpm build
+pnpm start     # then open the address it prints
+```
+
+`pnpm dev` runs it with hot reload if you're changing things.
+
+## Other commands
+
+```
+pnpm validate                 # check the core pack against the house rules
+pnpm simulate                 # one 60-day story with random choices, in the terminal
+pnpm simulate 90 42           # 90 days, seed 42
+pnpm simulate 135 --runs 200  # averages across 200 seeds, for balance
 pnpm test
+pnpm typecheck
 ```
 
 ## Where things are
 
 ```
+apps/web           the game: a React app with the engine running in the browser
 packages/engine    the rules, as pure functions with no dependencies
 packages/content   pack schema, loader and validator
 packages/ai        prompts for the optional AI layer

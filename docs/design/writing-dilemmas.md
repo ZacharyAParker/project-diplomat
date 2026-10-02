@@ -121,7 +121,7 @@ when it clearly is that thing. Current tags with mechanical meaning:
 
 `spending`, `austerity`, `redistribution`, `pro_labour`, `anti_labour`, `privacy`, `surveillance`,
 `green`, `polluting`, `permissive`, `paternalist`, `hawkish`, `dovish`, `growth`, `water_heavy`,
-`water_saving`.
+`water_saving`, `free_trade`, `lenient`.
 
 ## Follow-ups
 
