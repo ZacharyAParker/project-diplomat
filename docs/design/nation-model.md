@@ -121,7 +121,7 @@ whose standing falls to 10 resigns, which costs a little legitimacy, and a repla
 
 Once every seven days:
 
-- The gap between `fiscal` and 50 is settled against the debt (a sixth of the gap, rounded).
+- The gap between `fiscal` and 50 is settled against the debt (a sixth of the gap, to one decimal place).
 - `fiscal` moves 30% of the way back to 50, because most costs and windfalls are one-offs.
 - If debt is at 80 or more, interest costs take 1 off living standards and 2 off legitimacy.
 
@@ -146,8 +146,8 @@ decides it.
 | Support | Result |
 |---|---|
 | 50 or more | Re-elected. Legitimacy +6 |
-| 40 to 49.9 | Returned with a reduced majority. Legitimacy +1 |
-| Under 40 | Voted out |
+| 43 to 49.9 | Returned with a reduced majority. Legitimacy +1 |
+| Under 43 | Voted out |
 
 Being voted out works like a fall: a new government number, a new cabinet, promises lapse and every
 faction's approval moves halfway back to 50. Legitimacy is set to 45, not 40, because losing a vote

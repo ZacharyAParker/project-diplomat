@@ -16,7 +16,7 @@ Set in a fictional present day. "Project Diplomat" is a codename until I settle 
 
 ## Status
 
-Version 0.1.0: the single-player game, playable in the browser. See the
+Version 0.2.0: the single-player game, playable in the browser. See the
 [changelog](CHANGELOG.md) for what's in it and what isn't.
 
 - Found a nation, give it a flag, and answer a few questions about its character.
@@ -25,7 +25,8 @@ Version 0.1.0: the single-player game, playable in the browser. See the
 - There's an election every 45 days, and now and then a crisis that runs for several days.
 - Everything that happens goes in a permanent record. Saves live in your browser, and you can
   export and import them.
-- The core pack has 95 dilemmas and four crises.
+- The core pack has 101 dilemmas and four crises. Six of them are routine business (the budget, the
+  pay round, a reshuffle) and come round again.
 
 Not in yet: other nations, treaties and disputes, and the optional AI layer (the prompts are
 written, nothing calls them).

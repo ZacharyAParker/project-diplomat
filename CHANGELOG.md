@@ -1,5 +1,26 @@
 # Changelog
 
+## 0.2.0
+
+The gaps 0.1.0 admitted to, mostly.
+
+- Routine business: the budget, the pay round, a reshuffle, the televised address, a by-election
+  and the regional summit now come round again every few weeks, so the desk no longer goes quiet
+  for good once the one-off dilemmas run out.
+- Follow-ups wait. A dilemma can require that a flag was set some days ago, and the existing
+  follow-ups now use it. The fares row no longer arrives the morning after the railway is bought.
+- Elections are more of a contest. The bar to survive one is support of 43, up from 40. Governing
+  at random now loses about one election in three.
+- The weekly budget settles to one decimal place, so small deficits reach the debt instead of
+  rounding away.
+- Saves from 0.1.0 load as they are.
+
+Still true:
+
+- The one-off dilemmas run out around day 80. After that it is routine business only.
+- No other nations yet, so no treaties, trade or disputes.
+- The AI layer is prompts only.
+
 ## 0.1.0
 
 The first playable version. Single-player, in the browser, no server and no AI.

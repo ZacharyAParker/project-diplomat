@@ -46,6 +46,7 @@ An id may appear only once across a root file and its folder. Files in the folde
   kind: major                    # or minor; major is the default
   when: { flag: something }      # optional: who gets this dilemma
   priority: 0                    # higher wins when several are eligible; use 1 for follow-ups
+  repeat: 30                     # optional: may come round again after this many days
   options:
     - id: nationalise
       advocate: { name: Petra Hallam, role: general secretary of the rail union }
@@ -88,6 +89,7 @@ Used in `when`, `kept`, and trait rules.
 | `{ faction: labour, lt: 30 }` | The faction's approval passes the test |
 | `{ policy: wealth_tax, is: true }` | The policy has exactly that value |
 | `{ flag: rail_nationalised }` | The flag has been set |
+| `{ flag: rail_nationalised, days: 10 }` | The flag was set at least that many days ago |
 | `{ trait: debtor_nation }` | The nation holds the trait |
 | `{ day: { gte: 10 } }` | The day number passes the test |
 | `{ all: [...] }`, `{ any: [...] }`, `{ not: ... }` | Combine the above |
@@ -126,7 +128,16 @@ when it clearly is that thing. Current tags with mechanical meaning:
 ## Follow-ups
 
 Set a flag in one dilemma, require it in another, and give the second `priority: 1` so it arrives
-soon after. See `rail-buyout` and `rail-fares`.
+as soon as it can. Add `days` to the flag condition if time has to pass first: a railway cannot have
+a fares row the morning after it is bought. See `rail-buyout` and `rail-fares`.
+
+## Routine business
+
+A dilemma with `repeat` comes back after that many days, for as long as its `when` holds. These are
+the things a government really does over and over: the budget, the pay round, a reshuffle. They are
+in `routine.yaml`. Write them so that they read as well the fourth time as the first: no "for the
+first time", no one-off events, and results that are funny as a habit. Keep the effects small, since
+they add up.
 
 The engine sets two flags itself: `government_fell` when a government collapses and `election_lost`
 when one is voted out. Both can be used in `when`.
