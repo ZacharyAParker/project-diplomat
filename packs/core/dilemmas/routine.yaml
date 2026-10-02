@@ -1,0 +1,299 @@
+# The business that comes round again. Each of these repeats, so the text must read
+# as well the fourth time as the first.
+
+- id: budget-day
+  title: The Red Box Is Opened
+  description: >-
+    It is budget day. {minister:finance} has a speech, a photograph to pose for outside the
+    ministry, and three versions of the numbers, depending on what is decided this morning.
+  tags: [economy, tax]
+  when: { day: { gte: 14 } }
+  repeat: 30
+  priority: 1
+  options:
+    - id: spend
+      advocate: { name: Maren Okafor, role: economist at the Fair Share Institute }
+      speech: "The roads have holes and the wards have queues. Money is what budgets are for. Spend it."
+      tags: [spending]
+      effects:
+        - { indicator: fiscal, by: -5, why: "The budget put new money into hospitals, schools and roads." }
+        - { indicator: living, by: 2, why: "Services that had been rationed are a little less so." }
+        - { indicator: health, by: 1, why: "The wards got some of the staff they had asked for." }
+        - { faction: labour, by: 5, why: "Public-sector unions saw their departments funded." }
+        - { faction: business, by: -4, why: "The Chamber counted the borrowing and not the roads." }
+      headline: Budget opens the taps
+      result: The speech runs to ninety minutes. The applause is from one side of the chamber only, but it is sincere.
+
+    - id: cut
+      advocate: { name: Lorne Abbasi, role: Treasury official }
+      speech: "Every department has a bottom drawer. I know, because I have seen inside them. Trim, and nobody will notice until after the next budget."
+      tags: [austerity]
+      effects:
+        - { indicator: fiscal, by: 5, why: "Every department's budget was trimmed by the same small amount." }
+        - { indicator: administration, by: -2, why: "The trimming fell on training, maintenance and anyone due to be hired." }
+        - { indicator: living, by: -2, why: "Libraries are opening later and buses are running less often." }
+        - { faction: business, by: 4, why: "The Chamber likes a government that lives within its means." }
+        - { faction: labour, by: -5, why: "A hiring freeze is a pay cut for everyone who covers the gaps." }
+      headline: Budget tightens every belt by one notch
+      result: The speech is described as responsible. Nobody has ever been cheered in the street for being responsible.
+
+    - id: tax
+      advocate: { name: "{minister:finance}", role: speaking in cabinet }
+      speech: "A penny on income tax. One. I have had it costed and I have had it polled, and I prefer the costing."
+      tags: [redistribution]
+      effects:
+        - { indicator: fiscal, by: 4, why: "A penny on income tax brings in more than any saving would." }
+        - { indicator: inequality, by: -1, why: "Higher earners pay more of the extra penny." }
+        - { indicator: capacity, by: -1, why: "Firms that were about to hire are waiting to see next year's rate." }
+        - { faction: business, by: -5, why: "The Chamber says a penny is how it always starts." }
+        - { faction: grey, by: -3, why: "Pensioners with a second income are paying it too." }
+        - { minister: finance, by: 5, why: "The Finance Minister's budget went through as written." }
+      headline: A penny on income tax
+      result: The penny is on every front page, enlarged to the size of a dinner plate.
+
+    - id: steady
+      advocate: { name: Dame Philippa Wace, role: cabinet secretary }
+      speech: "There is a great deal to be said for a budget that nobody can remember by the weekend."
+      tags: []
+      effects:
+        - { indicator: administration, by: 1, why: "Departments got the same budget as last time and could plan on it." }
+        - { indicator: legitimacy, by: -1, why: "A budget with nothing in it looks like a government with no ideas." }
+        - { faction: mandarins, by: 3, why: "The civil service prizes a quiet budget above all others." }
+        - { faction: youth, by: -2, why: "The young had hoped to hear themselves mentioned." }
+      headline: Budget changes nothing, at length
+      result: The Finance Minister speaks for an hour. Analysts search the small print for the story and find the small print.
+
+- id: pay-round
+  title: The Going Rate
+  description: >-
+    The independent review bodies have reported on public-sector pay, as they do. They recommend a
+    rise somewhat above what the Treasury has budgeted for, as they do.
+  tags: [pay, work]
+  when: { day: { gte: 20 } }
+  repeat: 38
+  priority: 1
+  options:
+    - id: accept
+      advocate: { name: Sister Joan Adeyemi, role: nurse and union convenor }
+      speech: "You set up an independent body so that you would not have to decide. It has decided. Pay it."
+      tags: [spending, pro_labour]
+      effects:
+        - { indicator: fiscal, by: -4, why: "The pay award was met in full across the public sector." }
+        - { indicator: administration, by: 2, why: "Fewer nurses, teachers and clerks are leaving for better-paid work." }
+        - { faction: labour, by: 6, why: "The unions got the recommended rise without a fight." }
+        - { faction: business, by: -3, why: "Private employers now have to match it." }
+      headline: Public-sector pay award accepted in full
+      result: The review bodies are thanked for their independence, which is noted for next year.
+
+    - id: stagger
+      advocate: { name: "{minister:finance}", role: speaking in cabinet }
+      speech: "Accept it in principle and pay it in two halves, six months apart. The second half falls in next year's books, which are not yet my problem."
+      tags: []
+      effects:
+        - { indicator: fiscal, by: -2, why: "Half the pay award was paid now and half deferred." }
+        - { indicator: legitimacy, by: -1, why: "Everyone can see what staggering a pay rise is for." }
+        - { faction: labour, by: 1, why: "The unions accepted it and said what they thought of it." }
+        - { minister: finance, by: 4, why: "The Finance Minister kept this year's books intact." }
+      headline: Pay award accepted, in instalments
+      result: Payslips arrive with an explanatory leaflet longer than the payslip.
+
+    - id: reject
+      advocate: { name: Idris Monk, role: fellow of the Free Enterprise Forum }
+      speech: "The bodies recommend. Ministers decide. If you always accept, you have not got an independent body, you have got a second Treasury that only says yes."
+      tags: [austerity, anti_labour]
+      effects:
+        - { indicator: fiscal, by: 3, why: "The pay award was held to what the Treasury had budgeted." }
+        - { indicator: administration, by: -3, why: "Experienced staff are leaving and their posts are being covered by agencies." }
+        - { faction: labour, by: -7, why: "The unions were told an independent recommendation did not count." }
+        - { faction: business, by: 3, why: "Private employers are relieved not to be outbid." }
+      headline: Government overrules pay review bodies
+      result: Two members of a review body resign. They are replaced, after some difficulty finding anyone.
+
+- id: reshuffle
+  title: Musical Chairs
+  description: >-
+    The papers have decided the government looks tired, and have printed a list of ministers they
+    expect to be moved. Several of the ministers have read it. A reshuffle is possible today, if
+    one is wanted.
+  tags: [government]
+  when: { day: { gte: 25 } }
+  repeat: 45
+  priority: 1
+  options:
+    - id: promote-loyal
+      advocate: { name: Dame Philippa Wace, role: cabinet secretary }
+      speech: "Reward the ones who have never caused you a moment's trouble. It encourages the others, or at any rate it warns them."
+      tags: []
+      effects:
+        - { minister: finance, by: 8, why: "The Finance Minister was publicly confirmed in post." }
+        - { minister: interior, by: 8, why: "The Interior Minister was publicly confirmed in post." }
+        - { minister: environment, by: -8, why: "The Environment Minister was passed over, and it was in the papers." }
+        - { minister: education, by: -8, why: "The Education Minister was passed over, and it was in the papers." }
+        - { indicator: administration, by: 1, why: "The big departments kept their ministers and their momentum." }
+        - { indicator: legitimacy, by: -1, why: "A reshuffle that moved nobody important was called a missed opportunity." }
+      headline: Reshuffle rewards the reliable
+      result: The ministers who were not promoted are described as "relaxed", by themselves, through gritted teeth.
+
+    - id: fresh-faces
+      advocate: { name: Kasia Dunmore, role: president of the students' union }
+      speech: "Half your cabinet was in the job before I could vote. Find someone who has used a bus this decade."
+      tags: []
+      effects:
+        - { minister: health, by: 10, why: "The Health Minister is new, keen and has not yet had a bad winter." }
+        - { minister: defence, by: 10, why: "The Defence Minister is new and the generals are still being polite." }
+        - { indicator: administration, by: -3, why: "Two departments have new ministers who are still learning where the lifts are." }
+        - { faction: youth, by: 4, why: "The cabinet's average age fell by nine years in an afternoon." }
+        - { faction: mandarins, by: -4, why: "Officials have to explain everything again from the beginning." }
+      headline: New faces at health and defence
+      result: The outgoing ministers take it well. Their memoirs are understood to be taking it less well.
+
+    - id: no-change
+      advocate: { name: Lorne Abbasi, role: Treasury official }
+      speech: "A reshuffle is how a government tells the country it has run out of other announcements. Leave them where they are."
+      tags: []
+      effects:
+        - { indicator: administration, by: 2, why: "Every minister has been in post long enough to know the brief." }
+        - { indicator: legitimacy, by: -2, why: "The papers predicted a reshuffle and resent being wrong." }
+        - { faction: mandarins, by: 3, why: "The civil service was spared a round of introductions." }
+        - { faction: youth, by: -2, why: "The same faces are giving the same interviews." }
+      headline: No reshuffle, {leader} insists
+      result: The list of ministers "certain to be moved" is quietly reprinted with next month's date.
+
+- id: the-address
+  title: A Few Words to the Nation
+  description: >-
+    The {leader} is due to give the regular televised address. The speechwriters have three drafts.
+    Each is eleven minutes long and each begins "My fellow {demonym}s", which is as far as
+    agreement has got.
+  tags: [government, media]
+  when: { day: { gte: 12 } }
+  repeat: 24
+  priority: 1
+  options:
+    - id: reassure
+      advocate: { name: Mabel Thwaite, role: secretary of the Pensioners' Convention }
+      speech: "Tell people it is going to be all right. They do not believe it, but they like to be told."
+      tags: []
+      effects:
+        - { faction: grey, by: 4, why: "Older viewers watched the whole address and approved of the tie." }
+        - { indicator: legitimacy, by: 1, why: "The address was calm and the country, briefly, was too." }
+        - { faction: youth, by: -3, why: "The young watched a clip of it and the clip was not kind." }
+      headline: Address strikes a reassuring note
+      result: The phrase "steady as she goes" is used four times. A fifth was cut for length.
+
+    - id: rally
+      advocate: { name: Petra Hallam, role: general secretary of the rail union }
+      speech: "Name who is to blame and promise to do something about them. People like a government with a pulse."
+      tags: []
+      effects:
+        - { faction: labour, by: 4, why: "The address named the right villains, by the unions' lights." }
+        - { faction: youth, by: 3, why: "The young shared the angry part." }
+        - { faction: business, by: -5, why: "The Chamber recognised itself in the speech and did not care for the likeness." }
+        - { indicator: legitimacy, by: -1, why: "Half the country heard a leader, the other half heard a threat." }
+      headline: Address takes aim at "those who have had it easy"
+      result: Nobody is named. Everybody who was meant is certain they were.
+
+    - id: candour
+      advocate: { name: Rufus Hale, role: civil liberties barrister }
+      speech: "Tell them the truth: what went wrong, what it cost and what you do not know. It has never been tried, so nobody can say it does not work."
+      tags: []
+      effects:
+        - { indicator: legitimacy, by: 3, why: "The address admitted mistakes, and people remembered that it had." }
+        - { faction: mandarins, by: -3, why: "Officials found their advice described on television as 'wrong'." }
+        - { faction: business, by: -2, why: "Markets dislike the word 'unknown' in any context." }
+        - { faction: grey, by: -2, why: "Older viewers prefer a leader who at least pretends to be sure." }
+      headline: Address admits "we got some of this wrong"
+      result: The opposition demands to know which parts. A list is promised and is still being agreed.
+
+- id: by-election
+  title: A Seat Becomes Vacant
+  description: >-
+    A member of parliament has stood down "to spend more time with a tribunal", and there is a
+    by-election in a seat the government holds by a few hundred votes. The local party wants to
+    know how hard to fight it.
+  tags: [government]
+  when: { day: { gte: 18 } }
+  repeat: 33
+  priority: 1
+  options:
+    - id: throw-everything
+      advocate: { name: "{minister:interior}", role: speaking in cabinet }
+      speech: "Send the whole cabinet. If we lose a seat like this, the papers will write nothing else for a month."
+      tags: []
+      effects:
+        - { indicator: legitimacy, by: 2, why: "The seat was held, and holding it looked like strength." }
+        - { indicator: administration, by: -2, why: "Seven ministers spent a fortnight knocking on doors instead of running departments." }
+        - { faction: mandarins, by: -3, why: "Decisions waited in red boxes while ministers posed with a candidate." }
+        - { minister: interior, by: 4, why: "The Interior Minister's campaign plan worked." }
+      headline: Government holds by-election seat after cabinet descends on it
+      result: The town has never been so visited. It asks that this not happen again.
+
+    - id: local-bribe
+      advocate: { name: Councillor Hester Pym, role: leader of Wickford council }
+      speech: "My residents are not ideological. They would like a bypass. I mention this purely as background."
+      tags: [spending]
+      effects:
+        - { indicator: fiscal, by: -2, why: "A bypass was announced nine days before polling." }
+        - { indicator: legitimacy, by: -1, why: "The timing of the bypass was noticed everywhere except in the announcement." }
+        - { faction: rural, by: 5, why: "A market town got a road it had asked for since the last by-election." }
+        - { faction: business, by: 2, why: "Hauliers will save twenty minutes." }
+      headline: Bypass announced for by-election town
+      result: The seat is held. Three other towns are reported to be considering resignations.
+
+    - id: let-it-go
+      advocate: { name: Dame Philippa Wace, role: cabinet secretary }
+      speech: "Governments lose by-elections. It lets the voters feel better and changes nothing. Run a paper candidate and keep your ministers at their desks."
+      tags: []
+      effects:
+        - { indicator: administration, by: 1, why: "Ministers stayed at their desks during the campaign." }
+        - { indicator: legitimacy, by: -3, why: "The seat was lost on a large swing and the papers drew conclusions." }
+        - { faction: mandarins, by: 2, why: "The business of government was not interrupted." }
+      headline: Government loses by-election
+      result: The winner promises to hold ministers to account. Ministers are told his name by an aide.
+
+- id: summit
+  title: The Family Photograph
+  description: >-
+    The regional summit meets this week. Eleven leaders will stand on a staircase and then spend
+    two days agreeing a communique that was written in advance. There is one open question:
+    whether {nation} signs it.
+  tags: [foreign]
+  when: { day: { gte: 22 } }
+  repeat: 42
+  priority: 1
+  options:
+    - id: sign
+      advocate: { name: "{minister:foreign}", role: speaking in cabinet }
+      speech: "It commits us to nothing we were not doing anyway and it gets me invited back."
+      tags: [dovish]
+      effects:
+        - { indicator: capacity, by: 1, why: "Exporters keep the easy terms that signatories give one another." }
+        - { faction: business, by: 3, why: "The Chamber's members trade with every country on that staircase." }
+        - { faction: services, by: -3, why: "The defence staff read the clause about joint exercises twice." }
+        - { minister: foreign, by: 6, why: "The Foreign Minister came home with a signature and a photograph." }
+      headline: "{nation} signs summit communique"
+      result: The communique runs to forty pages. Its only verb is "reaffirm".
+
+    - id: opt-out
+      advocate: { name: General Hartley Voss, role: chief of the defence staff }
+      speech: "Sign the trade pages. Leave the rest. Nobody ever lost an election by being awkward abroad."
+      tags: [hawkish]
+      effects:
+        - { faction: services, by: 4, why: "The defence clauses were struck out at the defence staff's request." }
+        - { faction: grey, by: 2, why: "Older voters enjoyed seeing the country hold out." }
+        - { faction: business, by: -3, why: "The Chamber fears an opt-out today is a tariff tomorrow." }
+        - { minister: foreign, by: -5, why: "The Foreign Minister had to explain the footnotes to ten other governments." }
+      headline: "{nation} signs summit text with reservations"
+      result: The reservations are printed as a footnote. The footnote is longer than the chapter.
+
+    - id: walk-out
+      advocate: { name: Idris Monk, role: fellow of the Free Enterprise Forum }
+      speech: "Leave before the photograph. It costs nothing, it leads every bulletin, and they will still take your calls on Monday."
+      tags: [hawkish]
+      effects:
+        - { indicator: legitimacy, by: 2, why: "The walk-out led every bulletin at home for two days." }
+        - { indicator: capacity, by: -2, why: "Exporters are finding their paperwork is taking longer at ten borders." }
+        - { faction: business, by: -5, why: "The Chamber's members had orders riding on that communique." }
+        - { minister: foreign, by: -8, why: "The Foreign Minister was left on the staircase to explain." }
+      headline: "{leader} walks out of summit before photograph"
+      result: The photograph is taken anyway. There is a gap on the third step.

@@ -137,7 +137,7 @@
     wader most {demonym} people know only from stamps. A petition asks for the census otter
     instead, and has more signatures than the census had returns.
   tags: [culture]
-  when: { flag: mascot_adopted }
+  when: { flag: mascot_adopted, days: 6 }
   priority: 1
   options:
     - id: otter
@@ -215,7 +215,7 @@
     bought it for forty {currency}. The "Options" folder is now in every newspaper. Option four is
     to abolish the August bank holiday, which the Treasury prices at one day of national output.
   tags: [work, daily-life]
-  when: { flag: budget_laptop_at_large }
+  when: { flag: budget_laptop_at_large, days: 3 }
   priority: 1
   options:
     - id: keep
@@ -267,7 +267,7 @@
     the government of {nation} holds into it, from tax returns to hip operations, for less than the
     ministries now spend on filing cabinets and the basements to keep them in.
   tags: [technology, government]
-  when: { flag: data_centre_built }
+  when: { flag: data_centre_built, days: 15 }
   priority: 1
   options:
     - id: move-in
@@ -322,7 +322,7 @@
     berth is on a lease, the lease is up, and the fund would like the space for containers. It has
     offered the fleet "reasonable visiting hours".
   tags: [foreign, defence]
-  when: { flag: port_sold }
+  when: { flag: port_sold, days: 15 }
   priority: 1
   options:
     - id: buy-back
@@ -382,7 +382,7 @@
     said it would do and had not started. Each one has a press release, a ribbon somewhere in a
     drawer, and a town that is still waiting.
   tags: [government]
-  when: { flag: government_fell }
+  when: { flag: government_fell, days: 2 }
   priority: 1
   options:
     - id: honour

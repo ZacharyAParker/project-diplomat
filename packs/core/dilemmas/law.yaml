@@ -130,7 +130,7 @@
     reports that six hundred of the tags show their wearers at a single address, which is Halcyon's
     warehouse. They were never fitted.
   tags: [prisons, technology]
-  when: { flag: prisoners_released_early }
+  when: { flag: prisoners_released_early, days: 10 }
   priority: 1
   options:
     - id: manhunt
@@ -378,7 +378,7 @@
     the estimate, and sits four degrees to port, which the yard calls within tolerance and the navy
     calls visible from the shore.
   tags: [defence, economy]
-  when: { flag: frigates_at_kessel }
+  when: { flag: frigates_at_kessel, days: 25 }
   priority: 1
   options:
     - id: carry-on

@@ -69,7 +69,7 @@
     Now that the state owns the trains, the annual fare rise is your decision. {minister:finance}
     has circled a number. The number is large.
   tags: [transport, economy]
-  when: { flag: rail_nationalised }
+  when: { flag: rail_nationalised, days: 10 }
   priority: 1
   options:
     - id: freeze

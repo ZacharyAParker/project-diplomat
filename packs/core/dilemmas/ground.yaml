@@ -210,7 +210,7 @@
     {nation} have no bus at all, and a good many more have one a week, on Thursdays, outbound only.
     {minister:finance} has noticed the money.
   tags: [buses, transport]
-  when: { all: [{ flag: road_charge_on }, { policy: public_buses, is: false }] }
+  when: { all: [{ flag: road_charge_on, days: 8 }, { policy: public_buses, is: false }] }
   priority: 1
   options:
     - id: buses
@@ -393,7 +393,7 @@
     The new woodland has been a great success with deer, of which {nation} has two million and no
     wolves. They have eaten a third of the saplings and have started on the gardens of the retired.
   tags: [wildlife, environment]
-  when: { flag: forests_planted }
+  when: { flag: forests_planted, days: 20 }
   priority: 1
   options:
     - id: army-cull

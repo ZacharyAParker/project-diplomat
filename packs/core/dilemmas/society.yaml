@@ -286,7 +286,7 @@
     Two hundred thousand people have marched through {capital} against the new pension age. The
     organisers describe it as peaceful. It was also slow, and has not technically finished.
   tags: [pensions, order]
-  when: { flag: pension_age_raised }
+  when: { flag: pension_age_raised, days: 5 }
   priority: 1
   options:
     - id: hold-firm

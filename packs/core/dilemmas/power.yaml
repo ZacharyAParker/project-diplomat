@@ -179,7 +179,7 @@
     treasurer's diary. A cap on political donations is being drafted by people who would not have
     drafted one a month ago.
   tags: [ethics, constitution]
-  when: { all: [{ flag: donor_knighted }, { policy: donation_cap, is: false }] }
+  when: { all: [{ flag: donor_knighted, days: 8 }, { policy: donation_cap, is: false }] }
   priority: 1
   options:
     - id: cap
@@ -443,7 +443,7 @@
     colour of the bins. They want regional assemblies with tax powers of their own. The letter was
     sent second class, to make a point.
   tags: [regions, constitution]
-  when: { all: [{ flag: kessel_went_bust }, { policy: regional_assemblies, is: false }] }
+  when: { all: [{ flag: kessel_went_bust, days: 10 }, { policy: regional_assemblies, is: false }] }
   priority: 1
   options:
     - id: assemblies

@@ -121,7 +121,7 @@
     fourteen-year-old in four. The tobacco firms own most of the brands and describe them as a
     quitting aid.
   tags: [health, drugs]
-  when: { all: [{ flag: tobacco_age_raised }, { policy: tobacco_age_rising, is: true }] }
+  when: { all: [{ flag: tobacco_age_raised, days: 12 }, { policy: tobacco_age_rising, is: true }] }
   priority: 1
   options:
     - id: prescription
@@ -322,7 +322,7 @@
     was meant to. The contractor reports that the site turns out to be a marsh. It is on the map as
     Marsh Lane.
   tags: [sport, economy]
-  when: { flag: games_awarded }
+  when: { flag: games_awarded, days: 20 }
   priority: 1
   options:
     - id: pay-up

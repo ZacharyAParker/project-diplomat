@@ -132,7 +132,7 @@
     little more. The same letter confirms that retention bonuses have been paid to the senior staff
     who, it says, steered the bank through the crisis.
   tags: [banking, pay]
-  when: { all: [{ flag: aldermoor_rescued }, { policy: bonus_cap, is: false }] }
+  when: { all: [{ flag: aldermoor_rescued, days: 12 }, { policy: bonus_cap, is: false }] }
   priority: 1
   options:
     - id: top-up
@@ -252,7 +252,7 @@
     cheese, cider and lamb. It chose them, its trade minister explains, at random. All three are
     produced in the home districts of cabinet ministers.
   tags: [trade, farming]
-  when: { all: [{ flag: steel_tariff_imposed }, { policy: steel_tariff, is: true }] }
+  when: { all: [{ flag: steel_tariff_imposed, days: 8 }, { policy: steel_tariff, is: true }] }
   priority: 1
   options:
     - id: escalate
