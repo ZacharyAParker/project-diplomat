@@ -3,7 +3,7 @@ import { loadPack, type Problem } from './load.ts'
 import { validate } from './validate.ts'
 
 export { loadPack, validate, type Problem }
-export { LIMITS } from './validate.ts'
+export { FOUNDING_RANGE, LIMITS } from './validate.ts'
 
 export function checkPack(dir: string): { content: Content; problems: Problem[] } {
   const { content, problems } = loadPack(dir)

@@ -1,12 +1,24 @@
-import { LOWER_IS_BETTER, type Condition, type Content, type Effect, type Option } from '@diplomat/engine'
+import {
+  INDICATORS,
+  LOWER_IS_BETTER,
+  START_INDICATORS,
+  type Condition,
+  type Content,
+  type Effect,
+  type FoundingEffect,
+  type Option,
+} from '@diplomat/engine'
 import type { Problem } from './load.ts'
 
 // How far one effect may move a number. Delayed effects get a little more room.
 export const LIMITS = { indicator: 10, faction: 15, minister: 20, situation: 20, laterBonus: 2 }
 
+// Where founding may leave a starting indicator or a faction's approval, however it is answered.
+export const FOUNDING_RANGE = { min: 25, max: 75 }
+
 const MACROS = /\{([a-z]+)(?::([a-z_]+))?\}/g
-const PLAIN_MACROS = new Set(['nation', 'capital', 'currency', 'demonym'])
-const BUILT_IN_FLAGS = new Set(['government_fell'])
+const PLAIN_MACROS = new Set(['nation', 'capital', 'currency', 'demonym', 'leader'])
+const BUILT_IN_FLAGS = new Set(['government_fell', 'election_lost'])
 
 // Checks the things a schema can't: references, bounds, and the house rules.
 export function validate(content: Content): Problem[] {
@@ -14,7 +26,7 @@ export function validate(content: Content): Problem[] {
   const say = (where: string, message: string) => problems.push({ where, message })
 
   const factions = new Set(content.factions.map((f) => f.id))
-  const policies = new Set(content.policies.map((p) => p.id))
+  const policies = new Map(content.policies.map((p) => [p.id, p.default]))
   const traits = new Set(content.traits.map((t) => t.id))
   const portfolios = new Set(content.portfolios.map((p) => p.id))
   const situations = new Set(content.situations.map((s) => s.id))
@@ -28,6 +40,8 @@ export function validate(content: Content): Problem[] {
     trait: content.traits,
     dilemma: content.dilemmas,
     situation: content.situations,
+    class: content.classes,
+    'founding question': content.founding.questions,
   })) {
     const seen = new Set<string>()
     for (const item of list) {
@@ -49,6 +63,10 @@ export function validate(content: Content): Problem[] {
     if ('all' in c) return c.all.forEach((inner) => checkCondition(where, inner))
     if ('any' in c) return c.any.forEach((inner) => checkCondition(where, inner))
     if ('not' in c) return checkCondition(where, c.not)
+    const bounds = 'day' in c ? c.day : 'indicator' in c || 'faction' in c ? c : undefined
+    if (bounds && [bounds.gt, bounds.gte, bounds.lt, bounds.lte].every((bound) => bound === undefined)) {
+      say(where, 'a comparison with no gt, gte, lt or lte is always true')
+    }
     if ('faction' in c && !factions.has(c.faction)) say(where, `unknown faction ${c.faction}`)
     if ('policy' in c && !policies.has(c.policy)) say(where, `unknown policy ${c.policy}`)
     if ('trait' in c && !traits.has(c.trait)) say(where, `unknown trait ${c.trait}`)
@@ -71,7 +89,11 @@ export function validate(content: Content): Problem[] {
         if (!situations.has(e.situation)) say(where, `unknown situation ${e.situation}`)
         if (Math.abs(e.by) > LIMITS.situation) say(where, `situation gauge moves by ${e.by}; the limit is ${LIMITS.situation}`)
       } else if ('policy' in e) {
-        if (!policies.has(e.policy)) say(where, `unknown policy ${e.policy}`)
+        const usual = policies.get(e.policy)
+        if (usual === undefined) say(where, `unknown policy ${e.policy}`)
+        else if (typeof usual !== typeof e.to) {
+          say(where, `policy ${e.policy} is a ${typeof usual} and cannot be set to ${e.to}`)
+        }
       } else if (!e.clear) {
         flagsSet.add(e.flag)
       }
@@ -79,17 +101,36 @@ export function validate(content: Content): Problem[] {
   }
 
   // House rule: no option is free and no option is pure punishment.
-  function checkTradeOff(where: string, option: Option) {
+  function checkTradeOff(where: string, effects: Effect[], what: string) {
     let good = false
     let bad = false
-    for (const e of [...option.effects, ...option.later.flatMap((l) => l.effects)]) {
+    for (const e of effects) {
       if (!('by' in e) || e.by === 0 || 'situation' in e) continue
       const helps = 'indicator' in e && LOWER_IS_BETTER.has(e.indicator) ? e.by < 0 : e.by > 0
       if (helps) good = true
       else bad = true
     }
-    if (!good) say(where, 'nothing good comes of this option')
-    if (!bad) say(where, 'this option costs nothing')
+    if (!good) say(where, `nothing good comes of this ${what}`)
+    if (!bad) say(where, `this ${what} costs nothing`)
+  }
+
+  // Adds up the furthest founding could push one number in one direction: the
+  // most extreme answer to every question at once.
+  function foundingReach(target: (e: FoundingEffect) => boolean, sign: 1 | -1): number {
+    return content.founding.questions.reduce((sum, question) => {
+      const moves = question.answers.map((answer) =>
+        answer.effects.reduce((total, e) => (target(e) && 'by' in e ? total + e.by : total), 0),
+      )
+      return sum + sign * Math.max(0, ...moves.map((move) => sign * move))
+    }, 0)
+  }
+
+  function checkFoundingRange(name: string, start: number, target: (e: FoundingEffect) => boolean) {
+    const low = start + foundingReach(target, -1)
+    const high = start + foundingReach(target, 1)
+    const { min, max } = FOUNDING_RANGE
+    if (low < min) say('founding', `${name} can start at ${low}; the lowest allowed is ${min}`)
+    if (high > max) say('founding', `${name} can start at ${high}; the highest allowed is ${max}`)
   }
 
   function checkOption(where: string, option: Option, needsTradeOff: boolean) {
@@ -108,7 +149,7 @@ export function validate(content: Content): Problem[] {
     for (const value of [option.advocate.name, option.advocate.role, option.speech, option.headline, option.result]) {
       checkText(where, value)
     }
-    if (needsTradeOff) checkTradeOff(where, option)
+    if (needsTradeOff) checkTradeOff(where, [...option.effects, ...option.later.flatMap((l) => l.effects)], 'option')
   }
 
   function checkOptions(where: string, options: Option[], needsTradeOff: boolean) {
@@ -144,6 +185,39 @@ export function validate(content: Content): Problem[] {
     checkCondition(t.id, t.earn)
     checkCondition(t.id, t.lose)
   }
+
+  for (const q of content.founding.questions) {
+    const where = `founding/${q.id}`
+    checkText(where, q.prompt)
+    const seen = new Set<string>()
+    for (const answer of q.answers) {
+      if (seen.has(answer.id)) say(where, `duplicate answer id ${answer.id}`)
+      seen.add(answer.id)
+      checkText(`${where}/${answer.id}`, answer.label)
+      checkEffects(`${where}/${answer.id}`, answer.effects)
+      checkTradeOff(`${where}/${answer.id}`, answer.effects, 'answer')
+    }
+  }
+  for (const id of INDICATORS) {
+    checkFoundingRange(id, START_INDICATORS[id], (e) => 'indicator' in e && e.indicator === id)
+  }
+  for (const f of content.factions) {
+    checkFoundingRange(`${f.id} approval`, 50, (e) => 'faction' in e && e.faction === f.id)
+  }
+
+  content.classes.forEach((c, i) => {
+    const last = i === content.classes.length - 1
+    checkCondition(`classes/${c.id}`, c.when)
+    checkText(`classes/${c.id}`, c.name)
+    checkText(`classes/${c.id}`, c.description)
+    if (last && c.when) {
+      say(`classes/${c.id}`, 'the last class must have no when, so every nation is something')
+    }
+    if (!last && !c.when) {
+      say(`classes/${c.id}`, 'only the last class may have no when; nothing after this one can be reached')
+    }
+  })
+  if (content.classes.length === 0) say('classes', 'the pack needs at least one class')
 
   // Tags are only compared after every option has been read.
   for (const s of content.situations) {

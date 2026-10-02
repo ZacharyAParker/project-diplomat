@@ -1,0 +1,230 @@
+questions:
+  - id: origin
+    prompt: >-
+      Every country tells a story about how it began. Which one is on the first page of {nation}'s
+      school history books?
+    answers:
+      - id: uprising
+        label: A popular uprising. The statues are of people holding flags.
+        effects:
+          - { indicator: liberty, by: 5, why: "The right to march is in the first article of the constitution, ahead of the right to property." }
+          - { indicator: administration, by: -4, why: "The ministries were set up in a hurry by the people who had just stormed them." }
+          - { faction: labour, by: 5, why: "The Unions were on the barricades and have the photographs to prove it." }
+          - { faction: business, by: -4, why: "The Chamber's founders spent the uprising abroad, and nobody has forgotten." }
+      - id: settlement
+        label: A negotiated settlement. The statues are of people holding pens.
+        effects:
+          - { indicator: administration, by: 6, why: "The civil service is older than the country and has never let it forget." }
+          - { indicator: liberty, by: -3, why: "The founding compromise left some emergency powers in place, temporarily." }
+          - { faction: mandarins, by: 6, why: "The Mandarins drafted the settlement, including the clauses about officials." }
+          - { faction: youth, by: -4, why: "Nobody under thirty-five can name a single founder, and the founders planned it that way." }
+      - id: crown
+        label: An old kingdom that modernised when it had to. The statues are of people on horses.
+        effects:
+          - { indicator: legitimacy, by: 4, why: "The state has been here for nine hundred years and people assume it knows what it is doing." }
+          - { indicator: inequality, by: 5, why: "The families who owned the land then own it now, plus the car parks." }
+          - { faction: rural, by: 5, why: "The Shires like a country that remembers where it came from." }
+          - { faction: faithful, by: 4, why: "The Congregations were written into the old order and never written out." }
+          - { faction: youth, by: -4, why: "The Young have noticed that the horses get better housing than they do." }
+          - { faction: labour, by: -2, why: "The Unions have never been invited to the palace and have stopped pretending not to mind." }
+      - id: accident
+        label: A province nobody else wanted. There are no statues. There was no budget.
+        effects:
+          - { indicator: fiscal, by: 6, why: "A country that began with nothing learned early not to spend what it did not have." }
+          - { indicator: debt, by: -3, why: "Nobody would lend to a province nobody wanted, so it owes very little." }
+          - { indicator: capacity, by: -4, why: "Nobody ever thought the place worth building much in." }
+          - { indicator: legitimacy, by: -3, why: "It is hard to be solemn about a state founded by an oversight." }
+          - { faction: grey, by: 3, why: "Pensioners remember being ignored by a larger capital and prefer being ignored by this one." }
+          - { faction: services, by: -4, why: "No army was needed to found the country, and the army has felt underused since." }
+
+  - id: livelihood
+    prompt: What does {nation} do for a living?
+    answers:
+      - id: industry
+        label: It makes things. Steel, ships and a persistent haze.
+        effects:
+          - { indicator: capacity, by: 6, why: "The yards and furnaces at Kessel work three shifts." }
+          - { indicator: employment, by: 3, why: "There is a job for anyone who can stand the noise." }
+          - { indicator: environment, by: -6, why: "The rivers downstream of the works come in several colours." }
+          - { indicator: health, by: -2, why: "The national cough is a recognised accent." }
+          - { faction: labour, by: 6, why: "A yard of four thousand people is a union branch with a gate." }
+          - { faction: youth, by: -4, why: "The Young would like a future that does not involve a hard hat." }
+          - { faction: rural, by: -3, why: "The Shires get the smoke and none of the wages." }
+      - id: land
+        label: It grows things. The national dish is whatever was ready that week.
+        effects:
+          - { indicator: environment, by: 4, why: "Most of the country is still fields, hedges and weather." }
+          - { indicator: capacity, by: -4, why: "The largest machine in most districts is a combine harvester." }
+          - { indicator: living, by: -2, why: "Farm wages buy less than they did, and they never bought much." }
+          - { faction: rural, by: 8, why: "The Shires are the economy, and expect to be spoken to accordingly." }
+          - { faction: youth, by: -4, why: "The Young leave for anywhere with a cinema." }
+      - id: money
+        label: It looks after other people's money. The capital has more banks than bakeries.
+        effects:
+          - { indicator: fiscal, by: 5, why: "The banks pay a great deal of tax, by their standards." }
+          - { indicator: inequality, by: 6, why: "Bonuses in {capital} are larger than budgets everywhere else." }
+          - { faction: business, by: 6, why: "The Chamber has a view of the harbour and of the Treasury." }
+          - { faction: labour, by: -5, why: "There is not much to organise in an office of forty analysts." }
+          - { faction: rural, by: -3, why: "The Shires appear in the national accounts as a rounding error." }
+      - id: state
+        label: It works for the government, mostly. The largest employer in every town is a ministry.
+        effects:
+          - { indicator: employment, by: 5, why: "There is always a vacancy somewhere in the public service." }
+          - { indicator: administration, by: 3, why: "With this many officials, some of them are bound to be good." }
+          - { indicator: fiscal, by: -5, why: "The wage bill is the budget." }
+          - { indicator: debt, by: 3, why: "Payday has been met with borrowing more than once." }
+          - { faction: mandarins, by: 6, why: "The Mandarins run the largest enterprise in the country and know it." }
+          - { faction: grey, by: 2, why: "A public pension is the one promise everybody expects to be kept." }
+          - { faction: business, by: -4, why: "The Chamber cannot hire anyone the ministries have not already hired." }
+
+  - id: bargain
+    prompt: What is the arrangement between {nation} and the people who live in it?
+    answers:
+      - id: cradle
+        label: High taxes and a state that does things. People complain about both.
+        effects:
+          - { indicator: health, by: 5, why: "The clinics are free and, most days, open." }
+          - { indicator: education, by: 2, why: "Schools have roofs and the roofs have been inspected." }
+          - { indicator: inequality, by: -5, why: "The tax system takes from the top with some enthusiasm." }
+          - { indicator: fiscal, by: -6, why: "Doing things costs money every single year." }
+          - { indicator: capacity, by: -3, why: "Some firms keep their head office next door and their sums to themselves." }
+          - { faction: labour, by: 4, why: "The Unions regard the welfare state as their own work." }
+          - { faction: grey, by: 3, why: "Pensioners get a bus pass and intend to use it." }
+          - { faction: business, by: -6, why: "The Chamber refers to the tax office as a hostile power." }
+      - id: ladder
+        label: Low taxes, and after that you are on your own. People complain about that too.
+        effects:
+          - { indicator: capacity, by: 5, why: "Money that is not taxed gets invested, some of it here." }
+          - { indicator: fiscal, by: 3, why: "A state that does little spends little, and the Treasury closes at four." }
+          - { indicator: inequality, by: 6, why: "Those who started with more have kept it and added to it." }
+          - { indicator: health, by: -4, why: "A visit to the doctor begins with a conversation about payment." }
+          - { faction: business, by: 6, why: "The Chamber calls it the most sensible tax code on the continent." }
+          - { faction: labour, by: -5, why: "The Unions call it the most sensible tax code for anyone with an accountant." }
+          - { faction: grey, by: -2, why: "Pensioners have found out what on your own means at eighty." }
+      - id: stamps
+        label: You pay in, you get out, and there is a card with stamps on it.
+        effects:
+          - { indicator: living, by: 3, why: "Anyone with a full card has a pension, a doctor and a small sense of superiority." }
+          - { indicator: inequality, by: 2, why: "Anyone without a full card has a leaflet." }
+          - { indicator: fiscal, by: 3, why: "The scheme pays for itself, as the leaflet explains." }
+          - { indicator: administration, by: -3, why: "Half the civil service is employed in counting stamps." }
+          - { faction: grey, by: 5, why: "Pensioners paid in for forty years and have the cards to prove it." }
+          - { faction: youth, by: -4, why: "The Young are paying for cards they do not expect to fill." }
+
+  - id: order
+    prompt: There is trouble in the streets of {capital}. What happens next?
+    answers:
+      - id: courts
+        label: A judge is woken up. Nothing may be done to anyone until she has put her glasses on.
+        effects:
+          - { indicator: liberty, by: 6, why: "The police need a warrant for most things and a good reason for the rest." }
+          - { indicator: administration, by: -2, why: "Every decision of the state can be appealed, and is." }
+          - { faction: youth, by: 4, why: "The Young can march without bringing a lawyer, though many bring one anyway." }
+          - { faction: services, by: -6, why: "The police describe their job as paperwork interrupted by crime." }
+      - id: police
+        label: The police arrive quickly and in numbers. The trouble moves indoors.
+        effects:
+          - { indicator: liberty, by: -6, why: "The police may hold anyone for a week and tend to round up." }
+          - { indicator: living, by: 2, why: "The streets are quiet and the shop windows are intact." }
+          - { faction: services, by: 6, why: "The Services have the budget and the benefit of the doubt." }
+          - { faction: grey, by: 3, why: "Pensioners sleep well and say so in letters to the paper." }
+          - { faction: youth, by: -6, why: "The Young all know someone who spent a night in the cells for standing in the wrong place." }
+          - { faction: labour, by: -2, why: "Picket lines are policed as if they were riots in waiting." }
+      - id: neighbours
+        label: Somebody's aunt has a word. Most things are sorted out before the state hears of them.
+        effects:
+          - { indicator: liberty, by: 2, why: "The state rarely interferes, mostly because it rarely finds out." }
+          - { indicator: administration, by: -4, why: "The government's writ runs as far as the ring road." }
+          - { faction: rural, by: 5, why: "The Shires regard a call to the authorities as a failure of manners." }
+          - { faction: faithful, by: 5, why: "The Congregations do most of the mediating and all of the catering." }
+          - { faction: mandarins, by: -5, why: "The Mandarins issue guidance that is received politely and filed in the stove." }
+          - { faction: youth, by: -3, why: "The Young find that the aunts have opinions about them too." }
+
+  - id: inheritance
+    prompt: The last people to run the place left a note in the desk drawer. What did it say?
+    answers:
+      - id: motorways
+        label: '"It has all gone on the motorways. Do enjoy them."'
+        effects:
+          - { indicator: capacity, by: 6, why: "The roads, bridges and ports are new and mostly finished." }
+          - { indicator: employment, by: 3, why: "Something always needs resurfacing, and a small army is kept on to do it." }
+          - { indicator: debt, by: 6, why: "All of it was built on borrowed money, and the lenders have kept the receipts." }
+          - { indicator: fiscal, by: -3, why: "The interest is paid before anything else." }
+          - { faction: business, by: 3, why: "The Chamber's lorries have never moved faster." }
+          - { faction: grey, by: -3, why: "Pensioners disapprove of debt on principle, including debt they voted for." }
+      - id: balanced
+        label: '"The books balance. Please do not look at the hospital roofs."'
+        effects:
+          - { indicator: fiscal, by: 5, why: "Nothing has been spent that did not strictly have to be, and strictly is reviewed every year." }
+          - { indicator: debt, by: -6, why: "The country owes very little to anyone, and mentions it at every summit." }
+          - { indicator: health, by: -5, why: "The hospitals have buckets in the corridors, and not for cleaning." }
+          - { indicator: living, by: -2, why: "Every town has a library, open on Tuesdays." }
+          - { indicator: education, by: -3, why: "The newest school textbook describes a country with different borders." }
+          - { faction: business, by: 3, why: "The Chamber admires a tidy balance sheet and has asked for a framed copy." }
+          - { faction: labour, by: -4, why: "Public sector pay was frozen so long ago that the freeze has tenure." }
+      - id: empty
+        label: Nothing. The drawer was empty, and so were the filing cabinets.
+        effects:
+          - { indicator: legitimacy, by: 3, why: "Nobody can blame this government for the past, since nobody can find it." }
+          - { indicator: administration, by: -5, why: "The ministries are working out from first principles what it is they do." }
+          - { faction: youth, by: 4, why: "The Young like the idea of a country with no file on them." }
+          - { faction: mandarins, by: -6, why: "The Mandarins have lost their files, which is to say their memory." }
+
+  - id: countryside
+    prompt: Look out of the train window an hour from {capital}. What is there?
+    answers:
+      - id: kept
+        label: Protected landscape. Putting up a shed takes three permits and a public inquiry.
+        effects:
+          - { indicator: environment, by: 6, why: "The hills look as they did in the paintings, by law." }
+          - { indicator: living, by: -3, why: "Nothing can be built, so everything that exists costs a fortune." }
+          - { indicator: capacity, by: -3, why: "The last attempt to build a factory ended at the public inquiry stage, in its ninth year." }
+          - { faction: rural, by: 4, why: "The Shires like the view and own most of it." }
+          - { faction: grey, by: 2, why: "Pensioners bought their houses before the prices went up." }
+          - { faction: youth, by: -4, why: "The Young can admire the countryside but cannot afford to live anywhere near it." }
+          - { faction: business, by: -2, why: "The Chamber has a list of sites it is not allowed to mention." }
+      - id: worked
+        label: Quarries, pylons, warehouses and a very large sign thanking you for visiting.
+        effects:
+          - { indicator: capacity, by: 4, why: "If something can be dug up, piped or stacked, it has been." }
+          - { indicator: employment, by: 3, why: "There is work at the quarry, the depot and the place that makes the pylons." }
+          - { indicator: environment, by: -6, why: "The national bird is now seen mainly on the coinage." }
+          - { faction: business, by: 4, why: "The Chamber has never been refused planning permission." }
+          - { faction: rural, by: -6, why: "The Shires live next to a distribution centre and can hear it at night." }
+      - id: emptied
+        label: Not very much. Everyone moved to the city, and the villages are kept on for weekends.
+        effects:
+          - { indicator: environment, by: 3, why: "The fields are going back to woodland because nobody is there to stop them." }
+          - { indicator: education, by: 3, why: "Nearly everyone lives within a bus ride of a college." }
+          - { indicator: inequality, by: 4, why: "The capital has the money and the rest has the scenery." }
+          - { faction: youth, by: 5, why: "The Young are where the jobs, the flats and the other young are." }
+          - { faction: rural, by: -7, why: "The Shires are down to one bus, and it is under review." }
+
+  - id: machine
+    prompt: Ministers come and go. Who actually runs the ministries of {nation}?
+    answers:
+      - id: officials
+        label: Career officials who have seen ministers arrive and leave, and prefer the leaving.
+        effects:
+          - { indicator: administration, by: 6, why: "The people in charge have done the job for thirty years and can find every file in the dark." }
+          - { indicator: capacity, by: -3, why: "Nothing has been decided quickly since the present building was opened." }
+          - { indicator: legitimacy, by: -3, why: "Voters have noticed that changing the government changes very little." }
+          - { faction: mandarins, by: 7, why: "The Mandarins consider this the natural order, and have a paper on it." }
+          - { faction: business, by: -3, why: "The Chamber cannot get a meeting without filling in a form about why." }
+      - id: friends
+        label: Whoever helped win the election. The door plates are held on with one screw.
+        effects:
+          - { indicator: legitimacy, by: 3, why: "When the voters change the government, the government visibly changes." }
+          - { indicator: administration, by: -5, why: "Every ministry is run by someone in their first year." }
+          - { faction: labour, by: 2, why: "The Unions got some of their people into the building." }
+          - { faction: business, by: 2, why: "The Chamber got some of its people into the building too, by a different door." }
+          - { faction: mandarins, by: -6, why: "The Mandarins spend each term training their own replacements." }
+      - id: consultants
+        label: Consultants on rolling contracts. Every decision arrives as forty slides.
+        effects:
+          - { indicator: capacity, by: 3, why: "Things do get delivered, to a deadline and an invoice." }
+          - { indicator: administration, by: 2, why: "There is a project plan for everything, with a named owner and a colour." }
+          - { indicator: fiscal, by: -4, why: "The day rates are a line in the budget larger than some ministries." }
+          - { faction: business, by: 5, why: "The Chamber's members hold most of the contracts." }
+          - { faction: mandarins, by: -5, why: "The Mandarins now manage contracts instead of the country." }
+          - { faction: labour, by: -4, why: "The Unions cannot organise people who are technically self-employed." }

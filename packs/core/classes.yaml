@@ -1,0 +1,81 @@
+# Read from the top. The first class whose condition holds is the one the nation gets,
+# so the dramatic ones go first and the last one, with no condition, catches everybody else.
+
+- id: receivership
+  name: Country in Receivership
+  description: The creditors have a desk at the Treasury now. It is the nicest desk.
+  when: { indicator: debt, gte: 75 }
+
+- id: efficient-unpleasantness
+  name: Efficient Unpleasantness
+  description: Everything in {nation} works, including the parts people would rather did not.
+  when: { all: [{ indicator: liberty, lt: 40 }, { indicator: administration, gte: 55 }] }
+
+- id: butter-fingers
+  name: Heavy Hand With Butter Fingers
+  description: The state would like to control everything and cannot currently find the forms.
+  when: { all: [{ indicator: liberty, lt: 40 }, { indicator: administration, lt: 40 }] }
+
+- id: curfew
+  name: Early Night
+  description: Citizens are free to do as they are told. Complaints may be made in writing, with a return address.
+  when: { indicator: liberty, lt: 40 }
+
+- id: free-for-all
+  name: Honour System
+  description: People may do as they like, largely because nobody is in a position to stop them.
+  when: { all: [{ indicator: liberty, gte: 60 }, { indicator: administration, lt: 38 }] }
+
+- id: gated-community
+  name: Gated Community With an Anthem
+  description: The economy is doing very well. Ask at the gate whether it is doing well for you.
+  when: { all: [{ indicator: inequality, gte: 60 }, { indicator: capacity, gte: 58 }] }
+
+- id: family-business
+  name: Family Business
+  description: "{nation} is owned by about forty families. Even they are not doing especially well out of it."
+  when: { all: [{ indicator: inequality, gte: 60 }, { indicator: capacity, lt: 45 }] }
+
+- id: two-countries
+  name: Two Countries Sharing a Postcode
+  description: One of them has a wine cellar. The other has a view of it.
+  when: { indicator: inequality, gte: 60 }
+
+- id: equal-shares
+  name: Equal Shares of Not Much
+  description: Everyone in {nation} has the same. It is not a lot, but nobody can say it was unfair.
+  when: { all: [{ indicator: inequality, lt: 42 }, { indicator: capacity, lt: 48 }] }
+
+- id: co-operative
+  name: Co-operative That Somehow Works
+  description: Fair and prosperous at once. Visiting economists leave quietly and do not write it up.
+  when: { all: [{ indicator: inequality, lt: 42 }, { indicator: capacity, gte: 58 }] }
+
+- id: boom-on-credit
+  name: Boom on Credit
+  description: Growth is strong and so is borrowing. Nobody asks which came first while the cranes are still up.
+  when: { all: [{ indicator: capacity, gte: 58 }, { indicator: debt, gte: 60 }] }
+
+- id: going-concern
+  name: Going Concern
+  description: "{nation} earns its keep and pays its bills. It is said to be very dull to visit."
+  when: { all: [{ indicator: capacity, gte: 58 }, { indicator: debt, lt: 60 }] }
+
+- id: republic-of-forms
+  name: Republic of Forms
+  description: Nothing is impossible in {nation}, provided it is submitted in triplicate before the fifteenth.
+  when: { indicator: administration, gte: 58 }
+
+- id: sovereign-shrug
+  name: Sovereign Shrug
+  description: The state exists on paper. The paper has been mislaid.
+  when: { indicator: administration, lt: 35 }
+
+- id: debating-society
+  name: Standing Committee
+  description: Everyone in {nation} may say anything, and does, at length. Decisions are expected shortly.
+  when: { indicator: liberty, gte: 60 }
+
+- id: muddle
+  name: Muddle With a Mandate
+  description: Nothing about {nation} is extreme enough to remark on. The government regards this as an achievement.

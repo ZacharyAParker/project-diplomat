@@ -117,4 +117,34 @@ export const cabinet = z.strictObject({
   names: z.strictObject({ given: z.array(text).min(8), family: z.array(text).min(8) }),
 })
 
+export const pack = z.strictObject({
+  id,
+  name: text,
+  version: z.string().regex(/^\d+\.\d+\.\d+$/, 'versions look like 0.1.0'),
+})
+
+const foundingEffect = z.union([
+  z.strictObject({ indicator, by: z.number(), why: text }),
+  z.strictObject({ faction: id, by: z.number(), why: text }),
+  z.strictObject({ policy: id, to: z.union([z.boolean(), z.number()]) }),
+])
+
+export const founding = z.strictObject({
+  questions: z
+    .array(
+      z.strictObject({
+        id,
+        prompt: text,
+        answers: z
+          .array(z.strictObject({ id, label: text, effects: z.array(foundingEffect).min(1) }))
+          .min(3)
+          .max(4),
+      }),
+    )
+    .min(6)
+    .max(8),
+})
+
+export const nationClass = z.strictObject({ id, name: text, description: text, when: condition.optional() })
+
 export const oneOrMany = <T extends z.ZodType>(item: T) => z.union([z.array(item), item.transform((one) => [one])])

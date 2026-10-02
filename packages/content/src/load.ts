@@ -21,6 +21,10 @@ export function loadPack(dir: string): Loaded {
   function read<T extends z.ZodType>(file: string, shape: T): z.output<T> | undefined {
     const where = relative(dir, file).replaceAll('\\', '/')
     let raw: unknown
+    if (!existsSync(file)) {
+      problems.push({ where, message: 'file is missing' })
+      return undefined
+    }
     try {
       raw = parse(readFileSync(file, 'utf8'))
     } catch (error) {
@@ -39,16 +43,27 @@ export function loadPack(dir: string): Loaded {
     const path = join(dir, folder)
     if (!existsSync(path)) return []
     return readdirSync(path)
-      .filter((name) => name.endsWith('.yaml'))
+      .filter((name) => /\.ya?ml$/i.test(name))
       .sort()
       .flatMap((name) => read(join(path, name), schema.oneOrMany(item)) ?? [])
   }
 
+  // A list can live in one file at the root, in a folder of files, or both.
+  function readSplit<T extends z.ZodType>(name: string, item: T): z.output<T>[] {
+    const root = join(dir, `${name}.yaml`)
+    const folder = readAll(name, item)
+    if (!existsSync(root) && existsSync(join(dir, name))) return folder
+    return [...(read(root, item.array()) ?? []), ...folder]
+  }
+
   const cabinet = read(join(dir, 'cabinet.yaml'), schema.cabinet)
   const content: Content = {
+    pack: read(join(dir, 'pack.yaml'), schema.pack) ?? { id: 'unknown', name: 'Unknown', version: '0.0.0' },
     factions: read(join(dir, 'factions.yaml'), schema.faction.array()) ?? [],
-    policies: read(join(dir, 'policies.yaml'), schema.policy.array()) ?? [],
-    traits: read(join(dir, 'traits.yaml'), schema.trait.array()) ?? [],
+    policies: readSplit('policies', schema.policy),
+    traits: readSplit('traits', schema.trait),
+    founding: read(join(dir, 'founding.yaml'), schema.founding) ?? { questions: [] },
+    classes: read(join(dir, 'classes.yaml'), schema.nationClass.array().min(2)) ?? [],
     portfolios: cabinet?.portfolios ?? [],
     names: cabinet?.names ?? { given: [], family: [] },
     dilemmas: readAll('dilemmas', schema.dilemma),
