@@ -16,9 +16,47 @@ Set in a fictional present day. "Project Diplomat" is a codename until I settle 
 
 ## Status
 
-Planning. There's no game here yet, just the design and the research behind it.
+Early. There's a working rules engine and a first pack of dilemmas, and no interface yet. You can
+watch a nation play itself in the terminal.
 
-- [docs/blueprint.md](docs/blueprint.md) is the plan: what I'm building, how it works, what order.
+What exists:
+
+- The engine: indicators, factions, policies, traits, a cabinet, promises, delayed consequences,
+  a weekly budget, governments that fall, and multi-day situations.
+- A core pack: 33 dilemmas and one situation (a drought), plus a validator that enforces the
+  house rules.
+- Prompts for the optional AI layer. No provider code yet.
+
+What doesn't: a playable interface, other nations, treaties, disputes, saving.
+
+## Try it
+
+Needs Node 24 or later and pnpm.
+
+```
+pnpm install
+pnpm validate          # check the core pack
+pnpm simulate          # one 60-day story with random choices
+pnpm simulate 90 42    # 90 days, seed 42
+pnpm simulate 60 --runs 200   # averages across 200 seeds, for balance
+pnpm test
+```
+
+## Where things are
+
+```
+packages/engine    the rules, as pure functions with no dependencies
+packages/content   pack schema, loader and validator
+packages/ai        prompts for the optional AI layer
+packs/core         the dilemmas, factions, policies and traits
+scripts            the simulator
+docs               the plan, the design notes and the research
+```
+
+- [docs/blueprint.md](docs/blueprint.md) is the plan.
+- [docs/design/nation-model.md](docs/design/nation-model.md) is how a nation works.
+- [docs/design/writing-dilemmas.md](docs/design/writing-dilemmas.md) is how to write a dilemma.
+- [docs/design/disputes.md](docs/design/disputes.md) is the unbuilt conflict system, on paper.
 - [docs/research/](docs/research/) is the reading I did first, including a full teardown of how
   NationStates works and a look at why NationStates 2 failed.
 
@@ -34,8 +72,9 @@ Planning. There's no game here yet, just the design and the research behind it.
 
 ## Contributing
 
-Too early for code contributions, but if you've played NationStates and have opinions about what a
-successor should do, I'd like to hear them. Open an issue.
+Dilemmas are the easiest way in. Read [writing-dilemmas.md](docs/design/writing-dilemmas.md), add a
+file under `packs/core/dilemmas/`, and run `pnpm validate`. If you've played NationStates and have
+opinions about what a successor should do, open an issue.
 
 ## Licence
 
