@@ -16,7 +16,7 @@ export function holds(condition: Condition | undefined, state: NationState): boo
   if ('indicator' in condition) return compare(state.indicators[condition.indicator], condition)
   if ('faction' in condition) return compare(state.factions[condition.faction]?.approval ?? 0, condition)
   if ('policy' in condition) return state.policies[condition.policy] === condition.is
-  if ('flag' in condition) return condition.flag in state.flags
+  if ('flag' in condition) return Object.hasOwn(state.flags, condition.flag)
   if ('trait' in condition) return state.traits.includes(condition.trait)
   return compare(state.day, condition.day)
 }

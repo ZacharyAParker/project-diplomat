@@ -1,5 +1,6 @@
 import { holds, compare } from './conditions.ts'
 import { pick, pickWeighted, rngFor } from './rng.ts'
+import { SAVE_VERSION } from './save.ts'
 import {
   type Change,
   type Content,
@@ -11,6 +12,7 @@ import {
   type NationState,
   type Option,
   type Situation,
+  type SituationStage,
 } from './types.ts'
 
 export interface Agenda {
@@ -20,10 +22,34 @@ export interface Agenda {
 }
 
 export interface GameState extends NationState {
+  version: number
+  pack: { id: string; version: string }
   agenda: Agenda
 }
 
-const START: Record<IndicatorId, number> = {
+export interface AgendaItems {
+  major: Dilemma | null
+  minors: Dilemma[]
+  situation: { situation: Situation; stage: SituationStage; index: number; gauge: number } | null
+}
+
+export interface Forecast {
+  changes: Change[]
+  penalties: (Change & { trait: string })[]
+  pressure: Change[]
+  policies: { policy: string; to: boolean | number }[]
+  hasLater: boolean
+  // due is in days from the decision, as written in the pack.
+  promise?: { text: string; due: number }
+}
+
+export interface NationClass {
+  id: string
+  name: string
+  description: string
+}
+
+export const START_INDICATORS: Readonly<Record<IndicatorId, number>> = {
   fiscal: 48,
   debt: 45,
   capacity: 50,
@@ -38,6 +64,16 @@ const START: Record<IndicatorId, number> = {
   administration: 50,
 }
 
+export const TERM_DAYS = 45
+
+export const ELECTION_HEADLINES = {
+  won: 'The government is re-elected',
+  reduced: 'The government is returned with a reduced majority',
+  lost: 'The government is voted out',
+} as const
+
+const ELECTION_WIN = 50
+const ELECTION_HOLD = 40
 const FALL_LEGITIMACY = 10
 const FALL_SUPPORT = 20
 const RESIGN_STANDING = 10
@@ -47,12 +83,19 @@ const DEBT_CRISIS = 80
 
 const clamp = (n: number) => Math.round(Math.min(100, Math.max(0, n)) * 10) / 10
 
-export function newNation(content: Content, identity: Identity, seed: number): GameState {
+export function newNation(
+  content: Content,
+  identity: Identity,
+  seed: number,
+  answers: Record<string, string> = {},
+): GameState {
   const state: GameState = {
+    version: SAVE_VERSION,
+    pack: { id: content.pack.id, version: content.pack.version },
     seed,
     day: 1,
-    identity,
-    indicators: { ...START },
+    identity: structuredClone(identity),
+    indicators: { ...START_INDICATORS },
     factions: Object.fromEntries(content.factions.map((f) => [f.id, { clout: f.clout, approval: 50 }])),
     policies: Object.fromEntries(content.policies.map((p) => [p.id, p.default])),
     flags: {},
@@ -68,8 +111,34 @@ export function newNation(content: Content, identity: Identity, seed: number): G
     agenda: { major: null, minors: [], situation: false },
   }
   appointCabinet(state, content)
+  found(state, content, answers)
   state.agenda = buildAgenda(state, content)
   return state
+}
+
+// Answers are applied in the pack's order, not the order they were given in,
+// so the same answers always found the same nation.
+function found(state: GameState, content: Content, answers: Record<string, string>) {
+  const questions = content.founding.questions
+  for (const id of Object.keys(answers)) {
+    if (!questions.some((q) => q.id === id)) throw new Error(`unknown founding question ${id}`)
+  }
+  const changes: Change[] = []
+  for (const question of questions) {
+    if (!Object.hasOwn(answers, question.id)) continue
+    const chosen = answers[question.id]
+    const answer = question.answers.find((a) => a.id === chosen)
+    if (!answer) throw new Error(`unknown answer ${chosen} to founding question ${question.id}`)
+    apply(state, answer.effects, changes)
+  }
+  record(
+    state,
+    content,
+    'founding',
+    '{nation} is founded',
+    changes,
+    'A government takes office in {capital} under its first {leader}.',
+  )
 }
 
 // Clout-weighted approval across all factions, 0 to 100.
@@ -86,6 +155,7 @@ export function render(text: string, state: NationState, content: Content): stri
     if (key === 'capital') return state.identity.capital
     if (key === 'currency') return state.identity.currency
     if (key === 'demonym') return state.identity.demonym
+    if (key === 'leader') return state.identity.leaderTitle
     if (key === 'minister' && arg) {
       const title = content.portfolios.find((p) => p.id === arg)?.title
       const name = state.cabinet[arg]?.name
@@ -105,15 +175,113 @@ export function currentStage(state: NationState, content: Content) {
   return situation.stages[state.situation.stage] ?? null
 }
 
-export function decide(input: GameState, content: Content, dilemmaId: string, optionId: string): GameState {
-  const state = structuredClone(input)
-  const onAgenda = state.agenda.major === dilemmaId || state.agenda.minors.includes(dilemmaId)
-  if (!onAgenda) throw new Error(`${dilemmaId} is not on today's agenda`)
+export function agendaItems(state: GameState, content: Content): AgendaItems {
+  const stage = state.agenda.situation ? currentStage(state, content) : null
+  return {
+    major: state.agenda.major === null ? null : findDilemma(content, state.agenda.major),
+    minors: state.agenda.minors.map((id) => findDilemma(content, id)),
+    situation:
+      stage && state.situation
+        ? {
+            situation: findSituation(content, state.situation.id),
+            stage,
+            index: state.situation.stage,
+            gauge: state.situation.gauge,
+          }
+        : null,
+  }
+}
+
+export function dayComplete(state: GameState): boolean {
+  return state.agenda.major === null && state.agenda.minors.length === 0 && !state.agenda.situation
+}
+
+export function daysUntilElection(state: NationState): number {
+  return (TERM_DAYS - (state.day % TERM_DAYS)) % TERM_DAYS
+}
+
+export function classify(state: NationState, content: Content): NationClass {
+  const fits = content.classes.find((c) => holds(c.when, state))
+  if (!fits) throw new Error('no class in the pack fits this nation')
+  return {
+    id: fits.id,
+    name: render(fits.name, state, content),
+    description: render(fits.description, state, content),
+  }
+}
+
+// A stage option takes no pressure from its own tags and a dilemma option does, and an
+// option does not say which it is. So it is looked up on today's agenda: as the pack's
+// own object if it is one, by id if it is a copy.
+export function forecast(option: Option, state: GameState, content: Content): Forecast {
+  const stage = state.agenda.situation ? currentStage(state, content) : null
+  const dilemmas = agendaIds(state).map((id) => findDilemma(content, id))
+  const atStage = (same: (o: Option) => boolean) => stage?.options.some(same) ?? false
+  const onDilemma = (same: (o: Option) => boolean) => dilemmas.some((d) => d.options.some(same))
+  const itself = (o: Option) => o === option
+  const sameId = (o: Option) => o.id === option.id
+
+  if (atStage(itself)) return dryRun(state, content, option, 'situation')
+  if (onDilemma(itself)) return dryRun(state, content, option, 'decision')
+  if (atStage(sameId) && onDilemma(sameId)) {
+    throw new Error(
+      `a copy of option ${option.id} could belong to a dilemma or to the situation: ` +
+        'use forecastDecision or forecastSituation',
+    )
+  }
+  return dryRun(state, content, option, atStage(sameId) ? 'situation' : 'decision')
+}
+
+export function forecastDecision(
+  state: GameState,
+  content: Content,
+  dilemmaId: string,
+  optionId: string,
+): Forecast {
+  return dryRun(state, content, agendaOption(state, content, dilemmaId, optionId), 'decision')
+}
+
+export function forecastSituation(state: GameState, content: Content, optionId: string): Forecast {
+  return dryRun(state, content, stageOption(state, content, optionId), 'situation')
+}
+
+// Runs the option against a scratch copy through the same function decide uses,
+// so what is shown before the choice is what happens after it.
+function dryRun(
+  state: GameState,
+  content: Content,
+  option: Option,
+  kind: 'decision' | 'situation',
+): Forecast {
+  const scratch: GameState = structuredClone({ ...state, timeline: [] })
+  return enact(scratch, content, option, '', kind)
+}
+
+function agendaIds(state: GameState): string[] {
+  return state.agenda.major === null ? state.agenda.minors : [state.agenda.major, ...state.agenda.minors]
+}
+
+function agendaOption(state: GameState, content: Content, dilemmaId: string, optionId: string): Option {
+  if (!agendaIds(state).includes(dilemmaId)) throw new Error(`${dilemmaId} is not on today's agenda`)
   const dilemma = findDilemma(content, dilemmaId)
   const option = availableOptions(dilemma.options, state).find((o) => o.id === optionId)
   if (!option) throw new Error(`${optionId} is not an available option for ${dilemmaId}`)
+  return option
+}
 
-  enact(state, content, option, dilemmaId)
+function stageOption(state: GameState, content: Content, optionId: string): Option {
+  const stage = currentStage(state, content)
+  if (!stage || !state.agenda.situation) throw new Error('no situation stage is waiting on a decision')
+  const option = availableOptions(stage.options, state).find((o) => o.id === optionId)
+  if (!option) throw new Error(`${optionId} is not an available option at this stage`)
+  return option
+}
+
+export function decide(input: GameState, content: Content, dilemmaId: string, optionId: string): GameState {
+  const state = structuredClone(input)
+  const option = agendaOption(state, content, dilemmaId, optionId)
+
+  enact(state, content, option, dilemmaId, 'decision')
   state.answered[dilemmaId] = state.day
   if (state.agenda.major === dilemmaId) state.agenda.major = null
   state.agenda.minors = state.agenda.minors.filter((id) => id !== dilemmaId)
@@ -122,10 +290,7 @@ export function decide(input: GameState, content: Content, dilemmaId: string, op
 
 export function decideSituation(input: GameState, content: Content, optionId: string): GameState {
   const state = structuredClone(input)
-  const stage = currentStage(state, content)
-  if (!stage || !state.agenda.situation) throw new Error('no situation stage is waiting on a decision')
-  const option = availableOptions(stage.options, state).find((o) => o.id === optionId)
-  if (!option) throw new Error(`${optionId} is not an available option at this stage`)
+  const option = stageOption(state, content, optionId)
 
   enact(state, content, option, state.situation!.id, 'situation')
   state.agenda.situation = false
@@ -141,41 +306,53 @@ export function endDay(input: GameState, content: Content): GameState {
   advanceSituation(state, content)
   updateTraits(state, content)
   checkCabinet(state, content)
-  checkGovernment(state, content)
+  const fell = checkGovernment(state, content)
+  if (!fell && state.day % TERM_DAYS === 0) holdElection(state, content)
 
   state.day += 1
   state.agenda = buildAgenda(state, content)
   return state
 }
 
-function enact(state: GameState, content: Content, option: Option, source: string, kind: EntryKind = 'decision') {
+function enact(
+  state: GameState,
+  content: Content,
+  option: Option,
+  source: string,
+  kind: 'decision' | 'situation',
+): Forecast {
+  const policies = policyChanges(state, option.effects)
   const changes: Change[] = []
   apply(state, option.effects, changes)
 
+  const penalties: (Change & { trait: string })[] = []
   for (const trait of content.traits) {
     if (!state.traits.includes(trait.id)) continue
     if (!trait.opposes.some((tag) => option.tags.includes(tag))) continue
-    apply(
-      state,
-      [{ indicator: 'legitimacy', by: -trait.penalty, why: `{nation} is known as a ${trait.name}. This cuts against it.` }],
-      changes,
-    )
+    if (trait.penalty === 0) continue
+    const why = `{nation} is known as a ${trait.name}. This cuts against it.`
+    const hit: Change[] = []
+    apply(state, [{ indicator: 'legitimacy', by: -trait.penalty, why }], hit)
+    penalties.push(...hit.map((c) => ({ ...c, trait: trait.id })))
   }
 
+  const pressure: Change[] = []
   if (state.situation && kind === 'decision') {
     const situation = findSituation(content, state.situation.id)
-    for (const pressure of situation.pressures) {
-      if (!option.tags.includes(pressure.tag)) continue
-      apply(state, [{ situation: situation.id, by: pressure.by, why: `It bears on ${situation.title.toLowerCase()}.` }], changes)
+    for (const push of situation.pressures) {
+      if (!option.tags.includes(push.tag)) continue
+      const why = `It bears on ${situation.title.toLowerCase()}.`
+      apply(state, [{ situation: situation.id, by: push.by, why }], pressure)
     }
   }
 
+  // Copied, so the state never shares a list with the pack it was played from.
   for (const later of option.later) {
     state.pending.push({
       dueDay: state.day + later.after,
-      when: later.when,
+      ...(later.when ? { when: structuredClone(later.when) } : {}),
       headline: later.headline,
-      effects: later.effects,
+      effects: structuredClone(later.effects),
       source,
     })
   }
@@ -184,14 +361,40 @@ function enact(state: GameState, content: Content, option: Option, source: strin
       id: option.promise.id,
       text: option.promise.text,
       dueDay: state.day + option.promise.due,
-      kept: option.promise.kept,
-      broken: option.promise.broken,
+      kept: structuredClone(option.promise.kept),
+      broken: structuredClone(option.promise.broken),
     })
   }
-  record(state, content, kind, option.headline, changes, option.result)
+  record(state, content, kind, option.headline, [...changes, ...penalties, ...pressure], option.result)
+
+  const explained = (c: Change) => explain(c, state, content)
+  return {
+    changes: changes.map(explained),
+    penalties: penalties.map((p) => ({ ...explained(p), trait: p.trait })),
+    pressure: pressure.map(explained),
+    policies,
+    hasLater: option.later.length > 0,
+    ...(option.promise
+      ? { promise: { text: render(option.promise.text, state, content), due: option.promise.due } }
+      : {}),
+  }
 }
 
-function apply(state: GameState, effects: Effect[], changes: Change[]) {
+// A forecast that listed a policy already in force would make it look like a change.
+function policyChanges(state: GameState, effects: Effect[]): { policy: string; to: boolean | number }[] {
+  const last = new Map<string, boolean | number>()
+  for (const effect of effects) if ('policy' in effect) last.set(effect.policy, effect.to)
+  return [...last]
+    .filter(([policy, to]) => state.policies[policy] !== to)
+    .map(([policy, to]) => ({ policy, to }))
+}
+
+// Builds the stored form field by field, so nothing extra rides along into a save.
+function explain(change: Change, state: NationState, content: Content): Change {
+  return { kind: change.kind, target: change.target, by: change.by, why: render(change.why, state, content) }
+}
+
+function apply(state: GameState, effects: readonly Effect[], changes: Change[]) {
   for (const effect of effects) {
     if ('indicator' in effect) {
       state.indicators[effect.indicator] = clamp(state.indicators[effect.indicator] + effect.by)
@@ -232,8 +435,8 @@ function record(
     day: state.day,
     kind,
     headline: render(headline, state, content),
-    text: text === undefined ? undefined : render(text, state, content),
-    changes: changes.map((c) => ({ ...c, why: render(c.why, state, content) })),
+    ...(text === undefined ? {} : { text: render(text, state, content) }),
+    changes: changes.map((c) => explain(c, state, content)),
   })
 }
 
@@ -347,14 +550,10 @@ function checkCabinet(state: GameState, content: Content) {
   }
 }
 
-function checkGovernment(state: GameState, content: Content) {
-  if (state.indicators.legitimacy > FALL_LEGITIMACY && support(state) >= FALL_SUPPORT) return
-  state.government += 1
-  state.indicators.legitimacy = 40
-  for (const faction of Object.values(state.factions)) faction.approval = clamp((faction.approval + 50) / 2)
-  state.promises = []
+function checkGovernment(state: GameState, content: Content): boolean {
+  if (state.indicators.legitimacy > FALL_LEGITIMACY && support(state) >= FALL_SUPPORT) return false
+  replaceGovernment(state, content, 40)
   state.flags['government_fell'] = state.day
-  appointCabinet(state, content)
   record(
     state,
     content,
@@ -363,6 +562,35 @@ function checkGovernment(state: GameState, content: Content) {
     [],
     'A new administration takes office in {capital}. It inherits everything the last one did.',
   )
+  return true
+}
+
+function holdElection(state: GameState, content: Content) {
+  const polled = support(state)
+  const report = (rest: string) => `Support stood at ${polled} on polling day. ${rest}`
+  const changes: Change[] = []
+  if (polled >= ELECTION_WIN) {
+    apply(state, [{ indicator: 'legitimacy', by: 6, why: 'The voters were asked and said yes.' }], changes)
+    const text = report('The {leader} stays on with a fresh mandate.')
+    record(state, content, 'election', ELECTION_HEADLINES.won, changes, text)
+  } else if (polled >= ELECTION_HOLD) {
+    apply(state, [{ indicator: 'legitimacy', by: 1, why: 'The voters said yes, but not loudly.' }], changes)
+    const text = report('The {leader} stays on, with fewer friends in the chamber.')
+    record(state, content, 'election', ELECTION_HEADLINES.reduced, changes, text)
+  } else {
+    replaceGovernment(state, content, 45)
+    state.flags['election_lost'] = state.day
+    const text = report('A new {leader} takes office in {capital} and inherits everything the last one did.')
+    record(state, content, 'election', ELECTION_HEADLINES.lost, changes, text)
+  }
+}
+
+function replaceGovernment(state: GameState, content: Content, legitimacy: number) {
+  state.government += 1
+  state.indicators.legitimacy = legitimacy
+  for (const faction of Object.values(state.factions)) faction.approval = clamp((faction.approval + 50) / 2)
+  state.promises = []
+  appointCabinet(state, content)
 }
 
 function appointCabinet(state: GameState, content: Content) {
@@ -381,7 +609,7 @@ function newName(state: GameState, content: Content, purpose: string): string {
 
 function buildAgenda(state: GameState, content: Content): Agenda {
   const eligible = content.dilemmas.filter(
-    (d) => !(d.id in state.answered) && holds(d.when, state) && availableOptions(d.options, state).length >= 2,
+    (d) => !Object.hasOwn(state.answered, d.id) && holds(d.when, state) && availableOptions(d.options, state).length >= 2,
   )
   const rng = rngFor(state.seed, state.day, 'agenda')
 
