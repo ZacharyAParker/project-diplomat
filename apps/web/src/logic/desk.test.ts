@@ -160,7 +160,13 @@ describe('boxNotice', () => {
 
   it('tells a pause from the end, and counts what is still waiting', () => {
     const state = bare({ ...founded(), day: 5 }, { [majors[0]!.id]: 4 })
-    expect(boxNotice(state, content)).toEqual({ exhausted: false, remaining: majors.length - 1, first: true })
+    expect(boxNotice(state, content)).toEqual({ exhausted: false, remaining: majors.filter((d) => d.repeat === undefined).length - 1, first: true })
+  })
+
+  it('says nothing on a day a repeating dilemma was answered', () => {
+    const routine = content.dilemmas.find((d) => d.kind === 'major' && d.repeat !== undefined)!
+    const state = bare({ ...founded(), day: 5 }, { [routine.id]: 5 })
+    expect(boxNotice(state, content)).toBeNull()
   })
 })
 

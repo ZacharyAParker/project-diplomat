@@ -328,13 +328,13 @@ function Day({ current, onEnd, onReport }: DayProps) {
 function BoxNote({ notice, nation, pack }: { notice: BoxNotice; nation: string; pack: string }) {
   if (!notice.first) return <p className="soft">No major business today.</p>
   const kept =
-    `${nation} is kept, and can still be run through quiet days: the budget settles, old decisions come ` +
-    'home and elections come round. More dilemmas arrive with later versions.'
+    `${nation} is kept, and the routine goes on: budgets, pay rounds and reshuffles still come round, old ` +
+    'decisions come home and elections are held. More dilemmas arrive with later versions.'
   if (notice.exhausted) {
     return (
       <Notice title="The pack has run out">
         <p>
-          Every major dilemma in {pack} has now crossed this desk. {kept}
+          Every one-off dilemma in {pack} has now crossed this desk. {kept}
         </p>
       </Notice>
     )

@@ -121,7 +121,7 @@ export function todaysDecisions(state: GameState): { index: number; entry: Timel
 }
 
 export interface BoxNotice {
-  // True when every major dilemma in the pack has been answered.
+  // True when every major dilemma that comes only once has been answered.
   exhausted: boolean
   // How many major dilemmas have not come up yet.
   remaining: number
@@ -133,10 +133,11 @@ export interface BoxNotice {
 export function boxNotice(state: GameState, content: Content): BoxNotice | null {
   if (state.agenda.major !== null) return null
   const majors = content.dilemmas.filter((d) => d.kind === 'major')
-  const days = majors.flatMap((d) => (Object.hasOwn(state.answered, d.id) ? [state.answered[d.id]!] : []))
-  const last = days.length ? Math.max(...days) : 0
+  const answered = majors.filter((d) => Object.hasOwn(state.answered, d.id))
+  const last = Math.max(0, ...answered.map((d) => state.answered[d.id]!))
   if (last === state.day) return null
-  const remaining = majors.length - days.length
+  // Dilemmas that repeat never run out, so they do not count towards what is left.
+  const remaining = majors.filter((d) => d.repeat === undefined && !answered.includes(d)).length
   return { exhausted: remaining === 0, remaining, first: last === state.day - 1 }
 }
 

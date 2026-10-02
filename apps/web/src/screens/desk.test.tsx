@@ -160,7 +160,7 @@ describe('a day with nothing in the box', () => {
     await heading('The desk')
 
     expect(screen.getByText('The pack has run out')).toBeDefined()
-    expect(screen.getByText(/can still be run through quiet days/)).toBeDefined()
+    expect(screen.getByText(/the routine goes on/)).toBeDefined()
     expect(screen.getByText(/More dilemmas arrive with later versions/)).toBeDefined()
     expect(screen.getByText('Nothing needs deciding.')).toBeDefined()
     expect(screen.getByText(/^The box is empty/)).toBeDefined()
