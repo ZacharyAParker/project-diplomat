@@ -1,0 +1,54 @@
+- id: debtor_nation
+  name: Debtor Nation
+  description: The debt is now the first thing anyone abroad says about {nation}. New spending is watched closely.
+  earn: { indicator: debt, gte: 72 }
+  lose: { indicator: debt, lt: 60 }
+  opposes: [spending]
+  penalty: 3
+
+- id: surveillance_state
+  name: Surveillance State
+  description: The cameras know who you are. Talk of privacy from this government is not taken seriously.
+  earn: { all: [{ policy: face_cameras, is: true }, { indicator: liberty, lt: 45 }] }
+  lose: { policy: face_cameras, is: false }
+  opposes: [privacy]
+  penalty: 3
+
+- id: workers_republic
+  name: Workers' Republic
+  description: The unions consider this their government. They will notice if it stops being so.
+  earn: { all: [{ faction: labour, gte: 72 }, { policy: gig_worker_rights, is: true }] }
+  lose: { faction: labour, lt: 50 }
+  opposes: [anti_labour]
+  penalty: 4
+
+- id: tax_haven
+  name: Tax Haven
+  description: Money comes to {nation} because it is left alone here. It can leave just as quietly.
+  earn: { all: [{ policy: wealth_tax, is: false }, { faction: business, gte: 72 }, { indicator: inequality, gte: 60 }] }
+  lose: { policy: wealth_tax, is: true }
+  opposes: [redistribution]
+  penalty: 4
+
+- id: green_pioneer
+  name: Green Pioneer
+  description: Other countries send delegations to see how {nation} did it. Backsliding would be noticed.
+  earn: { all: [{ policy: coal_phaseout, is: true }, { indicator: environment, gte: 62 }] }
+  lose: { indicator: environment, lt: 50 }
+  opposes: [polluting]
+  penalty: 4
+
+- id: nanny_state
+  name: Nanny State
+  description: The government has opinions about what you eat and when your children may look at a screen.
+  earn: { all: [{ policy: sugar_tax, is: true }, { policy: phone_ban_schools, is: true }] }
+  opposes: [permissive]
+  penalty: 2
+
+- id: garrison_state
+  name: Garrison State
+  description: Every family has someone in uniform. Softness abroad is taken personally at home.
+  earn: { all: [{ policy: national_service, is: true }, { faction: services, gte: 65 }] }
+  lose: { policy: national_service, is: false }
+  opposes: [dovish]
+  penalty: 3

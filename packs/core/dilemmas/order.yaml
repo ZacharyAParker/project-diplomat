@@ -1,0 +1,230 @@
+- id: street-cameras
+  title: Smile, You're on Record
+  description: >-
+    The police in {capital} have trialled cameras that recognise faces. In three months they found
+    four wanted men and wrongly stopped sixty-one people, one of them twice.
+  tags: [order, technology]
+  options:
+    - id: roll-out
+      advocate: { name: Commissioner Bridget Stane, role: head of the capital's police }
+      speech: "Four dangerous men are off the street. If you have done nothing wrong, the camera has nothing to say about you."
+      tags: [surveillance]
+      effects:
+        - { policy: face_cameras, to: true }
+        - { indicator: liberty, by: -8, why: "Every face in every high street is now checked against a list." }
+        - { indicator: living, by: 2, why: "Street crime falls where the cameras are." }
+        - { faction: services, by: 8, why: "The police got the tool they asked for." }
+        - { faction: youth, by: -6, why: "The people most often wrongly stopped are young." }
+      headline: Face-recognition cameras to cover every city
+      result: Sales of scarves, hats and large sunglasses rise sharply, even for the season.
+
+    - id: warrant-only
+      advocate: { name: Rufus Hale, role: civil liberties barrister }
+      speech: "Use it to find a named suspect, with a judge's signature. Not to scan a crowd in case someone in it is interesting."
+      tags: [privacy]
+      effects:
+        - { indicator: liberty, by: -2, why: "The cameras exist and can be switched on with a warrant." }
+        - { indicator: administration, by: -2, why: "Each use needs a judge, and judges are busy." }
+        - { faction: services, by: -3, why: "The police call the safeguards unworkable." }
+        - { indicator: legitimacy, by: 2, why: "The courts, not the police, decide who is watched." }
+      headline: Face recognition allowed only with a warrant
+      result: The first warrant application is refused because the photograph was of the wrong man.
+
+    - id: ban
+      advocate: { name: Dalia Renn, role: delivery rider }
+      speech: "I was one of the sixty-one. Twice. Take them down."
+      tags: [privacy]
+      effects:
+        - { indicator: liberty, by: 4, why: "The cameras are gone and the trial data is deleted." }
+        - { faction: youth, by: 5, why: "The young were the ones being stopped." }
+        - { faction: services, by: -8, why: "The police say their hands have been tied." }
+        - { faction: grey, by: -3, why: "Pensioners liked the idea of being watched over." }
+      headline: Face-recognition cameras banned
+      result: The four wanted men's lawyers ask whether the ban is retrospective.
+
+- id: national-service
+  title: Your Country Needs You, Specifically
+  description: >-
+    The army is nine thousand recruits short. {minister:defence} proposes a compulsory year of
+    service at eighteen, military or civilian, and has had a logo designed.
+  tags: [defence, youth]
+  options:
+    - id: compulsory
+      advocate: { name: "{minister:defence}", role: speaking in cabinet }
+      speech: "A year of discipline, fitness and shared purpose. It did my generation no harm, and I will not be taking questions on that."
+      tags: [hawkish, paternalist]
+      effects:
+        - { policy: national_service, to: true }
+        - { indicator: liberty, by: -5, why: "A year of every young person's life now belongs to the state." }
+        - { indicator: fiscal, by: -4, why: "Housing, feeding and training a whole year group is not cheap." }
+        - { indicator: administration, by: 2, why: "Hospitals and care homes get a year of extra hands." }
+        - { faction: services, by: 9, why: "The army gets its recruits and its relevance." }
+        - { faction: youth, by: -12, why: "Nobody asked the people who have to do it." }
+        - { faction: grey, by: 5, why: "Pensioners think it will do them good." }
+      headline: National service to return
+      result: The logo is widely mocked. Applications to study abroad triple.
+
+    - id: voluntary
+      advocate: { name: Kasia Dunmore, role: president of the students' union }
+      speech: "Pay people properly for a civic year and they will queue up. Conscript them and you get a year of sulking."
+      tags: [spending, dovish]
+      effects:
+        - { indicator: fiscal, by: -3, why: "A paid voluntary year costs money for everyone who signs up." }
+        - { indicator: education, by: 2, why: "Volunteers leave with skills and a reference." }
+        - { faction: youth, by: 4, why: "A choice, and a wage." }
+        - { faction: services, by: -4, why: "The army still has nine thousand empty beds." }
+      headline: Paid voluntary service year launched
+      result: The most popular placement is lifeguard. {nation} has not needed that many lifeguards.
+
+    - id: pay-rise
+      advocate: { name: General Hartley Voss, role: chief of the defence staff }
+      speech: "I do not want eighteen-year-olds who would rather be elsewhere. Pay my soldiers properly and I will fill the ranks myself."
+      tags: [spending, hawkish]
+      effects:
+        - { indicator: fiscal, by: -5, why: "A pay rise across the armed forces." }
+        - { faction: services, by: 7, why: "The forces were given money instead of conscripts." }
+        - { faction: labour, by: -3, why: "Nurses and teachers ask where their rise is." }
+        - { minister: defence, by: -10, why: "The Defence Minister's scheme, and logo, were dropped." }
+      headline: Armed forces pay raised; national service dropped
+      result: The logo is quietly reused for a road safety campaign.
+
+- id: protest-permits
+  title: Please March in an Orderly Fashion
+  description: >-
+    Climate protesters have blocked the ring road around {capital} for nine days running. An
+    ambulance was delayed. So, the Chamber points out, were forty thousand people trying to get to
+    work.
+  tags: [order, liberty]
+  options:
+    - id: permits
+      advocate: { name: Commissioner Bridget Stane, role: head of the capital's police }
+      speech: "Nobody is banning protest. We are asking for a form, six days' notice and an agreed route. Protest by appointment."
+      tags: [surveillance]
+      effects:
+        - { policy: protest_permits, to: true }
+        - { indicator: liberty, by: -6, why: "A march now needs the permission of the people it is marching against." }
+        - { indicator: capacity, by: 2, why: "The roads are clear and deliveries are moving." }
+        - { faction: services, by: 6, why: "The police can plan, and refuse." }
+        - { faction: business, by: 5, why: "The Chamber's members can get to work." }
+        - { faction: youth, by: -8, why: "Most of the people on the road were under thirty." }
+      headline: Marches to need police permits
+      result: The first permit application is for a protest against permits. It is granted, for a car park.
+
+    - id: arrest
+      advocate: { name: "{minister:interior}", role: speaking in cabinet }
+      speech: "We have laws against blocking a road. Use them. No new powers, just the will to apply the old ones."
+      tags: []
+      effects:
+        - { indicator: capacity, by: 1, why: "The ring road reopens." }
+        - { indicator: administration, by: -3, why: "Nine hundred arrests have to be processed by courts that were already behind." }
+        - { faction: youth, by: -5, why: "Nine hundred young people now have a record." }
+        - { faction: services, by: 3, why: "The police were backed." }
+      headline: Hundreds arrested as ring road is cleared
+      result: The protesters glue themselves to the courthouse instead, which is at least convenient.
+
+    - id: talks
+      advocate: { name: Suvi Arden, role: transport campaigner }
+      speech: "They are on the road because nobody will meet them. Meet them. It costs you an afternoon."
+      tags: [green, dovish]
+      effects:
+        - { faction: youth, by: 6, why: "The protesters got a meeting with a minister." }
+        - { indicator: environment, by: 1, why: "A modest emissions pledge came out of the talks." }
+        - { indicator: legitimacy, by: -3, why: "It looks as though blocking a road gets you a hearing." }
+        - { faction: business, by: -5, why: "The Chamber asks who else should block a road." }
+      headline: Minister meets road protesters
+      result: The road reopens. Three other groups announce plans to block it.
+
+- id: border-backlog
+  title: Waiting Room
+  description: >-
+    Sixty thousand people who have claimed asylum in {nation} are waiting for a decision. The
+    average wait is nineteen months, during which they may not work and must be housed, at the
+    state's expense, in hotels.
+  tags: [border, order]
+  options:
+    - id: let-work
+      advocate: { name: Bishop Ottoline Faye, role: chair of the Council of Congregations }
+      speech: "They are doctors and bricklayers sitting in hotel rooms. Let them work while they wait. It is cheaper and it is kinder."
+      tags: [dovish]
+      effects:
+        - { indicator: fiscal, by: 3, why: "People who are working are paying tax, not costing a hotel bill." }
+        - { indicator: capacity, by: 2, why: "Farms and care homes fill jobs that were standing empty." }
+        - { faction: faithful, by: 5, why: "The Congregations run most of the shelters." }
+        - { faction: labour, by: -4, why: "The unions worry about wages being undercut." }
+        - { faction: grey, by: -5, why: "Older voters see it as a reward for arriving." }
+      headline: Asylum seekers allowed to work while they wait
+      result: A hotel in the east loses its guests and reopens, reluctantly, as a hotel.
+
+    - id: hire-caseworkers
+      advocate: { name: "{minister:interior}", role: speaking in cabinet }
+      speech: "The problem is the queue. Double the caseworkers, decide every claim in six months, and act on the answer."
+      tags: [spending]
+      effects:
+        - { indicator: fiscal, by: -4, why: "Two thousand caseworkers were hired and trained." }
+        - { indicator: administration, by: 3, why: "The system is finally doing the job it was built for." }
+        - { minister: interior, by: 6, why: "The Interior Minister's plan was adopted." }
+        - { faction: mandarins, by: 3, why: "The civil service was given people instead of blame." }
+      later:
+        - after: 30
+          headline: Asylum backlog halved
+          effects:
+            - { indicator: fiscal, by: 3, why: "The hotel bill has fallen with the queue." }
+            - { indicator: legitimacy, by: 2, why: "A government said it would fix something and then did." }
+      headline: Caseworkers doubled to clear asylum backlog
+      result: The new caseworkers begin by processing the backlog of their own job applications.
+
+    - id: offshore
+      advocate: { name: Idris Monk, role: fellow of the Free Enterprise Forum }
+      speech: "Process claims in a third country. People stop coming when coming stops working."
+      tags: [hawkish]
+      effects:
+        - { indicator: fiscal, by: -5, why: "The partner country charges handsomely, per person, in advance." }
+        - { indicator: liberty, by: -3, why: "People are held abroad, beyond the reach of {nation}'s courts." }
+        - { faction: grey, by: 6, why: "Older voters wanted something that looked firm." }
+        - { faction: faithful, by: -7, why: "Every pulpit in the country has something to say." }
+        - { minister: foreign, by: -8, why: "The Foreign Minister had to negotiate it and then defend it." }
+      headline: Asylum claims to be processed overseas
+      result: The first flight carries seven people and costs more than the airline.
+
+- id: police-pay
+  title: The Thin Blue Bottom Line
+  description: >-
+    The police federation says officers' pay has fallen a fifth behind prices in ten years. Police
+    cannot legally strike in {nation}. An unusual number have, however, come down with flu.
+  tags: [order, pay]
+  options:
+    - id: full-rise
+      advocate: { name: Sergeant Mick Dolan, role: chair of the police federation }
+      speech: "My officers are using food banks. I am not asking for a reward. I am asking for what they had in 2015."
+      tags: [spending]
+      effects:
+        - { indicator: fiscal, by: -5, why: "A full catch-up rise for every officer." }
+        - { faction: services, by: 9, why: "The police were paid what they asked for." }
+        - { indicator: living, by: 1, why: "Officers are back at work and response times recover." }
+        - { faction: labour, by: -3, why: "Every other public-sector union has just revised its claim upwards." }
+      headline: Police get full pay rise
+      result: The flu clears up within the hour. Doctors call it remarkable.
+
+    - id: partial
+      advocate: { name: "{minister:finance}", role: speaking in cabinet }
+      speech: "Half now, half tied to reform of overtime. We cannot give one service everything and then face the nurses."
+      tags: []
+      effects:
+        - { indicator: fiscal, by: -2, why: "Half a rise costs half as much." }
+        - { faction: services, by: -3, why: "The federation calls it an insult with conditions." }
+        - { indicator: administration, by: 1, why: "Overtime rules that nobody could explain are being rewritten." }
+        - { minister: finance, by: 4, why: "The Finance Minister held the line." }
+      headline: Police offered half a rise now, half for reform
+      result: The flu lingers, in a milder form, mostly on Mondays.
+
+    - id: refuse
+      advocate: { name: Lorne Abbasi, role: Treasury official }
+      speech: "It is not a strike, so it is misconduct. Discipline the absentees and the flu will pass."
+      tags: [austerity, anti_labour]
+      effects:
+        - { indicator: fiscal, by: 1, why: "No rise, and sick pay docked." }
+        - { faction: services, by: -10, why: "Officers were threatened instead of paid." }
+        - { indicator: living, by: -3, why: "With a third of officers off, burglaries are going unanswered." }
+        - { indicator: legitimacy, by: -2, why: "A government in open dispute with its own police looks weak." }
+      headline: Government threatens to discipline "sick" officers
+      result: The epidemic spreads to officers' spouses, several of whom are also officers.

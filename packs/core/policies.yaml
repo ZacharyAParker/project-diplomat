@@ -1,0 +1,20 @@
+- { id: rail_public, name: Public railways, description: The state owns and runs the trains. }
+- { id: wealth_tax, name: Wealth tax, description: An annual levy on large fortunes. }
+- { id: four_day_week, name: Four-day week, description: The standard working week is four days. }
+- { id: gig_worker_rights, name: Rider rights, description: Platform workers count as employees. }
+- { id: rent_controls, name: Rent controls, description: Rents cannot rise faster than a set rate. }
+- { id: digital_currency, name: State digital currency, description: "The central bank issues its own digital money." }
+- { id: phone_ban_schools, name: School phone ban, description: Phones are locked away during the school day. }
+- { id: sugar_tax, name: Sugar levy, description: A tax on sweetened drinks and snacks. }
+- { id: tuition_fees, name: Tuition fees, description: Students pay for university., default: true }
+- { id: faith_schools_funded, name: Funded faith schools, description: Religious schools receive public money., default: true }
+- { id: public_broadcaster, name: Public broadcaster, description: A national broadcaster paid for by a licence fee., default: true }
+- { id: pension_age, name: Pension age, description: The age at which the state pension begins., default: 65 }
+- { id: face_cameras, name: Face-recognition cameras, description: Public cameras identify people as they pass. }
+- { id: national_service, name: National service, description: A compulsory year of service at eighteen. }
+- { id: protest_permits, name: Protest permits, description: Marches need permission in advance. }
+- { id: farm_subsidies, name: Farm payments, description: Farmers are paid by the hectare., default: true }
+- { id: coal_phaseout, name: Coal phase-out, description: The last coal plants are closed or closing. }
+- { id: nuclear_power, name: Nuclear power, description: The country builds and runs nuclear plants. }
+- { id: lobby_register, name: Lobbying register, description: Meetings between ministers and lobbyists are published. }
+- { id: daylight_saving, name: Clock changes, description: The clocks go forward in spring and back in autumn., default: true }

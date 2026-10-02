@@ -1,0 +1,198 @@
+- id: lobby-register
+  title: Who Was at Lunch
+  description: >-
+    A newspaper has published a photograph of {minister:finance} on a yacht belonging to a man
+    whose company was awarded a contract the following week. Both say they discussed sailing.
+  tags: [government, ethics]
+  options:
+    - id: register
+      advocate: { name: Rufus Hale, role: civil liberties barrister }
+      speech: "Publish every meeting between a minister and anyone who wants something. Monthly. Then nobody needs a long lens."
+      tags: []
+      effects:
+        - { policy: lobby_register, to: true }
+        - { indicator: legitimacy, by: 4, why: "Voters can now see who their ministers meet." }
+        - { faction: business, by: -5, why: "The Chamber's members preferred lunch when it was private." }
+        - { faction: mandarins, by: -3, why: "The civil service has to compile the list." }
+        - { minister: finance, by: -6, why: "The register exists because of the Finance Minister's weekend." }
+      headline: Register of ministers' meetings to be published
+      result: Ministers begin meeting lobbyists by accident, in corridors, at length.
+
+    - id: inquiry
+      advocate: { name: Dame Philippa Wace, role: cabinet secretary }
+      speech: "An independent inquiry, with a suitably senior chair and proper terms of reference. These things should not be rushed."
+      tags: []
+      effects:
+        - { indicator: legitimacy, by: -2, why: "Everyone knows what an inquiry is for." }
+        - { faction: mandarins, by: 4, why: "The civil service knows how to run an inquiry." }
+        - { faction: business, by: 2, why: "Nothing changes for now." }
+      later:
+        - after: 35
+          headline: Yacht inquiry reports; finds "no rules were broken, there being no rules"
+          effects:
+            - { indicator: legitimacy, by: -3, why: "The inquiry took five weeks to say nothing." }
+            - { minister: finance, by: 5, why: "The Finance Minister was formally cleared." }
+      headline: Inquiry announced into minister's yacht trip
+      result: The inquiry's first act is to rent an office and appoint a secretary.
+
+    - id: sack
+      advocate: { name: Petra Hallam, role: general secretary of the rail union }
+      speech: "If one of my members took a gift from a supplier they would be out by Friday. Why is a minister different?"
+      tags: []
+      effects:
+        - { indicator: legitimacy, by: 3, why: "A minister was held to the standard everyone else is." }
+        - { minister: finance, by: -20, why: "The Finance Minister was told to go." }
+        - { faction: business, by: -4, why: "The Chamber lost its best contact in government." }
+        - { indicator: administration, by: -2, why: "The Treasury is leaderless a month before the budget." }
+      headline: Finance minister told to resign over yacht trip
+      result: The yacht is renamed. The contract is not cancelled.
+
+- id: port-offer
+  title: Any Port in a Shortfall
+  description: >-
+    A foreign sovereign wealth fund has offered to buy Kessel, {nation}'s largest container port,
+    for three times its book value, in cash. The fund belongs to a government with which
+    {minister:foreign} describes relations as "correct".
+  tags: [foreign, economy]
+  options:
+    - id: sell
+      advocate: { name: "{minister:finance}", role: speaking in cabinet }
+      speech: "Three times its value. We could pay down a tenth of the debt in an afternoon. The cranes stay where they are."
+      tags: [austerity, dovish]
+      effects:
+        - { flag: port_sold }
+        - { indicator: debt, by: -8, why: "The sale money went straight to the national debt." }
+        - { faction: business, by: 4, why: "The Chamber sees a country open to investment." }
+        - { faction: services, by: -9, why: "The navy's main supply port now has a foreign landlord." }
+        - { faction: labour, by: -5, why: "The dockers' contracts transfer to an owner they cannot strike against." }
+        - { minister: foreign, by: -6, why: "The Foreign Minister advised against it." }
+      later:
+        - after: 30
+          headline: Kessel's new owners raise harbour fees and replace the union agreement
+          effects:
+            - { indicator: capacity, by: -3, why: "Everything that comes in by sea now costs more to land." }
+            - { faction: labour, by: -4, why: "The dockers' agreement was torn up as predicted." }
+      headline: Kessel port sold to foreign fund
+      result: The fund's first act is to repaint the cranes in its national colours.
+
+    - id: refuse
+      advocate: { name: General Hartley Voss, role: chief of the defence staff }
+      speech: "Half of what this country eats comes through Kessel. You do not sell your front door."
+      tags: [hawkish]
+      effects:
+        - { faction: services, by: 6, why: "The defence staff's advice was taken." }
+        - { faction: labour, by: 3, why: "The dockers keep their employer." }
+        - { faction: business, by: -4, why: "The Chamber fears the next investor will not ask." }
+        - { minister: foreign, by: 5, why: "The Foreign Minister's caution prevailed." }
+        - { indicator: capacity, by: -1, why: "The port still needs investment nobody is offering." }
+      headline: Offer for Kessel port refused
+      result: Relations with the fund's government are downgraded from "correct" to "proper".
+
+    - id: minority-stake
+      advocate: { name: Dame Philippa Wace, role: cabinet secretary }
+      speech: "Sell them forty-nine percent. Their money, our casting vote. I am told this is called having it both ways."
+      tags: []
+      effects:
+        - { indicator: debt, by: -3, why: "Half a port brings in half the money." }
+        - { indicator: capacity, by: 2, why: "The fund pays for new cranes to protect its stake." }
+        - { faction: services, by: -4, why: "The navy still has a foreign partner in its supply port." }
+        - { indicator: administration, by: -2, why: "Every board meeting is now a diplomatic incident." }
+      headline: Minority stake in Kessel sold
+      result: The fund accepts, and asks politely about the airport.
+
+- id: hospital-queues
+  title: Your Operation Is Important to Us
+  description: >-
+    One in eight people in {nation} is waiting for hospital treatment. The median wait for a hip is
+    fourteen months. Private hospitals have empty theatres and have sent a brochure.
+  tags: [health]
+  options:
+    - id: buy-private
+      advocate: { name: Dr Lionel Faraday, role: chief executive of Meridian Health }
+      speech: "We have the theatres and the surgeons, idle. Pay us per operation and the queue is gone in a year. The surgeons are the same ones, incidentally. They work for you in the mornings."
+      tags: [spending]
+      effects:
+        - { indicator: fiscal, by: -5, why: "Each operation bought privately costs a third more." }
+        - { indicator: health, by: 5, why: "The waiting list is falling for the first time in six years." }
+        - { faction: business, by: 4, why: "A large new customer for private healthcare." }
+        - { faction: labour, by: -5, why: "The health unions call it privatisation by the back door." }
+      later:
+        - after: 30
+          headline: Public hospitals lose surgeons to better-paid private lists
+          effects:
+            - { indicator: administration, by: -3, why: "The surgeons are doing more afternoons and fewer mornings." }
+      headline: State to buy operations from private hospitals
+      result: Patients report the private hospitals are lovely, and the biscuits are better.
+
+    - id: hire
+      advocate: { name: Sister Joan Adeyemi, role: nurse and union convenor }
+      speech: "We do not have a shortage of buildings. We have a shortage of nurses, because you pay us less than the supermarket."
+      tags: [spending, pro_labour]
+      effects:
+        - { indicator: fiscal, by: -6, why: "A pay rise and ten thousand new posts." }
+        - { faction: labour, by: 7, why: "The health unions got pay and posts." }
+        - { minister: health, by: 5, why: "The Health Minister can finally announce something." }
+        - { indicator: employment, by: 2, why: "Ten thousand people are being hired." }
+      later:
+        - after: 35
+          headline: Waiting lists fall as newly trained staff reach the wards
+          effects:
+            - { indicator: health, by: 6, why: "It took a year to train them, and it is working." }
+      headline: Nurses' pay raised and ten thousand posts created
+      result: The queue does not move for months. Ministers are advised to describe this as investment.
+
+    - id: ration
+      advocate: { name: Lorne Abbasi, role: Treasury official }
+      speech: "The list is long because it includes everything. Stop offering the procedures that matter least and the list shortens itself."
+      tags: [austerity]
+      effects:
+        - { indicator: fiscal, by: 3, why: "A dozen procedures are no longer offered." }
+        - { indicator: health, by: -3, why: "People are living with conditions that used to be treated." }
+        - { faction: grey, by: -7, why: "Most of the dropped procedures are ones the old need." }
+        - { indicator: administration, by: 2, why: "Hospitals can plan around a shorter list." }
+      headline: Health service to stop offering "low priority" procedures
+      result: The list of low-priority procedures is published. Everyone finds theirs on it.
+
+- id: teacher-strike
+  title: Class Dismissed
+  description: >-
+    Teachers have voted to strike for the first time in eleven years. Schools will close two days a
+    week until the dispute ends. Parents across {nation} are learning what teachers do.
+  tags: [education, pay]
+  options:
+    - id: settle
+      advocate: { name: Agnes Whitlow, role: head teacher }
+      speech: "I have four vacancies I cannot fill at this salary. Pay them, or get used to classes of forty."
+      tags: [spending, pro_labour]
+      effects:
+        - { indicator: fiscal, by: -5, why: "The teachers' claim is met in full." }
+        - { indicator: education, by: 3, why: "Schools reopen and the vacancies start to fill." }
+        - { faction: labour, by: 7, why: "A union struck and won." }
+        - { faction: business, by: -3, why: "Employers fear every pay round will now look like this." }
+      headline: Teachers' pay claim met in full
+      result: Parents return their children to school with visible relief and a new respect that lasts about a week.
+
+    - id: hold-out
+      advocate: { name: "{minister:education}", role: speaking in cabinet }
+      speech: "The offer is fair and it is final. They will run out of strike pay before we run out of patience."
+      tags: [austerity, anti_labour]
+      effects:
+        - { indicator: fiscal, by: 1, why: "No rise, and no wages paid on strike days." }
+        - { indicator: education, by: -5, why: "Schools are shut two days a week for most of a term." }
+        - { indicator: capacity, by: -2, why: "Parents are staying home to look after children." }
+        - { faction: labour, by: -8, why: "The government chose a fight with teachers." }
+        - { minister: education, by: -6, why: "Every closed school has the Education Minister's name on it." }
+      headline: Government refuses to move on teachers' pay
+      result: A generation discovers daytime television.
+
+    - id: arbitration
+      advocate: { name: Dame Philippa Wace, role: cabinet secretary }
+      speech: "Refer it to an independent pay body and agree in advance to accept the answer. Both sides can then blame the body."
+      tags: []
+      effects:
+        - { indicator: fiscal, by: -3, why: "The pay body awards most of the claim." }
+        - { indicator: education, by: 1, why: "The strike is suspended while the body sits." }
+        - { faction: labour, by: 3, why: "The unions got most of what they asked." }
+        - { indicator: legitimacy, by: -1, why: "The government handed a decision to someone else." }
+      headline: Teachers' pay sent to arbitration
+      result: The pay body's report runs to two hundred pages. The number is on page one hundred and ninety.

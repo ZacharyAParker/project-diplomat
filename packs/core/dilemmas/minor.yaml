@@ -1,0 +1,117 @@
+- id: clock-change
+  kind: minor
+  title: What Time Do You Call This
+  description: >-
+    A petition to stop changing the clocks twice a year has half a million signatures. Farmers and
+    the parents of small children are on opposite sides, as usual.
+  tags: [daily-life]
+  when: { policy: daylight_saving, is: true }
+  options:
+    - id: abolish
+      advocate: { name: Jory Pell, role: organiser of the Four Day Campaign }
+      speech: "Nobody alive can explain why we do it. Pick a time and stay there."
+      effects:
+        - { policy: daylight_saving, to: false }
+        - { indicator: health, by: 1, why: "Nobody loses an hour's sleep in March." }
+        - { faction: rural, by: -3, why: "Farmers liked their light mornings." }
+      headline: Clock changes abolished
+      result: Half the country's ovens are now permanently right.
+
+    - id: keep
+      advocate: { name: Ewan Thorley, role: farmer and parish councillor }
+      speech: "My cows have just got used to it."
+      effects:
+        - { faction: rural, by: 2, why: "The farmers keep their mornings." }
+        - { faction: youth, by: -1, why: "Half a million signatures were ignored." }
+      headline: Clocks will keep changing
+      result: The petition's organiser vows to try again in the spring. Or possibly the autumn.
+
+- id: statue
+  kind: minor
+  title: Set in Stone
+  description: >-
+    A statue of the nineteenth-century shipping magnate Josiah Cray stands outside the parliament
+    in {capital}. Historians have recently been more specific about what he shipped.
+  tags: [culture]
+  options:
+    - id: remove
+      advocate: { name: Kasia Dunmore, role: president of the students' union }
+      speech: "Put him in a museum, with a label that tells the truth."
+      effects:
+        - { faction: youth, by: 4, why: "The young wanted him gone." }
+        - { faction: grey, by: -4, why: "Older voters call it erasing history." }
+      headline: Cray statue moved to museum
+      result: The empty plinth becomes more popular than the statue ever was.
+
+    - id: plaque
+      advocate: { name: Dame Philippa Wace, role: cabinet secretary }
+      speech: "Leave him where he is and add a plaque. A long one."
+      effects:
+        - { indicator: education, by: 1, why: "People are stopping to read it." }
+        - { faction: youth, by: -2, why: "A plaque is not what the young asked for." }
+        - { faction: grey, by: -1, why: "Older voters dislike the plaque too." }
+      headline: Cray statue to get explanatory plaque
+      result: The plaque's wording takes a committee eight months and satisfies nobody, which is taken as a sign of balance.
+
+    - id: leave
+      advocate: { name: Sir Anselm Roke, role: chair of the Chamber }
+      speech: "He built the harbour. Judge a man by his century."
+      effects:
+        - { faction: grey, by: 3, why: "The statue stays." }
+        - { faction: youth, by: -4, why: "The young were told to judge him by his century." }
+      headline: Cray statue stays
+      result: Someone puts a traffic cone on his head. It becomes a tradition.
+
+- id: minister-expenses
+  kind: minor
+  title: Receipts
+  description: >-
+    {minister:environment} has claimed, on expenses, a return flight to a climate conference that
+    was held forty minutes away by train.
+  tags: [ethics]
+  options:
+    - id: repay
+      advocate: { name: Dame Philippa Wace, role: cabinet secretary }
+      speech: "Repay it, apologise, and let us never discuss it again."
+      effects:
+        - { minister: environment, by: -6, why: "The Environment Minister had to apologise for a flight." }
+        - { indicator: legitimacy, by: 1, why: "The money was paid back before anyone had to ask twice." }
+      headline: Minister repays cost of conference flight
+      result: The apology mentions "an administrative oversight". The administrator is not named.
+
+    - id: defend
+      advocate: { name: "{minister:environment}", role: explaining }
+      speech: "My diary did not permit the train. I offset the flight. Personally."
+      effects:
+        - { minister: environment, by: 4, why: "The Environment Minister was backed by the leader." }
+        - { indicator: legitimacy, by: -2, why: "The government defended flying to a climate conference." }
+      headline: Government stands by minister's conference flight
+      result: The offset turns out to be one tree. It is doing well.
+
+- id: anthem
+  kind: minor
+  title: All Rise, Eventually
+  description: >-
+    {nation}'s national anthem has six verses, the fourth of which insults a neighbouring country
+    by name. A choir has asked whether it must keep singing it.
+  tags: [culture, foreign]
+  options:
+    - id: cut-verse
+      advocate: { name: "{minister:foreign}", role: speaking in cabinet }
+      speech: "It would help me a great deal at summits."
+      tags: [dovish]
+      effects:
+        - { minister: foreign, by: 5, why: "The Foreign Minister has one fewer thing to apologise for." }
+        - { faction: services, by: -3, why: "The forces sing all six verses and like the fourth best." }
+      headline: Fourth verse dropped from national anthem
+      result: Nobody knew the fourth verse. Everybody now knows the fourth verse.
+
+    - id: keep-verse
+      advocate: { name: General Hartley Voss, role: chief of the defence staff }
+      speech: "It is a song. They have one about us."
+      tags: [hawkish]
+      effects:
+        - { faction: services, by: 3, why: "The anthem stays whole." }
+        - { minister: foreign, by: -4, why: "The Foreign Minister will be hearing about this at the next summit." }
+      headline: Anthem to remain at six verses
+      result: The neighbouring country's embassy issues a statement. It rhymes.

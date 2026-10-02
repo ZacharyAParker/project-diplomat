@@ -1,0 +1,32 @@
+- id: labour
+  name: The Unions
+  description: Organised workers, from dockers to call-centre staff. Long memories, loud voices.
+  clout: 16
+- id: business
+  name: The Chamber
+  description: Employers, investors and the people who lunch with them.
+  clout: 18
+- id: rural
+  name: The Shires
+  description: Farmers, villages and market towns. Suspicious of anything decided in the capital.
+  clout: 10
+- id: faithful
+  name: The Congregations
+  description: The churches, temples and the charities they run. Fewer than they were, better organised than anyone.
+  clout: 8
+- id: services
+  name: The Services
+  description: The armed forces, the police and everyone who has ever worn the uniform.
+  clout: 10
+- id: mandarins
+  name: The Mandarins
+  description: The permanent civil service. They were here before you and intend to be here after.
+  clout: 8
+- id: youth
+  name: The Young
+  description: Students, renters and anyone under thirty-five with an opinion and a phone.
+  clout: 12
+- id: grey
+  name: The Grey Vote
+  description: Pensioners. They vote in every election, including the ones you forgot were happening.
+  clout: 18

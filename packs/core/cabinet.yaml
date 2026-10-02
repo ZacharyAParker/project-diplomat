@@ -1,0 +1,16 @@
+portfolios:
+  - { id: finance, title: Finance Minister }
+  - { id: interior, title: Interior Minister }
+  - { id: foreign, title: Foreign Minister }
+  - { id: health, title: Health Minister }
+  - { id: education, title: Education Minister }
+  - { id: environment, title: Environment Minister }
+  - { id: defence, title: Defence Minister }
+
+names:
+  given:
+    [Ana, Bram, Celia, Dario, Edda, Farid, Greta, Hugo, Ilse, Jonas, Katya, Leon, Mirela, Nico, Odile,
+     Pavel, Rosa, Stefan, Tilde, Ulrich, Vera, Willem, Yara, Zoltan]
+  family:
+    [Albrecht, Brandt, Castell, Dravik, Eskola, Ferrand, Galvan, Halloran, Ilves, Jarnac, Kovic, Lindqvist,
+     Marchetti, Novak, Okonjo, Petrenko, Quist, Rautio, Solberg, Tanaka, Urquhart, Vasko, Wend, Zielinski]

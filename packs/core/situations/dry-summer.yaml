@@ -1,0 +1,184 @@
+id: dry-summer
+title: The Dry Summer
+description: >-
+  It has not rained properly in {nation} since March. The reservoirs are at half their usual level
+  and the forecast is a row of suns. The water companies say there is no cause for alarm, which is
+  what they said last time.
+when: { day: { gte: 10 } }
+gauge: Reservoir level
+start: 45
+pressures:
+  - { tag: water_heavy, by: -8 }
+  - { tag: water_saving, by: 6 }
+
+stages:
+  - title: Hosepipes
+    description: >-
+      Reservoirs have fallen below half. The water companies want a hosepipe ban. The Chamber points
+      out that car washes, garden centres and golf courses employ people.
+    options:
+      - id: ban-now
+        advocate: { name: Dr Wren Calloway, role: ecologist }
+        speech: "Ban them today. Every week you wait costs a month at the other end."
+        tags: [water_saving]
+        effects:
+          - { situation: dry-summer, by: 10, why: "Household use drops by a tenth within days." }
+          - { faction: business, by: -4, why: "Car washes and garden centres lose their summer." }
+          - { faction: grey, by: -3, why: "The gardens of the retired are turning brown." }
+        headline: Hosepipe ban across the country
+        result: Neighbours begin reporting each other. The hotline is busier than the one for burglaries.
+
+      - id: ask-nicely
+        advocate: { name: "{minister:environment}", role: speaking in cabinet }
+        speech: "Start with an appeal. People respond to being trusted."
+        effects:
+          - { situation: dry-summer, by: 2, why: "Some people cut back. Most assume the appeal is for other people." }
+          - { minister: environment, by: 3, why: "The Environment Minister got to front a campaign." }
+        headline: Public asked to save water voluntarily
+        result: The campaign's slogan is "Every Drop Counts". Sales of paddling pools rise.
+
+      - id: wait
+        advocate: { name: Sir Anselm Roke, role: chair of the Chamber }
+        speech: "It always rains in the end. Do not wreck a season's trade over a forecast."
+        effects:
+          - { situation: dry-summer, by: -8, why: "Another fortnight of normal use from a shrinking supply." }
+          - { faction: business, by: 3, why: "The summer trade goes on." }
+        headline: No water restrictions for now
+        result: The golf courses stay green. They are now the only thing that is.
+
+  - title: The Leaks
+    description: >-
+      It emerges that the water companies lose a quarter of what they pump through leaking pipes,
+      and paid their shareholders more last year than they spent on repairs.
+    options:
+      - id: force-repairs
+        advocate: { name: Nadia Brook, role: chair of the Tenants' Union }
+        speech: "Freeze the dividends until the pipes are fixed. They can pay shareholders in water."
+        tags: [water_saving]
+        effects:
+          - { situation: dry-summer, by: 8, why: "Repair crews are working round the clock on the worst mains." }
+          - { faction: business, by: -6, why: "Investors did not expect dividends to be frozen by decree." }
+          - { indicator: legitimacy, by: 2, why: "The government took the public's side against the water companies." }
+        headline: Water company dividends frozen until leaks are fixed
+        result: The companies discover they can fix pipes quite quickly after all.
+
+      - id: fund-repairs
+        advocate: { name: "{minister:finance}", role: speaking in cabinet }
+        speech: "There is no time for a fight. Pay for the repairs ourselves and argue about the bill in the autumn."
+        tags: [spending]
+        effects:
+          - { situation: dry-summer, by: 8, why: "Emergency repairs begin on the worst mains." }
+          - { indicator: fiscal, by: -4, why: "The public is paying to fix pipes it does not own." }
+          - { indicator: legitimacy, by: -2, why: "The shareholders kept their dividend and the taxpayer got the bill." }
+        headline: Government pays for emergency pipe repairs
+        result: The water companies thank the government for its partnership.
+
+      - id: leave-it
+        advocate: { name: Idris Monk, role: fellow of the Free Enterprise Forum }
+        speech: "The regulator sets leakage targets. If you dislike the targets, change them in the usual way, at the usual time."
+        effects:
+          - { situation: dry-summer, by: -4, why: "A quarter of the water is still going into the ground." }
+          - { faction: business, by: 3, why: "The rules were not changed mid-game." }
+        headline: No action on water company leaks
+        result: A burst main in {capital} forms a small lake. Children paddle in it.
+
+  - title: Who Goes Without
+    description: >-
+      There is not enough for everyone. Farms need water for the harvest, factories for production,
+      and four million households for everything.
+    options:
+      - id: cut-farms
+        advocate: { name: Verity Lang, role: vice-president at Halcyon Systems }
+        speech: "Agriculture uses the most and earns the least per litre. I say that with great respect for agriculture."
+        effects:
+          - { situation: dry-summer, by: 10, why: "Irrigation is the single largest use, and it has stopped." }
+          - { faction: rural, by: -10, why: "Crops are dying in the field while the capital's taps run." }
+          - { indicator: living, by: -2, why: "A failed harvest means dearer food by winter." }
+        headline: Irrigation banned to protect water supply
+        result: Farmers post photographs of cracked fields next to photographs of the capital's fountains.
+
+      - id: cut-industry
+        advocate: { name: Ewan Thorley, role: farmer and parish councillor }
+        speech: "You can restart a factory in September. You cannot restart a harvest."
+        effects:
+          - { situation: dry-summer, by: 7, why: "The largest industrial users shut down for three weeks." }
+          - { indicator: capacity, by: -4, why: "Three weeks of lost production." }
+          - { faction: business, by: -7, why: "Factories were ordered to close." }
+          - { faction: rural, by: 5, why: "The harvest was put first." }
+        headline: Heavy industry ordered to stop drawing water
+        result: Workers are sent home on full pay, and spend it watering nothing.
+
+      - id: ration-homes
+        advocate: { name: Commissioner Bridget Stane, role: head of the capital's police }
+        speech: "Water on for six hours a day, by district. People will cope. They coped with worse."
+        effects:
+          - { situation: dry-summer, by: 9, why: "Household supply is cut to six hours a day." }
+          - { indicator: living, by: -4, why: "Four million households are filling buckets at dawn." }
+          - { indicator: legitimacy, by: -3, why: "Nobody forgives a dry tap." }
+        headline: Household water rationed by district
+        result: The country rediscovers the bath as a place for storing water, not using it.
+
+  - title: The Sky
+    description: >-
+      The reservoirs are close to the point where the pumps suck mud. A storm system is forecast,
+      three days out, possibly. A neighbouring country has offered a pipeline's worth of water, at a
+      price, and with a smile.
+    options:
+      - id: buy-water
+        advocate: { name: "{minister:foreign}", role: speaking in cabinet }
+        speech: "Take the offer. Pride does not come out of a tap."
+        tags: [dovish]
+        effects:
+          - { situation: dry-summer, by: 12, why: "A neighbour's water is flowing into the eastern reservoirs." }
+          - { indicator: fiscal, by: -4, why: "The neighbour named a price and it was paid." }
+          - { faction: services, by: -3, why: "The defence staff note the country now owes a favour." }
+        headline: Emergency water bought from neighbour
+        result: The neighbour's ambassador attends the switching-on, and brings his own photographer.
+
+      - id: pray
+        advocate: { name: Bishop Ottoline Faye, role: chair of the Council of Congregations }
+        speech: "Declare a national day of prayer for rain. It costs nothing, and you may be surprised."
+        effects:
+          - { situation: dry-summer, by: -3, why: "Three more days of use, and the storm is still only a forecast." }
+          - { faction: faithful, by: 6, why: "The Congregations filled every pew in the country." }
+          - { faction: youth, by: -3, why: "The young would have preferred a plan." }
+        headline: National day of prayer for rain
+        result: It is very well attended. The sky remains a matter of opinion.
+
+      - id: tankers
+        advocate: { name: General Hartley Voss, role: chief of the defence staff }
+        speech: "Give me the order and I will have army tankers at every standpipe in the east by morning."
+        tags: [hawkish]
+        effects:
+          - { situation: dry-summer, by: 6, why: "The army is moving water from the wet west to the dry east by road." }
+          - { faction: services, by: 5, why: "The forces were asked to do something and did it well." }
+          - { indicator: fiscal, by: -2, why: "Several thousand soldiers and their fuel." }
+        headline: Army tankers deployed to dry districts
+        result: Soldiers hand out water in the market squares. Recruitment enquiries go up.
+
+outcomes:
+  - gte: 70
+    headline: The rain comes, and the reservoirs were never in danger
+    text: >-
+      It rains for a week. The reservoirs, carefully managed all summer, are back to normal by the
+      month's end. Within a fortnight people are complaining about the weather.
+    effects:
+      - { indicator: legitimacy, by: 5, why: "The drought was handled and everyone noticed." }
+      - { indicator: environment, by: 2, why: "The rivers were never drained to keep the taps running." }
+  - gte: 50
+    headline: The rain comes, just in time
+    text: >-
+      The storm arrives a day late. Restrictions stay until October and the harvest is thin, but the
+      taps never stopped.
+    effects:
+      - { indicator: living, by: -2, why: "A thin harvest and a summer of restrictions." }
+      - { indicator: legitimacy, by: 1, why: "It was close, but the water held." }
+  - headline: The taps run dry
+    text: >-
+      For nine days, a million people in the east have no running water. Bottles are handed out from
+      lorries. When the rain comes it falls on a country that has stopped being polite about it.
+    effects:
+      - { indicator: legitimacy, by: -10, why: "A government that cannot keep the water on is not forgiven quickly." }
+      - { indicator: health, by: -4, why: "Nine days without clean water put thousands in hospital." }
+      - { indicator: living, by: -5, why: "The harvest failed and the east went thirsty." }
+      - { faction: rural, by: -8, why: "The countryside went dry first." }

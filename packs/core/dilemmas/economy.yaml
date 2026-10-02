@@ -1,0 +1,393 @@
+- id: rail-buyout
+  title: The 07:42 Is Cancelled, Along With the Company That Runs It
+  description: >-
+    NorthLine, which runs a third of {nation}'s trains, has told the transport regulator it will hand
+    back its franchise in six weeks unless someone gives it money. Its shareholders received a
+    dividend in the spring.
+  tags: [transport, economy]
+  options:
+    - id: nationalise
+      advocate: { name: Petra Hallam, role: general secretary of the rail union }
+      speech: "We bailed them out twice. The third time, we should at least get to keep the trains."
+      tags: [spending, pro_labour]
+      effects:
+        - { policy: rail_public, to: true }
+        - { flag: rail_nationalised }
+        - { indicator: debt, by: 5, why: "The buy-out was paid for with borrowing." }
+        - { indicator: administration, by: -3, why: "The transport ministry now has to run a railway, which it has never done." }
+        - { faction: labour, by: 8, why: "The rail union got what it has asked for since 1994." }
+        - { faction: business, by: -6, why: "Investors wonder which industry is next." }
+      later:
+        - after: 12
+          headline: Trains run on time for an entire week, to general suspicion
+          effects:
+            - { indicator: living, by: 3, why: "Commuters are getting to work, which they had stopped expecting." }
+      headline: State takes over NorthLine
+      result: The trains are yours now. So are the delays, the leaves on the line, and the letters about both.
+
+    - id: subsidise
+      advocate: { name: Corwin Vale, role: chief executive of NorthLine }
+      speech: "A modest bridging facility protects passengers and avoids the chaos of a handover. Everybody wins, and I say that as someone who would win."
+      tags: [spending]
+      effects:
+        - { indicator: fiscal, by: -5, why: "The bridging facility comes straight out of this year's budget." }
+        - { faction: business, by: 5, why: "The Chamber is relieved the government still writes cheques." }
+        - { faction: labour, by: -5, why: "The union calls it a reward for failure." }
+        - { indicator: legitimacy, by: -2, why: "The dividend is on the front page next to the bail-out." }
+        - { indicator: living, by: 2, why: "The trains keep running, for now." }
+      later:
+        - after: 20
+          headline: NorthLine asks for a further modest bridging facility
+          effects:
+            - { indicator: fiscal, by: -3, why: "The first payment did not turn out to be the last." }
+      headline: Government pays NorthLine to keep running
+      result: NorthLine thanks you for your confidence and reminds you that confidence is a recurring cost.
+
+    - id: let-fail
+      advocate: { name: Idris Monk, role: fellow of the Free Enterprise Forum }
+      speech: "Companies fail. It is the only thing about them that reliably works. Let another operator bid for the routes."
+      tags: [austerity]
+      effects:
+        - { indicator: fiscal, by: 2, why: "No bail-out, no buy-out." }
+        - { indicator: living, by: -5, why: "A third of the network has no trains while the routes are re-tendered." }
+        - { indicator: employment, by: -3, why: "NorthLine's staff are laid off until a new operator hires them back." }
+        - { faction: business, by: 3, why: "The Chamber approves in principle, from its cars." }
+        - { faction: labour, by: -7, why: "Four thousand rail workers got their notice by text message." }
+      later:
+        - after: 15
+          headline: New operator takes over NorthLine routes with fewer trains and higher fares
+          effects:
+            - { indicator: living, by: 2, why: "Trains are running again." }
+            - { indicator: inequality, by: 2, why: "Fares went up most on the commuter lines." }
+      headline: NorthLine allowed to collapse
+      result: The market has spoken. It said something about replacement buses.
+
+- id: rail-fares
+  title: Your Railway, Your Fares
+  description: >-
+    Now that the state owns the trains, the annual fare rise is your decision. {minister:finance}
+    has circled a number. The number is large.
+  tags: [transport, economy]
+  when: { flag: rail_nationalised }
+  priority: 1
+  options:
+    - id: freeze
+      advocate: { name: Petra Hallam, role: general secretary of the rail union }
+      speech: "The point of owning it was to stop squeezing people. Freeze the fares."
+      tags: [spending]
+      effects:
+        - { indicator: fiscal, by: -4, why: "The railway's losses are now covered by the Treasury." }
+        - { indicator: living, by: 3, why: "A season ticket costs what it did last year." }
+        - { faction: youth, by: 5, why: "The people least able to afford a car noticed." }
+        - { minister: finance, by: -10, why: "The Finance Minister's circled number was ignored." }
+      headline: Rail fares frozen
+      result: The trains are still late, but they are late at last year's prices.
+
+    - id: raise
+      advocate: { name: Lorne Abbasi, role: Treasury official }
+      speech: "The railway loses money every time someone gets on it. The fare box has to carry more."
+      tags: [austerity]
+      effects:
+        - { indicator: fiscal, by: 4, why: "Passengers now cover more of the railway's costs." }
+        - { indicator: living, by: -3, why: "Commuting got more expensive overnight." }
+        - { faction: labour, by: -4, why: "The union asks what nationalisation was for." }
+        - { indicator: legitimacy, by: -2, why: "People expected a public railway to be cheaper." }
+        - { minister: finance, by: 8, why: "The Finance Minister got the number." }
+      headline: Fares rise on the public railway
+      result: Ticket machines now apologise before displaying the price.
+
+    - id: free-off-peak
+      advocate: { name: Suvi Arden, role: transport campaigner }
+      speech: "Make it free outside rush hour. Empty seats cost you the same whether anyone sits in them."
+      tags: [spending, green]
+      effects:
+        - { indicator: fiscal, by: -6, why: "Off-peak ticket income is gone." }
+        - { indicator: environment, by: 3, why: "People are leaving the car at home for daytime trips." }
+        - { faction: grey, by: 6, why: "Pensioners travel off-peak and now travel free." }
+        - { faction: business, by: -3, why: "The Chamber calls it a giveaway." }
+      headline: Off-peak trains made free
+      result: The 11:15 to the coast is standing room only, and nobody on it is in a hurry.
+
+- id: wealth-tax
+  title: The One Percent Solution
+  description: >-
+    A leaked Treasury paper proposes an annual levy of one percent on fortunes above ten million
+    {currency}. It was leaked by the Treasury, to see what would happen.
+  tags: [tax, economy]
+  options:
+    - id: introduce
+      advocate: { name: Maren Okafor, role: economist at the Fair Share Institute }
+      speech: "One percent. From people who would not notice two. The alternative is cutting hospitals."
+      tags: [redistribution]
+      effects:
+        - { policy: wealth_tax, to: true }
+        - { indicator: fiscal, by: 6, why: "The levy raises real money in its first year." }
+        - { indicator: inequality, by: -4, why: "The largest fortunes grow a little more slowly." }
+        - { faction: business, by: -10, why: "The Chamber calls it the politics of envy, at length." }
+        - { faction: labour, by: 6, why: "The unions have wanted this for years." }
+      later:
+        - after: 25
+          headline: Three of the country's richest families discover a deep love of living abroad
+          effects:
+            - { indicator: fiscal, by: -3, why: "Some of the fortunes being taxed have moved." }
+            - { indicator: capacity, by: -2, why: "Their investment went with them." }
+      headline: Wealth tax announced
+      result: Accountants across {capital} cancel their holidays.
+
+    - id: reject
+      advocate: { name: Sir Anselm Roke, role: chair of the Chamber }
+      speech: "Wealth is mobile. Tax it and you will be left taxing the people who cannot leave."
+      tags: []
+      effects:
+        - { indicator: capacity, by: 3, why: "Investors take it as a promise and commit to projects." }
+        - { faction: business, by: 7, why: "The Chamber sends a hamper." }
+        - { faction: labour, by: -5, why: "The unions note who got listened to." }
+        - { indicator: inequality, by: 3, why: "The gap keeps widening at the top." }
+      headline: Government rules out wealth tax
+      result: The leaked paper is officially described as a document that does not exist.
+
+    - id: mansion-levy
+      advocate: { name: Lorne Abbasi, role: Treasury official }
+      speech: "Fortunes can leave. Houses cannot. Tax the houses."
+      tags: [redistribution]
+      effects:
+        - { indicator: fiscal, by: 3, why: "A levy on the most expensive homes brings in a steady amount." }
+        - { indicator: inequality, by: -2, why: "It falls on those with the most property." }
+        - { faction: grey, by: -6, why: "Pensioners in large old houses are asset-rich and furious." }
+        - { faction: business, by: -3, why: "Less than they feared, more than they wanted." }
+      headline: Levy on expensive homes instead of wealth tax
+      result: Estate agents begin describing nine-bedroom houses as deceptively modest.
+
+- id: four-day-week
+  title: Thank Goodness It's Thursday
+  description: >-
+    A six-month trial at two hundred firms found that staff working four days got as much done as
+    they had in five. The firms were volunteers, which the Chamber would like you to bear in mind.
+  tags: [work, economy]
+  options:
+    - id: legislate
+      advocate: { name: Jory Pell, role: organiser of the Four Day Campaign }
+      speech: "The five-day week was invented for factories that no longer exist. Make four the law."
+      tags: [pro_labour]
+      effects:
+        - { policy: four_day_week, to: true }
+        - { indicator: health, by: 4, why: "People are sleeping more and seeing their doctors less." }
+        - { indicator: capacity, by: -5, why: "Not every job compresses. Hospitals and factories lost a fifth of their hours." }
+        - { faction: labour, by: 9, why: "The largest change to working life in a generation." }
+        - { faction: business, by: -9, why: "Employers who were not volunteers now have no choice." }
+        - { faction: youth, by: 5, why: "The young expected this to take another thirty years." }
+      headline: Four-day week becomes law
+      result: Friday is renamed by popular usage. The new name is not printable.
+
+    - id: incentives
+      advocate: { name: Lorne Abbasi, role: Treasury official }
+      speech: "Offer a tax credit to firms that switch. Those it suits will take it. Those it doesn't, won't."
+      tags: [spending]
+      effects:
+        - { indicator: fiscal, by: -3, why: "The tax credit costs money for every firm that switches." }
+        - { indicator: health, by: 2, why: "Office workers at switching firms are better rested." }
+        - { indicator: inequality, by: 2, why: "Desk jobs got a day off. Warehouse and care jobs did not." }
+        - { faction: labour, by: 2, why: "A start, the unions say, without enthusiasm." }
+      headline: Tax credit for firms that move to four days
+      result: The country now has two kinds of worker, and they resent each other on Fridays.
+
+    - id: refuse
+      advocate: { name: Sir Anselm Roke, role: chair of the Chamber }
+      speech: "Our competitors work six days. We are debating whether to work four. I leave the arithmetic to you."
+      tags: [anti_labour]
+      effects:
+        - { indicator: capacity, by: 2, why: "Employers plan on the hours they already have." }
+        - { faction: business, by: 5, why: "The Chamber was listened to." }
+        - { faction: labour, by: -6, why: "The trial results were ignored." }
+        - { faction: youth, by: -4, why: "The young had started making plans for Fridays." }
+      headline: Government shelves four-day week
+      result: The trial's final report is published on a Friday afternoon, when nobody is looking.
+
+- id: gig-riders
+  title: Self-Employed, Says the App
+  description: >-
+    A delivery rider was hit by a van outside the finance ministry and found she had no sick pay,
+    because Scoot classes its forty thousand riders as independent businesses. She has since become
+    quite well known.
+  tags: [work, economy]
+  options:
+    - id: employees
+      advocate: { name: Dalia Renn, role: delivery rider }
+      speech: "The app tells me where to go, what to wear and when I'm fired. If that isn't a boss I'd like to know what is."
+      tags: [pro_labour]
+      effects:
+        - { policy: gig_worker_rights, to: true }
+        - { indicator: inequality, by: -3, why: "Forty thousand riders now have sick pay and a minimum wage." }
+        - { indicator: employment, by: -3, why: "Scoot cut its rider numbers once each one cost more." }
+        - { faction: labour, by: 8, why: "The unions gained forty thousand potential members." }
+        - { faction: business, by: -6, why: "Platforms warn that their whole model has been outlawed." }
+      headline: Riders ruled to be employees
+      result: Scoot adds a small surcharge to every order, labelled "regulation".
+
+    - id: status-quo
+      advocate: { name: Tomas Reiker, role: head of policy at Scoot }
+      speech: "Our partners value flexibility above everything. We know because we asked them, in the app, with one button."
+      tags: [anti_labour]
+      effects:
+        - { indicator: employment, by: 3, why: "Platform work keeps growing while it stays cheap to offer." }
+        - { faction: business, by: 5, why: "The platforms keep their model." }
+        - { faction: labour, by: -7, why: "The rider outside the ministry is still not covered." }
+        - { faction: youth, by: -4, why: "Most riders are under thirty." }
+      headline: Riders remain self-employed
+      result: The rider's crowdfunder for her medical bills does very well, which is taken as proof the system works.
+
+    - id: third-status
+      advocate: { name: Maren Okafor, role: economist at the Fair Share Institute }
+      speech: "Create a middle category. Insurance and a wage floor, without the full weight of employment law."
+      tags: []
+      effects:
+        - { indicator: inequality, by: -1, why: "Riders gain accident cover and a wage floor." }
+        - { indicator: administration, by: -3, why: "A third category of worker means a third set of rules to police." }
+        - { faction: labour, by: 2, why: "Better than nothing, say the unions, which is their lowest grade of praise." }
+        - { faction: business, by: -2, why: "The platforms accept it and brief against it." }
+      headline: New "dependent contractor" status created
+      result: Lawyers for both sides agree the new category is unclear, and bill accordingly.
+
+- id: rent-freeze
+  title: A Roof Over Your Overdraft
+  description: >-
+    Rents in {capital} have risen by a fifth in two years. A flat advertised this week as "cosy" was
+    found on inspection to be a cupboard with a kettle.
+  tags: [housing, economy]
+  options:
+    - id: controls
+      advocate: { name: Nadia Brook, role: chair of the Tenants' Union }
+      speech: "Cap rises at inflation. People cannot plan a life twelve months at a time."
+      tags: [redistribution]
+      effects:
+        - { policy: rent_controls, to: true }
+        - { indicator: living, by: 4, why: "Tenants know what next year's rent will be." }
+        - { faction: youth, by: 9, why: "Most renters are young, and this is the first thing done for them in years." }
+        - { faction: business, by: -6, why: "Landlords and their lenders are livid." }
+      later:
+        - after: 30
+          headline: Landlords sell up as rent cap bites
+          effects:
+            - { indicator: capacity, by: -3, why: "Fewer homes are being built or let since the cap." }
+      headline: Rent rises capped
+      result: The cupboard with a kettle is relisted at the capped price, described as "regulated".
+
+    - id: build
+      advocate: { name: Garrick Hume, role: director of the Homebuilders' Federation }
+      speech: "The problem is not enough homes. Loosen planning and we will build them. It really is that simple, for us."
+      tags: [growth]
+      effects:
+        - { indicator: capacity, by: 4, why: "Construction picks up once the planning rules relax." }
+        - { indicator: environment, by: -4, why: "The new estates are going on fields at the edge of every town." }
+        - { faction: business, by: 5, why: "Developers have been asking for this for a decade." }
+        - { faction: rural, by: -7, why: "The fields being built on had neighbours." }
+      later:
+        - after: 40
+          headline: First homes from planning reform go on the market
+          effects:
+            - { indicator: living, by: 4, why: "New homes are finally taking pressure off rents." }
+      headline: Planning rules relaxed to build more homes
+      result: Every village now has a sign opposing the development, and a development.
+
+    - id: nothing
+      advocate: { name: Lorne Abbasi, role: Treasury official }
+      speech: "Every intervention in housing has made it worse. I recommend the dignity of inaction."
+      tags: [austerity]
+      effects:
+        - { indicator: fiscal, by: 1, why: "Doing nothing is, at least, cheap." }
+        - { indicator: living, by: -4, why: "Rents went up again this quarter." }
+        - { faction: youth, by: -8, why: "The young were told the market would sort it out." }
+        - { faction: grey, by: 3, why: "Homeowners are quietly pleased about prices." }
+      headline: Government declines to act on rents
+      result: A think tank praises your restraint. Its staff commute from another city.
+
+- id: data-centre
+  title: The Cloud Is Thirsty
+  description: >-
+    Halcyon Systems wants to build the continent's largest data centre outside a market town in the
+    east. It would bring two thousand construction jobs, eighty permanent ones, and use as much
+    water as the town.
+  tags: [technology, environment]
+  options:
+    - id: approve
+      advocate: { name: Verity Lang, role: vice-president at Halcyon Systems }
+      speech: "This puts {nation} on the map. Not the physical map, obviously. That is where the water comes from."
+      tags: [growth, water_heavy, polluting]
+      effects:
+        - { flag: data_centre_built }
+        - { indicator: capacity, by: 5, why: "The investment is the largest the region has seen." }
+        - { indicator: employment, by: 2, why: "Two thousand people are building it." }
+        - { indicator: environment, by: -5, why: "The site draws on the same aquifer as the farms around it." }
+        - { faction: business, by: 6, why: "The Chamber calls it a vote of confidence." }
+        - { faction: rural, by: -7, why: "The farmers were told about it by the newspaper." }
+      headline: Halcyon data centre approved
+      result: The town gets a ring road, a visitor centre, and a hosepipe ban.
+
+    - id: conditions
+      advocate: { name: "{minister:environment}", role: speaking in cabinet }
+      speech: "Let them build it, on condition that it runs on recycled water and pays for the plant that provides it."
+      tags: [water_saving]
+      effects:
+        - { indicator: capacity, by: 2, why: "A smaller version of the project goes ahead." }
+        - { indicator: administration, by: -2, why: "Someone has to check the conditions are being met." }
+        - { faction: business, by: -2, why: "The Chamber says the conditions send a signal." }
+        - { minister: environment, by: 8, why: "The Environment Minister won one in cabinet." }
+      headline: Data centre approved with water conditions
+      result: Halcyon agrees to everything and announces it was their idea.
+
+    - id: refuse
+      advocate: { name: Ewan Thorley, role: farmer and parish councillor }
+      speech: "Eighty jobs. I employ eleven and I do not need a river to do it."
+      tags: [green, water_saving]
+      effects:
+        - { indicator: environment, by: 2, why: "The aquifer is left alone." }
+        - { indicator: capacity, by: -3, why: "Halcyon builds across the border, and other investors take note." }
+        - { faction: rural, by: 7, why: "The Shires were listened to over a multinational." }
+        - { faction: business, by: -6, why: "The Chamber calls the country closed for business." }
+      headline: Halcyon data centre refused
+      result: Halcyon's press release wishes {nation} well in the nineteenth century.
+
+- id: digital-coin
+  title: Money, But With an App
+  description: >-
+    The central bank has built a digital {currency} and would like permission to switch it on.
+    Payments would be instant and free. They would also, a footnote observes, be visible.
+  tags: [technology, economy]
+  options:
+    - id: launch
+      advocate: { name: Governor Helene Strand, role: governor of the central bank }
+      speech: "Cash is expensive to move and impossible to trace. I mention the second point only for completeness."
+      tags: [surveillance]
+      effects:
+        - { policy: digital_currency, to: true }
+        - { indicator: capacity, by: 3, why: "Small businesses stop paying card fees." }
+        - { indicator: fiscal, by: 2, why: "Cash-in-hand work became harder to hide from the tax office." }
+        - { indicator: liberty, by: -5, why: "Every payment now leaves a record the state can read." }
+        - { faction: grey, by: -5, why: "Pensioners liked cash and distrust the app." }
+      headline: Digital {currency} launched
+      result: The first transaction is a coffee, bought by the Governor, recorded forever.
+
+    - id: private-launch
+      advocate: { name: Rufus Hale, role: civil liberties barrister }
+      speech: "Build it so that small payments are as anonymous as cash. If the bank says that is impossible, find a better bank."
+      tags: [privacy]
+      effects:
+        - { policy: digital_currency, to: true }
+        - { indicator: capacity, by: 2, why: "Payments get cheaper and faster." }
+        - { indicator: fiscal, by: -3, why: "The privacy design took longer and cost more to build." }
+        - { faction: services, by: -5, why: "The police wanted to be able to follow the money." }
+        - { faction: youth, by: 4, why: "The young took to it, on the understanding nobody was watching." }
+      headline: Digital {currency} launched with cash-like privacy
+      result: The police describe the design as a gift to criminals. Criminals have not commented.
+
+    - id: shelve
+      advocate: { name: Mabel Thwaite, role: secretary of the Pensioners' Convention }
+      speech: "I have a purse. It has never needed an update."
+      tags: [privacy]
+      effects:
+        - { indicator: liberty, by: 1, why: "Cash stays as it was." }
+        - { indicator: capacity, by: -2, why: "Businesses keep paying card fees." }
+        - { faction: grey, by: 5, why: "Pensioners keep their purses." }
+        - { faction: mandarins, by: -4, why: "Three years of the central bank's work went in a drawer." }
+      headline: Digital {currency} shelved
+      result: The central bank's app is quietly repurposed as a currency converter nobody uses.

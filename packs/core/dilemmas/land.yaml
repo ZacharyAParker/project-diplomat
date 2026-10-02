@@ -1,0 +1,259 @@
+- id: farm-payments
+  title: Paid by the Hectare
+  description: >-
+    {nation} pays its farmers by the area they own, so the largest cheque each year goes to a duke.
+    The budget for this is a tenth of all public spending outside health.
+  tags: [farming, environment]
+  when: { policy: farm_subsidies, is: true }
+  options:
+    - id: pay-for-nature
+      advocate: { name: Dr Wren Calloway, role: ecologist }
+      speech: "Pay for what we want more of. Hedgerows, clean rivers, soil that is still there in fifty years. Not acreage."
+      tags: [green, water_saving]
+      effects:
+        - { indicator: environment, by: 5, why: "Farmers are paid to restore hedges, ponds and river banks." }
+        - { indicator: administration, by: -3, why: "Someone has to go and count the hedges." }
+        - { faction: rural, by: -5, why: "Farmers say they are being paid to be gardeners." }
+        - { faction: youth, by: 3, why: "The young care about rivers more than acreage." }
+      headline: Farm payments switched to rewarding nature
+      result: A farmer in the west is paid more for a pond than he ever was for wheat, and says so on television, baffled.
+
+    - id: abolish
+      advocate: { name: Idris Monk, role: fellow of the Free Enterprise Forum }
+      speech: "No other industry is paid for existing. End the payments and let farmers farm what people will buy."
+      tags: [austerity]
+      effects:
+        - { policy: farm_subsidies, to: false }
+        - { indicator: fiscal, by: 6, why: "A tenth of non-health spending is saved." }
+        - { indicator: employment, by: -3, why: "Small farms that lived on the payment are being sold." }
+        - { faction: rural, by: -13, why: "The Shires regard it as the capital declaring war on the countryside." }
+        - { faction: business, by: 3, why: "The Chamber approves of ending a subsidy that was not theirs." }
+      later:
+        - after: 25
+          headline: Supermarket food prices rise as small farms close
+          effects:
+            - { indicator: living, by: -3, why: "Less is grown at home and more is imported at a higher price." }
+      headline: Farm payments abolished
+      result: Tractors arrive in {capital}. They are in no hurry to leave.
+
+    - id: cap
+      advocate: { name: Ewan Thorley, role: farmer and parish councillor }
+      speech: "Keep it, but cap it. Nobody needs a public cheque for their ninth thousand hectare."
+      tags: [redistribution]
+      effects:
+        - { indicator: fiscal, by: 2, why: "The largest estates lose most of their payment." }
+        - { indicator: inequality, by: -1, why: "The saving comes from the biggest landowners." }
+        - { faction: rural, by: 4, why: "Small farmers keep every penny and enjoy the duke's discomfort." }
+        - { faction: business, by: -3, why: "Large estates are members of the Chamber too." }
+      headline: Farm payments capped for large estates
+      result: The duke divides his estate, on paper, among eleven cousins and a labrador.
+
+- id: coal-closure
+  title: The Last Shift at Harrowgate
+  description: >-
+    Harrowgate is the last coal-fired power station in {nation} and the only large employer in its
+    valley. It supplies a twelfth of the country's electricity and a quarter of its carbon.
+  tags: [energy, environment]
+  when: { policy: coal_phaseout, is: false }
+  options:
+    - id: close-now
+      advocate: { name: Dr Wren Calloway, role: ecologist }
+      speech: "Every year it runs costs more in hospital admissions than it pays in wages. Close it."
+      tags: [green]
+      effects:
+        - { policy: coal_phaseout, to: true }
+        - { indicator: environment, by: 7, why: "A quarter of the country's emissions stop." }
+        - { indicator: health, by: 2, why: "The air in three counties is cleaner." }
+        - { indicator: employment, by: -4, why: "Twelve hundred jobs go, and the valley's shops with them." }
+        - { indicator: capacity, by: -3, why: "A twelfth of the electricity has to be bought in." }
+        - { faction: labour, by: -8, why: "The miners' and power workers' unions were given a month's notice." }
+      headline: Harrowgate coal plant to close this year
+      result: The chimneys are demolished live on television. The valley does not watch.
+
+    - id: transition
+      advocate: { name: Petra Hallam, role: general secretary of the rail union }
+      speech: "Close it in five years, and build the turbine factory in the valley first. You do not get to end a town by press release."
+      tags: [spending, green, pro_labour]
+      effects:
+        - { policy: coal_phaseout, to: true }
+        - { indicator: fiscal, by: -5, why: "A turbine factory and five years of retraining are paid for up front." }
+        - { indicator: environment, by: 3, why: "The plant runs down in stages." }
+        - { faction: labour, by: 5, why: "The valley was given a future as well as a closure date." }
+        - { faction: business, by: -2, why: "The Chamber dislikes governments picking factory sites." }
+      later:
+        - after: 35
+          headline: Turbine factory opens in Harrowgate valley
+          effects:
+            - { indicator: employment, by: 3, why: "The factory is hiring the people the plant let go." }
+            - { indicator: capacity, by: 2, why: "The country now makes its own turbines." }
+      headline: Harrowgate to close in stages, with a factory to replace it
+      result: The retraining course is oversubscribed. So is the pub opposite.
+
+    - id: keep-open
+      advocate: { name: Councillor Des Marrow, role: leader of Harrowgate council }
+      speech: "My father worked there and so did his. When the wind drops, the lights stay on because of us."
+      tags: [polluting]
+      effects:
+        - { indicator: employment, by: 1, why: "Twelve hundred jobs are safe." }
+        - { indicator: environment, by: -5, why: "The plant gets a new licence and keeps burning." }
+        - { indicator: health, by: -2, why: "Asthma admissions downwind stay where they were." }
+        - { faction: labour, by: 5, why: "The power workers' union won." }
+        - { faction: youth, by: -6, why: "The young wanted it gone." }
+      headline: Harrowgate coal plant gets a new licence
+      result: The plant's manager celebrates by ordering more coal, from abroad.
+
+- id: nuclear-site
+  title: Not in My Back Yard, and It's a Big Yard
+  description: >-
+    The grid operator says {nation} needs a nuclear plant to keep the lights on once coal has gone.
+    The only suitable site is Saltmere, on the coast, next to a bird reserve and four villages that
+    have already printed posters.
+  tags: [energy, environment]
+  options:
+    - id: build
+      advocate: { name: Dr Per Ohlsen, role: chief engineer at the grid operator }
+      speech: "It is the safest form of power we have and the only one that works in the dark with no wind. The birds will cope. Birds usually do."
+      tags: [growth, spending, water_heavy]
+      effects:
+        - { policy: nuclear_power, to: true }
+        - { indicator: debt, by: 6, why: "The plant is the most expensive thing the country has ever built." }
+        - { indicator: employment, by: 3, why: "Six thousand people are building it." }
+        - { faction: rural, by: -8, why: "Four villages are about to spend ten years next to a building site." }
+        - { faction: business, by: 5, why: "Industry wants power it can rely on." }
+      later:
+        - after: 45
+          headline: Saltmere reactor is over budget and behind schedule, to nobody's surprise
+          effects:
+            - { indicator: debt, by: 3, why: "The plant will cost a third more than the estimate." }
+            - { indicator: capacity, by: 5, why: "Even half-built, it has secured the country's power for a generation." }
+      headline: Nuclear plant approved at Saltmere
+      result: The posters in the four villages are updated. The new ones are larger.
+
+    - id: wind-instead
+      advocate: { name: Dr Wren Calloway, role: ecologist }
+      speech: "For the same money you could build offshore wind and the storage to go with it, in half the time, with nothing to bury afterwards."
+      tags: [green, spending]
+      effects:
+        - { indicator: debt, by: 4, why: "Offshore wind and storage are borrowed for at scale." }
+        - { indicator: environment, by: 4, why: "The new power is clean and the reserve is untouched." }
+        - { indicator: capacity, by: -2, why: "On still winter nights the grid runs close to the edge." }
+        - { faction: youth, by: 4, why: "The young prefer turbines to reactors." }
+      headline: Offshore wind chosen over nuclear
+      result: The four villages celebrate, until they see where the cables come ashore.
+
+    - id: import
+      advocate: { name: Lorne Abbasi, role: Treasury official }
+      speech: "Build nothing. Lay a cable and buy power from the neighbours, who have already paid for their plants."
+      tags: [austerity, dovish]
+      effects:
+        - { indicator: fiscal, by: 2, why: "A cable costs a fraction of a power station." }
+        - { indicator: capacity, by: -4, why: "The country's power now depends on a neighbour's goodwill and a single cable." }
+        - { faction: rural, by: 4, why: "Saltmere stays as it is." }
+        - { faction: services, by: -4, why: "The defence staff dislike depending on anyone for anything." }
+      headline: Government opts to import electricity
+      result: The neighbours are delighted, and mention the price will be reviewed annually.
+
+- id: flood-plain
+  title: Lovely River Views
+  description: >-
+    The town of Wickford has flooded three times in six years. A developer has permission in
+    principle for four thousand homes on the meadows upstream, which is where the water currently
+    goes instead.
+  tags: [housing, environment]
+  options:
+    - id: defences
+      advocate: { name: Councillor Hester Pym, role: leader of Wickford council }
+      speech: "Build the flood wall. My residents cannot get insurance and have stopped buying carpets."
+      tags: [spending]
+      effects:
+        - { indicator: fiscal, by: -4, why: "A flood wall the length of the town." }
+        - { indicator: living, by: 3, why: "Wickford can be insured again." }
+        - { faction: rural, by: 4, why: "A market town was protected." }
+        - { faction: business, by: -2, why: "The developer's meadows are now on the wrong side of the wall." }
+      headline: Flood defences approved for Wickford
+      result: The wall is finished in a year with no rain at all, and is declared a waste of money.
+
+    - id: homes
+      advocate: { name: Garrick Hume, role: director of the Homebuilders' Federation }
+      speech: "Four thousand families need somewhere to live. We will put the houses on stilts, if that helps. Decorative stilts."
+      tags: [growth]
+      effects:
+        - { indicator: capacity, by: 4, why: "Four thousand homes are under construction." }
+        - { indicator: environment, by: -4, why: "The meadows that absorbed the floods are being paved." }
+        - { faction: business, by: 5, why: "The developers got their site." }
+        - { faction: rural, by: -6, why: "Wickford knows where the water will go now." }
+      later:
+        - after: 30
+          headline: Wickford floods again; new estate under a metre of water
+          effects:
+            - { indicator: living, by: -4, why: "Four thousand new homes and the old town are both flooded." }
+            - { indicator: legitimacy, by: -3, why: "Everyone remembers who approved the estate." }
+      headline: Homes approved on Wickford meadows
+      result: The show home has a water feature. It was not in the plans.
+
+    - id: rewild
+      advocate: { name: Dr Wren Calloway, role: ecologist }
+      speech: "Buy the meadows, give the river room, plant the hills upstream. It is cheaper than a wall and it works for longer."
+      tags: [green, water_saving]
+      effects:
+        - { indicator: fiscal, by: -2, why: "The meadows are bought from the developer at an agreed price." }
+        - { indicator: environment, by: 4, why: "The river has its flood plain back and the hills are being planted." }
+        - { indicator: capacity, by: -2, why: "Four thousand homes are not built." }
+        - { faction: business, by: -4, why: "A site with permission in principle was taken away." }
+      later:
+        - after: 30
+          headline: Heavy rain upstream; Wickford stays dry
+          effects:
+            - { indicator: living, by: 3, why: "The meadows flooded so the town did not have to." }
+      headline: Wickford meadows bought and returned to the river
+      result: A beaver is sighted within the month. Nobody will say who put it there.
+
+- id: mandarins-move
+  title: A Posting to the Provinces
+  description: >-
+    Nine in ten senior civil servants work within a mile of each other in {capital}. A plan is on
+    your desk to move twenty thousand of them to Dunmoor, a northern town whose main industry
+    closed in 1987.
+  tags: [government, regions]
+  options:
+    - id: move
+      advocate: { name: Councillor Des Marrow, role: leader of Harrowgate council }
+      speech: "You make decisions about places you have never been. Come and live in one."
+      tags: [spending]
+      effects:
+        - { indicator: fiscal, by: -3, why: "Moving twenty thousand desks and their owners." }
+        - { indicator: administration, by: -5, why: "A third of the people asked to move have resigned instead." }
+        - { indicator: inequality, by: -3, why: "Twenty thousand good salaries have arrived in a town that had none." }
+        - { faction: mandarins, by: -12, why: "The civil service has discovered it can be moved." }
+        - { faction: rural, by: 6, why: "The provinces were given something that used to belong to the capital." }
+      later:
+        - after: 40
+          headline: Dunmoor ministries settle in; locals report that the coffee has improved
+          effects:
+            - { indicator: administration, by: 4, why: "The new recruits are local, keen and cheaper to house." }
+      headline: Twenty thousand civil servants to move north
+      result: House prices in Dunmoor double. A deputy secretary is seen looking at a map.
+
+    - id: hubs
+      advocate: { name: Dame Philippa Wace, role: cabinet secretary }
+      speech: "A measured programme of regional hubs would deliver the benefits without the disruption. I can have a paper with you by the autumn. Of next year."
+      tags: []
+      effects:
+        - { indicator: fiscal, by: -1, why: "Three small regional offices are opened." }
+        - { indicator: inequality, by: -1, why: "A few hundred posts leave the capital." }
+        - { faction: mandarins, by: 3, why: "The civil service wrote the plan itself." }
+        - { faction: rural, by: -2, why: "The provinces know a gesture when they see one." }
+      headline: Regional civil service hubs announced
+      result: Each hub has a ribbon-cutting. Each is staffed by people who commute from {capital}.
+
+    - id: stay
+      advocate: { name: Lorne Abbasi, role: Treasury official }
+      speech: "Government works because the people who run it can walk to each other's offices. Scatter them and you will spend the savings on train tickets."
+      tags: []
+      effects:
+        - { indicator: administration, by: 2, why: "Nothing was disrupted." }
+        - { faction: mandarins, by: 5, why: "The civil service keeps its mile." }
+        - { faction: rural, by: -5, why: "The provinces were told government works best without them." }
+        - { indicator: inequality, by: 1, why: "The capital goes on pulling ahead." }
+      headline: Civil service to stay in the capital
+      result: The relocation plan is filed in an office four minutes' walk from where it was written.
