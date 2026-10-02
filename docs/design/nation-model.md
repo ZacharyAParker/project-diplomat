@@ -26,6 +26,34 @@ better; for debt and inequality, higher is worse.
 Every change to an indicator carries a one-line reason, and the reason is stored with the change.
 There are no hidden effects.
 
+The display name and a one-line description of each indicator live in the engine as
+`INDICATOR_INFO`, so anything that draws them says the same thing.
+
+## Identity
+
+A name, a capital, a currency, a demonym, the leader's title ("Prime Minister", "President",
+whatever the player types) and a flag. The flag is a layout name and a list of colours. The engine
+stores it and never looks inside; drawing it is the interface's business.
+
+## Founding
+
+Before day 1 the player answers the questions in the pack's `founding.yaml`: seven in the core
+pack, three or four answers each. They ask what kind of country this already is: how it began, what
+it does for a living, what the last government left in the desk drawer.
+
+Each answer moves a few indicators and faction approvals by a few points, with a reason, exactly as
+a decision would. There is no right answer; the validator requires every answer to help something
+and hurt something. All the answers together are written as the first timeline entry, kind
+`founding`, on day 1.
+
+Founding is there to spread nations out, not to decide the game. The validator adds up the most
+extreme answer to every question and refuses a pack in which any indicator, or any faction's
+approval, could start outside 25 to 75. In the core pack a starting indicator can sit around twenty
+points from the default, which is enough that two nations get different first dilemmas and a
+different class.
+
+Questions can be skipped. A nation founded with no answers starts at the numbers in the table above.
+
 ## Factions
 
 Eight groups. Each has a **clout** (its share of political weight; they add up to 100) and an
@@ -59,9 +87,20 @@ Labels a nation earns from what it has done: Surveillance State, Debtor Nation, 
 has a condition for earning it, sometimes a condition for losing it, and a list of option tags it
 **opposes**.
 
-Choosing an option that carries an opposed tag costs legitimacy. A Debtor Nation that announces new
-spending, or a Surveillance State that suddenly champions privacy, pays for the inconsistency. This
-is the main way history constrains the present.
+Choosing an option that carries an opposed tag costs legitimacy: the trait's `penalty`, a few
+points. A Debtor Nation that announces new spending, or a Surveillance State that suddenly champions
+privacy, pays for the inconsistency. This is the main way history constrains the present. A trait
+whose penalty is 0 costs nothing, and nothing is recorded.
+
+## Class
+
+A one-line summary of what kind of country this is today: Country in Receivership, Gated Community
+With an Anthem, Sovereign Shrug. Unlike a trait it is not earned or kept and it costs nothing. It is
+worked out fresh from the current numbers whenever anyone asks.
+
+The pack's `classes.yaml` is an ordered list. Each class has a condition, and the nation is the
+first one whose condition holds. The last has no condition and catches everyone else. The core pack
+has sixteen, built from liberty, inequality, capacity, administration and the debt.
 
 ## Cabinet
 
@@ -99,6 +138,26 @@ At the end of any day, if legitimacy is 10 or lower, or support is under 20, the
 
 The nation continues under a new administration that inherits all of it. Nothing is deleted.
 
+## Elections
+
+A term is 45 days. At the end of day 45, 90 and so on there is an election, and support on the day
+decides it.
+
+| Support | Result |
+|---|---|
+| 50 or more | Re-elected. Legitimacy +6 |
+| 40 to 49.9 | Returned with a reduced majority. Legitimacy +1 |
+| Under 40 | Voted out |
+
+Being voted out works like a fall: a new government number, a new cabinet, promises lapse and every
+faction's approval moves halfway back to 50. Legitimacy is set to 45, not 40, because losing a vote
+is a more respectable way to go. It sets the flag `election_lost`, where a fall sets
+`government_fell`, so follow-up dilemmas can tell the two apart.
+
+The timeline entry is kind `election` and its text gives the support figure. If the government
+collapses on polling day the collapse stands and no election is held. The calendar does not move
+after a fall: the next election is still at the next multiple of 45.
+
 ## Situations
 
 A situation is a crisis that runs over several days alongside the normal agenda. It has a gauge from
@@ -109,14 +168,50 @@ tags that bear on it.
 ## A day
 
 1. The agenda is one major dilemma, up to two minor ones, and the current situation stage if there
-   is one. It is fixed for the day and is the same every time you ask.
+   is one. It is fixed for the day and is the same every time you ask. `agendaItems` turns it into
+   the dilemmas themselves, and `dayComplete` says whether anything is left to decide.
 2. Each decision applies at once and writes a timeline entry.
 3. Ending the day settles the budget (weekly), delayed effects, promises, the situation, traits,
-   resignations and the government check, in that order, then builds tomorrow's agenda.
+   resignations, the government check and the election if one is due, in that order, then builds
+   tomorrow's agenda.
 
-Everything is deterministic for a given seed and set of choices.
+A day can have nothing on it, when no dilemma is eligible. It can still be ended. Ending a day with
+decisions still open is also allowed; they are simply not taken.
+
+Everything is deterministic for a given seed, set of founding answers and set of choices.
+
+## Forecasts
+
+Before choosing, the player can see what an option will do: the immediate changes with their
+reasons, any legitimacy penalty for acting against a trait, any pressure on a running situation,
+which policies would change, whether a promise is being made and when it falls due, and whether
+something is scheduled for later (but not what; that is the surprise).
+
+`forecast` gets this by running the option against a scratch copy of the nation through the same
+function `decide` uses, so the two cannot drift apart.
+
+One thing differs between the two kinds of option: a decision on a dilemma puts pressure on a
+running situation through its tags, and a decision at a situation stage does not. `forecastDecision`
+and `forecastSituation` take ids, exactly as `decide` and `decideSituation` do, and refuse the same
+things they refuse. `forecast` takes the option itself and works out which kind it is by finding it
+on today's agenda. A copy of the option (one that has been through JSON, or spread into another
+object) is found by its id. If a dilemma on the agenda and the waiting stage both have an option
+with that id, a copy could be either, and `forecast` throws and says to use one of the other two.
+
+## Saves
+
+The whole game is one plain object, and `serialize` turns it into JSON. It carries a save version
+(1) and the id and version of the pack it was founded from. `deserialize` refuses anything that is
+not JSON, has no version, has a version it does not know, or has a part missing or malformed. The
+check goes all the way down: every stored effect and condition has to be one the engine can read,
+days and counts have to be whole numbers, and indicators, approvals, standings and the gauge have to
+be between 0 and 100. So a save that loads will not fall over later in the day.
+
+What it cannot check is anything that needs the pack: whether the factions, policies, dilemmas and
+situations named in the save exist. A save carries the id and version of its pack, and whether to
+play one from a different pack or pack version is for the caller to decide.
 
 ## Not built yet
 
-Founding questionnaire, other nations, treaties, dependencies, regional projects, disputes, the
-census of comic rankings. Disputes are sketched in [disputes.md](disputes.md).
+Other nations, treaties, dependencies, regional projects, disputes, the census of comic rankings.
+Disputes are sketched in [disputes.md](disputes.md).
