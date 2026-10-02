@@ -56,7 +56,8 @@ test('the core pack is valid', () => {
   const { content, problems } = checkPack('packs/core')
   assert.deepEqual(problems, [])
   assert.ok(content.dilemmas.length >= 30)
-  assert.deepEqual(content.pack, { id: 'core', name: 'The Core Pack', version: '0.1.0' })
+  assert.deepEqual({ id: content.pack.id, name: content.pack.name }, { id: 'core', name: 'The Core Pack' })
+  assert.match(content.pack.version, /^\d+\.\d+\.\d+$/)
 })
 
 test('the core pack has six to eight founding questions and twelve to sixteen classes', () => {

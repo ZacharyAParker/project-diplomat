@@ -73,7 +73,7 @@ export const ELECTION_HEADLINES = {
 } as const
 
 const ELECTION_WIN = 50
-const ELECTION_HOLD = 40
+const ELECTION_HOLD = 43
 const FALL_LEGITIMACY = 10
 const FALL_SUPPORT = 20
 const RESIGN_STANDING = 10
@@ -445,7 +445,7 @@ function record(
 // Past DEBT_CRISIS the interest bill starts to hurt.
 function settleBudget(state: GameState, content: Content) {
   const gap = 50 - state.indicators.fiscal
-  const borrowed = Math.round(gap / BORROW_DIVISOR)
+  const borrowed = Math.round((gap / BORROW_DIVISOR) * 10) / 10
   const effects: Effect[] = []
   if (borrowed !== 0) {
     const why =
@@ -609,7 +609,7 @@ function newName(state: GameState, content: Content, purpose: string): string {
 
 function buildAgenda(state: GameState, content: Content): Agenda {
   const eligible = content.dilemmas.filter(
-    (d) => !Object.hasOwn(state.answered, d.id) && holds(d.when, state) && availableOptions(d.options, state).length >= 2,
+    (d) => isDue(d, state) && holds(d.when, state) && availableOptions(d.options, state).length >= 2,
   )
   const rng = rngFor(state.seed, state.day, 'agenda')
 
@@ -630,6 +630,13 @@ function buildAgenda(state: GameState, content: Content): Agenda {
     minors: minors.map((d) => d.id),
     situation: currentStage(state, content) !== null,
   }
+}
+
+// A dilemma is due if it has never been answered, or if it repeats and has rested long enough.
+export function isDue(dilemma: Dilemma, state: NationState): boolean {
+  if (!Object.hasOwn(state.answered, dilemma.id)) return true
+  if (dilemma.repeat === undefined) return false
+  return state.day - state.answered[dilemma.id]! >= dilemma.repeat
 }
 
 function findDilemma(content: Content, id: string): Dilemma {

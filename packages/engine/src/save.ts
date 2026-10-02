@@ -35,7 +35,7 @@ const isCondition: Check = (value) => {
   if ('indicator' in value) return shaped({ indicator: isIndicator, ...BOUNDS })(value)
   if ('faction' in value) return shaped({ faction: isString, ...BOUNDS })(value)
   if ('policy' in value) return shaped({ policy: isString, is: isSetting })(value)
-  if ('flag' in value) return isString(value['flag'])
+  if ('flag' in value) return shaped({ flag: isString, days: optional(isDay) })(value)
   if ('trait' in value) return isString(value['trait'])
   return shaped(BOUNDS)(value['day'])
 }

@@ -12,6 +12,7 @@ import {
   classify,
   dayComplete,
   daysUntilElection,
+  isDue,
   decide,
   decideSituation,
   deserialize,
@@ -311,7 +312,7 @@ test('a week in deficit adds to the debt', () => {
   let state = decide(newNation(content, identity, 1), content, 'only', 'a')
   const debt = state.indicators.debt
   state = skip(state, content, 7)
-  assert.equal(state.indicators.debt, debt + 3)
+  assert.equal(state.indicators.debt, debt + 3.3)
   assert.ok(state.indicators.fiscal > 30)
 })
 
@@ -665,8 +666,8 @@ test('a government with support of 50 or more is re-elected', () => {
   assert.equal(after.promises.length, 1)
 })
 
-test('support between 40 and 50 returns the government with a reduced majority', () => {
-  for (const [labour, polled] of [[-0.2, 49.9], [-20, 40]] as const) {
+test('support between 43 and 50 returns the government with a reduced majority', () => {
+  for (const [labour, polled] of [[-0.2, 49.9], [-14, 43]] as const) {
     const content = electionPack(labour)
     const before = toPollingDay(content)
     assert.equal(support(before), polled)
@@ -680,19 +681,19 @@ test('support between 40 and 50 returns the government with a reduced majority',
   }
 })
 
-test('support under 40 loses the election, which is handled like a fall', () => {
-  const content = electionPack(-20.2)
+test('support under 43 loses the election, which is handled like a fall', () => {
+  const content = electionPack(-14.2)
   const before = toPollingDay(content)
-  assert.equal(support(before), 39.9)
+  assert.equal(support(before), 42.9)
   const after = endDay(before, content)
   const entry = after.timeline.at(-1)!
 
   assert.equal(entry.kind, 'election')
   assert.equal(entry.headline, ELECTION_HEADLINES.lost)
-  assert.match(entry.text!, /Support stood at 39.9 on polling day/)
+  assert.match(entry.text!, /Support stood at 42.9 on polling day/)
   assert.equal(after.government, 2)
   assert.equal(after.indicators.legitimacy, 45)
-  assert.equal(after.factions['labour']!.approval, 39.9)
+  assert.equal(after.factions['labour']!.approval, 42.9)
   assert.deepEqual(after.promises, [])
   assert.ok('election_lost' in after.flags)
   assert.ok(!('government_fell' in after.flags))
@@ -866,4 +867,41 @@ test('a day with nothing to decide is legal and can be ended', () => {
   state = skip(state, content, 10)
   assert.equal(state.day, 11)
   assert.equal(dayComplete(state), true)
+})
+
+test('a flag condition can ask how long ago the flag was set', () => {
+  const content = pack({
+    dilemmas: [
+      dilemma('first', [option('a', { effects: [{ flag: 'done' }] }), option('b')], { priority: 1 }),
+      dilemma('sequel', [option('a'), option('b')], { when: { flag: 'done', days: 3 } }),
+    ],
+  })
+  let state = endDay(decide(newNation(content, identity, 1), content, 'first', 'a'), content)
+  assert.equal(state.agenda.major, null)
+  state = endDay(state, content)
+  assert.equal(state.agenda.major, null)
+  state = endDay(state, content)
+  assert.equal(state.day, 4)
+  assert.equal(state.agenda.major, 'sequel')
+})
+
+test('a repeating dilemma comes back after its rest and not before', () => {
+  const content = pack({ dilemmas: [dilemma('routine', [option('a'), option('b')], { repeat: 7 })] })
+  let state = decide(newNation(content, identity, 1), content, 'routine', 'a')
+  assert.equal(isDue(content.dilemmas[0]!, state), false)
+  state = skip(state, content, 6)
+  assert.equal(state.day, 7)
+  assert.equal(state.agenda.major, null)
+  state = endDay(state, content)
+  assert.equal(state.agenda.major, 'routine')
+  state = endDay(decide(state, content, 'routine', 'b'), content)
+  assert.equal(state.answered['routine'], 8)
+  assert.equal(state.agenda.major, null)
+})
+
+test('a dilemma with no repeat never returns', () => {
+  const content = pack()
+  let state = decide(newNation(content, identity, 1), content, 'only', 'a')
+  state = skip(state, content, 200)
+  assert.equal(state.agenda.major, null)
 })

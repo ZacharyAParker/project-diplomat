@@ -75,7 +75,7 @@ export type Condition =
   | ({ indicator: IndicatorId } & Compare)
   | ({ faction: string } & Compare)
   | { policy: string; is: boolean | number }
-  | { flag: string }
+  | { flag: string; days?: number }
   | { trait: string }
   | { day: Compare }
 
@@ -125,6 +125,8 @@ export interface Dilemma {
   when?: Condition
   priority: number
   weight: number
+  // Days before an answered dilemma may come round again. Most never do.
+  repeat?: number
   author?: string
   options: Option[]
 }

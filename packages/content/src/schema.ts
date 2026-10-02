@@ -20,7 +20,7 @@ export const condition: z.ZodType<Condition> = z.lazy(() =>
     z.strictObject({ indicator, ...bounds }),
     z.strictObject({ faction: id, ...bounds }),
     z.strictObject({ policy: id, is: z.union([z.boolean(), z.number()]) }),
-    z.strictObject({ flag: id }),
+    z.strictObject({ flag: id, days: z.number().int().min(1).max(120).optional() }),
     z.strictObject({ trait: id }),
     z.strictObject({ day: z.strictObject(bounds) }),
   ]),
@@ -75,6 +75,7 @@ export const dilemma = z.strictObject({
   when: condition.optional(),
   priority: z.number().int().default(0),
   weight: z.number().positive().default(1),
+  repeat: z.number().int().min(7).max(180).optional(),
   author: z.string().optional(),
   options: z.array(option).min(2).max(4),
 })
