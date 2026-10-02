@@ -1,0 +1,236 @@
+id: general-strike
+title: The General Strike
+description: >-
+  The Unions have run out of patience with this government and have found a way to say so. The
+  rail union has voted to walk out, the dockers and the teachers have voted to join them, and the
+  congress of unions has named Monday. Six in ten workplaces in {nation} expect to be shut.
+when: { all: [{ faction: labour, lt: 24 }, { day: { gte: 11 } }] }
+gauge: Share of the country still working
+start: 40
+pressures:
+  - { tag: pro_labour, by: 6 }
+  - { tag: redistribution, by: 3 }
+  - { tag: anti_labour, by: -8 }
+  - { tag: austerity, by: -4 }
+
+stages:
+  - title: The Weekend
+    description: >-
+      There are two days before the strike begins. The union leaders are in a hotel by the station
+      and have let it be known that the telephone in the lobby works.
+    options:
+      - id: talks-before-monday
+        advocate: { name: Sister Joan Adeyemi, role: nurse and union convenor }
+        speech: "Ask them in before Monday. It costs you a pot of tea, and half my members are hoping for a reason to stay at work."
+        effects:
+          - { situation: general-strike, by: 8, why: "Several unions put their walkouts back while the talks last." }
+          - { faction: labour, by: 4, why: "The Unions were asked in through the front door." }
+          - { faction: business, by: -3, why: "The Chamber watched the government blink first." }
+        headline: Union leaders invited to talks
+        result: The talks last eleven hours and agree an agenda for further talks. Both sides call this progress.
+
+      - id: address-the-nation
+        advocate: { name: "{minister:interior}", role: speaking in cabinet }
+        speech: "Go on television tonight and ask people to turn up on Monday. Most of them never wanted this."
+        effects:
+          - { situation: general-strike, by: 1, why: "A few people went to work because they were asked. Most had already decided." }
+          - { faction: grey, by: 3, why: "The Grey Vote liked being spoken to directly, and at a sensible hour." }
+          - { faction: labour, by: -2, why: "The Unions were talked about on television and not talked to." }
+        headline: "{leader} appeals to the country to keep working"
+        result: The address goes out at seven. The union leaders watch it in the hotel bar and order another round.
+
+      - id: let-them-walk
+        advocate: { name: Sir Anselm Roke, role: chair of the Chamber }
+        speech: "Let them walk. Strike pay runs out on about the Thursday, and principles shortly after."
+        tags: [anti_labour]
+        effects:
+          - { situation: general-strike, by: -5, why: "Unions that were wavering came out to make a point." }
+          - { faction: business, by: 4, why: "The Chamber was promised a government that would not flinch." }
+          - { faction: labour, by: -5, why: "The Unions were dared, in public." }
+        headline: Government refuses to meet strike leaders
+        result: On Monday the stations are locked. The pickets have brought deckchairs.
+
+  - title: The Docks
+    description: >-
+      Kessel is shut. No trains are running, the fuel depots are picketed and the petrol
+      queues reach back on to the ring road. Hospitals have four days of supplies.
+    options:
+      - id: soldiers-drive-tankers
+        advocate: { name: General Hartley Voss, role: chief of the defence staff }
+        speech: "I have six hundred drivers who do not belong to a union. Give the order and the fuel moves tonight."
+        tags: [hawkish, anti_labour]
+        effects:
+          - { situation: general-strike, by: 9, why: "Army drivers are taking fuel past the picket lines under escort." }
+          - { faction: labour, by: -8, why: "Soldiers were used to break a picket." }
+          - { faction: services, by: 3, why: "The Services were given a clear job and did it by morning." }
+          - { indicator: liberty, by: -1, why: "Troops on the roads to break a lawful strike sets a precedent." }
+          - { flag: troops_broke_pickets }
+        headline: Army drives fuel tankers through picket lines
+        result: The tankers leave Kessel in convoy at dawn. The pickets salute, though not with the whole hand.
+
+      - id: life-and-limb-cover
+        advocate: { name: Sister Joan Adeyemi, role: nurse and union convenor }
+        speech: "Nobody on a picket line wants a death on their conscience. Agree a list of what must keep running and we will run it ourselves."
+        effects:
+          - { situation: general-strike, by: 5, why: "Hospitals, ambulances and the fuel for both are running by agreement with the pickets." }
+          - { indicator: health, by: 1, why: "No hospital ran short of anything." }
+          - { faction: business, by: -2, why: "The Chamber notes that the unions now decide what counts as essential." }
+        headline: Unions agree to keep emergency services running
+        result: Each ambulance carries a union pass in the windscreen. The pickets wave them through and go back to the brazier.
+
+      - id: ration-the-fuel
+        advocate: { name: Commissioner Bridget Stane, role: head of the capital's police }
+        speech: "Keep what fuel there is for police, fire and ambulance. Everybody else can find out how far it is to walk."
+        effects:
+          - { situation: general-strike, by: -4, why: "People who wanted to work cannot get there." }
+          - { indicator: living, by: -3, why: "The pumps are closed to the public and the shops are running out of bread." }
+          - { faction: services, by: 2, why: "The police and the ambulances were put first." }
+        headline: Petrol reserved for emergency services
+        result: Bicycles are stolen in record numbers. The police attend, by car.
+
+  - title: The Demand
+    description: >-
+      The unions have put it in writing: a pay rise for every public worker that matches prices,
+      backdated a year. The Treasury has costed it and would prefer not to say the number aloud.
+    options:
+      - id: pay-in-full
+        advocate: { name: Petra Hallam, role: general secretary of the rail union }
+        speech: "You know the number. Say yes and I will have every one of them back at work by the night shift."
+        tags: [spending, pro_labour]
+        effects:
+          - { situation: general-strike, by: 14, why: "The largest unions ordered their members back within hours." }
+          - { indicator: fiscal, by: -4, why: "A backdated pay rise for every public worker in the country." }
+          - { faction: labour, by: 10, why: "The Unions asked for all of it and got all of it." }
+          - { faction: business, by: -5, why: "Every private employer now expects the same letter." }
+          - { flag: strike_demands_met }
+        headline: Government meets the unions' pay demand in full
+        result: Petra Hallam announces the result from the hotel steps. She does not look surprised.
+
+      - id: half-now-half-later
+        advocate: { name: Lorne Abbasi, role: Treasury official }
+        speech: "Half now. Refer the rest to a pay review body, which will take a year and find something in the middle. It always does."
+        tags: [spending]
+        effects:
+          - { situation: general-strike, by: 6, why: "The smaller unions took the offer and went back. The larger ones are counting votes." }
+          - { indicator: fiscal, by: -2, why: "Half of a very large pay claim." }
+          - { faction: labour, by: 3, why: "The Unions got half, and a committee." }
+          - { minister: finance, by: 3, why: "The Treasury's compromise was the one adopted." }
+        headline: Unions offered half their pay claim
+        result: The pay review body is appointed the same day. Its members are still agreeing their own fees.
+
+      - id: nothing-on-the-table
+        advocate: { name: Idris Monk, role: fellow of the Free Enterprise Forum }
+        speech: "Pay it and you have told every union in the country what a week costs. Offer nothing and wait."
+        tags: [austerity, anti_labour]
+        effects:
+          - { situation: general-strike, by: -6, why: "With nothing offered, unions that had stayed in are now balloting." }
+          - { faction: business, by: 4, why: "The Chamber was spared a pay round it would have had to match." }
+          - { faction: labour, by: -6, why: "The Unions' letter was not answered." }
+        headline: No pay offer while the strike lasts
+        result: The Treasury returns the unions' letter with a compliments slip.
+
+  - title: The Picket Lines
+    description: >-
+      Pickets and police have fought at the gates of Kessel docks, and there are pictures. The
+      Chamber wants strikes in essential services made illegal by the end of the week.
+    options:
+      - id: outlaw-the-strike
+        advocate: { name: Sir Anselm Roke, role: chair of the Chamber }
+        speech: "Emergency powers. Anyone in an essential service who is not at work on Friday is dismissed. They will find their shoes quickly enough."
+        tags: [anti_labour]
+        effects:
+          - { situation: general-strike, by: 9, why: "Faced with dismissal, the railway, the docks and the power stations are back at work." }
+          - { indicator: liberty, by: -5, why: "Striking in an essential service is now a sacking offence, and nearly everything is essential." }
+          - { faction: labour, by: -10, why: "The Unions were beaten by decree, and will say so for thirty years." }
+          - { faction: business, by: 4, why: "The Chamber got the law it asked for." }
+          - { flag: strike_outlawed }
+        headline: Emergency powers end strikes in essential services
+        result: The trains run on Friday. The drivers do not speak to the passengers, which the passengers say is normal.
+
+      - id: bishop-in-the-chair
+        advocate: { name: Bishop Ottoline Faye, role: chair of the Council of Congregations }
+        speech: "Both sides need somebody to blame for giving way. I am available, and I have a large hall with poor heating."
+        effects:
+          - { situation: general-strike, by: 10, why: "The pickets thinned out once talks with a neutral chair began." }
+          - { faction: faithful, by: 4, why: "The Congregations were asked to keep the peace and are keeping it." }
+          - { minister: interior, by: -4, why: "The Interior Minister's job is being done by a bishop." }
+        headline: Bishop to chair talks between government and unions
+        result: The talks open with a prayer and continue for nine hours without a break. Nobody dares ask for one.
+
+      - id: police-keep-the-peace
+        advocate: { name: Sergeant Mick Dolan, role: chair of the police federation }
+        speech: "My members live next door to these people. We will keep the peace. We will not be anybody's strike-breakers."
+        effects:
+          - { situation: general-strike, by: -5, why: "The picket lines are orderly, well attended and going nowhere." }
+          - { faction: services, by: 3, why: "The police were not asked to charge their neighbours." }
+          - { faction: business, by: -3, why: "The Chamber wanted the gates cleared and they are not." }
+        headline: Police told to hold the line and nothing more
+        result: At Kessel the police and the pickets share a tea urn. Each side claims to have paid for it.
+
+  - title: The Return
+    description: >-
+      The strike is fraying. Union delegates meet tomorrow to vote on going back, and the last
+      thing on their agenda is what happens to the people who walked out.
+    options:
+      - id: no-reprisals
+        advocate: { name: Rufus Hale, role: civil liberties barrister }
+        speech: "No sackings, no docked pensions, no lists. Say so before they vote and they will vote to go back."
+        effects:
+          - { situation: general-strike, by: 8, why: "With no reprisals to fear, the delegates voted to return." }
+          - { faction: labour, by: 5, why: "Nobody in the Unions lost a job for striking." }
+          - { faction: business, by: -4, why: "Employers were told they may not settle scores." }
+        headline: No reprisals against strikers
+        result: Everyone goes back on the same morning and nobody mentions last week. It takes some effort.
+
+      - id: say-nothing
+        advocate: { name: Dame Philippa Wace, role: cabinet secretary }
+        speech: "Say nothing at all. Whatever they decide, let them be the ones to announce it."
+        effects:
+          - { situation: general-strike, by: 2, why: "The delegates argued among themselves with no help from the government." }
+          - { faction: mandarins, by: 2, why: "The Mandarins' advice to do nothing was taken, which is rare." }
+        headline: Government silent as union delegates vote
+        result: The vote goes to three recounts. Downstairs, the press office issues a statement about road safety.
+
+      - id: dock-their-pay
+        advocate: { name: "{minister:finance}", role: speaking in cabinet }
+        speech: "Nobody is paid for days they did not work. Dock it from this month's wages, all of it, and let that be the last word."
+        tags: [anti_labour]
+        effects:
+          - { situation: general-strike, by: -3, why: "Delegates who were ready to go back have voted to stay out over the docked pay." }
+          - { indicator: fiscal, by: 2, why: "A week of the public wage bill was not paid." }
+          - { faction: labour, by: -5, why: "The Unions' members opened a short pay packet." }
+          - { faction: grey, by: 2, why: "The Grey Vote does not think people should be paid for standing by a brazier." }
+        headline: Strikers lose pay for every day out
+        result: The payslips arrive with the deduction on its own line, in bold.
+
+outcomes:
+  - gte: 70
+    headline: The strike is over inside the week
+    text: >-
+      The trains run, the docks open and the schools take the children back. The week is talked
+      about for a month and then becomes something that happened to other people.
+    effects:
+      - { indicator: legitimacy, by: 5, why: "The strike ended quickly and the government was still standing at the end of it." }
+      - { faction: grey, by: 3, why: "The buses are running and the pension was paid on time." }
+      - { flag: general_strike_ended_quickly }
+  - gte: 40
+    headline: The strike ends slowly, without a handshake
+    text: >-
+      People drift back to work a depot at a time. There is no announcement and no agreement that
+      either side will admit to. It takes a month to clear the docks.
+    effects:
+      - { indicator: capacity, by: -2, why: "A fortnight of production was lost and a month of freight is still stacked on the quay." }
+      - { indicator: living, by: -2, why: "Shops are short of everything that comes by rail or sea." }
+      - { indicator: legitimacy, by: -1, why: "The strike ended on its own, and the government looked like a bystander." }
+      - { flag: general_strike_dragged_on }
+  - headline: The country stops
+    text: >-
+      By the second week the power is on for six hours a day and the shops open by candlelight. The
+      strike ends when there is nothing left to stop. Nobody claims to have won.
+    effects:
+      - { indicator: legitimacy, by: -10, why: "For a fortnight nobody could say who was running the country." }
+      - { indicator: capacity, by: -5, why: "Factories shut down cold are slow and costly to start again." }
+      - { indicator: living, by: -4, why: "A fortnight of power cuts, empty shelves and no wages." }
+      - { indicator: fiscal, by: -3, why: "Two weeks of tax were never collected." }
+      - { faction: business, by: -8, why: "The Chamber lost a fortnight's trade and blames the government for all of it." }
+      - { flag: general_strike_paralysis }

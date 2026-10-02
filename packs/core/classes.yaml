@@ -49,7 +49,7 @@
 - id: co-operative
   name: Co-operative That Somehow Works
   description: Fair and prosperous at once. Visiting economists leave quietly and do not write it up.
-  when: { all: [{ indicator: inequality, lt: 42 }, { indicator: capacity, gte: 58 }] }
+  when: { all: [{ indicator: inequality, lt: 45 }, { indicator: capacity, gte: 56 }] }
 
 - id: boom-on-credit
   name: Boom on Credit

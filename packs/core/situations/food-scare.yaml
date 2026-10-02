@@ -1,0 +1,195 @@
+id: food-scare
+title: The Kessel Batch
+description: >-
+  Forty people in three towns are in hospital with the same stomach complaint. What they have in
+  common is cooked chicken from one packing plant at Kessel, which supplies half the supermarkets
+  in {nation}. The plant says its last inspection was spotless. Its last inspection was two years ago.
+when: { all: [{ day: { gte: 28 } }, { indicator: administration, lt: 50 }] }
+gauge: Shoppers who trust the shelves
+start: 50
+pressures:
+  - { tag: paternalist, by: 5 }
+  - { tag: permissive, by: -5 }
+  - { tag: austerity, by: -4 }
+  - { tag: growth, by: -3 }
+
+stages:
+  - title: The Recall
+    description: >-
+      Three batch codes are confirmed as contaminated. The plant ships four hundred a week and
+      cannot say for certain which lorries the three went out on.
+    options:
+      - id: recall-whole-plant
+        advocate: { name: Dr Imogen Sayer, role: chief medical officer }
+        speech: "Take everything that plant has made this month off the shelves today. I would rather apologise for waste than for a funeral."
+        tags: [paternalist]
+        effects:
+          - { situation: food-scare, by: 12, why: "Every product from the plant was gone from the shelves by the evening news." }
+          - { faction: business, by: -5, why: "The supermarkets binned a month of stock on a doctor's say-so." }
+          - { indicator: living, by: -2, why: "The chilled aisle is empty and what is left costs more." }
+        headline: Every product from Kessel plant recalled
+        result: Supermarkets fill the gaps with tinned soup. The country finds out how much tinned soup there is.
+
+      - id: recall-three-batches
+        advocate: { name: "{minister:health}", role: speaking in cabinet }
+        speech: "Recall the three batches we know about. We act on evidence, and the evidence is three batches."
+        effects:
+          - { situation: food-scare, by: 4, why: "The known batches are recalled. Nobody can say whether they were the only ones." }
+          - { minister: health, by: 3, why: "The Health Minister's measured approach was adopted." }
+          - { indicator: health, by: -1, why: "A fourth batch turned up in a hospital canteen." }
+        headline: Three batches of chicken recalled
+        result: Shoppers are asked to check the code on the back of the packet. It is printed in grey on silver.
+
+      - id: leave-it-to-plant
+        advocate: { name: Sir Anselm Roke, role: chair of the Chamber }
+        speech: "The firm is already withdrawing stock of its own accord. A state recall says panic, and panic costs more than chicken."
+        effects:
+          - { situation: food-scare, by: -8, why: "The plant's own withdrawal was slow, partial and announced on a Friday night." }
+          - { faction: business, by: 3, why: "The Chamber was trusted to put its own house in order." }
+          - { indicator: health, by: -2, why: "Contaminated packets stayed on sale for another week." }
+        headline: Government leaves recall to the packing plant
+        result: The plant's statement runs to two lines, one of which is the address of its solicitors.
+
+  - title: The Inspectors
+    description: >-
+      It emerges that the food inspectorate has lost a third of its staff in five years. Visits were
+      replaced by a form on which each plant marks its own hygiene out of ten. The Kessel plant gave
+      itself a nine.
+    options:
+      - id: rehire-inspectors
+        advocate: { name: Dame Philippa Wace, role: cabinet secretary }
+        speech: "We let the inspectors go. Most of them are a telephone call away and rather bored. Bring them back."
+        tags: [spending]
+        effects:
+          - { situation: food-scare, by: 9, why: "Inspectors are walking into plants unannounced for the first time in years." }
+          - { indicator: fiscal, by: -2, why: "Three hundred inspectors were hired back at more than they were paid to leave." }
+          - { indicator: administration, by: 2, why: "The inspectorate can inspect again." }
+          - { faction: mandarins, by: 3, why: "The Mandarins were told, in effect, that they had been right." }
+        headline: Food inspectors hired back
+        result: The first week of visits closes eleven plants. Nobody had given themselves less than an eight.
+
+      - id: publish-hygiene-reports
+        advocate: { name: Rufus Hale, role: civil liberties barrister }
+        speech: "Publish every form and every inspection report for every plant. People are entitled to know what they are eating and when anyone last looked at it."
+        effects:
+          - { situation: food-scare, by: 5, why: "Shoppers can look a plant up, and most plants turn out to be dull." }
+          - { faction: business, by: -5, why: "Every food firm's hygiene paperwork is now on the front page of something." }
+          - { indicator: legitimacy, by: 2, why: "The government showed what it knew, including how little that was." }
+        headline: Every food plant's hygiene record published
+        result: A website lists the plants by score. The bottom ten issue a joint statement about context.
+
+      - id: keep-the-forms
+        advocate: { name: Idris Monk, role: fellow of the Free Enterprise Forum }
+        speech: "One plant lied on one form. Prosecute the plant. Do not punish four thousand honest ones with a man in a white coat."
+        effects:
+          - { situation: food-scare, by: -5, why: "Plants are still marking their own homework, and shoppers know it now." }
+          - { faction: business, by: 4, why: "The Chamber was spared a new inspection regime." }
+        headline: Self-inspection of food plants to continue
+        result: The form is revised. It now asks plants to confirm that their previous answers were true.
+
+  - title: The Shelves
+    description: >-
+      People have stopped buying chicken, and then anything chilled, and then anything in a packet
+      they did not seal themselves. Farmers have sheds full of birds nobody will take.
+    options:
+      - id: test-every-batch
+        advocate: { name: Dr Imogen Sayer, role: chief medical officer }
+        speech: "Test every batch before it leaves the gate and print the result on the packet. It is slow and it is dear and it will work."
+        tags: [paternalist]
+        effects:
+          - { situation: food-scare, by: 10, why: "Each packet carries a test date, and people have started reading packets." }
+          - { indicator: living, by: -3, why: "Testing every batch has put a tenth on the price of anything chilled." }
+          - { faction: business, by: -4, why: "The cost of the tests fell on the packers." }
+        headline: Every batch of chilled food to be tested before sale
+        result: The laboratories work in three shifts. The label reads "Tested", which shoppers find more alarming than no label.
+
+      - id: buy-the-birds
+        advocate: { name: Ewan Thorley, role: farmer and parish councillor }
+        speech: "My birds are clean and I cannot give them away. Buy them, freeze them, and sell them when people have calmed down."
+        tags: [spending]
+        effects:
+          - { situation: food-scare, by: 4, why: "There were no pictures of farmers gassing healthy flocks, which was the alternative." }
+          - { faction: rural, by: 7, why: "The Shires were paid for birds the market had abandoned." }
+          - { indicator: fiscal, by: -3, why: "The state now owns nine million frozen chickens." }
+        headline: Government buys unsold poultry
+        result: The birds go into cold stores at Kessel. The Treasury lists them as an asset.
+
+      - id: minister-eats-chicken
+        advocate: { name: "{minister:environment}", role: speaking in cabinet }
+        speech: "Let me eat a chicken sandwich in front of the cameras. People believe what they see."
+        effects:
+          - { situation: food-scare, by: -6, why: "The minister chewed for a very long time, and the country watched every second of it." }
+          - { minister: environment, by: -8, why: "The Environment Minister is now a photograph of a person eating a sandwich." }
+          - { faction: business, by: 3, why: "The Chamber appreciated a minister prepared to chew for the industry." }
+        headline: Minister eats chicken sandwich on live television
+        result: The clip is shown nine thousand times that evening. In none of them does the minister swallow.
+
+  - title: The Source
+    description: >-
+      The trail ends at the plant's own office. Managers knew a chiller had failed in the spring,
+      kept the line running, and backdated the temperature logs. The plant employs eight hundred
+      people in Kessel and its owner sits on the Chamber's council.
+    options:
+      - id: prosecute-the-directors
+        advocate: { name: Commissioner Bridget Stane, role: head of the capital's police }
+        speech: "Falsified records, forty people in hospital. I have arrested people for less this morning. Let me have the directors."
+        effects:
+          - { situation: food-scare, by: 10, why: "The directors were seen leaving the plant in a police car." }
+          - { faction: business, by: -6, why: "A member of the Chamber's council is on bail." }
+          - { faction: services, by: 3, why: "The police were let loose on somebody in a suit for once." }
+          - { indicator: legitimacy, by: 2, why: "The law turned out to apply to the people who own things." }
+        headline: Kessel plant directors arrested
+        result: The owner resigns from the Chamber's council to spend more time with his barrister.
+
+      - id: order-an-inquiry
+        advocate: { name: Dame Philippa Wace, role: cabinet secretary }
+        speech: "A public inquiry, properly chaired, with terms of reference. It will establish the facts, which is not the same as establishing them quickly."
+        effects:
+          - { situation: food-scare, by: 2, why: "Something official is happening, in a hired room, at a pace." }
+          - { faction: mandarins, by: 3, why: "The Mandarins were given an inquiry to staff." }
+          - { indicator: legitimacy, by: -2, why: "The inquiry will report in eighteen months, which people took to mean never." }
+        headline: Public inquiry into the Kessel plant
+        result: The inquiry's first decision is to move to a larger room. Its second is to break for lunch.
+
+      - id: settle-quietly
+        advocate: { name: Sir Anselm Roke, role: chair of the Chamber }
+        speech: "A fine, a new manager, and the line running again by Monday. Eight hundred families in Kessel will thank you, though not in public."
+        effects:
+          - { situation: food-scare, by: -7, why: "The plant that poisoned forty people reopened under the same name." }
+          - { faction: business, by: 5, why: "The Chamber's man paid a fine and admitted nothing." }
+          - { indicator: employment, by: 1, why: "Eight hundred jobs at Kessel were kept." }
+          - { indicator: legitimacy, by: -3, why: "The fine was smaller than the plant's advertising budget." }
+          - { flag: kessel_plant_let_off }
+        headline: Kessel plant fined and reopened
+        result: The plant reopens with a banner reading "Under New Management". The new manager is the old manager's deputy.
+
+outcomes:
+  - gte: 70
+    headline: The food scare is over, and people believe it
+    text: >-
+      The last patient goes home and chicken sales are back to normal within the month. The whole
+      affair is remembered, where it is remembered, as the time the system worked.
+    effects:
+      - { indicator: legitimacy, by: 4, why: "People were told the food was safe and found they believed it." }
+      - { indicator: health, by: 2, why: "Food plants are cleaner than they have been in years, mostly out of fear." }
+      - { flag: food_scare_contained }
+  - gte: 45
+    headline: The food scare fades, but the suspicion does not
+    text: >-
+      Nobody else falls ill. Nobody quite believes it is over either. Shoppers have taken to
+      sniffing things, and sales of chilled food settle a fifth lower than before.
+    effects:
+      - { indicator: living, by: -2, why: "People are paying more for food they trust and throwing away food they do not." }
+      - { faction: rural, by: -3, why: "The Shires are still selling poultry at a loss." }
+      - { indicator: legitimacy, by: -1, why: "The all-clear was given three times before anybody believed it." }
+      - { flag: food_scare_lingered }
+  - headline: A second plant, and the borders close to {demonym} meat
+    text: >-
+      The same bug turns up at a second plant, forty miles from the first. Within a week every
+      country that buys {demonym} meat has stopped. The health service opens a ward for it.
+    effects:
+      - { indicator: legitimacy, by: -8, why: "The government said the food was safe and the food put people in hospital." }
+      - { indicator: health, by: -4, why: "Six hundred people were poisoned by their own supper." }
+      - { indicator: capacity, by: -3, why: "Meat exports have stopped and the packing plants are standing idle." }
+      - { faction: rural, by: -8, why: "The Shires cannot sell an animal abroad at any price." }
+      - { flag: meat_export_ban }

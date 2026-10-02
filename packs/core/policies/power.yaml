@@ -1,0 +1,7 @@
+- { id: votes_at_16, name: Votes at sixteen, description: The voting age is sixteen. }
+- { id: elected_senate, name: Elected Senate, description: Senators are chosen by voters and not by birth or appointment. }
+- { id: donation_cap, name: Donation cap, description: Nobody may give a political party more than a set amount a year. }
+- { id: online_real_names, name: Real names online, description: Every social media account carries its owner's legal name. }
+- { id: ai_caseworkers, name: Automated benefit decisions, description: A machine decides benefit claims without a caseworker. }
+- { id: regional_assemblies, name: Regional assemblies, description: The regions have elected assemblies with tax powers of their own. }
+- { id: independent_statistics, name: Independent statistics, description: Official figures are defined and published without ministers' say., default: true }

@@ -1,0 +1,646 @@
+- id: energy-bills
+  title: The Heat Is Off
+  description: >-
+    The wholesale price of gas has trebled since the autumn and the average household bill in
+    {nation} is about to follow it. The energy suppliers have written to every customer to say how
+    sorry they are. The letter went first class.
+  tags: [energy, economy]
+  when: { policy: energy_price_cap, is: false }
+  options:
+    - id: freeze
+      advocate: { name: Mabel Thwaite, role: secretary of the Pensioners' Convention }
+      speech: "My members are choosing between the fire and the dinner. Freeze the price and send the bill to somebody with central heating."
+      tags: [spending]
+      effects:
+        - { policy: energy_price_cap, to: true }
+        - { indicator: debt, by: 5, why: "The state is paying the gap between the frozen price and the real one on every bill in the country." }
+        - { indicator: living, by: 5, why: "Nobody's bill goes up this winter." }
+        - { faction: grey, by: 11, why: "Pensioners can have the fire and the dinner." }
+        - { minister: finance, by: -8, why: "The Finance Minister called it an open cheque made out to the weather, and was overruled." }
+      later:
+        - after: 20
+          headline: Gas use rises in the winter it was meant to fall
+          effects:
+            - { indicator: fiscal, by: -2, why: "With the price frozen nobody turned anything down, and the state is paying for the difference." }
+            - { indicator: environment, by: -2, why: "More gas was burned this winter than last." }
+      headline: Energy bills frozen for the winter
+      result: Every thermostat in {nation} is turned up one degree, as a mark of gratitude.
+
+    - id: windfall
+      advocate: { name: Maren Okafor, role: economist at the Fair Share Institute }
+      speech: "The generators are selling the same electricity for three times the price. Tax the difference and post it back to the people who paid it."
+      tags: [redistribution]
+      effects:
+        - { indicator: fiscal, by: 3, why: "The levy on generators brings in slightly more than the rebate gives back." }
+        - { indicator: living, by: 2, why: "Every household gets a rebate before midwinter." }
+        - { indicator: inequality, by: -3, why: "The rebate is the same for everyone, so it is worth most to those with least." }
+        - { indicator: capacity, by: -4, why: "Two wind farms and a gas terminal are on hold while their investors read the small print." }
+        - { faction: business, by: -13, why: "The Chamber's energy members call it a raid, and the rest wonder who is next." }
+      later:
+        - after: 25
+          headline: Generators' accountants find profits were smaller than first thought
+          effects:
+            - { indicator: fiscal, by: -2, why: "The windfall shrank as soon as the law defined it." }
+      headline: Windfall levy on power generators
+      result: The generators announce the hardest year in their history, from a new headquarters.
+
+    - id: jumper
+      advocate: { name: Idris Monk, role: fellow of the Free Enterprise Forum }
+      speech: "A high price is information. It is telling people to put on a jumper. Help the very poorest and let the price finish what it was saying."
+      tags: [austerity]
+      effects:
+        - { indicator: fiscal, by: -1, why: "A small payment goes to the poorest tenth of households." }
+        - { indicator: environment, by: 3, why: "Gas use falls by a tenth, because people can read a bill." }
+        - { indicator: living, by: -4, why: "Most households are paying three times as much to be slightly colder." }
+        - { faction: grey, by: -7, why: "Pensioners were advised to wear a jumper by a man in a heated studio." }
+        - { faction: business, by: 3, why: "The Chamber's energy members keep both the price and the customers." }
+        - { minister: finance, by: 5, why: "The Finance Minister kept the winter off the books." }
+      headline: No freeze on energy bills; help for the poorest only
+      result: Knitwear sales reach a level the textile trade describes as a windfall. Nobody proposes taxing it.
+
+    - id: burn-coal
+      advocate: { name: Councillor Des Marrow, role: leader of Harrowgate council }
+      speech: "Harrowgate burns coal, not gas. Run us flat out until spring and you will have power at last year's price. You are welcome."
+      when: { policy: coal_phaseout, is: false }
+      tags: [polluting]
+      effects:
+        - { indicator: living, by: 3, why: "Harrowgate is running day and night, and the price of coal has not trebled." }
+        - { indicator: employment, by: 1, why: "Harrowgate has taken on a third shift." }
+        - { indicator: environment, by: -5, why: "The dirtiest power station in the country is at full output for the first time in ten years." }
+        - { indicator: health, by: -2, why: "Three counties downwind can taste the difference." }
+        - { faction: labour, by: 4, why: "The power workers are on overtime and being thanked for it." }
+        - { faction: youth, by: -4, why: "The young had been told the plant was on its way out." }
+      headline: Harrowgate to run flat out to hold down bills
+      result: The lights stay on. From the right hill you can see what is keeping them on.
+
+- id: cod-quota
+  title: Plenty More Fish in the Sea, Reportedly
+  description: >-
+    Scientists have surveyed the cod grounds off Saltmere and found a third of the fish that were
+    there ten years ago. The Saltmere fleet has surveyed the same grounds and reports that the
+    scientists cannot fish.
+  tags: [fishing, environment]
+  when: { policy: cod_moratorium, is: false }
+  options:
+    - id: close
+      advocate: { name: Dr Wren Calloway, role: ecologist }
+      speech: "Close the grounds for five years. A fishery with no fish employs nobody, and that is where this ends if you leave it."
+      tags: [green]
+      effects:
+        - { policy: cod_moratorium, to: true }
+        - { indicator: environment, by: 3, why: "The cod grounds are closed, and the fish that are left are being left." }
+        - { indicator: employment, by: -3, why: "Three hundred boats are tied up at Saltmere and the fish market is selling ice." }
+        - { indicator: fiscal, by: -1, why: "Skippers are being paid to stay in harbour." }
+        - { faction: rural, by: -11, why: "The coast was shut by somebody with a clipboard." }
+        - { faction: youth, by: 3, why: "The young like a government that can count fish." }
+      later:
+        - after: 40
+          headline: Cod return to Saltmere in numbers; skippers say they always knew
+          effects:
+            - { indicator: environment, by: 3, why: "The stock is recovering faster than the model said it would." }
+      headline: Saltmere cod grounds closed for five years
+      result: The chip shops of Saltmere switch to a fish described on the menu as white.
+
+    - id: inspectors
+      advocate: { name: "{minister:environment}", role: speaking in cabinet }
+      speech: "Halve the quota and put an inspector on every boat. Then we shall know what is landed, which at present we take on trust from the people landing it."
+      tags: []
+      effects:
+        - { indicator: administration, by: 2, why: "The fisheries office has people at sea and, for the first time, figures it believes." }
+        - { indicator: environment, by: 2, why: "Half as many cod are being taken." }
+        - { indicator: fiscal, by: -1, why: "Three hundred inspectors, with oilskins." }
+        - { faction: rural, by: -6, why: "Skippers go to sea with a civil servant aboard and half as much to catch." }
+        - { minister: environment, by: 6, why: "The Environment Minister's scheme was adopted." }
+      later:
+        - after: 30
+          headline: Inspectors find half of Saltmere's catch was never declared
+          effects:
+            - { indicator: fiscal, by: 3, why: "Fines, and tax on fish that used to come ashore after dark." }
+            - { faction: rural, by: -4, why: "The fleet was called dishonest in the paper, with a table." }
+      headline: Cod quota halved; inspectors to sail with the fleet
+      result: The inspectors are seasick for a fortnight. The skippers call this the best part of the scheme.
+
+    - id: fish-on
+      advocate: { name: Morwenna Teague, role: skipper and chair of the Saltmere Fishermen's Association }
+      speech: "Thirty years I have fished those grounds, and my nets came up full on Tuesday. If the cod are gone, somebody ought to tell the cod."
+      tags: []
+      effects:
+        - { indicator: employment, by: 2, why: "The whole fleet is at sea and the fish market is busy." }
+        - { indicator: environment, by: -5, why: "Another full season is being taken from a stock that is two thirds gone." }
+        - { faction: rural, by: 8, why: "The coast was believed over the scientists." }
+        - { faction: youth, by: -2, why: "The young read the survey, which is more than the cabinet did." }
+      later:
+        - after: 35
+          headline: Saltmere boats come home empty; skippers blame the scientists
+          effects:
+            - { indicator: employment, by: -4, why: "The nets stopped coming up full all at once, as the survey said they would." }
+            - { faction: rural, by: -3, why: "The coast wants to know why nobody stopped it." }
+      headline: Cod quota left unchanged
+      result: The season's catch is the best in years. The skippers say this proves there are plenty. The scientists say it proves there were.
+
+- id: road-pricing
+  title: Highway Robbery, With a Receipt
+  description: >-
+    Fuel duty pays for a twentieth of everything the state does, and electric cars do not pay it.
+    The Treasury has observed that the roads are as full as ever while the money from them falls by
+    a tenth a year.
+  tags: [roads, tax]
+  when: { policy: road_pricing, is: false }
+  options:
+    - id: per-mile
+      advocate: { name: Lorne Abbasi, role: Treasury official }
+      speech: "Charge every vehicle by the mile, more at rush hour. A box in the car does the sums. I would not call it tracking. I would call it billing."
+      tags: [surveillance]
+      effects:
+        - { policy: road_pricing, to: true }
+        - { flag: road_charge_on }
+        - { indicator: fiscal, by: 6, why: "Every mile driven earns the Treasury something, whatever the car runs on." }
+        - { indicator: administration, by: 2, why: "The licensing office has, at last, one record of every vehicle and who really drives it." }
+        - { indicator: liberty, by: -3, why: "A box in each car reports where it has been and when." }
+        - { faction: rural, by: -10, why: "In the Shires the nearest shop is eleven miles off and now charges admission." }
+      later:
+        - after: 15
+          headline: Rush hour thins as drivers find out what it costs
+          effects:
+            - { indicator: capacity, by: 2, why: "Lorries cross {capital} in half the time." }
+      promise:
+        id: road-money-for-transport
+        text: Every penny of the road charge will be spent on transport
+        due: 30
+        kept: { not: { flag: road_money_diverted } }
+        broken:
+          - { indicator: legitimacy, by: -5, why: "The road charge was sold as money for transport and spent on something else." }
+          - { faction: rural, by: -6, why: "The Shires paid by the mile and got nothing back." }
+      headline: Drivers to pay by the mile
+      result: The first bills go out. Several thousand people learn exactly how far it is to their mother's.
+
+    - id: tolls
+      advocate: { name: Idris Monk, role: fellow of the Free Enterprise Forum }
+      speech: "Lease the motorways to an operator for forty years. They put up the booths, you bank a cheque today, and the potholes become somebody else's reputation."
+      tags: []
+      effects:
+        - { indicator: debt, by: -8, why: "An operator paid up front for forty years of motorway." }
+        - { indicator: living, by: -3, why: "Driving between two cities costs money at both ends." }
+        - { indicator: inequality, by: 2, why: "The roads that are still free are the slow ones." }
+        - { faction: business, by: 8, why: "The Chamber's members bid for the concession and one of them won it." }
+      later:
+        - after: 30
+          headline: Tolls go up; lorries take to the lanes
+          effects:
+            - { indicator: environment, by: -2, why: "Heavy lorries have left the motorway for roads laid out for carts." }
+            - { faction: rural, by: -4, why: "Every village on the old road has a queue through the middle of it." }
+      headline: Motorways leased to a toll operator
+      result: The motorways are quiet and beautifully kept. The traffic has gone to look at the countryside.
+
+    - id: leave-roads
+      advocate: { name: Ewan Thorley, role: farmer and parish councillor }
+      speech: "I drive forty miles for a bag of nails. Leave the roads alone and get your money from people who have a bus."
+      tags: []
+      effects:
+        - { indicator: fiscal, by: -2, why: "Fuel duty brings in less every year and nothing has replaced it." }
+        - { faction: rural, by: 10, why: "The Shires go on driving for nothing." }
+        - { faction: youth, by: -2, why: "The young mostly have no car and are paying for the roads out of income tax." }
+      headline: No new charges for drivers
+      result: The hole in the road budget is dealt with in the traditional way, by not dealing with the holes in the roads.
+
+- id: bus-money
+  title: The Wheels on the Bus Go to the Treasury
+  description: >-
+    The road charge raised more in its first month than anybody forecast. Four hundred villages in
+    {nation} have no bus at all, and a good many more have one a week, on Thursdays, outbound only.
+    {minister:finance} has noticed the money.
+  tags: [buses, transport]
+  when: { all: [{ flag: road_charge_on }, { policy: public_buses, is: false }] }
+  priority: 1
+  options:
+    - id: buses
+      advocate: { name: Mabel Thwaite, role: secretary of the Pensioners' Convention }
+      speech: "I have held a bus pass for nine years. I should like, before I die, to hold it on a bus."
+      tags: [spending]
+      effects:
+        - { policy: public_buses, to: true }
+        - { indicator: fiscal, by: -4, why: "The road charge is spent on buses as fast as it arrives." }
+        - { indicator: living, by: 3, why: "Four hundred villages have a timetable again." }
+        - { indicator: administration, by: 2, why: "Councils draw the bus map themselves instead of pleading with operators." }
+        - { faction: grey, by: 7, why: "Pensioners can reach the surgery without asking a neighbour." }
+        - { faction: rural, by: 6, why: "The Shires got something back for what they pay by the mile." }
+        - { faction: business, by: -4, why: "Bus companies lost the right to run only the routes that pay." }
+      later:
+        - after: 20
+          headline: Village buses run on time and nearly empty; drivers know every passenger by name
+          effects:
+            - { indicator: environment, by: 2, why: "A few thousand cars are staying in the drive." }
+            - { indicator: fiscal, by: -2, why: "A bus with three people on it costs the same to run as a full one." }
+      headline: Road charge to pay for a bus in every village
+      result: The Thursday bus now also comes back. People who left on it in the spring return, with stories.
+
+    - id: potholes
+      advocate: { name: Sir Anselm Roke, role: chair of the Chamber }
+      speech: "Drivers paid this money. Spend it on the thing they drive on. My members lost more axles last year than the army."
+      tags: [growth]
+      effects:
+        - { indicator: fiscal, by: -2, why: "The road charge goes straight back into tarmac." }
+        - { indicator: capacity, by: 2, why: "Lorries no longer have to steer round the road." }
+        - { indicator: environment, by: -2, why: "Smoother roads have filled up with more cars." }
+        - { faction: business, by: 8, why: "The Chamber's hauliers got their roads mended." }
+        - { faction: youth, by: -3, why: "The young do not drive and were hoping for a bus." }
+      headline: Road charge to be spent on resurfacing
+      result: The roads are mended in the order in which the Chamber's members use them.
+
+    - id: one-ticket
+      advocate: { name: Petra Hallam, role: general secretary of the rail union }
+      speech: "You already own the trains. Run the buses to meet them, one ticket for both, and put my members in the driving seats."
+      when: { policy: rail_public, is: true }
+      tags: [spending, pro_labour]
+      effects:
+        - { policy: public_buses, to: true }
+        - { indicator: fiscal, by: -3, why: "The state buys the bus companies and puts the drivers on railway pay." }
+        - { indicator: living, by: 4, why: "One ticket covers the bus to the station and the train from it." }
+        - { faction: labour, by: 6, why: "Every bus driver in the country is now in the rail union." }
+        - { faction: business, by: -5, why: "The bus companies were bought at a price they did not set." }
+      headline: Buses folded into the public railway
+      result: The bus is timed to meet the train. Both are late, but at last they are late together.
+
+    - id: keep-it
+      advocate: { name: "{minister:finance}", role: speaking in cabinet }
+      speech: "That promise was made in a different fiscal climate, by which I mean last month. Pay down the debt and describe it as an investment in transport, broadly."
+      tags: [austerity]
+      effects:
+        - { flag: road_money_diverted }
+        - { indicator: debt, by: -7, why: "A month of road charges has gone to the country's creditors." }
+        - { faction: rural, by: -6, why: "The Shires pay by the mile and their bus is still the Thursday one." }
+        - { faction: mandarins, by: 2, why: "The Treasury's officials never liked money that arrived with a label on it." }
+        - { minister: finance, by: 8, why: "The Finance Minister found money that nobody was guarding." }
+      headline: Road charge income to go on the national debt
+      result: The Treasury explains that debt interest is a kind of transport, in that the money goes somewhere.
+
+- id: second-runway
+  title: Cleared for Take-off, Pending Appeal
+  description: >-
+    The airport at {capital} is full. A second runway would double it, and would cross the bedrooms
+    of two hundred thousand people who are already awake. The airport's owners have offered to pay
+    for the whole thing themselves, and mention it often.
+  tags: [aviation, environment]
+  when: { policy: flyer_levy, is: false }
+  options:
+    - id: build
+      advocate: { name: Clement Farrow, role: chief executive of the airport }
+      speech: "Every flight we turn away lands in somebody else's country and spends its money there. We are paying for the runway. All we ask from you is the sky."
+      tags: [growth, polluting]
+      effects:
+        - { indicator: capacity, by: 2, why: "Airlines are ordering aircraft and hotels are ordering hotels." }
+        - { indicator: employment, by: 3, why: "Eight thousand people are pouring concrete." }
+        - { indicator: environment, by: -6, why: "Twice the flights means twice the fuel burned over {capital}." }
+        - { indicator: health, by: -2, why: "Two hundred thousand people under the new flight path are woken at five." }
+        - { faction: business, by: 11, why: "The Chamber has wanted this runway since before the last one." }
+        - { faction: youth, by: -4, why: "The young were told there was a climate target and are now told there is a runway." }
+      later:
+        - after: 40
+          headline: Second runway opens on time; airport asks about a third
+          effects:
+            - { indicator: capacity, by: 3, why: "Twice as many flights land, and the freight comes with them." }
+            - { indicator: environment, by: -3, why: "Flying is now the fastest-growing source of emissions in the country." }
+      headline: Second runway approved
+      result: Houses under the flight path are put back on the market as close to transport links.
+
+    - id: levy
+      advocate: { name: Suvi Arden, role: transport campaigner }
+      speech: "Half the flights are taken by a twentieth of the people. Tax the fourth flight of the year, not the first, and the airport stops being full by itself."
+      tags: [green, redistribution]
+      effects:
+        - { policy: flyer_levy, to: true }
+        - { indicator: fiscal, by: 5, why: "The people who fly most pay a levy that rises with every trip." }
+        - { indicator: environment, by: 3, why: "Fewer flights are taken and no runway is laid." }
+        - { indicator: capacity, by: -3, why: "The airport stays the size it is and the conferences go elsewhere." }
+        - { faction: business, by: -8, why: "The Chamber's members are the twentieth." }
+      headline: Frequent flyer levy instead of a runway
+      result: Frequent flyers start booking the fourth flight in a spouse's name. Marriage among management consultants is up sharply.
+
+    - id: trains
+      advocate: { name: Petra Hallam, role: general secretary of the rail union }
+      speech: "A third of those flights go somewhere a train gets to in three hours. Ban them and there is your spare runway. I declare an interest, which is that I am right."
+      tags: [green]
+      effects:
+        - { indicator: environment, by: 2, why: "The shortest flights have stopped." }
+        - { indicator: liberty, by: -1, why: "It is now an offence to fly a journey the state thinks should be made by rail." }
+        - { indicator: living, by: -2, why: "The three-hour train takes five, with one seat for every two tickets." }
+        - { faction: labour, by: 4, why: "The rail union gained the passengers and will be wanting the staff." }
+        - { faction: business, by: -4, why: "The Chamber's members now hold their morning meetings on a platform." }
+      headline: Short flights banned where a train will do
+      result: Airlines relaunch the banned routes with a stop abroad. The trip takes six hours and counts as international.
+
+- id: forest-target
+  title: Can't See the Wood for the Targets
+  description: >-
+    {nation} has less woodland than any of its neighbours and imports four-fifths of its timber. A
+    plan on your desk would put a tenth of the country under trees within ten years. It does not
+    say which tenth, and the people who live there have asked.
+  tags: [forestry, environment]
+  options:
+    - id: spruce
+      advocate: { name: Garrick Hume, role: director of the Homebuilders' Federation }
+      speech: "Spruce. It grows in thirty years, in straight lines, and comes out the shape of a roof truss. I am told there are other trees."
+      tags: [growth]
+      effects:
+        - { flag: forests_planted }
+        - { indicator: capacity, by: 2, why: "Planting contracts are let across the uplands and the sawmills are ordering saws." }
+        - { indicator: employment, by: 2, why: "Planting gangs are hiring in every hill town." }
+        - { indicator: fiscal, by: -2, why: "Planting grants are paid by the hectare, in advance." }
+        - { indicator: environment, by: -2, why: "The moors are being drained and planted with one species, in rows." }
+        - { faction: rural, by: -7, why: "Hill farms are being bought whole and put under trees by companies with an address in {capital}." }
+      later:
+        - after: 40
+          headline: Plantations ahead of schedule; walkers report that the hills have gone dark
+          effects:
+            - { indicator: capacity, by: 2, why: "The first thinnings have reached the sawmills and the timber import bill is falling." }
+      headline: A tenth of the country to be planted with spruce
+      result: From the air, a tenth of {nation} now looks like a barcode.
+
+    - id: native
+      advocate: { name: Dr Wren Calloway, role: ecologist }
+      speech: "Oak, birch and alder along the rivers, planted by a proper forestry service that will still be there to look after them. It is slower. So are trees."
+      tags: [green, spending]
+      effects:
+        - { flag: forests_planted }
+        - { indicator: fiscal, by: -2, why: "A national forestry service is hired, equipped and handed a very long plan." }
+        - { indicator: administration, by: 2, why: "The state has foresters again, and a map of the land it owns." }
+        - { indicator: environment, by: 3, why: "Native woodland is going in along every river in the uplands." }
+        - { faction: business, by: -4, why: "The Chamber points out that nobody can sell an oak until the next century." }
+        - { faction: rural, by: -4, why: "Farmers are asked to give up their river fields, which are the good ones." }
+      later:
+        - after: 35
+          headline: Young woodland takes hold; rivers below it run clear
+          effects:
+            - { indicator: environment, by: 2, why: "The new woods are holding the soil on the hills and out of the water." }
+      headline: Forestry service founded to plant native woodland
+      result: The first oak is planted by a minister. It will be ready for inspection in a hundred and twenty years, and the date is in the diary.
+
+    - id: no-trees
+      advocate: { name: Ewan Thorley, role: farmer and parish councillor }
+      speech: "That tenth is where the sheep are. You cannot eat a tree, and I notice nobody proposes planting one in the capital."
+      tags: []
+      effects:
+        - { indicator: fiscal, by: 2, why: "No planting grants are paid." }
+        - { indicator: capacity, by: -3, why: "Four-fifths of the timber still comes in by ship, at a price set abroad." }
+        - { faction: rural, by: 7, why: "The Shires keep their hills for grazing." }
+        - { faction: youth, by: -3, why: "The young wanted a forest and were given a consultation." }
+      headline: Tree-planting plan withdrawn
+      result: The plan is withdrawn. The paper it was printed on was imported.
+
+- id: deer
+  title: Oh Deer
+  description: >-
+    The new woodland has been a great success with deer, of which {nation} has two million and no
+    wolves. They have eaten a third of the saplings and have started on the gardens of the retired.
+  tags: [wildlife, environment]
+  when: { flag: forests_planted }
+  priority: 1
+  options:
+    - id: army-cull
+      advocate: { name: "{minister:defence}", role: speaking in cabinet }
+      speech: "My marksmen need the practice and the deer need the attention. Give me one winter. We shall be discreet, by military standards."
+      tags: []
+      effects:
+        - { indicator: environment, by: 3, why: "The saplings are growing past the height a deer can reach." }
+        - { indicator: legitimacy, by: -1, why: "Soldiers were filmed shooting deer at the edge of a school field." }
+        - { faction: services, by: 4, why: "The army was given a job with a beginning, an end and a body count." }
+        - { faction: youth, by: -6, why: "The young have seen the photographs, and the deer photograph well." }
+        - { minister: defence, by: 6, why: "The Defence Minister's operation was approved." }
+      headline: Army marksmen to cull half a million deer
+      result: The cull finishes on schedule. Barracks canteens serve venison for eleven weeks, and morale is described as mixed.
+
+    - id: lynx
+      advocate: { name: Dr Wren Calloway, role: ecologist }
+      speech: "Bring back the lynx. It is what ate them before we did. It works nights and it does not invoice."
+      tags: [green]
+      effects:
+        - { indicator: fiscal, by: -1, why: "A hundred lynx are bought, flown in and fitted with collars." }
+        - { indicator: environment, by: 3, why: "The forests have a predator in them for the first time in five centuries." }
+        - { faction: rural, by: -10, why: "Sheep farmers are told the lynx prefers deer, and would like that in writing." }
+        - { faction: youth, by: 6, why: "The young are delighted to live in a country with a big cat in it." }
+      later:
+        - after: 30
+          headline: Deer thin out in the new forests; so do the sheep beside them
+          effects:
+            - { indicator: environment, by: 3, why: "Deer are keeping away from the young woodland without a shot fired." }
+            - { faction: rural, by: -5, why: "Forty sheep and a number of cats are unaccounted for." }
+      headline: Lynx to be released to control deer
+      result: The lynx are released at dawn, before the cameras. None has been seen since, which the ecologists say is the idea.
+
+    - id: bounty
+      advocate: { name: Ewan Thorley, role: farmer and parish councillor }
+      speech: "Pay us by the head and we will see to it ourselves. There is a freezer in every farmhouse in the country and room in all of them."
+      tags: [spending]
+      effects:
+        - { indicator: fiscal, by: -1, why: "A bounty is paid on every deer, on production of the deer." }
+        - { indicator: environment, by: 2, why: "Fewer deer are getting at the saplings." }
+        - { indicator: administration, by: -2, why: "Somebody in the ministry has to count carcasses and check none is counted twice." }
+        - { faction: rural, by: 10, why: "The Shires are being paid to do what they did anyway." }
+      later:
+        - after: 25
+          headline: Bounty claims exceed the number of deer in the country
+          effects:
+            - { indicator: fiscal, by: -2, why: "A good many deer appear to have been shot more than once." }
+      headline: Bounty offered for every deer shot
+      result: Venison becomes the cheapest meat in {nation}. School dinners are affected.
+
+- id: landfill-full
+  title: Where There's Muck There's a Planning Application
+  description: >-
+    The landfill sites of {nation} will be full in three years. Recycling has been stuck at a third
+    since the bins were colour-coded, and a company has applied to build an incinerator at Dunmoor
+    that would burn the lot and sell the heat.
+  tags: [waste, environment]
+  when: { policy: bin_charges, is: false }
+  options:
+    - id: incinerator
+      advocate: { name: Dr Per Ohlsen, role: chief engineer at the grid operator }
+      speech: "It is not my favourite kind of power station. It is, however, the only kind where the customers deliver the fuel free, every week, in bags."
+      tags: [polluting]
+      effects:
+        - { indicator: capacity, by: 2, why: "Dunmoor will be heated and lit by what the rest of the country throws away." }
+        - { indicator: employment, by: 2, why: "The furnace needs four hundred people to feed it, and Dunmoor has them to spare." }
+        - { indicator: environment, by: -3, why: "Whatever goes in the bin now goes up a chimney." }
+        - { indicator: health, by: -2, why: "Dunmoor is downwind of everything the country did not want." }
+        - { faction: youth, by: -5, why: "The young had been sorting their recycling in good faith." }
+      later:
+        - after: 35
+          headline: Dunmoor furnace needs more rubbish than the country makes; imports begin
+          effects:
+            - { indicator: fiscal, by: 3, why: "Other countries pay to have their rubbish burned here." }
+            - { indicator: environment, by: -2, why: "Waste arrives by ship to keep the furnace fed." }
+      headline: Incinerator approved at Dunmoor
+      result: Dunmoor is promised cheap heat and gets it, along with a view of where it comes from.
+
+    - id: weigh-bins
+      advocate: { name: Lorne Abbasi, role: Treasury official }
+      speech: "Weigh every bin and charge by the kilo. People sort their rubbish with great care once it has a price on it."
+      tags: [green, paternalist]
+      effects:
+        - { policy: bin_charges, to: true }
+        - { indicator: fiscal, by: 3, why: "Every household is billed for what it throws out." }
+        - { indicator: environment, by: 3, why: "Half as much goes to landfill once it costs money to send it." }
+        - { indicator: administration, by: 2, why: "Councils know for the first time what is in the bins and whose it is." }
+        - { indicator: inequality, by: 2, why: "A family in a flat pays the same per kilo as a family with a compost heap and a paddock." }
+        - { faction: grey, by: -5, why: "Pensioners resent being invoiced by a dustcart." }
+      later:
+        - after: 15
+          headline: Fly-tipping doubles; there is a sofa in every lay-by
+          effects:
+            - { indicator: environment, by: -3, why: "What is not weighed at the kerb is being left in a field." }
+            - { faction: rural, by: -5, why: "The fields it is left in belong to somebody." }
+      headline: Households to pay for rubbish by weight
+      result: Householders are seen out after dark, putting their rubbish in each other's bins.
+
+    - id: ship-it
+      advocate: { name: "{minister:foreign}", role: speaking in cabinet }
+      speech: "There are countries that will take it, for a fee, and ask no questions. I propose that we ask none either."
+      tags: []
+      effects:
+        - { indicator: fiscal, by: -2, why: "Somebody else's landfill charges by the tonne, plus shipping." }
+        - { faction: grey, by: 5, why: "Nothing changes at the kerb, which is all older voters asked for." }
+        - { minister: foreign, by: 5, why: "The Foreign Minister signed the contracts and was thanked in cabinet." }
+      later:
+        - after: 30
+          headline: "{nation}'s rubbish found on a foreign beach, with the address labels still on"
+          effects:
+            - { indicator: legitimacy, by: -2, why: "The rubbish that was shipped abroad was photographed where it ended up." }
+            - { minister: foreign, by: -8, why: "The Foreign Minister was sent to apologise in person, on the beach." }
+      headline: Rubbish to be shipped abroad
+      result: The ships leave weekly. Their destination is commercially confidential.
+
+- id: pylons
+  title: Power to the People, Via Their Gardens
+  description: >-
+    The wind farms off the coast make more electricity than the cables can carry inland, so on a
+    windy day {nation} pays them to switch off. The grid operator wants four hundred kilometres of
+    pylons across the Shires. Under the present rules the public inquiry would report in eleven
+    years.
+  tags: [planning, energy]
+  when: { policy: fast_track_planning, is: false }
+  options:
+    - id: fast-track
+      advocate: { name: Dr Per Ohlsen, role: chief engineer at the grid operator }
+      speech: "I can build the line in three years. I cannot build it in three years after an eleven-year conversation about the view."
+      tags: [growth]
+      effects:
+        - { policy: fast_track_planning, to: true }
+        - { indicator: capacity, by: 4, why: "The line is being built and the wind farms can sell everything they make." }
+        - { indicator: administration, by: 2, why: "A national project gets its answer in months, from one office." }
+        - { indicator: environment, by: -3, why: "The route crosses two valleys that were protected before there was a grid." }
+        - { indicator: liberty, by: -1, why: "People who live under the route have lost the right to object to it." }
+        - { faction: rural, by: -8, why: "The Shires found out about the pylons from the men marking out the fields." }
+        - { faction: business, by: 6, why: "The Chamber has a list of other projects that are also of national importance." }
+      later:
+        - after: 30
+          headline: Fast-track powers used for a motorway junction, a reservoir and a prison
+          effects:
+            - { indicator: capacity, by: 2, why: "Projects that had waited a decade are being dug." }
+            - { indicator: legitimacy, by: -1, why: "A power passed for one line of pylons is being used for everything." }
+      headline: Pylon line approved without a public inquiry
+      result: The inquiry is cancelled. The inspector, eight years from his pension, is given a pylon to name.
+
+    - id: bury
+      advocate: { name: Ewan Thorley, role: farmer and parish councillor }
+      speech: "Put it underground. It costs more, I grant you. So does everything you do properly."
+      tags: [spending, green]
+      effects:
+        - { indicator: debt, by: 3, why: "Burying a cable costs six times what hanging it does, and the money is borrowed." }
+        - { indicator: capacity, by: 2, why: "The line will be built, slowly, with nothing to look at." }
+        - { indicator: environment, by: 2, why: "The valleys keep their skyline." }
+        - { faction: rural, by: 10, why: "The Shires were asked, and then listened to." }
+        - { minister: finance, by: -6, why: "The Finance Minister had costed the cheap version." }
+      headline: Power line to be buried
+      result: The trench crosses the country like a scar. In two years it will be a strip of slightly greener field, and that is the next complaint.
+
+    - id: more-inspectors
+      advocate: { name: Dame Philippa Wace, role: cabinet secretary }
+      speech: "The inquiry takes eleven years because there are four inspectors. Appoint forty. One would not wish to remove a safeguard merely for being slow."
+      tags: [spending]
+      effects:
+        - { indicator: fiscal, by: -2, why: "Forty planning inspectors, with clerks and a building." }
+        - { indicator: administration, by: 3, why: "The queue of planning inquiries is moving for the first time in years." }
+        - { indicator: capacity, by: -3, why: "The wind farms are still paid to stand idle while the inquiry sits." }
+        - { faction: mandarins, by: 5, why: "The civil service was given people and a process." }
+        - { faction: business, by: -4, why: "The Chamber wanted the inquiry abolished, not staffed." }
+      later:
+        - after: 40
+          headline: "Pylon inquiry reports in record time: approved, with 212 conditions"
+          effects:
+            - { indicator: capacity, by: 3, why: "The line can be built, in the colour the inquiry chose." }
+            - { faction: rural, by: -5, why: "The Shires were heard at length and got pylons anyway." }
+      headline: Planning inspectorate expanded tenfold
+      result: The inquiry opens within the month. The first session is given over to the seating plan.
+
+- id: sewage
+  title: Going Through the Motions
+  description: >-
+    Merrow Water, the largest of the water companies, put raw sewage into the rivers and the sea on
+    four thousand occasions last year, each of which it describes as exceptional. The beach at Saltmere has been shut since June.
+    The company's sewers were laid by men in top hats.
+  tags: [water, environment]
+  when: { all: [{ policy: water_public, is: false }, { day: { gte: 20 } }] }
+  options:
+    - id: take-over
+      advocate: { name: Nadia Brook, role: chair of the Tenants' Union }
+      speech: "We pay them to take it away and they put it in the river. Take the company back. It was ours when the pipes were new."
+      tags: [spending]
+      effects:
+        - { policy: water_public, to: true }
+        - { indicator: debt, by: 3, why: "Merrow's shareholders are bought out with borrowed money." }
+        - { indicator: legitimacy, by: 5, why: "The most disliked company in the country was taken off its owners." }
+        - { indicator: administration, by: -3, why: "The state owns forty thousand kilometres of pipe and cannot say where a third of it is." }
+        - { faction: labour, by: 4, why: "The water workers are public employees again." }
+        - { faction: business, by: -8, why: "Investors saw a company taken over for being unpopular." }
+      later:
+        - after: 30
+          headline: State water company releases sewage; minister calls it exceptional
+          effects:
+            - { indicator: legitimacy, by: -2, why: "The sewage is still going into the river, and now it is the government's." }
+      headline: Merrow Water taken into public ownership
+      result: The sign outside head office is repainted. The pipes were not consulted.
+
+    - id: regulator
+      advocate: { name: "{minister:environment}", role: speaking in cabinet }
+      speech: "Give the regulator inspectors, laboratories and the power to fine a director personally. At present it has a telephone, which Merrow does not always answer."
+      tags: []
+      effects:
+        - { indicator: fiscal, by: -1, why: "The water regulator gets laboratories and the people to staff them." }
+        - { indicator: administration, by: 3, why: "The regulator tests the rivers itself instead of asking the company how they are." }
+        - { indicator: environment, by: 3, why: "Releases fall once each one costs a director a month's salary." }
+        - { indicator: living, by: -2, why: "Merrow has added the cost of its fines to the water bill." }
+        - { faction: business, by: -7, why: "The Chamber dislikes the word personally." }
+        - { minister: environment, by: 6, why: "The Environment Minister's regulator finally has teeth." }
+      headline: Water regulator given power to fine directors
+      result: Merrow's board resigns before the first fine and is replaced by a board with the same opinions and different names.
+
+    - id: raise-bills
+      advocate: { name: Piers Lathom, role: chief executive of Merrow Water }
+      speech: "The sewers are a hundred and fifty years old and we would love to replace them. Let us raise bills by a third and we will start at once, straight after the dividend."
+      tags: []
+      effects:
+        - { indicator: living, by: -4, why: "Water bills go up by a third from next month." }
+        - { indicator: capacity, by: 2, why: "The largest programme of sewer-laying in a century has been announced." }
+        - { indicator: environment, by: 2, why: "Merrow is replacing its oldest sewers, beginning with those nearest the cameras." }
+        - { faction: business, by: 5, why: "The Chamber sees a regulated company allowed to earn its keep." }
+        - { faction: grey, by: -4, why: "Pensioners are paying a third more for the same water." }
+      later:
+        - after: 35
+          headline: Merrow Water pays record dividend; sewer programme "on course for 2060"
+          effects:
+            - { indicator: legitimacy, by: -2, why: "The government approved the bill rise that paid for the dividend." }
+      headline: Water bills to rise by a third to pay for new sewers
+      result: Merrow thanks its customers for their investment. They are not, it adds, investors.
+
+    - id: conscripts
+      advocate: { name: "{minister:defence}", role: speaking in cabinet }
+      speech: "I have a whole year group of eighteen-year-olds and nine thousand shovels. Give me the beaches."
+      when: { policy: national_service, is: true }
+      tags: []
+      effects:
+        - { indicator: environment, by: 2, why: "Conscripts are clearing the beaches and river banks by hand." }
+        - { faction: services, by: 3, why: "National service has something to show the public." }
+        - { faction: youth, by: -7, why: "The young are spending their year of service picking up what Merrow let out." }
+        - { minister: defence, by: 5, why: "The Defence Minister's conscripts were on the evening news, working." }
+      headline: National service conscripts sent to clean the beaches
+      result: The beach at Saltmere reopens. It shuts again after the next heavy rain, and the conscripts are sent back with the same shovels.

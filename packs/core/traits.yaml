@@ -33,7 +33,7 @@
 - id: green_pioneer
   name: Green Pioneer
   description: Other countries send delegations to see how {nation} did it. Backsliding would be noticed.
-  earn: { all: [{ policy: coal_phaseout, is: true }, { indicator: environment, gte: 62 }] }
+  earn: { all: [{ policy: coal_phaseout, is: true }, { indicator: environment, gte: 63 }] }
   lose: { indicator: environment, lt: 50 }
   opposes: [polluting]
   penalty: 4

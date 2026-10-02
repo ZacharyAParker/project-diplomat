@@ -68,7 +68,7 @@ stages:
         tags: [spending]
         effects:
           - { situation: dry-summer, by: 8, why: "Emergency repairs begin on the worst mains." }
-          - { indicator: fiscal, by: -4, why: "The public is paying to fix pipes it does not own." }
+          - { indicator: fiscal, by: -3, why: "The public is paying to fix pipes it does not own." }
           - { indicator: legitimacy, by: -2, why: "The shareholders kept their dividend and the taxpayer got the bill." }
         headline: Government pays for emergency pipe repairs
         result: The water companies thank the government for its partnership.
@@ -130,7 +130,7 @@ stages:
         tags: [dovish]
         effects:
           - { situation: dry-summer, by: 12, why: "A neighbour's water is flowing into the eastern reservoirs." }
-          - { indicator: fiscal, by: -4, why: "The neighbour named a price and it was paid." }
+          - { indicator: fiscal, by: -3, why: "The neighbour named a price and it was paid." }
           - { faction: services, by: -3, why: "The defence staff note the country now owes a favour." }
         headline: Emergency water bought from neighbour
         result: The neighbour's ambassador attends the switching-on, and brings his own photographer.
@@ -172,7 +172,7 @@ outcomes:
       taps never stopped.
     effects:
       - { indicator: living, by: -2, why: "A thin harvest and a summer of restrictions." }
-      - { indicator: legitimacy, by: 1, why: "It was close, but the water held." }
+      - { indicator: legitimacy, by: 2, why: "It was close, but the water held." }
   - headline: The taps run dry
     text: >-
       For nine days, a million people in the east have no running water. Bottles are handed out from

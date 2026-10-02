@@ -38,7 +38,7 @@
       advocate: { name: Kasia Dunmore, role: president of the students' union }
       speech: "Put him in a museum, with a label that tells the truth."
       effects:
-        - { faction: youth, by: 4, why: "The young wanted him gone." }
+        - { faction: youth, by: 4, why: "The young get an empty plinth and a list of ideas for it." }
         - { faction: grey, by: -4, why: "Older voters call it erasing history." }
       headline: Cray statue moved to museum
       result: The empty plinth becomes more popular than the statue ever was.
@@ -57,7 +57,7 @@
       advocate: { name: Sir Anselm Roke, role: chair of the Chamber }
       speech: "He built the harbour. Judge a man by his century."
       effects:
-        - { faction: grey, by: 3, why: "The statue stays." }
+        - { faction: grey, by: 3, why: "Older voters keep a statue most of them had not looked at until this week." }
         - { faction: youth, by: -4, why: "The young were told to judge him by his century." }
       headline: Cray statue stays
       result: Someone puts a traffic cone on his head. It becomes a tradition.
@@ -75,7 +75,7 @@
       speech: "Repay it, apologise, and let us never discuss it again."
       effects:
         - { minister: environment, by: -6, why: "The Environment Minister had to apologise for a flight." }
-        - { indicator: legitimacy, by: 1, why: "The money was paid back before anyone had to ask twice." }
+        - { indicator: legitimacy, by: 2, why: "The money was paid back before anyone had to ask twice." }
       headline: Minister repays cost of conference flight
       result: The apology mentions "an administrative oversight". The administrator is not named.
 
@@ -84,7 +84,7 @@
       speech: "My diary did not permit the train. I offset the flight. Personally."
       effects:
         - { minister: environment, by: 4, why: "The Environment Minister was backed by the leader." }
-        - { indicator: legitimacy, by: -2, why: "The government defended flying to a climate conference." }
+        - { indicator: legitimacy, by: -1, why: "The government defended flying to a climate conference." }
       headline: Government stands by minister's conference flight
       result: The offset turns out to be one tree. It is doing well.
 

@@ -1,0 +1,575 @@
+- id: measles-jab
+  title: Herd Mentality
+  description: >-
+    Measles has closed eleven schools in {capital}. Vaccination among five-year-olds has fallen to
+    eight in ten, and is lowest in the districts with the most expensive prams.
+  tags: [health, education]
+  when: { policy: vaccine_mandate, is: false }
+  options:
+    - id: mandate
+      advocate: { name: Dr Imogen Sayer, role: chief medical officer }
+      speech: "A school place already requires a birth certificate, a uniform and a named water bottle. I am asking to add the one item that prevents encephalitis."
+      tags: [paternalist]
+      effects:
+        - { policy: vaccine_mandate, to: true }
+        - { indicator: health, by: 4, why: "Vaccination is back above the level at which measles stops spreading." }
+        - { indicator: administration, by: 2, why: "The health service has a single register of who has had which jab, as promised in 1998." }
+        - { indicator: liberty, by: -2, why: "A medical procedure is now a condition of a school place." }
+        - { faction: faithful, by: -4, why: "A few congregations object on doctrine, and the rest object to being told." }
+        - { faction: grey, by: 5, why: "Pensioners remember measles and did not want it back." }
+      later:
+        - after: 20
+          headline: Tutors in the capital's leafier districts report a record term
+          effects:
+            - { indicator: inequality, by: 1, why: "Families who refused the jab have left the schools and hired tutors." }
+      headline: No jab, no school place
+      result: Exemption certificates are on sale online within days. The cheaper ones are misspelt.
+
+    - id: persuade
+      advocate: { name: "{minister:health}", role: speaking in cabinet }
+      speech: "Compulsion makes martyrs. Put nurses at the school gates and let them talk to people. I would be happy to front the campaign myself."
+      tags: [spending]
+      effects:
+        - { indicator: fiscal, by: -2, why: "Nurses are posted at school gates and clinics stay open in the evenings." }
+        - { indicator: health, by: 3, why: "Parents who had simply missed the appointment are catching up." }
+        - { faction: labour, by: 5, why: "Health visitor posts that were cut five years ago have been restored." }
+        - { minister: health, by: 6, why: "The Health Minister is on every billboard, holding a leaflet." }
+      later:
+        - after: 25
+          headline: Jab campaign has reached everyone except the people it was for
+          effects:
+            - { indicator: health, by: -1, why: "The parents who refused were never short of information, and measles has reached a fourth city." }
+      headline: Nurses sent to the school gates as measles spreads
+      result: The campaign's mascot is a syringe with a face. Children are reported to find it more frightening than measles.
+
+    - id: choice
+      advocate: { name: Cordelia Prewitt, role: founder of Parents for Natural Immunity }
+      speech: "My children have never had a jab and never had measles. They have also never sat next to a child who had it, which I arrange."
+      tags: [permissive]
+      effects:
+        - { indicator: liberty, by: 3, why: "No parent is made to do anything." }
+        - { indicator: health, by: -4, why: "Measles is established in three cities and the wards are opening isolation bays." }
+        - { indicator: education, by: -2, why: "A school with a case sends home every child without a certificate, for weeks at a time." }
+        - { faction: faithful, by: 5, why: "The congregations that object were left to their consciences." }
+        - { minister: health, by: -5, why: "The Health Minister is asked about measles at every hospital opening." }
+      headline: Vaccination to stay a matter for parents
+      result: The outbreak is declared over on the day it runs out of children to infect.
+
+- id: tobacco-age
+  title: The Last Gasp
+  description: >-
+    The chief medical officer wants the legal age for buying tobacco to rise by one year every
+    year, so that nobody now under sixteen could ever be sold a cigarette. Smoking kills more
+    {demonym} people than anything else, and its duty pays for a tenth of the health budget. The
+    Treasury has asked which of these it is supposed to mind.
+  tags: [health, drugs]
+  when: { policy: tobacco_age_rising, is: false }
+  options:
+    - id: rising-age
+      advocate: { name: Dr Imogen Sayer, role: chief medical officer }
+      speech: "Nobody takes it up at forty. Stop the fifteen-year-olds, and in sixty years the problem buries itself. I chose that word with care."
+      tags: [paternalist]
+      effects:
+        - { policy: tobacco_age_rising, to: true }
+        - { flag: tobacco_age_raised }
+        - { indicator: health, by: 4, why: "Fewer teenagers are starting, and those who have are finding it awkward to buy." }
+        - { indicator: liberty, by: -2, why: "Two adults born a day apart have different rights at the same counter." }
+        - { faction: business, by: -6, why: "The tobacco firms and the corner shops can count their remaining customers." }
+        - { faction: youth, by: -5, why: "The young have been told that they alone cannot be trusted with a vice." }
+        - { faction: grey, by: 2, why: "Pensioners keep their own cigarettes and approve of the principle." }
+      later:
+        - after: 30
+          headline: Treasury finds a hole where the tobacco duty used to be
+          effects:
+            - { indicator: fiscal, by: -1, why: "Every smoker who never starts is duty that never arrives." }
+      headline: Tobacco age to rise by a year, every year
+      result: Shopkeepers are issued with a chart of birth dates. In fifty years they will be asking pensioners for identification.
+
+    - id: duty-up
+      advocate: { name: Lorne Abbasi, role: Treasury official }
+      speech: "Ban nothing. Put the duty up by a fifth. The smokers who stop will be healthier, and the ones who do not will be more useful to me."
+      effects:
+        - { indicator: fiscal, by: 6, why: "A fifth more duty is collected on every packet sold." }
+        - { indicator: health, by: 2, why: "Some smokers have looked at the price and stopped." }
+        - { indicator: inequality, by: 2, why: "The duty falls hardest on the poorest districts, where most of the smokers live." }
+        - { faction: labour, by: -4, why: "The unions call it a tax on the tea break." }
+      later:
+        - after: 25
+          headline: Customs at Kessel seize a container of cigarettes declared as garden furniture
+          effects:
+            - { indicator: fiscal, by: -1, why: "A fifth of the tobacco smoked is now smuggled and pays no duty at all." }
+      headline: Tobacco duty raised by a fifth
+      result: A packet now costs more than a cinema ticket. Smokers reply that it lasts longer and they know how it ends.
+
+    - id: leave-alone
+      advocate: { name: Gideon Marsh, role: director of the Tobacco Retailers' Alliance }
+      speech: "Our customers are adults making an informed choice, and we lose a great many of them every year. Nobody wants them to live longer than we do."
+      tags: [permissive]
+      effects:
+        - { indicator: liberty, by: 2, why: "An adult may buy what adults have always been able to buy." }
+        - { indicator: health, by: -3, why: "Another year's fifteen-year-olds have taken it up behind the bus shelter." }
+        - { faction: business, by: 6, why: "The tobacco firms and nineteen thousand corner shops keep their best-selling line." }
+        - { minister: health, by: -6, why: "The Health Minister announced the plan in a chest ward, in front of the patients." }
+      headline: No change to tobacco law
+      result: The industry welcomes the decision and launches a youth education programme. The leaflets are very attractively designed.
+
+- id: vape-shops
+  title: Smoke and Mirrors
+  description: >-
+    Since the tobacco age began to rise, a vape shop has opened on every high street in {nation}.
+    The devices come in bubblegum and custard, cost less than a comic, and are used by one
+    fourteen-year-old in four. The tobacco firms own most of the brands and describe them as a
+    quitting aid.
+  tags: [health, drugs]
+  when: { all: [{ flag: tobacco_age_raised }, { policy: tobacco_age_rising, is: true }] }
+  priority: 1
+  options:
+    - id: prescription
+      advocate: { name: "{minister:health}", role: speaking in cabinet }
+      speech: "Sell them at the chemist, on prescription, to smokers who are giving up. That is what the makers say they are for. I propose we believe them."
+      tags: [paternalist]
+      effects:
+        - { indicator: health, by: 3, why: "Vapes have gone from the school gate to the pharmacy counter." }
+        - { indicator: administration, by: -2, why: "Family doctors are writing prescriptions for something that used to be sold beside the sweets." }
+        - { faction: business, by: -7, why: "Four thousand vape shops have a fortnight to become something else." }
+        - { faction: youth, by: -5, why: "The young must now explain themselves to a doctor to get one." }
+        - { minister: health, by: 6, why: "The Health Minister took the industry at its word, on camera." }
+      headline: Vapes to be sold on prescription only
+      result: Vapes move behind the pharmacy counter. Trade resumes behind the bicycle sheds, where it has always been brisk.
+
+    - id: no-flavours
+      advocate: { name: Agnes Whitlow, role: head teacher }
+      speech: "Ban the flavours and the colours, and send somebody to check the shelves. I confiscated forty last week. My staff room smells of mango."
+      tags: [paternalist, spending]
+      effects:
+        - { indicator: fiscal, by: -1, why: "Trading standards officers are hired to check every shelf in the country." }
+        - { indicator: administration, by: 2, why: "Councils have inspectors again, and the inspectors have found other things while they were in." }
+        - { indicator: health, by: 2, why: "A vape that tastes of nothing has few takers under sixteen." }
+        - { faction: business, by: -4, why: "The firms have warehouses of custard flavour and nobody to sell it to." }
+        - { faction: youth, by: -2, why: "Adults who liked the mango have been treated as fourteen-year-olds." }
+      headline: Vape flavours banned; inspectors to check shops
+      result: The one legal flavour is listed on the packet as Original. Nobody can say what it is the original of.
+
+    - id: let-them-trade
+      advocate: { name: Gideon Marsh, role: director of the Tobacco Retailers' Alliance }
+      speech: "Every vaper is a smoker we have saved, or one we never had to. I cannot think what more could be asked of us. The bubblegum is for adults who like bubblegum."
+      tags: [permissive, growth]
+      effects:
+        - { indicator: fiscal, by: 3, why: "The vape shops pay rates and sales tax on a trade that doubles each year." }
+        - { faction: business, by: 8, why: "The tobacco firms have replaced the customers the law took away." }
+        - { indicator: health, by: -3, why: "A quarter of fourteen-year-olds have a nicotine habit that did not exist five years ago." }
+        - { indicator: education, by: -1, why: "Teachers spend the first ten minutes of every lesson collecting devices." }
+      headline: No new rules for vape shops
+      result: The sector reports record growth. Its newest device is shaped like a highlighter pen, for reasons the makers call ergonomic.
+
+    - id: nicotine-levy
+      advocate: { name: Lorne Abbasi, role: Treasury official }
+      speech: "We tax sugar by the gram already. Tax nicotine by the milligram. The form exists, the office exists, and I have a tobacco duty to replace."
+      when: { policy: sugar_tax, is: true }
+      tags: [paternalist]
+      effects:
+        - { indicator: fiscal, by: 5, why: "A duty on nicotine fills some of the gap the cigarettes left." }
+        - { indicator: administration, by: 1, why: "The sugar levy office collects a second duty with the staff it already had." }
+        - { indicator: inequality, by: 1, why: "The duty takes the same from a cleaner as from a barrister." }
+        - { faction: youth, by: -4, why: "A vape now costs more than a comic, which was the idea." }
+      headline: Nicotine to be taxed by strength, like sugar
+      result: Makers reformulate to stay in the lowest band. The strongest product on sale is now called Mild, and the mildest is called Air.
+
+- id: nursery-hours
+  title: Minor Expenses
+  description: >-
+    A nursery place in {capital} now costs more than the rent on the flat the child lives in. One
+    parent in four who would like to work has done the sum and stayed at home. The Treasury has
+    noticed the birth rate.
+  tags: [family, work]
+  when: { policy: free_childcare, is: false }
+  options:
+    - id: free-hours
+      advocate: { name: Sister Joan Adeyemi, role: nurse and union convenor }
+      speech: "Half the nurses I trained with would come back tomorrow if somebody would take the baby. Thirty free hours a week, from the first birthday."
+      tags: [spending]
+      effects:
+        - { policy: free_childcare, to: true }
+        - { indicator: fiscal, by: -3, why: "The state pays for thirty hours a week for every child over one." }
+        - { indicator: employment, by: 4, why: "Parents who had done the sum and stayed home are going back to work." }
+        - { indicator: inequality, by: -2, why: "The saving is worth most to the families who could least afford the fees." }
+        - { faction: youth, by: 10, why: "The young can now afford either a child or a flat, which is a start." }
+        - { faction: grey, by: -3, why: "Pensioners point out that nobody paid for their childcare, which was their wives." }
+      later:
+        - after: 25
+          headline: Free nursery places exist on paper; staff to open them do not
+          effects:
+            - { indicator: living, by: -2, why: "The nearest nursery with a vacancy is two towns away and has a waiting list." }
+      headline: Thirty free nursery hours a week from age one
+      result: Nurseries rename the hours outside the thirty. They are now called enrichment and cost extra.
+
+    - id: home-allowance
+      advocate: { name: Bishop Ottoline Faye, role: chair of the Council of Congregations }
+      speech: "Pay the parent, not the nursery. A mother at home does the same work and is rather better qualified. Our parish playgroups would, of course, be there to help."
+      tags: [spending]
+      effects:
+        - { indicator: fiscal, by: -2, why: "A monthly allowance goes to every parent at home with a child under four." }
+        - { indicator: living, by: 2, why: "Families with small children have a little more each month." }
+        - { indicator: employment, by: -2, why: "Some parents have taken the allowance and handed in their notice." }
+        - { faction: faithful, by: 11, why: "The Congregations have argued for a family wage since before there was a ministry." }
+        - { faction: rural, by: 5, why: "In the villages there was never a nursery to pay for." }
+        - { faction: business, by: -3, why: "Employers are losing trained staff to the kitchen table." }
+      headline: Allowance for parents who stay at home
+      result: Fathers make four percent of the claims and appear in nine in ten of the newspaper features.
+
+    - id: loosen-ratios
+      advocate: { name: Idris Monk, role: fellow of the Free Enterprise Forum }
+      speech: "The law demands one adult for every three infants. Make it one for six and the price halves. Children are more robust than regulators, and bounce better."
+      effects:
+        - { indicator: living, by: 2, why: "Nursery fees have fallen by a fifth." }
+        - { indicator: employment, by: 2, why: "At the lower price, some parents can afford to go back to work." }
+        - { indicator: education, by: -2, why: "One adult now watches six toddlers, in the loosest sense of watching." }
+        - { faction: business, by: 3, why: "The nursery chains have halved their largest cost." }
+        - { faction: labour, by: -7, why: "Nursery workers have twice the children on the same pay." }
+      later:
+        - after: 30
+          headline: Nursery chain fined after a toddler is found in the car park, unharmed and unimpressed
+          effects:
+            - { indicator: legitimacy, by: -1, why: "Everyone remembers who changed the ratio." }
+      headline: Nursery staffing rules relaxed to cut fees
+      result: Nurseries cut their fees by a fifth and their staff by a half. The difference is entered in the accounts as investment.
+
+    - id: service-year
+      advocate: { name: "{minister:defence}", role: speaking in cabinet }
+      speech: "I have a whole year group on civic service and we are running out of hedges for them to trim. Put them in the nurseries. It will teach both parties something."
+      when: { policy: national_service, is: true }
+      effects:
+        - { indicator: employment, by: 3, why: "Nurseries have opened extra rooms and parents have gone back to work." }
+        - { indicator: administration, by: 2, why: "The service year has a job to do, and a ministry that knows where everyone on it is." }
+        - { indicator: education, by: -1, why: "Three-year-olds are being minded by people who were children themselves quite recently." }
+        - { faction: youth, by: -6, why: "The conscripts were promised adventure and have been issued with wipes." }
+        - { minister: defence, by: 6, why: "The Defence Minister's scheme has been given a purpose, and a second logo." }
+      headline: National service conscripts to staff nurseries
+      result: The three-year-olds learn to march. The eighteen-year-olds learn to nap after lunch. Both are said to benefit.
+
+- id: games-bid
+  title: Going for Gold, on Credit
+  description: >-
+    The city due to host next summer's Continental Games has pulled out, citing the cost. The
+    organisers have asked whether {capital} would like them instead. They need an answer by Friday
+    and a stadium by June.
+  tags: [sport, economy]
+  options:
+    - id: host
+      advocate: { name: Lord Peregrine Ash, role: chair of the national Games committee }
+      speech: "I have chaired this committee for nineteen years and should like to see a Games before I die. The budget is firm, and has been signed off by everyone who will not be paying it."
+      tags: [spending, growth]
+      effects:
+        - { flag: games_awarded }
+        - { indicator: debt, by: 4, why: "The stadium and the athletes' village are being built with borrowed money." }
+        - { indicator: employment, by: 3, why: "Eleven thousand people are building venues against a deadline." }
+        - { faction: business, by: 6, why: "The Chamber's members hold the building contracts and the hotel rooms." }
+        - { faction: youth, by: 7, why: "The young have been promised a fortnight of sport and a great many temporary jobs." }
+        - { faction: rural, by: -3, why: "The Shires note that the money is being spent, once again, within sight of parliament." }
+      later:
+        - after: 45
+          headline: The Games open in {capital}, and it does not rain until the closing ceremony
+          effects:
+            - { indicator: legitimacy, by: 3, why: "For a fortnight the country was good at something in public." }
+            - { indicator: living, by: 2, why: "The east of the capital has a park and a railway station it did not have before." }
+      promise:
+        id: games-on-budget
+        text: The Games will be built within the published budget
+        due: 40
+        kept: { not: { flag: games_bailout } }
+        broken:
+          - { indicator: legitimacy, by: -5, why: "The government promised a firm budget and then wrote a second cheque." }
+          - { faction: grey, by: -4, why: "Pensioners kept the newspaper with the promise in it." }
+      headline: Capital to host the Continental Games
+      result: The mascot is unveiled the same afternoon. It is a badger, or possibly a kettle.
+
+    - id: decline
+      advocate: { name: "{minister:finance}", role: speaking in cabinet }
+      speech: "Every host for forty years has gone over budget, and the one that did not had no parliament to tell. Let somebody else's treasury enjoy the fortnight."
+      tags: [austerity]
+      effects:
+        - { indicator: legitimacy, by: -1, why: "The country was offered the world's attention and asked what it would cost." }
+        - { faction: grey, by: 3, why: "Pensioners approve of not borrowing money to watch people run." }
+        - { faction: youth, by: -5, why: "The young had already looked up the ticket prices." }
+        - { faction: business, by: -4, why: "The hoteliers and builders in the Chamber had priced the fortnight in." }
+        - { minister: finance, by: 6, why: "The Finance Minister kept a stadium off the books." }
+      headline: Government turns down the Continental Games
+      result: The Games go to a rival capital, which thanks {nation} for its prudence in a statement written to be quoted.
+
+    - id: spread-out
+      advocate: { name: Councillor Des Marrow, role: leader of Harrowgate council }
+      speech: "Hold them, but not in the capital. Dunmoor has a running track and Harrowgate has a swimming bath. It wants a roof, I grant you."
+      tags: [spending]
+      effects:
+        - { indicator: fiscal, by: -2, why: "Nine towns are each getting a venue repaired, roofed or dredged." }
+        - { indicator: inequality, by: -2, why: "The building money is going to towns that have not seen a crane since the pits closed." }
+        - { indicator: administration, by: -4, why: "Nine councils are each organising one ninth of an international event." }
+        - { faction: rural, by: 12, why: "The Shires and the northern towns were given something the capital wanted." }
+        - { faction: business, by: -2, why: "The sponsors had paid for a skyline and were shown a gasworks." }
+      later:
+        - after: 45
+          headline: Games held across nine towns; marathon runners praise the scenery and query the signposts
+          effects:
+            - { indicator: legitimacy, by: 3, why: "The towns that hosted have not stopped talking about it." }
+            - { indicator: administration, by: 2, why: "Nine councils have learned to run something larger than a car park, and have kept the staff." }
+      headline: Games to be shared among nine provincial towns
+      result: The organisers accept, having no alternative. The rowing will be on Harrowgate reservoir, once it has been dredged.
+
+- id: games-stadium
+  title: Faster, Higher, Dearer
+  description: >-
+    The stadium for the Continental Games is half built and has already cost what the whole of it
+    was meant to. The contractor reports that the site turns out to be a marsh. It is on the map as
+    Marsh Lane.
+  tags: [sport, economy]
+  when: { flag: games_awarded }
+  priority: 1
+  options:
+    - id: pay-up
+      advocate: { name: Lord Peregrine Ash, role: chair of the national Games committee }
+      speech: "One cannot run the hundred metres in a stadium eighty metres long. Pay the difference. Nobody remembers the invoice once the flame is lit, and I speak as one who has forgotten several."
+      tags: [spending]
+      effects:
+        - { flag: games_bailout }
+        - { indicator: debt, by: 2, why: "The second cheque for the stadium is larger than the first." }
+        - { indicator: legitimacy, by: -1, why: "The extra money was announced late on a Friday, which is when people look." }
+        - { faction: business, by: 5, why: "The contractor is a member of the Chamber in good standing." }
+        - { minister: finance, by: -6, why: "The Finance Minister signed a budget described as firm." }
+      later:
+        - after: 30
+          headline: Stadium finished with nine days to spare
+          effects:
+            - { indicator: capacity, by: 2, why: "The capital has a stadium, a rail link and a drained district where the marsh was." }
+      headline: Government covers Games stadium overrun
+      result: The contractor finds the new sum sufficient and the marsh, on reflection, manageable.
+
+    - id: naming-rights
+      advocate: { name: Verity Lang, role: vice-president at Halcyon Systems }
+      speech: "Halcyon will cover the overrun. The stadium takes our name, and spectators get in by showing their faces to a camera, which is quicker for everyone and very useful to us."
+      tags: [surveillance]
+      effects:
+        - { indicator: fiscal, by: 2, why: "The overrun has stopped being the Treasury's problem." }
+        - { indicator: liberty, by: -2, why: "Eighty thousand spectators a night have their faces kept on file by a private company." }
+        - { faction: business, by: 6, why: "The Chamber likes to see a firm rescue a government." }
+        - { faction: youth, by: -2, why: "The young would rather queue than be scanned, and now do both." }
+      headline: Halcyon to pay for stadium in return for its name
+      result: The Halcyon Systems Arena will open on time. The anthem is to be preceded by a short message about cloud storage.
+
+    - id: cut-the-roof
+      advocate: { name: Lorne Abbasi, role: Treasury official }
+      speech: "Take the roof off the plans, and a third of the seats with it. Athletes have competed in the rain before. It builds character, and character is not a budget line."
+      tags: [austerity]
+      effects:
+        - { indicator: legitimacy, by: -1, why: "The national showpiece is now visibly the cheaper version." }
+        - { faction: business, by: -4, why: "The contractor has lost the half of the contract with the margin in it." }
+        - { faction: grey, by: 2, why: "Pensioners sat in the rain at every match of their youth and think it adequate." }
+        - { minister: finance, by: 5, why: "The Finance Minister's budget survived contact with a stadium." }
+      later:
+        - after: 30
+          headline: Stadium completed to revised design; the revision is mainly sky
+          effects:
+            - { indicator: living, by: -1, why: "The capital has a stadium that can be used on dry days." }
+      headline: Games stadium to be built smaller, without a roof
+      result: The architect asks for her name to be taken off the building. It is removed, at a further small saving.
+
+- id: research-grants
+  title: Publish or Emigrate
+  description: >-
+    Professor Ines Halvard, the only {demonym} scientist to have won the continent's highest prize,
+    has accepted a post abroad. Her resignation letter says her last grant application ran to two
+    hundred and forty pages and was refused for lacking a section on impact.
+  tags: [science, education]
+  options:
+    - id: long-grants
+      advocate: { name: Professor Ines Halvard, role: physicist and laureate }
+      speech: "Fund people, not proposals. Ten years, no forms. Do that and I might stay, although I should say that I have already signed for the flat."
+      tags: [spending]
+      effects:
+        - { indicator: fiscal, by: -2, why: "Three hundred researchers are funded for a decade with no questions asked." }
+        - { indicator: education, by: 3, why: "Scientists are applying to come to {nation} who used to apply to leave." }
+        - { faction: mandarins, by: -4, why: "The research council's reviewers have nothing left to review." }
+      later:
+        - after: 40
+          headline: Ten-year laboratory announces a better battery; three others announce a sabbatical
+          effects:
+            - { indicator: capacity, by: 2, why: "One idea in the first batch worked, and a factory is being built around it." }
+      headline: Ten-year research grants, no forms
+      result: Professor Halvard agrees to stay for half of each year. The other half she will spend abroad, to keep both employers attentive.
+
+    - id: industry-missions
+      advocate: { name: Verity Lang, role: vice-president at Halcyon Systems }
+      speech: "Science should answer questions the economy is actually asking. Let industry set the questions and share the cost. We have a list, and we have numbered it."
+      tags: [growth]
+      effects:
+        - { indicator: capacity, by: 3, why: "University laboratories are working on things firms have said they will buy." }
+        - { indicator: education, by: -3, why: "Subjects with no customer are losing their funding, beginning with astronomy." }
+        - { faction: business, by: 8, why: "The Chamber's members have research departments they do not have to house." }
+        - { faction: youth, by: -2, why: "Doctoral students are finding that their thesis has a client." }
+      headline: Industry to set the questions for public research
+      result: The physics department is renamed the Halcyon Centre for Applied Outcomes. Its telescope is listed as surplus.
+
+    - id: grant-lottery
+      advocate: { name: Maren Okafor, role: economist at the Fair Share Institute }
+      speech: "The panels cannot tell a good proposal from an excellent one, and I have the data. Check each one is sound, then draw lots. It is exactly as accurate and takes an afternoon."
+      effects:
+        - { indicator: administration, by: 2, why: "Researchers and officials have stopped spending four months of each year on forms." }
+        - { indicator: fiscal, by: 2, why: "The review panels are stood down, with their travel budgets." }
+        - { indicator: legitimacy, by: -1, why: "Public money is being handed out by raffle, and the newspapers have found the word." }
+        - { faction: mandarins, by: -7, why: "The civil service has been replaced, in one of its functions, by a tombola." }
+      headline: Research grants to be awarded by lottery
+      result: The first draw funds a study of lichen and a study of a different lichen. Both applicants are astonished.
+
+- id: top-marks
+  title: Top Marks All Round
+  description: >-
+    Forty-six percent of school leavers in {nation} were given the top grade this summer, up from
+    twelve percent ten years ago. Either the children have become four times cleverer or something
+    else has happened. Universities have begun setting entrance tests of their own.
+  tags: [education]
+  options:
+    - id: ration-grades
+      advocate: { name: Agnes Whitlow, role: head teacher }
+      speech: "Give the top grade to the top tenth and nobody else. I will have forty furious parents outside my office by nine, and I would still rather that than sign another certificate that says nothing."
+      effects:
+        - { indicator: education, by: 3, why: "A top grade tells a university something again." }
+        - { faction: business, by: 5, why: "Employers can sort applicants without setting a test of their own." }
+        - { faction: grey, by: 5, why: "Pensioners always said exams were harder in their day, and now they are." }
+        - { faction: youth, by: -8, why: "This year's leavers will get lower grades than their older sisters did for the same work." }
+      headline: Top grade to be limited to one pupil in ten
+      result: Results day photographs show teenagers jumping, but not as high.
+
+    - id: one-board
+      advocate: { name: "{minister:education}", role: speaking in cabinet }
+      speech: "Five exam boards compete for schools' custom, and schools choose whichever marks kindest. Merge them into one and have it answer to my ministry."
+      effects:
+        - { indicator: administration, by: 2, why: "One exam board answers to the ministry, where five used to answer to their customers." }
+        - { indicator: education, by: 2, why: "Schools can no longer shop around for the easiest paper." }
+        - { indicator: fiscal, by: -1, why: "Five boards were bought out at a price their owners named." }
+        - { faction: business, by: -6, why: "The exam boards were businesses, and profitable ones." }
+        - { minister: education, by: 6, why: "The Education Minister now sets the exams as well as the syllabus." }
+      later:
+        - after: 30
+          headline: National exam board mislays eleven thousand scripts in its first summer
+          effects:
+            - { indicator: legitimacy, by: -1, why: "There is now only one body to blame for the exams, and it belongs to the government." }
+            - { minister: education, by: -6, why: "The scripts were found in a lorry park, and the Education Minister was found on the radio." }
+      headline: Exam boards merged into one national body
+      result: The five boards become one. It keeps all five logos, all five head offices and, for the present, all five chief executives.
+
+    - id: leave-grades
+      advocate: { name: Kasia Dunmore, role: president of the students' union }
+      speech: "Our grades went up because we worked harder than you did. Also we have them now, and would like to keep them."
+      effects:
+        - { faction: youth, by: 9, why: "This year's certificates are worth what last year's were, on paper." }
+        - { indicator: education, by: -3, why: "Universities and employers have stopped reading the certificate and set tests of their own." }
+        - { indicator: inequality, by: 2, why: "The private entrance tests are passed mostly by those who paid for coaching." }
+      headline: No change to exam grading
+      result: Next summer fifty-one percent get the top grade. A higher one is proposed, provisionally called A Double Star With Merit.
+
+- id: opera-roof
+  title: It Ain't Over Till the Ceiling Lands
+  description: >-
+    A piece of plaster the size of a cello has fallen into the stalls of the National Opera House
+    during the second act. Nobody was hurt, the row being empty. Mending the roof would cost what
+    the state spends on every other art form in a year.
+  tags: [arts, culture]
+  options:
+    - id: mend
+      advocate: { name: Sir Jocelyn Marchmont, role: director of the National Opera }
+      speech: "A country without an opera house is a province. Mend the roof. I would add that the dressing rooms have been neglected too, the principal one especially."
+      tags: [spending]
+      effects:
+        - { indicator: fiscal, by: -2, why: "The roof is being restored by the only three plasterers in the country who know how." }
+        - { faction: grey, by: 4, why: "The subscribers are mostly over seventy, and every one of them writes letters." }
+        - { faction: rural, by: -2, why: "The Shires have paid again for a building they will never go into." }
+        - { faction: youth, by: -2, why: "The young observe that the arts budget has gone to a ceiling." }
+      headline: State to pay for opera house roof
+      result: The roof is restored to its original design, including, it emerges, the original leak.
+
+    - id: tour
+      advocate: { name: Councillor Hester Pym, role: leader of Wickford council }
+      speech: "Sell the building and put the company on a lorry. Wickford has a perfectly good corn exchange and has not heard a professional singer since 1974."
+      effects:
+        - { indicator: fiscal, by: 5, why: "The opera house and the ground under it have been sold to a hotel group." }
+        - { indicator: education, by: 2, why: "School parties in forty towns are hearing a live orchestra for the first time." }
+        - { faction: rural, by: 7, why: "The market towns have been sent something the capital used to keep." }
+        - { faction: grey, by: -7, why: "The capital's subscribers have lost their Thursday evenings and their usual seats." }
+      headline: Opera house to be sold; company goes on tour
+      result: The company opens in Wickford with a tragedy that calls for a pyramid. The corn exchange seats two hundred and the pyramid does not fit.
+
+    - id: patrons
+      advocate: { name: Sir Anselm Roke, role: chair of the Chamber }
+      speech: "The Chamber's members will pay for the roof. We ask only for the name over the door, a box, and a season with rather fewer of the modern pieces."
+      effects:
+        - { faction: business, by: 8, why: "The Chamber has a box, a plaque and somewhere to take clients." }
+        - { faction: grey, by: 3, why: "The house is open and the programme has gone back to the favourites." }
+        - { faction: youth, by: -2, why: "The cheap seats in the gallery are now a hospitality suite." }
+        - { indicator: legitimacy, by: -1, why: "A national institution has a bank's name over the door." }
+      headline: Chamber members to pay for opera roof
+      result: The season opens with a much-loved work about a consumptive seamstress. The interval is forty minutes, for the convenience of the bar.
+
+    - id: broadcast
+      advocate: { name: Dame Rosalind Achebe, role: director-general of the broadcaster }
+      speech: "Give the house to us. We will mend the roof out of our own budget and show every performance to the whole country. It would also, I admit, solve Thursday nights."
+      when: { policy: public_broadcaster, is: true }
+      effects:
+        - { indicator: education, by: 2, why: "Every performance is shown free in every home that leaves the set on." }
+        - { faction: grey, by: 3, why: "Pensioners can see the opera without the stairs." }
+        - { faction: youth, by: -2, why: "The young pay for the broadcaster and it has bought a roof." }
+        - { faction: business, by: -4, why: "Commercial channels say public money has bought their rival a theatre." }
+      headline: Broadcaster takes over the opera house
+      result: Opera is watched by nine times as many people as before. Most of them are waiting for the programme after it.
+
+- id: sunday-trading
+  title: Thou Shalt Not Shop
+  description: >-
+    Under a law of 1911, any shop in {nation} larger than a tennis court must close on Sundays.
+    Garden centres are exempt, as places of contemplation. The Chamber wants the law repealed, and
+    the shop workers' union finds itself agreeing with a bishop.
+  tags: [religion, economy]
+  when: { policy: sunday_trading, is: false }
+  options:
+    - id: repeal
+      advocate: { name: Sir Anselm Roke, role: chair of the Chamber }
+      speech: "People already shop on Sundays, on their telephones, from firms abroad. I ask only that they be allowed to do it here, from me."
+      tags: [permissive, growth]
+      effects:
+        - { policy: sunday_trading, to: true }
+        - { indicator: capacity, by: 2, why: "The shops are taking a seventh day's money." }
+        - { indicator: employment, by: 2, why: "Sunday shifts are being advertised in every high street." }
+        - { faction: business, by: 7, why: "The Chamber has wanted this since 1911." }
+        - { faction: faithful, by: -12, why: "The Congregations have lost the one day the law still kept for them." }
+        - { faction: labour, by: -7, why: "Shop workers have lost the only day off they could count on." }
+      later:
+        - after: 20
+          headline: Sunday takings are up; the other six days are down by the same amount
+          effects:
+            - { indicator: capacity, by: -3, why: "People have the same money and one more day to spend it in." }
+      headline: Sunday trading law repealed
+      result: The first legal Sunday draws large crowds, many of whom have come to see what a shop looks like on a Sunday.
+
+    - id: keep-closed
+      advocate: { name: Bishop Ottoline Faye, role: chair of the Council of Congregations }
+      speech: "One day in seven on which nobody can sell you anything. Call it religion if you must. Where people choose to spend the morning instead is, naturally, up to them."
+      tags: [paternalist]
+      effects:
+        - { faction: faithful, by: 7, why: "The Congregations kept their day, and the law that keeps it." }
+        - { faction: labour, by: 4, why: "Shop workers keep the one day off they can plan around." }
+        - { faction: business, by: -5, why: "The Chamber's members watch Sunday's money go to websites abroad." }
+        - { faction: youth, by: -2, why: "The young work all week and find the shops shut on the day they are free." }
+      headline: Shops to stay shut on Sundays
+      result: Sunday stays quiet. The garden centres report their best year, mostly in things that are not plants.
+
+    - id: double-time
+      advocate: { name: Petra Hallam, role: general secretary of the rail union }
+      speech: "Open if you must, at double pay, and any worker may say no. If the Chamber wants our Sunday it can buy it at the proper price. The railway will need a Sunday timetable too, I notice."
+      tags: [pro_labour]
+      effects:
+        - { policy: sunday_trading, to: true }
+        - { indicator: employment, by: 1, why: "The supermarkets are hiring for a seventh day." }
+        - { indicator: administration, by: -2, why: "Inspectors must now establish whether a refusal to work on Sunday was freely made." }
+        - { faction: labour, by: 8, why: "The unions sold Sunday instead of losing it." }
+        - { faction: faithful, by: -4, why: "The Congregations note that the day of rest now has a price list." }
+        - { faction: business, by: -2, why: "Sunday costs twice as much to open as any other day, and the small shops stay shut." }
+      headline: Sunday opening allowed, at double pay
+      result: The supermarkets open with volunteers on double time. By the third week every volunteer is a manager's nephew.

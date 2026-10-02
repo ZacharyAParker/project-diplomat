@@ -1,0 +1,634 @@
+- id: votes-at-sixteen
+  title: Old Enough to Know Better
+  description: >-
+    A sixteen-year-old in {nation} may pay income tax, marry with a parent's signature and be tried
+    as an adult. She may not vote. A petition to change that has three hundred thousand signatures,
+    a third of which, the Interior Ministry notes, are in the same handwriting.
+  tags: [constitution, youth]
+  when: { policy: votes_at_16, is: false }
+  options:
+    - id: lower
+      advocate: { name: Kasia Dunmore, role: president of the students' union }
+      speech: "You tax my Saturday job. I would like a say in what you spend it on. It is not much money, I grant you, but then it is not much of a job."
+      tags: []
+      effects:
+        - { policy: votes_at_16, to: true }
+        - { indicator: liberty, by: 3, why: "A million more people have a vote." }
+        - { faction: youth, by: 10, why: "The young were handed something without having to block a road for it." }
+        - { faction: grey, by: -8, why: "Pensioners have been told their vote now counts the same as that of someone who cannot drive." }
+        - { indicator: administration, by: -2, why: "The electoral roll has to find a million people who change address every time a tenancy ends." }
+      later:
+        - after: 20
+          headline: Parties discover the sixteen-year-old voter; one manifesto is released as a dance
+          effects:
+            - { indicator: education, by: 2, why: "Schools are teaching how parliament works to pupils who now have a reason to listen." }
+            - { faction: grey, by: -3, why: "Pensioners have seen the dance." }
+      headline: Voting age lowered to sixteen
+      result: Candidates begin campaigning at the school gates. Head teachers move them along, as they would anyone else loitering there.
+
+    - id: refuse
+      advocate: { name: Mabel Thwaite, role: secretary of the Pensioners' Convention }
+      speech: "There are eleven million of us and we turn up, in the rain. I do not see why that should be watered down by people who cannot find the polling station without an app."
+      tags: []
+      effects:
+        - { faction: grey, by: 5, why: "Pensioners remain the largest group of people who actually vote." }
+        - { indicator: administration, by: 1, why: "The electoral roll is left as it is, which is the state its keepers prefer." }
+        - { faction: youth, by: -6, why: "The young were told to come back when they are older, by people who will not be there." }
+      headline: Voting age to stay at eighteen
+      result: The petition is acknowledged in a letter that begins "Dear Young Person".
+
+    - id: civics-first
+      advocate: { name: Agnes Whitlow, role: head teacher }
+      speech: "Half of them think the cabinet is a piece of furniture. Give me a compulsory civics course and a teacher to run it, and ask me again in two years. The teacher is the important part."
+      tags: [spending, paternalist]
+      effects:
+        - { indicator: fiscal, by: -1, why: "Every secondary school hires a civics teacher." }
+        - { indicator: education, by: 3, why: "Pupils are taught what a ministry is and how a law is made." }
+        - { faction: youth, by: -4, why: "The young asked for a vote and were set an exam." }
+        - { faction: mandarins, by: 2, why: "The civil service is pleased that somebody will finally be taught what it does." }
+      headline: Compulsory civics lessons instead of votes at sixteen
+      result: The first civics paper asks candidates to explain why they cannot vote. Marks are given for restraint.
+
+- id: senate-reform
+  title: The Upper House Is Resting Its Eyes
+  description: >-
+    The Senate of {nation} has six hundred and twelve members, none of them elected. Forty-one
+    inherited their seats and the average age is seventy-three. A recount this week found that two
+    have been dead since the spring and were still drawing the attendance allowance.
+  tags: [constitution]
+  when: { policy: elected_senate, is: false }
+  options:
+    - id: elect
+      advocate: { name: Rufus Hale, role: civil liberties barrister }
+      speech: "A chamber that writes the law should be able to say who sent it there. 'My great-grandfather' is not an answer. I would also be available to stand."
+      tags: []
+      effects:
+        - { policy: elected_senate, to: true }
+        - { indicator: legitimacy, by: 6, why: "Both houses of parliament now answer to voters." }
+        - { faction: youth, by: 5, why: "The young can vote out a senator, which no generation before them could." }
+        - { faction: mandarins, by: -7, why: "The civil service has lost a chamber that never asked the same hard question twice." }
+        - { faction: grey, by: -4, why: "Pensioners liked there being one institution older than they are." }
+      later:
+        - after: 30
+          when: { policy: elected_senate, is: true }
+          headline: Elected Senate throws out its first bill, to show that it can
+          effects:
+            - { indicator: administration, by: -4, why: "Every bill now has to get past a second set of politicians with a mandate and a grievance." }
+            - { indicator: liberty, by: 3, why: "A bad bill was stopped by people the voters had sent to stop it." }
+      headline: Senate to be elected
+      result: The first elected senators take their seats and at once vote themselves an office each.
+
+    - id: tidy
+      advocate: { name: Dame Philippa Wace, role: cabinet secretary }
+      speech: "Retire them at eighty, remove the deceased, and appoint on merit through an independent panel. I should be glad to suggest names for the panel."
+      tags: []
+      effects:
+        - { indicator: administration, by: 2, why: "Senate committees are now filled by people chosen because they know something." }
+        - { indicator: fiscal, by: 2, why: "Two hundred attendance allowances are no longer being paid, two of them to the dead." }
+        - { faction: mandarins, by: 5, why: "Retired officials turn out to be exactly the kind of merit the panel had in mind." }
+        - { indicator: legitimacy, by: -1, why: "The unelected house is still unelected, only tidier." }
+        - { faction: rural, by: -2, why: "Landowners who inherited a seat have been retired from it by a committee." }
+      headline: Senate to be trimmed and appointed on merit
+      result: The panel's first eleven appointments include four former permanent secretaries. A fifth chaired the panel.
+
+    - id: abolish
+      advocate: { name: Idris Monk, role: fellow of the Free Enterprise Forum }
+      speech: "Six hundred people are paid to read laws that have already passed. Close it. One chamber, half the cost, and the building would make a very fine hotel."
+      tags: [austerity]
+      effects:
+        - { indicator: fiscal, by: 5, why: "Six hundred allowances, a library and four dining rooms come off the books." }
+        - { indicator: administration, by: 2, why: "A bill becomes law in half the time, there being nobody left to send it back." }
+        - { indicator: liberty, by: -2, why: "Nothing now stands between a government's majority and the statute book." }
+        - { faction: faithful, by: -7, why: "The bishops' bench went with the rest of the chamber." }
+        - { faction: grey, by: -5, why: "Pensioners count most of the abolished senators as contemporaries." }
+      headline: Senate abolished
+      result: The dining rooms are let to a restaurant. The former senators book the same tables and notice no difference.
+
+    - id: leave
+      advocate: { name: Lord Peverell, role: hereditary senator }
+      speech: "My family has sat in that chamber for three hundred years and has never once been voted out. I call that a record."
+      tags: []
+      effects:
+        - { faction: rural, by: 5, why: "The landowners of the Shires keep their seats and their say over every farming bill." }
+        - { faction: faithful, by: 4, why: "The bishops keep their bench." }
+        - { faction: youth, by: -4, why: "The young have counted the senators under forty and found one, who inherited it." }
+        - { indicator: legitimacy, by: -2, why: "Two dead men drew an allowance for six months and the remedy was to do nothing." }
+      headline: No change to the Senate
+      result: The two late senators are recorded as absent. Their attendance is still better than Lord Peverell's.
+
+- id: honours-list
+  title: Arise, Sir Invoice
+  description: >-
+    The annual honours list is on your desk for signature. Between a lollipop lady of forty years'
+    service and a man who swam somewhere cold for charity is Tobias Leck, of Leck Aggregates,
+    proposed for a knighthood "for services to the economy". He gave the governing party two
+    million {currency} in March.
+  tags: [honours, ethics]
+  options:
+    - id: sign
+      advocate: { name: Sir Anselm Roke, role: chair of the Chamber }
+      speech: "Everybody on that list has given something. Tobias has simply given more, and to you. It would be odd to hold that against him, and odder still to hold it against the next man."
+      tags: []
+      effects:
+        - { flag: donor_knighted }
+        - { faction: business, by: 9, why: "The Chamber is glad to see generosity recognised in the usual way." }
+        - { indicator: legitimacy, by: -2, why: "A knighthood followed a cheque by nine weeks, and people can count to nine." }
+        - { faction: mandarins, by: -3, why: "The honours committee advised against the name and was thanked for its advice." }
+      later:
+        - after: 12
+          headline: "Party treasurer's diary leaks; the entry for March reads 'TL, 2m, K?'"
+          effects:
+            - { indicator: legitimacy, by: -2, why: "The treasurer's diary set out the price of a knighthood in the treasurer's own hand." }
+      headline: Party donor knighted in honours list
+      result: Sir Tobias kneels with some difficulty. The lollipop lady is photographed beside him and asked how much she gave.
+
+    - id: strike-out
+      advocate: { name: Dame Philippa Wace, role: cabinet secretary }
+      speech: "Remove the name and say nothing at all. He will understand. They always understand. It is the understanding that costs you, at the next election."
+      tags: []
+      effects:
+        - { indicator: legitimacy, by: 5, why: "The list was published without the donor on it and the papers noticed the gap." }
+        - { faction: mandarins, by: 3, why: "The honours committee's objection was upheld for the first time anyone can remember." }
+        - { faction: business, by: -7, why: "The Chamber's members are asking each other what a donation is for." }
+      later:
+        - after: 20
+          headline: Leck Aggregates moves its head office abroad, citing "the climate"
+          effects:
+            - { indicator: capacity, by: -3, why: "The country's largest quarry firm now books its profits and plans its investment somewhere else." }
+      headline: Donor's name struck from honours list
+      result: Mr Leck sends the lollipop lady a note of congratulation. It is typed, and unsigned.
+
+    - id: no-big-names
+      advocate: { name: Petra Hallam, role: general secretary of the rail union }
+      speech: "Forty years seeing children across a road gets a medal. Giving money, or already being called Sir, gets a thank-you card. I have nine thousand signallers who would suit a ribbon."
+      tags: [pro_labour]
+      effects:
+        - { indicator: legitimacy, by: 4, why: "Honours now go only to people who earn less than the minister who signs the list." }
+        - { faction: labour, by: 5, why: "The unions have been asked to nominate, and have a great many names." }
+        - { faction: mandarins, by: -10, why: "Permanent secretaries have lost the knighthood that used to arrive with the pension." }
+        - { faction: services, by: -6, why: "Generals and chief constables are no longer decorated for reaching retirement." }
+        - { faction: business, by: -6, why: "The Chamber's members have been told that money cannot buy a ribbon, which was news to them." }
+      headline: Honours closed to donors, officials and the already titled
+      result: The list is the shortest in a century and the ceremony the longest, because for once the families came to watch.
+
+- id: donation-cap
+  title: The Price List
+  description: >-
+    Since Sir Tobias, three newspapers have printed what each calls the tariff: what a donation of
+    a given size has tended to be followed by. The police have asked, politely, to see the party
+    treasurer's diary. A cap on political donations is being drafted by people who would not have
+    drafted one a month ago.
+  tags: [ethics, constitution]
+  when: { all: [{ flag: donor_knighted }, { policy: donation_cap, is: false }] }
+  priority: 1
+  options:
+    - id: cap
+      advocate: { name: Maren Okafor, role: economist at the Fair Share Institute }
+      speech: "Cap it at what a nurse earns in a month. A party that cannot live on that does not have too little money. It has too few friends. My institute, I should say, is funded by subscription."
+      tags: []
+      effects:
+        - { policy: donation_cap, to: true }
+        - { indicator: legitimacy, by: 6, why: "Nobody can now give a party enough to be owed anything for it." }
+        - { faction: business, by: -10, why: "The Chamber's largest donors have been told that their generosity has a ceiling." }
+        - { faction: labour, by: -6, why: "The unions' political funds are donations too, and the same cap caught them." }
+      headline: Political donations capped
+      result: The party treasurer finds four hundred new donors, each giving exactly the limit. A good many share a surname.
+
+    - id: state-funding
+      advocate: { name: "{minister:finance}", role: speaking in cabinet }
+      speech: "If we may not take their money we shall have to take the taxpayer's. So much per vote won, paid quarterly. It is cleaner. It also favours whoever won last time, which I mention only because it was us."
+      tags: [spending]
+      effects:
+        - { policy: donation_cap, to: true }
+        - { indicator: fiscal, by: -2, why: "Every party now receives a public grant for each vote it won." }
+        - { indicator: legitimacy, by: -1, why: "Voters find they are paying for the leaflets they put straight in the bin." }
+        - { faction: business, by: -6, why: "The Chamber's donors have been replaced by a line in the budget." }
+        - { faction: mandarins, by: 3, why: "The civil service pays out the grant and finds the parties much more polite." }
+        - { minister: finance, by: 6, why: "The Finance Minister now signs the cheque that every party depends on." }
+      headline: Parties to be funded by the taxpayer
+      result: Every party denounces the scheme in the morning and applies to it in the afternoon.
+
+    - id: publish
+      advocate: { name: Rufus Hale, role: civil liberties barrister }
+      speech: "You already publish who ministers have lunch with. Publish who paid for the lunch, on the same page, the same day. The voters can do the adding up, and so can I."
+      when: { policy: lobby_register, is: true }
+      tags: []
+      effects:
+        - { indicator: legitimacy, by: 5, why: "Every donation now appears on the register beside the meetings that followed it." }
+        - { indicator: administration, by: 1, why: "The register's clerks have become the only people in government who know who gives what to whom." }
+        - { faction: business, by: -6, why: "The Chamber's donors preferred giving when it was a private matter between friends." }
+        - { minister: finance, by: -4, why: "The Finance Minister's page of the register is now the longest and the most read." }
+      headline: Donations to be listed on the lobbying register
+      result: Donors begin giving in instalments just under the size anyone would look twice at. There are a great many instalments.
+
+    - id: brazen
+      advocate: { name: Sir Tobias Leck, role: chairman of Leck Aggregates }
+      speech: "I gave because I believe in this government. I should believe in it a good deal less if it started apologising for me."
+      tags: []
+      effects:
+        - { faction: business, by: 6, why: "The Chamber's donors have been reassured that the arrangement stands." }
+        - { indicator: legitimacy, by: -3, why: "The government looked at the published tariff and declined to dispute a single line." }
+        - { minister: interior, by: -6, why: "The Interior Minister has to explain to the police why the treasurer's diary cannot be found." }
+      later:
+        - after: 18
+          headline: Police close honours inquiry; detectives describe the file as "tidy"
+          effects:
+            - { faction: services, by: -4, why: "Detectives on the honours inquiry say they were asked to stop asking." }
+      headline: Government rules out any change to party funding
+      result: The treasurer's diary is reported lost in an office move. The office has not moved.
+
+- id: real-names
+  title: Say It to My Face, or at Least to My Passport
+  description: >-
+    An account called Truthhound77 has spent a year telling four hundred thousand followers that
+    {minister:health} is putting sedatives in the reservoirs. Last week a man arrived at a water
+    treatment works with a crowbar, to check. {minister:interior} has a bill ready that would put
+    a legal name on every social media account.
+  tags: [media, technology]
+  when: { policy: online_real_names, is: false }
+  options:
+    - id: real-names
+      advocate: { name: "{minister:interior}", role: speaking in cabinet }
+      speech: "People are braver behind a cartoon. Make them sign their work and half of it stops by teatime. I have read what they write about me, and I should like to know where they live."
+      tags: [surveillance]
+      effects:
+        - { policy: online_real_names, to: true }
+        - { indicator: liberty, by: -3, why: "Nobody can post an opinion without the state knowing whose opinion it is." }
+        - { faction: services, by: 6, why: "The police can find the author of a threat in an afternoon." }
+        - { faction: grey, by: 5, why: "Pensioners sign their letters to the paper and think everyone else should." }
+        - { faction: youth, by: -6, why: "The young have had to put their names to several years of things they said at fifteen." }
+        - { minister: interior, by: 6, why: "The Interior Minister's bill went through as written." }
+      later:
+        - after: 21
+          when: { policy: online_real_names, is: true }
+          headline: Truthhound77 unmasked as a retired dentist from Saltmere; ministry leaks dry up
+          effects:
+            - { indicator: legitimacy, by: -1, why: "Officials who used to tip off reporters under a false name have stopped, and stories about waste have stopped with them." }
+      headline: Real names to be compulsory on social media
+      result: Truthhound77 re-registers under his own name and gains followers, who admire his courage.
+
+    - id: platform-liability
+      advocate: { name: Dame Rosalind Achebe, role: director-general of the broadcaster }
+      speech: "If I broadcast that, I should lose my licence by the weekend. Hold the platforms to the rules you hold me to. I say this without a thought for my viewing figures."
+      tags: []
+      effects:
+        - { indicator: legitimacy, by: 4, why: "The reservoir story was taken down everywhere it had been posted and marked as false." }
+        - { indicator: liberty, by: -1, why: "Platforms now delete anything that might earn them a fine, including some things that are true." }
+        - { indicator: administration, by: -2, why: "A regulator with forty staff has been asked to rule on four million posts a day." }
+        - { faction: business, by: -7, why: "The technology firms have been made answerable for what they publish, like a newspaper." }
+      headline: Platforms made liable for what their users post
+      result: The platforms comply by removing every post containing the word "reservoir", including the water company's safety notices.
+
+    - id: hands-off
+      advocate: { name: Verity Lang, role: vice-president at Halcyon Systems }
+      speech: "We are a noticeboard, not a newspaper. We cannot be held responsible for what four million people choose to pin to it. We only sell the pins."
+      tags: [privacy, permissive]
+      effects:
+        - { indicator: liberty, by: 3, why: "Anyone may still say anything under any name they like." }
+        - { faction: business, by: 6, why: "The technology firms keep the audience and none of the responsibility." }
+        - { indicator: health, by: -2, why: "A tenth of the east has stopped drinking tap water and is spending the food money on bottles." }
+        - { minister: health, by: -8, why: "The Health Minister is still accused of drugging the water supply by four hundred thousand people a day." }
+      headline: No new rules for social media
+      result: Truthhound77 announces that the government has backed down, which proves it was the sedatives all along.
+
+    - id: match-faces
+      advocate: { name: Commissioner Bridget Stane, role: head of the capital's police }
+      speech: "I do not need his name. I have every face in the country on file and he has a profile picture. Give me a week and no new law."
+      when: { policy: face_cameras, is: true }
+      tags: [surveillance]
+      effects:
+        - { indicator: liberty, by: -2, why: "The face database built to catch wanted men is now used to find people by what they write." }
+        - { indicator: administration, by: 2, why: "The police have found a second use for a system that was already paid for." }
+        - { faction: services, by: 6, why: "The police were trusted with a new task and no new paperwork." }
+        - { faction: youth, by: -4, why: "The young have realised that every photograph they ever posted is a form of identification." }
+      headline: Police to match anonymous accounts against face database
+      result: The profile picture turns out to be of a film actor. Officers call on him anyway, to be thorough.
+
+- id: ai-caseworkers
+  title: Computer Says Maybe
+  description: >-
+    The benefits office takes eleven weeks to decide a claim. Halcyon Systems has offered an
+    artificial intelligence that decides one in four seconds, and has tested it on last year's
+    claims, where it agreed with the human caseworkers nine times in ten. Nobody has yet looked at
+    the tenth.
+  tags: [technology, government]
+  when: { policy: ai_caseworkers, is: false }
+  options:
+    - id: deploy
+      advocate: { name: Verity Lang, role: vice-president at Halcyon Systems }
+      speech: "It does not tire, it does not take lunch and it does not join a union. I mention the last purely as a technical specification."
+      tags: [austerity, anti_labour]
+      effects:
+        - { policy: ai_caseworkers, to: true }
+        - { indicator: fiscal, by: 6, why: "Three thousand caseworkers' posts are closed." }
+        - { indicator: administration, by: 2, why: "The eleven-week queue for a benefits decision is cleared in a fortnight." }
+        - { indicator: employment, by: -2, why: "Three thousand caseworkers are now claimants, and get their answer in four seconds." }
+        - { faction: labour, by: -8, why: "The civil service union lost three thousand members to a machine that pays no subscription." }
+        - { faction: business, by: 4, why: "Halcyon has its largest public contract, and its rivals have seen that such contracts exist." }
+      later:
+        - after: 25
+          when: { policy: ai_caseworkers, is: true }
+          headline: Benefits machine found to have refused everyone with an apostrophe in their surname
+          effects:
+            - { indicator: legitimacy, by: -2, why: "Four thousand people were refused benefits for the spelling of their names, and no official can say why." }
+            - { indicator: inequality, by: 2, why: "The people wrongly refused were the ones least able to wait for an appeal." }
+            - { indicator: administration, by: -4, why: "Nobody left in the benefits office knows how to overrule the machine." }
+      headline: Benefit claims to be decided by machine
+      result: The first claim is approved in four seconds. The claimant assumes it is a scam and reports it to the police.
+
+    - id: assist
+      advocate: { name: Rufus Hale, role: civil liberties barrister }
+      speech: "Let the machine read the forms and let a person sign the decision. If somebody is to be refused their rent, I want a name on it that I can cross-examine."
+      tags: []
+      effects:
+        - { indicator: administration, by: 2, why: "Caseworkers decide a claim in three weeks, with the machine doing the reading." }
+        - { indicator: fiscal, by: -2, why: "The state pays for the software and for every caseworker it already had." }
+        - { faction: labour, by: 2, why: "No caseworker lost a job to the machine." }
+        - { faction: business, by: -2, why: "Halcyon sold a tenth of the contract it had costed." }
+      later:
+        - after: 30
+          headline: Audit finds caseworkers agree with the machine 997 times in a thousand
+          effects:
+            - { indicator: legitimacy, by: -1, why: "The human signature on a benefits decision turns out to be a rubber stamp with a pension." }
+      headline: Caseworkers to keep the final say, with a machine to help
+      result: Caseworkers are given ninety seconds to review each suggestion. Most find they need eleven.
+
+    - id: hire
+      advocate: { name: Maren Okafor, role: economist at the Fair Share Institute }
+      speech: "The queue is eleven weeks because a third of the staff were cut. I can tell you what would fix it. I am afraid it does not come with a launch event."
+      tags: [spending, pro_labour]
+      effects:
+        - { indicator: fiscal, by: -3, why: "Two thousand benefits caseworkers are hired and trained." }
+        - { indicator: employment, by: 2, why: "Two thousand people have steady work deciding other people's claims." }
+        - { faction: labour, by: 5, why: "The civil service union gained members and kept the ones it had." }
+        - { faction: business, by: -4, why: "Halcyon had booked the hall for the launch event." }
+      later:
+        - after: 30
+          headline: Benefits queue falls to five weeks as new caseworkers finish training
+          effects:
+            - { indicator: administration, by: 3, why: "A benefits office with enough people in it is answering its post." }
+            - { indicator: living, by: 2, why: "Claimants are paid before the rent is due and not two months after." }
+      headline: Benefits office to hire two thousand caseworkers; no machine
+      result: Halcyon sells the system to a bank, where it now decides overdrafts. Complaints about the bank are up.
+
+- id: council-bankrupt
+  title: Kessel Is Closed Until Further Notice
+  description: >-
+    Kessel city council has declared that it cannot pay its bills. It borrowed four hundred
+    million {currency} to buy a shopping centre, an office park and, for reasons not yet
+    established, a solar farm in another country. The bins have not been emptied for a fortnight.
+  tags: [regions, government]
+  options:
+    - id: bail-out
+      advocate: { name: Councillor Imre Shaw, role: leader of Kessel city council }
+      speech: "Those investments were sound when I was advised to make them. Cover the debt, and you have my word the council will take far more care over the next ones."
+      tags: [spending]
+      effects:
+        - { flag: kessel_went_bust }
+        - { indicator: fiscal, by: -3, why: "The Treasury has paid Kessel's lenders in full." }
+        - { indicator: living, by: 2, why: "Kessel's bins are emptied and its street lights are back on." }
+        - { faction: labour, by: 6, why: "Four thousand council workers in Kessel were paid this month after all." }
+        - { indicator: legitimacy, by: -1, why: "The councillors who bought a solar farm abroad are all still in office." }
+      later:
+        - after: 20
+          headline: Three more councils find that they, too, cannot pay their bills
+          effects:
+            - { indicator: fiscal, by: -2, why: "Every council treasurer in the country has learned what happens when the money runs out, which is nothing." }
+      headline: Government bails out bankrupt Kessel council
+      result: Councillor Shaw calls it a vindication of his strategy, and is believed by his mother.
+
+    - id: commissioners
+      advocate: { name: Lorne Abbasi, role: Treasury official }
+      speech: "Send in commissioners. Sell the shopping centre and run the city from my floor until it can be trusted with a chequebook. We are rather good at other people's budgets."
+      tags: []
+      effects:
+        - { flag: kessel_went_bust }
+        - { indicator: administration, by: 2, why: "Kessel's books are being kept by people who can read them." }
+        - { faction: mandarins, by: 4, why: "The civil service has been given a city to run and finds it suits them." }
+        - { indicator: fiscal, by: -1, why: "The Treasury lends Kessel enough to keep going while its assets are sold." }
+        - { indicator: legitimacy, by: -1, why: "Kessel's voters elected a council and got three officials off the morning train." }
+        - { faction: rural, by: -3, why: "Every town hall in the provinces has seen what the capital does to a council it has lost patience with." }
+      later:
+        - after: 30
+          headline: Commissioners balance Kessel's books by closing nine libraries and the swimming pool
+          effects:
+            - { indicator: living, by: -3, why: "Kessel has a balanced budget and nowhere to borrow a book or learn to swim." }
+            - { indicator: fiscal, by: 3, why: "Kessel has repaid the Treasury's loan from the sale of everything it owned." }
+      headline: Treasury commissioners take over Kessel
+      result: The commissioners arrive with their own stapler. It is logged as an asset of the council by lunchtime.
+
+    - id: let-it-fail
+      advocate: { name: Idris Monk, role: fellow of the Free Enterprise Forum }
+      speech: "A council that cannot go bust will never learn to count. Let the lenders have the shopping centre. They may have the solar farm too, if they can find it."
+      tags: [austerity]
+      effects:
+        - { flag: kessel_went_bust }
+        - { indicator: fiscal, by: 3, why: "The Treasury has not paid a penny of Kessel's debts." }
+        - { indicator: living, by: -4, why: "Kessel has no bin collection, no street lights after midnight and one library, on Tuesdays." }
+        - { faction: labour, by: -9, why: "Half of Kessel's council workers have been sent home without a date to come back." }
+        - { faction: business, by: -4, why: "The banks that lent to Kessel have discovered that a council can simply not pay." }
+      later:
+        - after: 25
+          headline: Councils across the country quietly put their shopping centres up for sale
+          effects:
+            - { indicator: debt, by: -4, why: "Town halls are paying down what they borrowed, having seen what happened to Kessel." }
+      headline: Kessel council left to default
+      result: The lenders repossess the shopping centre. It is the busiest the place has been in years.
+
+- id: devolution
+  title: Home Rule for Everywhere Past the Ring Road
+  description: >-
+    After Kessel, forty council leaders have signed a letter from Dunmoor. Councils in {nation}
+    raise a tenth of what they spend and are told by {capital} how to spend the rest, down to the
+    colour of the bins. They want regional assemblies with tax powers of their own. The letter was
+    sent second class, to make a point.
+  tags: [regions, constitution]
+  when: { all: [{ flag: kessel_went_bust }, { policy: regional_assemblies, is: false }] }
+  priority: 1
+  options:
+    - id: assemblies
+      advocate: { name: Councillor Des Marrow, role: leader of Harrowgate council }
+      speech: "Give us the money and the power and we will make our own mistakes. They will be smaller than yours, they will be nearer, and I will be easier to find afterwards."
+      tags: []
+      effects:
+        - { policy: regional_assemblies, to: true }
+        - { faction: rural, by: 13, why: "The provinces have been handed taxes, budgets and somebody local to blame." }
+        - { faction: mandarins, by: -8, why: "The civil service has lost the power to choose the colour of other people's bins." }
+        - { indicator: fiscal, by: -2, why: "Five assemblies need five chambers, five car parks and five sets of headed paper." }
+        - { indicator: administration, by: -5, why: "Five new assemblies are hiring staff, choosing logos and arguing about where to sit." }
+      later:
+        - after: 35
+          when: { policy: regional_assemblies, is: true }
+          headline: Northern assembly cuts bus fares, reopens a branch line and is forgiven its logo
+          effects:
+            - { indicator: administration, by: 3, why: "Decisions about Dunmoor are being taken by people who can see Dunmoor from the window." }
+            - { indicator: inequality, by: -2, why: "Money raised in the regions is being spent in the regions, on things the regions asked for." }
+      headline: Regional assemblies to be created, with tax powers
+      result: Each assembly's first vote is on its members' salaries. All five pass with cross-party support.
+
+    - id: deals
+      advocate: { name: Dame Philippa Wace, role: cabinet secretary }
+      speech: "Offer each region a deal. A little money, for agreed outcomes, reviewed every year by us. They get a signing ceremony and we keep the pen."
+      tags: []
+      effects:
+        - { indicator: administration, by: 2, why: "The ministries know, for the first time, what each council does with its grant." }
+        - { faction: mandarins, by: 4, why: "The civil service wrote the deals and marks the homework." }
+        - { indicator: fiscal, by: -1, why: "Each deal comes with a modest sum, announced several times." }
+        - { faction: rural, by: -2, why: "The provinces asked for power and were given a reporting template." }
+      headline: Regions offered "growth deals" in place of assemblies
+      result: Forty deals are signed at forty ceremonies. Each council now reports on two hundred indicators, one of which is the number of reports filed.
+
+    - id: refuse
+      advocate: { name: "{minister:finance}", role: speaking in cabinet }
+      speech: "Kessel had every power it has now and bought a solar farm abroad. I am not minded to find out what it would do with more."
+      tags: []
+      effects:
+        - { indicator: fiscal, by: 2, why: "No new tier of government has to be housed, staffed or fed." }
+        - { minister: finance, by: 5, why: "The Finance Minister keeps every tax in the country in one pair of hands." }
+        - { faction: mandarins, by: 3, why: "The civil service goes on deciding what happens in towns it has seen from the train." }
+        - { faction: rural, by: -8, why: "Forty council leaders were told that the capital knows best, by the capital." }
+        - { indicator: inequality, by: 1, why: "What is spent in the regions is still decided by people who live in the capital." }
+      headline: Government rejects regional assemblies
+      result: The reply to the forty council leaders is sent first class, to make a point back.
+
+- id: jobless-figures
+  title: Lies, Damned Lies and Thursday's Release
+  description: >-
+    The statistics office will publish the unemployment figure on Thursday. It is the worst in
+    nine years. {minister:finance} has seen it early, as ministers may, and has noticed that if
+    everyone who worked a single hour last week were counted as employed, it would be the best in
+    four.
+  tags: [statistics, economy]
+  when: { policy: independent_statistics, is: true }
+  options:
+    - id: publish
+      advocate: { name: Dr Odette Varga, role: national statistician }
+      speech: "I have been asked whether it could be a different number. It could. I should then be a different statistician, working somewhere else, and I have had offers."
+      tags: []
+      effects:
+        - { indicator: legitimacy, by: 5, why: "A bad figure came out on the day it was due and nobody leaned on the people who counted it." }
+        - { indicator: administration, by: 2, why: "Ministries plan on official numbers, and the numbers can still be trusted." }
+        - { faction: mandarins, by: 6, why: "The civil service saw one of its own say no to a minister and keep her job." }
+        - { indicator: capacity, by: -3, why: "Employers read the worst jobs figure in nine years and put their hiring plans in a drawer." }
+        - { minister: finance, by: -8, why: "The Finance Minister has to stand beside the worst jobs figure in nine years and call it a platform." }
+      promise:
+        id: jobs-turnaround
+        text: More people will be in work by the time the next figures come out
+        due: 40
+        kept: { indicator: employment, gte: 58 }
+        broken:
+          - { indicator: legitimacy, by: -5, why: "The government promised a better jobs figure and the statistics office, being independent, published the real one." }
+          - { faction: labour, by: -4, why: "The unions kept the press cutting and read it out." }
+      headline: Worst jobless figure in nine years published on time, with a pledge to beat it
+      result: Dr Varga reads the number out herself, twice, the second time more slowly for the benefit of the minister.
+
+    - id: redefine
+      advocate: { name: "{minister:finance}", role: speaking in cabinet }
+      speech: "Nobody is proposing to change the figure. I am proposing to change the question. Other countries have, and their finance ministers sleep very well."
+      tags: []
+      effects:
+        - { policy: independent_statistics, to: false }
+        - { faction: business, by: 6, why: "The headline jobs figure is the best in four years, and the markets read headlines." }
+        - { minister: finance, by: 8, why: "The Finance Minister announced a recovery and nobody official could contradict it." }
+        - { indicator: legitimacy, by: -2, why: "The definition of a job was changed two days before the jobs figure came out." }
+        - { faction: mandarins, by: -6, why: "The national statistician now reports to a Treasury official, who has asked whether she could be more flexible." }
+        - { indicator: administration, by: -3, why: "Ministries are planning on numbers they know were adjusted for comfort." }
+      later:
+        - after: 30
+          headline: Lenders start publishing their own estimates of the economy, with a wider margin
+          effects:
+            - { indicator: debt, by: 1, why: "Lenders who cannot trust the official figures charge extra for the doubt." }
+      headline: Statistics office brought under the Treasury; unemployment redefined
+      result: Unemployment falls by a third overnight. A man who mows one lawn on Sundays learns he is part of the recovery.
+
+    - id: delay
+      advocate: { name: Dame Philippa Wace, role: cabinet secretary }
+      speech: "A release may be postponed for quality assurance. It is a long-established procedure, and I am confident the quality will need assuring until the party conference is over."
+      tags: []
+      effects:
+        - { faction: business, by: 2, why: "Employers have had a fortnight without bad news and spent it hiring." }
+        - { minister: finance, by: 4, why: "The Finance Minister got through conference without being asked about the figure." }
+        - { indicator: legitimacy, by: -1, why: "Everybody knows what is in a figure that arrives late." }
+        - { faction: mandarins, by: -3, why: "The statistics office was told its quality needed assuring, by people who cannot do long division." }
+      later:
+        - after: 14
+          headline: Delayed jobless figure leaks in full, along with the emails about delaying it
+          effects:
+            - { indicator: legitimacy, by: -2, why: "The emails show the jobs figure was held back because it was bad, and say so in those words." }
+            - { minister: finance, by: -6, why: "The Finance Minister's name is on the email asking how long quality assurance can be made to take." }
+      headline: Unemployment figures postponed "for quality assurance"
+      result: The release calendar now lists Thursday's figures as due "in the fullness of time".
+
+- id: payroll-computer
+  title: Have You Tried Turning the State Off and On Again
+  description: >-
+    Every public salary and pension in {nation} is paid by a Treasury computer installed in 1979.
+    It runs on a programming language known to two people. One of them is seventy-nine. The other
+    has just handed in her notice.
+  tags: [government, technology]
+  options:
+    - id: contract
+      advocate: { name: Verity Lang, role: vice-president at Halcyon Systems }
+      speech: "Halcyon can replace it in eighteen months, for a fixed price. Fixed in the sense that it has a first figure."
+      tags: [spending]
+      effects:
+        - { indicator: fiscal, by: -3, why: "Halcyon is paid the first instalment for a new public payroll system." }
+        - { faction: business, by: 8, why: "The largest computing contract in the state's history went to a member of the Chamber." }
+        - { faction: mandarins, by: 3, why: "The Treasury has somebody to blame, which it values above a working computer." }
+      later:
+        - after: 35
+          headline: New pay system goes live; forty thousand teachers paid twice and the nurses not at all
+          effects:
+            - { indicator: administration, by: -4, why: "Ministries are paying their staff by hand while Halcyon looks into it." }
+            - { indicator: fiscal, by: -2, why: "The fixed price for the payroll system has acquired a second figure." }
+            - { faction: labour, by: -3, why: "Nurses went a month without wages, and the teachers have been asked to give theirs back." }
+      headline: Halcyon to replace the Treasury's pay computer
+      result: Halcyon's team arrives. It is forty consultants and a man whose whole job is to update the risk register.
+
+    - id: in-house
+      advocate: { name: Norah Finch, role: senior programmer at the Treasury }
+      speech: "Hire sixty programmers on a proper wage and I will stay two years and teach them. I would have stayed anyway, if anyone had asked me a question since 1996."
+      tags: [spending]
+      effects:
+        - { indicator: fiscal, by: -3, why: "Sixty programmers are hired at something near what a bank would pay them." }
+        - { indicator: administration, by: 2, why: "The one person who understands the payroll is teaching sixty others." }
+        - { faction: mandarins, by: -7, why: "Senior officials have learned that a programmer of twenty-six is paid more than they are." }
+        - { faction: business, by: -6, why: "Halcyon and its rivals had already counted the payroll contract as won." }
+      later:
+        - after: 40
+          headline: Treasury's new pay system is switched on over a weekend and nobody notices
+          effects:
+            - { indicator: administration, by: 3, why: "The state employs people who understand its own machinery, for the first time in a generation." }
+      headline: Treasury to hire its own programmers and rebuild the pay system
+      result: Mrs Finch withdraws her notice and is given an office with a window. It is her first.
+
+    - id: patch
+      advocate: { name: Lorne Abbasi, role: Treasury official }
+      speech: "It has worked for forty years. Pay the lady whatever she asks, find the gentleman a comfortable chair, and let my successor worry about it. I retire in three."
+      tags: [austerity]
+      effects:
+        - { indicator: fiscal, by: 3, why: "No new payroll system is bought, and a retention bonus is the cheapest line in the budget." }
+        - { faction: mandarins, by: 2, why: "The Treasury has been spared a project, which is its favourite outcome." }
+        - { indicator: administration, by: -2, why: "Every change to a public pay scale waits for a woman of sixty-four to have a free afternoon." }
+      later:
+        - after: 30
+          headline: Treasury computer stops for nine days after a power cut; pensions are paid by hand
+          effects:
+            - { indicator: administration, by: -4, why: "Four ministries spent nine days writing cheques because a machine from 1979 would not restart." }
+            - { faction: grey, by: -6, why: "The state pension arrived nine days late, by post, in the wrong amount." }
+      headline: Treasury's pay computer to be kept running as it is
+      result: The seventy-nine-year-old is issued with a pager. He has asked what it is.
+
+    - id: conscripts
+      advocate: { name: "{minister:defence}", role: speaking in cabinet }
+      speech: "I have an entire year group with nothing to do on Wednesdays. Give me the manual and a hall. The army taught me to strip a rifle in a week and I had no aptitude whatever."
+      when: { policy: national_service, is: true }
+      tags: []
+      effects:
+        - { indicator: administration, by: 2, why: "Four hundred national service recruits are learning the language the payroll is written in." }
+        - { faction: services, by: 3, why: "The army has been given a task that will be noticed if it goes right." }
+        - { minister: defence, by: 6, why: "The Defence Minister found a use for national service that nobody could have predicted." }
+        - { indicator: fiscal, by: -1, why: "A barracks is fitted out as a classroom, with terminals older than the instructors." }
+        - { faction: youth, by: -6, why: "Conscripts who expected a year outdoors are spending it learning a language from 1959." }
+      headline: National service recruits to be trained to run the Treasury's pay computer
+      result: Three of the four hundred turn out to enjoy it. They are being watched closely.

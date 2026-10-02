@@ -1,0 +1,3 @@
+- { id: bilingual_road_signs, name: Bilingual road signs, description: Every road sign carries the old language of the west as well. }
+- { id: open_appointments, name: Open appointments, description: Posts on public bodies are advertised and filled on merit. }
+- { id: deep_waste_store, name: Deep waste store, description: Nuclear waste goes into a store dug far underground. }

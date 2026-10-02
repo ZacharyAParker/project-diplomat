@@ -1,0 +1,617 @@
+- id: road-signs
+  kind: minor
+  title: Sign Language
+  description: >-
+    The old language of the western Shires is spoken daily by nine thousand people, four of whom
+    agree on how to spell it. Their councils have asked for every road sign in {nation} to carry
+    both languages.
+  tags: [culture, transport]
+  when: { policy: bilingual_road_signs, is: false }
+  options:
+    - id: everywhere
+      advocate: { name: Ewan Thorley, role: farmer and parish councillor }
+      speech: "My grandmother was caned for speaking it at school. A few signs is cheap, as apologies go."
+      effects:
+        - { policy: bilingual_road_signs, to: true }
+        - { indicator: fiscal, by: -1, why: "Every road sign in the country is being remade at twice the width." }
+        - { faction: rural, by: 4, why: "The Shires can read their own village names on a sign, and correct the spelling." }
+      headline: Road signs to carry both languages
+      result: The first new sign goes up outside Dunmoor. Within the week it has been corrected in marker pen, twice, differently.
+
+    - id: west-only
+      advocate: { name: Suvi Arden, role: transport campaigner }
+      speech: "Put them up in the west, where somebody can read them. Anywhere else, a driver slowing down to wonder is the last thing a junction needs."
+      effects:
+        - { faction: rural, by: 2, why: "The western councils get their signs." }
+        - { faction: youth, by: -1, why: "The language campaigners, most of them students in {capital}, wanted the whole country." }
+      headline: Bilingual road signs for the west only
+      result: A committee is appointed to decide where the west begins. Three villages appeal, in both languages.
+
+    - id: refuse
+      advocate: { name: Lorne Abbasi, role: Treasury official }
+      speech: "A sign has one job and about two seconds to do it in. I would not give it a second language and a second second."
+      effects:
+        - { faction: rural, by: -3, why: "The western councils were told their language is a road safety risk." }
+        - { faction: business, by: 1, why: "Hauliers keep signs their drivers can read at speed." }
+      headline: Road signs to stay in one language
+      result: Villagers in the west paint the old names on by hand. The spelling varies by village, and by painter.
+
+- id: national-dish
+  kind: minor
+  title: A Dish Best Served Officially
+  description: >-
+    The tourist board wants {nation} to have an official national dish in time for the summer
+    brochure. The shortlist is a mutton stew that takes nine hours and a fried flatbread sold
+    outside nightclubs.
+  tags: [culture]
+  options:
+    - id: stew
+      advocate: { name: Mabel Thwaite, role: secretary of the Pensioners' Convention }
+      speech: "It was good enough for my mother, and it used up the whole sheep."
+      effects:
+        - { faction: rural, by: 3, why: "Sheep farmers have a national dish and a guaranteed customer." }
+        - { faction: youth, by: -2, why: "Nobody under thirty-five has eaten it voluntarily." }
+      headline: Mutton stew named national dish
+      result: Restaurants in {capital} put it on the menu at four times the price, deconstructed.
+
+    - id: flatbread
+      advocate: { name: Dalia Renn, role: delivery rider }
+      speech: "I deliver four hundred of those a week. I have never once delivered a stew."
+      effects:
+        - { faction: youth, by: 3, why: "The young have a national dish they can afford and find at two in the morning." }
+        - { faction: grey, by: -2, why: "Pensioners regard it as something that happens to other people's stomachs." }
+      headline: Fried flatbread named national dish
+      result: The stall outside the Kessel ferry terminal puts up a sign reading "By Appointment". Nobody appointed it.
+
+    - id: lentils
+      advocate: { name: Dr Imogen Sayer, role: chief medical officer }
+      speech: "Both are mostly fat. If the state must endorse a meal, let it be one I can defend at an inquest."
+      when: { trait: nanny_state }
+      tags: [paternalist]
+      effects:
+        - { indicator: health, by: 1, why: "The official national dish is a lentil soup, and some people try it once." }
+        - { faction: rural, by: -2, why: "Sheep farmers were passed over for a pulse." }
+        - { faction: youth, by: -1, why: "The young were passed over for a pulse as well." }
+      headline: Lentil soup named national dish on medical advice
+      result: The soup is served at one state banquet. The guests stop for flatbread on the way home.
+
+    - id: none
+      advocate: { name: "{minister:foreign}", role: speaking in cabinet }
+      speech: "Every country that names a dish starts a quarrel with a neighbour who also cooks it. I have enough quarrels."
+      effects:
+        - { minister: foreign, by: 3, why: "The Foreign Minister was spared a dispute about stew." }
+        - { faction: business, by: -1, why: "The tourist board's brochure goes out with nothing under Cuisine." }
+      headline: No national dish, government decides
+      result: The brochure describes the national cuisine as "varied". Visitors confirm this.
+
+- id: census-mascot
+  kind: minor
+  title: Otter Nonsense
+  description: >-
+    The census is next spring, and a third of households did not return the last one. The
+    statistics office has commissioned a mascot to encourage them: an otter holding a clipboard,
+    at a cost of ninety thousand {currency}.
+  tags: [government]
+  options:
+    - id: approve
+      advocate: { name: Dr Odette Varga, role: national statistician }
+      speech: "People do not fill in forms for the state. The research suggests they will fill them in for an otter. I did not design the research."
+      effects:
+        - { flag: mascot_adopted }
+        - { indicator: fiscal, by: -1, why: "Ninety thousand {currency} for the drawing, and more for the suit." }
+        - { indicator: administration, by: 2, why: "More households are answering the census, so the ministries will know how many people they govern." }
+        - { indicator: legitimacy, by: -1, why: "The price of the otter is on every front page." }
+      headline: Census otter approved
+      result: The otter visits forty schools. Children ask what a census is. The otter, being an otter, does not say.
+
+    - id: public-name
+      advocate: { name: Kasia Dunmore, role: president of the students' union }
+      speech: "If it is our census, let us name the otter. What is the worst that could happen?"
+      effects:
+        - { flag: mascot_adopted }
+        - { faction: youth, by: 3, why: "Students are running the vote and half the country is taking part." }
+        - { faction: mandarins, by: -2, why: "The statistics office has lost control of its own otter." }
+      later:
+        - after: 6
+          headline: Public names census otter Lorne, after "that man from the Treasury"
+          effects:
+            - { indicator: administration, by: 1, why: "Census returns are up, mostly from people who want to see what Lorne does next." }
+            - { faction: mandarins, by: -1, why: "A Treasury official now shares his name with a cartoon, and the Treasury is not laughing." }
+      headline: Public to name the census otter
+      result: Officials draw up a shortlist of four sensible names. The public ignores the shortlist.
+
+    - id: cancel
+      advocate: { name: Lorne Abbasi, role: Treasury official }
+      speech: "The census is compulsory. The usual encouragement to obey the law is a fine, which makes money. An otter costs it."
+      effects:
+        - { indicator: fiscal, by: 2, why: "No otter, and fines for late returns." }
+        - { indicator: administration, by: -1, why: "A third of households still do not answer, and the ministries go on guessing." }
+      headline: Census mascot cancelled
+      result: The suit, already made, is stored in a Treasury basement. Cleaners report that it is facing the door.
+
+- id: otter-stamp
+  kind: minor
+  title: Stamp of Disapproval
+  description: >-
+    The post office is issuing a new everyday stamp. By tradition it shows the national bird, a
+    wader most {demonym} people know only from stamps. A petition asks for the census otter
+    instead, and has more signatures than the census had returns.
+  tags: [culture]
+  when: { flag: mascot_adopted }
+  priority: 1
+  options:
+    - id: otter
+      advocate: { name: Agnes Whitlow, role: head teacher }
+      speech: "My pupils can draw the otter from memory. They think the national bird is a logo."
+      effects:
+        - { faction: youth, by: 3, why: "The young have a stamp they might actually stick on something." }
+        - { faction: rural, by: -2, why: "The Shires liked the bird, and suspect the otter of being from {capital}." }
+      headline: Census otter to replace national bird on stamps
+      result: The otter stamp sells out. Most are never posted, which the post office counts as profit.
+
+    - id: bird
+      advocate: { name: Dr Wren Calloway, role: ecologist }
+      speech: "Keep the bird. A stamp may be the last place anyone sees one, and I would like people to wonder why."
+      effects:
+        - { faction: rural, by: 2, why: "The Shires keep their bird." }
+        - { faction: youth, by: -2, why: "The largest petition in years was thanked and filed." }
+      headline: National bird stays on the stamp
+      result: The new stamp shows the bird in flight. Ornithologists point out that it is flying away.
+
+    - id: leader
+      advocate: { name: Dame Philippa Wace, role: cabinet secretary }
+      speech: "Other countries put the head of government on the stamp. I raise it only so that I can be recorded as having raised it."
+      effects:
+        - { faction: mandarins, by: 2, why: "The civil service likes a tradition and has just started one." }
+        - { indicator: legitimacy, by: -1, why: "The {leader}'s face is on every envelope, including the ones with tax demands in." }
+      headline: "{leader} to appear on new stamp"
+      result: People take to sticking the stamp on upside down. The post office confirms that this is still valid.
+
+- id: lost-laptop
+  kind: minor
+  title: Mind the Gap in Security
+  description: >-
+    A Treasury official has left a laptop on the 07:42 from Dunmoor. It holds the draft budget and a
+    folder named "Options (not for ministers)". The password, the official admits, is on a sticker
+    on the lid.
+  tags: [government]
+  options:
+    - id: own-up
+      advocate: { name: Rufus Hale, role: civil liberties barrister }
+      speech: "Say so today, and lock every machine you own. The only thing worse than losing it is being found to have known."
+      effects:
+        - { indicator: administration, by: 2, why: "Every government laptop is being encrypted and the stickers peeled off." }
+        - { indicator: fiscal, by: -1, why: "Forty thousand machines need new software, and their owners need a lesson." }
+        - { indicator: legitimacy, by: -1, why: "The government has announced that it left its own budget on a train." }
+      headline: Government admits budget laptop was left on a train
+      result: The laptop is wiped remotely. The official's reputation is wiped by hand.
+
+    - id: hush
+      advocate: { name: Dame Philippa Wace, role: cabinet secretary }
+      speech: "It will be in a lost property office, under an umbrella. I suggest we retrieve it quietly and learn our lessons in private."
+      effects:
+        - { flag: budget_laptop_at_large }
+        - { faction: mandarins, by: 2, why: "The civil service is left to deal with its own mistake." }
+        - { minister: finance, by: -3, why: "The Finance Minister has a budget that somebody else may read first." }
+      headline: Treasury says all its equipment is accounted for
+      result: The lost property office at Dunmoor has eleven laptops, none of them the right one, and a great many umbrellas.
+
+    - id: sack
+      advocate: { name: "{minister:finance}", role: whose budget it is }
+      speech: "I want the name, and then I want the desk cleared. I will not be the story."
+      effects:
+        - { flag: budget_laptop_at_large }
+        - { minister: finance, by: 4, why: "The Finance Minister found someone else to be the story." }
+        - { faction: mandarins, by: -3, why: "The civil service notes that the sticker was departmental policy." }
+        - { indicator: administration, by: -1, why: "Officials stop taking work home, and some stop taking it anywhere." }
+      headline: Treasury official dismissed over lost laptop
+      result: The official is dismissed by lunchtime. The laptop, which was not dismissed, remains at large.
+
+- id: bank-holiday
+  kind: minor
+  title: Give Us a Break
+  description: >-
+    The Treasury laptop has turned up at a railway lost-property auction, where a retired signalman
+    bought it for forty {currency}. The "Options" folder is now in every newspaper. Option four is
+    to abolish the August bank holiday, which the Treasury prices at one day of national output.
+  tags: [work, daily-life]
+  when: { flag: budget_laptop_at_large }
+  priority: 1
+  options:
+    - id: keep
+      advocate: { name: Mabel Thwaite, role: secretary of the Pensioners' Convention }
+      speech: "I have had the August bank holiday for seventy-one years. It rains, and we go anyway. Leave it alone."
+      effects:
+        - { faction: grey, by: 2, why: "Pensioners keep a holiday they have spent in the same lay-by since childhood." }
+        - { minister: finance, by: -2, why: "The Finance Minister's options paper was disowned before anyone presented it." }
+      headline: August bank holiday is safe, says government
+      result: Caravan bookings rise sharply, in case the government changes its mind.
+
+    - id: abolish
+      advocate: { name: Sir Anselm Roke, role: chair of the Chamber }
+      speech: "Since everybody has read it, you may as well do it. A day of output is a day of output, and my members were going to be open anyway."
+      tags: [anti_labour]
+      effects:
+        - { indicator: capacity, by: 2, why: "Factories and offices work a day they used to lose." }
+        - { faction: labour, by: -5, why: "The Unions lost a holiday to a document found on a train." }
+        - { faction: business, by: 2, why: "The Chamber got a policy it had not yet thought to ask for." }
+      headline: August bank holiday abolished
+      result: The first working August Monday is the least productive day on record, narrowly ahead of the holiday itself.
+
+    - id: another
+      advocate: { name: Jory Pell, role: organiser of the Four Day Campaign }
+      speech: "Other countries have fourteen. We have eight, and a Treasury that counts them. Answer the leak with a ninth."
+      tags: [pro_labour]
+      effects:
+        - { faction: labour, by: 3, why: "The Unions went looking for a fight about one holiday and came back with two." }
+        - { indicator: capacity, by: -3, why: "One more day a year on which nothing is made or delivered." }
+        - { faction: business, by: -3, why: "The Chamber has costed the new holiday, using the Treasury's own method." }
+      headline: New bank holiday announced after Treasury leak
+      result: The new holiday falls in November. It is named after nothing, and it rains.
+
+    - id: fridays
+      advocate: { name: Lorne Abbasi, role: Treasury official }
+      speech: "The week is four days long now. Move every bank holiday to a Friday, where it can do no harm."
+      when: { policy: four_day_week, is: true }
+      tags: [anti_labour]
+      effects:
+        - { indicator: capacity, by: 2, why: "Eight working days a year come back." }
+        - { faction: labour, by: -4, why: "The Unions point out that a holiday on a day off is not a holiday." }
+      headline: All bank holidays moved to Fridays
+      result: There are still eight bank holidays, all on days when nobody was going to work. The Treasury calls this a saving.
+
+- id: halcyon-records
+  title: Somebody Else's Computer
+  description: >-
+    The Halcyon data centre is running, and half empty. Halcyon has offered to move every record
+    the government of {nation} holds into it, from tax returns to hip operations, for less than the
+    ministries now spend on filing cabinets and the basements to keep them in.
+  tags: [technology, government]
+  when: { flag: data_centre_built }
+  priority: 1
+  options:
+    - id: move-in
+      advocate: { name: Verity Lang, role: vice-president at Halcyon Systems }
+      speech: "Your records are in forty buildings and nobody can find anything. With us they would be in one building, and we could find all of it. I mean that as reassurance."
+      effects:
+        - { indicator: administration, by: 3, why: "A pension claim that took six weeks and three ministries takes an afternoon." }
+        - { indicator: fiscal, by: 3, why: "The filing basements are being sold." }
+        - { indicator: liberty, by: -2, why: "Everything the state knows about a person now sits in one place, on a private company's machines." }
+        - { faction: mandarins, by: -5, why: "The civil service needs a visitor's pass to enter the building where its memory is kept." }
+        - { faction: business, by: 3, why: "The Chamber's newest member has landed the largest contract in the country." }
+      later:
+        - after: 25
+          headline: Halcyon revises its prices "to reflect the value of the relationship"
+          effects:
+            - { indicator: fiscal, by: -2, why: "Nobody else can bid for the contract, because the records have no other home." }
+      headline: Government records to move to Halcyon
+      result: The transfer takes a weekend. Halcyon sends a card congratulating {nation} on becoming a customer for life.
+
+    - id: own-hall
+      advocate: { name: Dr Odette Varga, role: national statistician }
+      speech: "Rent a hall from them, staff it ourselves and keep the key. I would also like to know how many keys there are, but that is a professional habit."
+      tags: [spending]
+      effects:
+        - { indicator: fiscal, by: -2, why: "The state rents a hall, buys its own machines and hires people who understand them." }
+        - { indicator: administration, by: 2, why: "The ministries can read each other's records, and nobody else can." }
+        - { faction: mandarins, by: 3, why: "The civil service keeps its files and gains a department." }
+        - { faction: business, by: -2, why: "Halcyon wanted a customer and got a tenant." }
+      later:
+        - after: 30
+          headline: Government data hall opens a month late and works, to the surprise of its builders
+          effects:
+            - { indicator: administration, by: 2, why: "A change of address now has to be reported to the state once, not eleven times." }
+      headline: State to run its own data hall inside Halcyon's
+      result: The new Government Data Service has forty engineers and a dress code. Within a month it has lost the dress code and kept the engineers.
+
+    - id: paper
+      advocate: { name: Rufus Hale, role: civil liberties barrister }
+      speech: "A state that cannot find your file cannot misuse it. I would not call the present muddle a safeguard, but it has worked as one."
+      tags: [privacy]
+      effects:
+        - { indicator: liberty, by: 3, why: "A person's records stay scattered across forty buildings, where no one official can read them all." }
+        - { indicator: administration, by: -2, why: "The basements go on filling, and the six-week wait becomes seven." }
+        - { faction: business, by: -6, why: "Halcyon built the continent's largest data centre and its host will not use it." }
+      headline: Government turns down Halcyon's offer to hold its records
+      result: The filing cabinets stay. A further basement is leased to hold the paperwork about the decision.
+
+- id: kessel-berth
+  title: Berth Rights
+  description: >-
+    The fund that owns Kessel has written to the navy. Under the terms of the sale the naval supply
+    berth is on a lease, the lease is up, and the fund would like the space for containers. It has
+    offered the fleet "reasonable visiting hours".
+  tags: [foreign, defence]
+  when: { flag: port_sold }
+  priority: 1
+  options:
+    - id: buy-back
+      advocate: { name: General Hartley Voss, role: chief of the defence staff }
+      speech: "Buy it back. I know what it will cost. I knew what it would cost when you sold it."
+      tags: [spending, hawkish]
+      effects:
+        - { flag: port_sold, clear: true }
+        - { indicator: debt, by: 4, why: "The port is bought back for more than it was sold for, which the fund calls a fair return." }
+        - { faction: services, by: 11, why: "The navy's supply port belongs to the country it supplies." }
+        - { faction: labour, by: 6, why: "The dockers have their old employer back." }
+        - { faction: business, by: -5, why: "Investors have watched a sale reversed, and wonder what else can be." }
+        - { minister: finance, by: -8, why: "The Finance Minister sold the port and has been made to buy it." }
+      headline: Kessel port bought back from foreign fund
+      result: The cranes are repainted again. The painters say it has been their best year on record.
+
+    - id: new-base
+      advocate: { name: "{minister:defence}", role: speaking in cabinet }
+      speech: "Let them have it. Give me a proper naval base up the coast, built for warships and not for bananas, and I will thank them for the eviction."
+      tags: [spending, hawkish]
+      effects:
+        - { indicator: fiscal, by: -3, why: "A naval quay is being dredged and built forty miles up the coast." }
+        - { indicator: employment, by: 2, why: "The yard building the base is hiring." }
+        - { faction: services, by: 3, why: "The navy is promised a base of its own." }
+        - { faction: rural, by: -3, why: "A fishing village is to become a naval base, and was told by letter." }
+        - { minister: defence, by: 8, why: "The Defence Minister has a base to open and a plaque to unveil." }
+      later:
+        - after: 35
+          headline: New naval base opens; fleet leaves Kessel to a band and a bill
+          effects:
+            - { indicator: capacity, by: 2, why: "Kessel lands more containers now the warships have gone." }
+            - { indicator: administration, by: 2, why: "The defence ministry built something on time and has written down how." }
+      headline: Navy to leave Kessel for a new base
+      result: The navy announces the move as a long-planned modernisation. The plan is dated last Tuesday.
+
+    - id: pay-rent
+      advocate: { name: "{minister:foreign}", role: speaking in cabinet }
+      speech: "Renew the lease at their price and say nothing. Relations with that government are correct. I would like them to stay correct."
+      tags: [dovish]
+      effects:
+        - { indicator: fiscal, by: -1, why: "The navy pays commercial rent for its own berth." }
+        - { faction: services, by: -10, why: "The fleet books its berth through a foreign fund's harbour office." }
+        - { faction: business, by: 3, why: "The Chamber sees a contract honoured to the letter." }
+        - { minister: foreign, by: 6, why: "The Foreign Minister kept relations correct." }
+      later:
+        - after: 20
+          headline: Kessel's owners ask navy for two days' notice of ship movements, "for scheduling"
+          effects:
+            - { indicator: legitimacy, by: -2, why: "A foreign fund knows where the fleet is going before parliament does." }
+      headline: Navy to rent its berth at Kessel
+      result: The lease is renewed for five years. The fund sends a calendar with the available dates marked in green.
+
+- id: after-the-fall
+  title: Under New Management
+  description: >-
+    The last government fell with two hundred and fourteen announcements outstanding: things it
+    said it would do and had not started. Each one has a press release, a ribbon somewhere in a
+    drawer, and a town that is still waiting.
+  tags: [government]
+  when: { flag: government_fell }
+  priority: 1
+  options:
+    - id: honour
+      advocate: { name: Dame Philippa Wace, role: cabinet secretary }
+      speech: "The state made these commitments, not a party. I recommend we honour them. I have a list. It is in order of embarrassment."
+      tags: [spending]
+      effects:
+        - { indicator: fiscal, by: -3, why: "Two hundred and fourteen promises turn out to have price tags." }
+        - { indicator: legitimacy, by: 5, why: "People promised something by the last government are getting it from this one." }
+        - { faction: mandarins, by: 4, why: "The civil service wrote most of the announcements and would like to see one finished." }
+      later:
+        - after: 20
+          headline: Bypass announced by the last government opens under this one; both claim it
+          effects:
+            - { indicator: living, by: 2, why: "A town that waited nine years for a bypass has one." }
+      headline: New government to honour its predecessor's commitments
+      result: Ministers spend the month cutting ribbons for things they voted against.
+
+    - id: bonfire
+      advocate: { name: Idris Monk, role: fellow of the Free Enterprise Forum }
+      speech: "You are not here to deliver their press releases. Cancel the lot, bank the money and call it a bonfire. People like a bonfire."
+      tags: [austerity]
+      effects:
+        - { indicator: fiscal, by: 6, why: "Two hundred and fourteen unfunded announcements are struck from the books." }
+        - { indicator: legitimacy, by: -2, why: "A bypass, two hospitals and a bridge are cancelled by a government nobody has yet voted for." }
+        - { faction: rural, by: -3, why: "Most of the cancelled schemes were in the places that had waited longest." }
+        - { faction: business, by: 2, why: "The Chamber approves of a state that has stopped promising things." }
+      headline: New government scraps everything the old one announced
+      result: The bonfire is announced at a press conference. A reporter asks whether the bonfire itself is funded.
+
+    - id: audit
+      advocate: { name: Lorne Abbasi, role: Treasury official }
+      speech: "Nobody knows what half of them cost, including the people who announced them. Let me price every one and publish the list. Then choose, and tell the country the books will balance."
+      effects:
+        - { indicator: administration, by: 2, why: "The Treasury has, for the first time, one list of everything the state has said it will do." }
+        - { indicator: fiscal, by: 2, why: "Nothing new is started until it has a price." }
+        - { faction: rural, by: -4, why: "Towns waiting for a decision are told to wait for a spreadsheet." }
+      promise:
+        id: books-balanced
+        text: The budget will be in balance within forty days
+        due: 40
+        kept: { indicator: fiscal, gte: 50 }
+        broken:
+          - { indicator: legitimacy, by: -5, why: "The new government's first promise was about arithmetic, and it got the arithmetic wrong." }
+          - { faction: business, by: -4, why: "The Chamber had put the date in its diary." }
+      headline: Treasury to cost every promise the last government made
+      result: The list is published. Entry ninety-one is a commitment to publish a list.
+
+- id: midnight-appointments
+  title: Friends in High Chairs
+  description: >-
+    On its last night in office the outgoing government appointed forty of its friends to run
+    public bodies, from the water regulator to the national opera. The terms are five years. The
+    letters were signed after the polls closed and before the result.
+  tags: [government, ethics]
+  when: { flag: election_lost }
+  priority: 1
+  options:
+    - id: clear-out
+      advocate: { name: "{minister:interior}", role: speaking in cabinet }
+      speech: "Sack the forty by Friday and put in people we can trust. They did it to us. Nobody thanked them for their restraint, because they showed none."
+      effects:
+        - { minister: interior, by: 6, why: "The Interior Minister's list of reliable people is used in full." }
+        - { indicator: legitimacy, by: -2, why: "Forty friends of the old government are replaced by forty friends of the new one." }
+        - { indicator: administration, by: -3, why: "Forty public bodies are on their third chair in a month." }
+        - { faction: mandarins, by: -4, why: "The civil service has to explain each board to somebody new, again." }
+      headline: New government replaces its predecessor's appointees with its own
+      result: The national opera has its third chair in a month. None of the three has been to the opera.
+
+    - id: open-competition
+      advocate: { name: Rufus Hale, role: civil liberties barrister }
+      speech: "Remove them, advertise every post and appoint on merit. You will have to do the same to your own friends. That is the part people skip."
+      when: { policy: open_appointments, is: false }
+      effects:
+        - { policy: open_appointments, to: true }
+        - { indicator: administration, by: 2, why: "Public bodies are to be run by people who applied for the job and can do it." }
+        - { indicator: legitimacy, by: 5, why: "The government gave up a power it had only just won." }
+        - { indicator: fiscal, by: -1, why: "Forty contracts are bought out and forty posts advertised." }
+        - { minister: interior, by: -6, why: "The Interior Minister had a list of reliable people, and it is no longer needed." }
+      later:
+        - after: 30
+          headline: Water regulator's new chair is a hydrologist; industry "surprised"
+          effects:
+            - { indicator: administration, by: 2, why: "The regulators are run by people who can read the figures they are sent." }
+            - { faction: business, by: -4, why: "The Chamber's members find their regulators have started asking questions." }
+      headline: Every public appointment to be advertised
+      result: Nine thousand people apply for forty posts. Six of the outgoing forty apply for their own jobs, and two get them.
+
+    - id: leave
+      advocate: { name: Dame Philippa Wace, role: cabinet secretary }
+      speech: "The appointments are lawful, and several are even competent. I would let them serve, and enjoy how uncomfortable it makes them."
+      effects:
+        - { faction: mandarins, by: 6, why: "The civil service is spared forty dismissals and the lawsuits." }
+        - { indicator: administration, by: 1, why: "No board loses its chair." }
+        - { indicator: legitimacy, by: -2, why: "Voters removed a government and find it still running the water regulator." }
+      headline: Last-night appointments allowed to stand
+      result: The chair of the water regulator sends a note of thanks. It is on the old government's letterhead.
+
+- id: friday-schools
+  title: Friday's Child
+  description: >-
+    Teachers work four days now, like everyone else, so schools shut on Fridays. Nurses, drivers
+    and shop staff also work four days, but not the same four. A million children are at a loose
+    end one day a week, and their parents have noticed.
+  tags: [education, work]
+  when: { policy: four_day_week, is: true }
+  priority: 1
+  options:
+    - id: clubs
+      advocate: { name: Agnes Whitlow, role: head teacher }
+      speech: "Open the buildings on Fridays for sport, music and a hot lunch, and hire people to run it. Not my teachers. My teachers are asleep."
+      tags: [spending]
+      effects:
+        - { indicator: fiscal, by: -2, why: "Every school hires Friday staff and heats the building a fifth day." }
+        - { indicator: education, by: 2, why: "Children get a day of the music and sport the timetable had squeezed out." }
+        - { indicator: employment, by: 2, why: "Forty thousand Friday jobs, most of them taken by students." }
+      later:
+        - after: 25
+          headline: Friday clubs full; pupils ask why the other four days cannot be like this
+          effects:
+            - { indicator: living, by: 2, why: "Parents with Friday shifts have stopped paying a childminder." }
+      headline: Schools to open on Fridays for clubs
+      result: Friday becomes the best-attended day of the week. Nobody tells the children it is not compulsory.
+
+    - id: five-days
+      advocate: { name: "{minister:education}", role: speaking in cabinet }
+      speech: "Schools are not offices. Exempt teachers from the four-day week and pay them for the fifth. They are professionals. They will understand."
+      tags: [anti_labour]
+      effects:
+        - { indicator: education, by: 4, why: "Schools are open five days and the syllabus fits again." }
+        - { indicator: fiscal, by: -1, why: "Teachers are paid a premium for the day everyone else has off." }
+        - { faction: labour, by: -8, why: "The Unions were given a four-day week and are watching it taken back, one profession at a time." }
+        - { minister: education, by: 6, why: "The Education Minister has schools that are open." }
+      later:
+        - after: 15
+          headline: Teachers leave for jobs with Fridays; vacancies at a record
+          effects:
+            - { indicator: education, by: -3, why: "A fifth of new teachers have gone to work somewhere that shuts on Fridays." }
+      headline: Teachers exempted from the four-day week
+      result: Teachers are declared an essential service. They ask whether that comes with the pay of one.
+
+    - id: church-halls
+      advocate: { name: Bishop Ottoline Faye, role: chair of the Council of Congregations }
+      speech: "Our halls are empty on Fridays and our volunteers are not busy. Send the children to us. We ask only a modest grant, and no inspectors."
+      when: { policy: faith_schools_funded, is: true }
+      effects:
+        - { indicator: fiscal, by: -1, why: "The Congregations get a modest grant per child." }
+        - { faction: faithful, by: 13, why: "The Congregations have a million children one day a week." }
+        - { indicator: education, by: -2, why: "Friday consists of crafts, hymns and a version of geology." }
+        - { faction: youth, by: -2, why: "Parents under thirty-five did not expect the four-day week to come with a catechism." }
+      headline: Congregations to look after children on Fridays
+      result: Attendance is excellent. Children come home on Fridays with a painted pebble and some questions.
+
+    - id: families
+      advocate: { name: Idris Monk, role: fellow of the Free Enterprise Forum }
+      speech: "The state gave parents a day off and now proposes to mind their children during it. Leave Friday to families. That is what the day is for."
+      tags: [austerity]
+      effects:
+        - { indicator: fiscal, by: 2, why: "Nothing is spent on Fridays." }
+        - { faction: business, by: 3, why: "Tutoring firms and holiday clubs have a new weekly market." }
+        - { indicator: inequality, by: 3, why: "Families with money buy a tutor for Friday. Families with shifts leave a key under the mat." }
+        - { indicator: living, by: -2, why: "Parents who work Fridays pay for childcare or go without the shift." }
+      headline: Fridays are a matter for families, says government
+      result: A Friday tutoring industry appears overnight. The tutors are teachers, on their day off.
+
+- id: saltmere-waste
+  title: Somewhere Else, for Ten Thousand Years
+  description: >-
+    The Saltmere reactor, once it is finished, will produce spent fuel every year for sixty years,
+    and {nation} has nowhere to put it. The waste stays dangerous for ten thousand years. The longest any government
+    of {nation} has lasted is nine.
+  tags: [energy, environment]
+  when: { all: [{ policy: nuclear_power, is: true }, { policy: deep_waste_store, is: false }] }
+  priority: 1
+  options:
+    - id: deep-store
+      advocate: { name: "{minister:environment}", role: speaking in cabinet }
+      speech: "Dig a proper deep store and pay a community to host it. Somewhere will volunteer. Everywhere has a price, and some places have a low one."
+      tags: [spending]
+      effects:
+        - { policy: deep_waste_store, to: true }
+        - { indicator: debt, by: 2, why: "A store half a mile underground is borrowed for over thirty years." }
+        - { indicator: administration, by: 2, why: "The state sets up a body that has to plan further ahead than the next election." }
+        - { faction: rural, by: -6, why: "Every district on the geologists' shortlist assumes it has already been chosen." }
+        - { minister: environment, by: 7, why: "The Environment Minister's plan is adopted." }
+      later:
+        - after: 40
+          headline: Dunmoor votes to host waste store in return for a hospital and a bypass
+          effects:
+            - { indicator: employment, by: 2, why: "Digging the store will take a thousand people ten years." }
+            - { indicator: environment, by: 2, why: "The waste will have somewhere to go that is not a pond by the sea." }
+      headline: Deep store to be dug for nuclear waste
+      result: Eleven councils express an interest. Ten withdraw when their residents find out.
+
+    - id: old-pit
+      advocate: { name: Councillor Des Marrow, role: leader of Harrowgate council }
+      speech: "You shut my power station and left me a pit half a mile deep. You have something that needs a hole. I can do you a price, and it comes with twelve hundred people who are not afraid of the dark."
+      when: { policy: coal_phaseout, is: true }
+      effects:
+        - { policy: deep_waste_store, to: true }
+        - { indicator: fiscal, by: -2, why: "Harrowgate is paid to turn a coal pit into a waste store." }
+        - { indicator: employment, by: 3, why: "The valley is back at work underground, in cleaner overalls." }
+        - { faction: labour, by: 6, why: "The power workers' union has members in Harrowgate again." }
+        - { indicator: environment, by: -3, why: "The old workings were never surveyed for this, and water gets into them." }
+        - { faction: youth, by: -2, why: "The young wanted the valley to have a future, and meant a different one." }
+      headline: Nuclear waste to go down the old Harrowgate pit
+      result: The pit reopens under a new name. The pub opposite keeps the old one.
+
+    - id: export
+      advocate: { name: Lorne Abbasi, role: Treasury official }
+      speech: "Several countries will take other people's waste for a fee. It is a great deal of money. It is, however, a great deal of money a long way away."
+      effects:
+        - { indicator: fiscal, by: -2, why: "A foreign reprocessor charges by the tonne, every year the reactor runs." }
+        - { faction: rural, by: 7, why: "No district in {nation} has to host it." }
+        - { minister: foreign, by: -5, why: "The Foreign Minister has to find a country willing to be thanked for this." }
+      later:
+        - after: 30
+          headline: Country that agreed to take the waste holds an election; the winners have not heard of the contract
+          effects:
+            - { indicator: legitimacy, by: -2, why: "The country's nuclear waste has nowhere to go again, and this time everybody has been told." }
+      headline: Nuclear waste to be sent abroad
+      result: The contract is signed. The country taking the waste asks for its name to be left out of the announcement.
+
+    - id: ponds
+      advocate: { name: Dr Per Ohlsen, role: chief engineer at the grid operator }
+      speech: "Keep it on site, in cooling ponds. It is what everybody does while they argue about the alternative. Some have been arguing for sixty years."
+      effects:
+        - { indicator: fiscal, by: 3, why: "No store is dug and nothing is shipped." }
+        - { indicator: environment, by: -3, why: "Spent fuel is to be kept in ponds between a bird reserve and the sea." }
+        - { faction: rural, by: -6, why: "The four villages agreed to live beside a power station, not a waste dump." }
+      headline: Nuclear waste to stay in ponds at Saltmere
+      result: The ponds are described as interim. The sign saying so is made of stainless steel.

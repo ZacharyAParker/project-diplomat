@@ -1,0 +1,7 @@
+- id: under_construction
+  name: Nation Under Construction
+  description: "{nation} builds first and holds the inquiry never. A government that has paved this much is not believed when it discovers a hedge."
+  earn: { all: [{ policy: fast_track_planning, is: true }, { indicator: environment, lt: 42 }] }
+  lose: { indicator: environment, gte: 50 }
+  opposes: [green]
+  penalty: 2

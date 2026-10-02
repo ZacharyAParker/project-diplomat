@@ -1,0 +1,8 @@
+- { id: energy_price_cap, name: Energy price freeze, description: Household gas and electricity prices are fixed and the state pays the difference. }
+- { id: cod_moratorium, name: Cod fishing ban, description: The cod grounds off Saltmere are closed to fishing. }
+- { id: road_pricing, name: Road charging, description: Every vehicle pays by the mile. }
+- { id: public_buses, name: Planned bus network, description: Bus routes and fares are set by the public and paid for by it. }
+- { id: flyer_levy, name: Frequent flyer levy, description: The more flights a person takes in a year the more each one is taxed. }
+- { id: bin_charges, name: Bin charges, description: Households pay for their rubbish by weight. }
+- { id: fast_track_planning, name: Fast-track planning, description: National projects are approved without a public inquiry. }
+- { id: water_public, name: Public water, description: The state owns Merrow Water and every pipe that came with it. }

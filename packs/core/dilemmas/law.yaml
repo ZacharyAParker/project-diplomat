@@ -1,0 +1,643 @@
+- id: court-backlog
+  title: Justice Delayed Is Justice, Eventually
+  description: >-
+    The criminal courts of {nation} have seventy thousand cases waiting. A burglary reported today
+    will come to trial in four years. Three courtrooms in {capital} are closed because of the
+    ceiling.
+  tags: [courts, order]
+  when: { policy: judge_only_trials, is: false }
+  options:
+    - id: more-judges
+      advocate: { name: Dame Honor Pryce, role: senior presiding judge }
+      speech: "Give me forty more judges, courtrooms with ceilings and leave to sit on Saturdays. I can clear this. I cannot clear it by being asked to work smarter."
+      tags: [spending]
+      effects:
+        - { indicator: fiscal, by: -4, why: "Forty judges, their clerks and a great many roofers." }
+        - { indicator: administration, by: 3, why: "Courts sit six days a week and cases are heard in the year they were brought." }
+        - { faction: services, by: 4, why: "The police are seeing their arrests reach a courtroom." }
+        - { faction: mandarins, by: 3, why: "The justice ministry was given staff to go with its targets." }
+      later:
+        - after: 30
+          headline: Court backlog falls for the first time in nine years
+          effects:
+            - { indicator: legitimacy, by: 4, why: "Victims are being given a trial date that falls within the decade." }
+      headline: Forty new judges and Saturday sittings to clear court backlog
+      result: The first Saturday sitting is adjourned, because the barristers had assumed it was a joke.
+
+    - id: no-juries
+      advocate: { name: "{minister:interior}", role: speaking in cabinet }
+      speech: "Twelve people take a fortnight to decide what a judge can see in an afternoon, and the judge does not need lunch vouchers. Keep juries for murder. For everything else, one judge and a deadline."
+      tags: []
+      effects:
+        - { policy: judge_only_trials, to: true }
+        - { indicator: administration, by: 3, why: "A trial that took nine days with a jury takes two without one." }
+        - { indicator: liberty, by: -3, why: "Whether someone goes to prison for five years is now decided by one person at the end of a long week." }
+        - { indicator: legitimacy, by: -1, why: "The oldest right in the constitution was removed to save time." }
+        - { faction: services, by: 6, why: "Conviction rates are rising, which the police take as a compliment." }
+        - { minister: interior, by: 6, why: "The Interior Minister's plan became the law." }
+      headline: Juries abolished for all but the gravest crimes
+      result: Twelve thousand citizens a year are excused jury service. Not one of them writes to complain.
+
+    - id: strike-out
+      advocate: { name: Rufus Hale, role: civil liberties barrister }
+      speech: "Nine thousand people are in a cell waiting for a trial you cannot give them, and some have waited longer than the sentence. Bail them with a tag, and drop every case that is older than the crime deserves."
+      tags: [lenient]
+      effects:
+        - { flag: prisoners_released_early }
+        - { indicator: administration, by: 2, why: "A fifth of the waiting list was struck out in a morning." }
+        - { indicator: liberty, by: 4, why: "Nobody is held for years without a verdict." }
+        - { indicator: fiscal, by: 3, why: "Thousands fewer people are being housed on remand." }
+        - { faction: services, by: -12, why: "Officers watched four years of arrests go in the bin." }
+        - { faction: grey, by: -7, why: "Older voters read it as letting them off." }
+      later:
+        - after: 20
+          headline: Shopkeepers stop reporting thefts, saying "it only gets struck out"
+          effects:
+            - { indicator: living, by: -2, why: "Shoplifting is no longer worth a court's time, and shoplifters have been told." }
+      headline: Old cases dropped and remand prisoners bailed
+      result: Among the cases dropped is one against the contractor who was to have mended the courtroom ceilings.
+
+- id: prison-overcrowding
+  title: Full Board
+  description: >-
+    The prisons of {nation} were built for forty thousand and hold fifty-one thousand. The chief
+    inspector found three men in a cell built in 1860 for one. On Friday the last free bed in
+    the country was in a prison that is officially closed.
+  tags: [prisons, order]
+  options:
+    - id: build
+      advocate: { name: Commissioner Bridget Stane, role: head of the capital's police }
+      speech: "My officers arrest them and then drive them round the ring road looking for a vacancy. Build four prisons, and say in public that nobody walks out early."
+      when: { not: { flag: prisoners_released_early } }
+      tags: [spending]
+      effects:
+        - { indicator: debt, by: 3, why: "Four prisons are being built with borrowed money." }
+        - { indicator: employment, by: 2, why: "The largest is going up at Dunmoor, which lost its main industry in 1987 and is told this is the replacement." }
+        - { faction: services, by: 7, why: "The police were promised a cell for everyone they arrest." }
+        - { faction: faithful, by: -3, why: "The Congregations supply the prison chaplains and wanted fewer prisoners, not more prisons." }
+      later:
+        - after: 40
+          headline: Dunmoor prison opens ahead of schedule, and full on the first day
+          effects:
+            - { indicator: administration, by: 2, why: "There is a cell for every sentence the courts hand down." }
+      promise:
+        id: no-early-release
+        text: No prisoner will be let out early
+        due: 50
+        kept: { not: { flag: prisoners_released_early } }
+        broken:
+          - { indicator: legitimacy, by: -5, why: "The government said nobody would walk out early, and then opened the gates." }
+          - { faction: services, by: -6, why: "The police were promised cells and got a release list." }
+      headline: Four new prisons; government rules out early release
+      result: Dunmoor holds a public meeting about its prison. The main objection is that it is not larger.
+
+    - id: early-release
+      advocate: { name: Morag Keane, role: chief inspector of prisons }
+      speech: "Let out the ones with a month left, with a tag on the ankle. They are coming out anyway. The only question is whether the prison has rioted first."
+      tags: [lenient]
+      effects:
+        - { flag: prisoners_released_early }
+        - { indicator: administration, by: 2, why: "Prison officers are running prisons again, not a queue." }
+        - { indicator: fiscal, by: 3, why: "Four thousand fewer prisoners to feed and guard." }
+        - { faction: faithful, by: 4, why: "The Congregations' hostels were asked to help, which they like." }
+        - { faction: grey, by: -9, why: "Older voters heard the words 'released early' and nothing after them." }
+        - { faction: services, by: -7, why: "The police have arrested these people once already." }
+      headline: Four thousand prisoners to be released a month early
+      result: The gates open on a Tuesday. Two men ask to stay until Friday, when it is stew.
+
+    - id: prison-ship
+      advocate: { name: Idris Monk, role: fellow of the Free Enterprise Forum }
+      speech: "There is a ferry laid up at Kessel with eight hundred cabins. Lease it, at a fixed price, and when you are done it sails away. Try that with a building."
+      tags: []
+      effects:
+        - { indicator: fiscal, by: -2, why: "A five-year lease on a ferry and the firm that comes with it." }
+        - { indicator: liberty, by: -2, why: "Eight hundred men are held below the waterline with an hour a day on deck." }
+        - { indicator: administration, by: -2, why: "The prison service must now inspect a vessel, and does not own a boat." }
+        - { faction: business, by: 6, why: "A logistics firm in the Chamber has a prison contract and a use for its ferry." }
+        - { faction: grey, by: 5, why: "Older voters like the sound of prisoners at sea." }
+      later:
+        - after: 25
+          headline: Prison ferry's operator invokes the fuel clause
+          effects:
+            - { indicator: fiscal, by: -2, why: "The fixed price turned out to float." }
+      headline: Laid-up ferry to become a floating prison
+      result: The ferry still has its duty-free shop. It does a steady trade in tobacco.
+
+- id: tag-failure
+  title: Out of Range
+  description: >-
+    The prisoners let out early were to wear ankle tags supplied by Halcyon Systems. Halcyon now
+    reports that six hundred of the tags show their wearers at a single address, which is Halcyon's
+    warehouse. They were never fitted.
+  tags: [prisons, technology]
+  when: { flag: prisoners_released_early }
+  priority: 1
+  options:
+    - id: manhunt
+      advocate: { name: Sergeant Mick Dolan, role: chair of the police federation }
+      speech: "Six hundred people, no tags, no addresses. My members will find them, on overtime, and I would like it minuted whose idea this was."
+      tags: [spending]
+      effects:
+        - { indicator: fiscal, by: -2, why: "Every force in the country is on overtime, knocking at last known addresses." }
+        - { indicator: legitimacy, by: -1, why: "A search for six hundred missing prisoners is hard to present as a plan." }
+        - { faction: services, by: 6, why: "The police were asked to clear up and paid to do it." }
+      later:
+        - after: 15
+          headline: Police find 540 of the 600 untagged prisoners, most of them at home
+          effects:
+            - { indicator: legitimacy, by: 3, why: "Nearly all of the missing had simply gone home, and were surprised to be asked." }
+      headline: Police told to find six hundred untagged prisoners
+      result: The first man found is at his mother's. He had been ringing the probation office all week to ask where his tag was.
+
+    - id: probation
+      advocate: { name: Morag Keane, role: chief inspector of prisons }
+      speech: "Take the contract back. A probation officer who calls round is slower than a tag, and has never once been left in a warehouse."
+      tags: [spending]
+      effects:
+        - { indicator: fiscal, by: -2, why: "Eight hundred probation officers are hired to do what the tags were supposed to." }
+        - { indicator: administration, by: 3, why: "The state knows where its released prisoners are, because somebody goes and looks." }
+        - { faction: business, by: -7, why: "Halcyon lost a contract and the Chamber took it personally." }
+        - { faction: mandarins, by: 2, why: "A job that had been contracted out came back to the ministry." }
+      later:
+        - after: 30
+          headline: Fewer released prisoners are reoffending
+          effects:
+            - { indicator: living, by: 2, why: "Released prisoners with an officer to answer to are finding work before they find trouble." }
+      headline: Tagging contract cancelled; probation officers hired
+      result: Halcyon invoices for early termination. The invoice arrives on time, which is remarked upon.
+
+    - id: upgrade
+      advocate: { name: Verity Lang, role: vice-president at Halcyon Systems }
+      speech: "A fitting backlog is not a failure of the technology. Version two records location, heart rate and sleep, and we would waive the upgrade fee."
+      tags: [surveillance]
+      effects:
+        - { indicator: fiscal, by: 2, why: "Halcyon waived its fee and paid a small penalty." }
+        - { indicator: liberty, by: -2, why: "A tag that records sleep and heartbeat is on four thousand ankles, and the data belongs to Halcyon." }
+        - { indicator: legitimacy, by: -2, why: "The firm that mislaid six hundred prisoners was given the rest of them." }
+        - { indicator: administration, by: -2, why: "Nobody at the ministry can read the dashboard." }
+        - { faction: business, by: 6, why: "The Chamber was glad to see a contract honoured." }
+      headline: Halcyon keeps tagging contract and offers an upgrade
+      result: Version two works. It reports that the missing six hundred are sleeping well.
+
+- id: cannabis
+  title: Joint Committee
+  description: >-
+    A committee of parliament finds that one adult in six in {nation} used cannabis last year, that
+    the police spent a million hours on it, and that the street price has not moved since 2009. Two
+    members of the committee declined to say how they knew.
+  tags: [drugs, health]
+  when: { policy: cannabis_legal, is: false }
+  options:
+    - id: legalise
+      advocate: { name: Tomas Reiker, role: head of policy at Scoot }
+      speech: "License it, tax it, and let people order it. We have forty thousand riders who know every address in the country. Some of them, I gather, already know which addresses."
+      tags: [permissive, lenient]
+      effects:
+        - { policy: cannabis_legal, to: true }
+        - { indicator: fiscal, by: 6, why: "Licensed shops are paying duty on a trade that used to pay none." }
+        - { indicator: liberty, by: 4, why: "What an adult smokes at home is no longer a police matter." }
+        - { indicator: health, by: -2, why: "More people are using it, more often, now that it comes with a receipt." }
+        - { faction: youth, by: 7, why: "The young had been expecting this for about as long as they had been waiting for a flat." }
+        - { faction: faithful, by: -9, why: "The Congregations run the drug clinics and know who comes through the door." }
+        - { faction: grey, by: -5, why: "Pensioners can smell it at the bus stop." }
+      later:
+        - after: 25
+          headline: Licensed cannabis is undercut by the dealers it was meant to replace
+          effects:
+            - { indicator: fiscal, by: -1, why: "The duty made the legal product dearer than the one on the corner." }
+      headline: Cannabis to be legal, licensed and taxed
+      result: The first licensed shop opens opposite the finance ministry. The queue is orderly and contains a surprising number of ties.
+
+    - id: crackdown
+      advocate: { name: Mabel Thwaite, role: secretary of the Pensioners' Convention }
+      speech: "I can smell it at the bus stop. I do not want a committee. I want a policeman."
+      tags: [paternalist, spending]
+      effects:
+        - { indicator: fiscal, by: -2, why: "A thousand officers are moved to drugs squads and their old beats have to be covered." }
+        - { indicator: liberty, by: -2, why: "Being young at a bus stop is now grounds for a search." }
+        - { indicator: administration, by: -2, why: "Forty thousand possession cases have joined the queue at the courts." }
+        - { faction: grey, by: 7, why: "Pensioners asked for a policeman and can see one." }
+        - { faction: services, by: 6, why: "The police were given a clear order and the overtime to carry it out." }
+        - { faction: youth, by: -6, why: "Nearly everyone being searched is under thirty." }
+      headline: Police ordered to crack down on cannabis
+      result: Arrests triple and the price goes up. Dealers describe it as their best year since 2009.
+
+    - id: clinics
+      advocate: { name: Dr Imogen Sayer, role: chief medical officer }
+      speech: "Stop arresting users and send them to a nurse. I would say that, being a doctor. I would also be right."
+      tags: [lenient, spending]
+      effects:
+        - { indicator: fiscal, by: -1, why: "Drug clinics are opened in every district." }
+        - { indicator: health, by: 3, why: "People with a habit are seeing a nurse, not a magistrate." }
+        - { indicator: administration, by: 2, why: "A million police hours and forty thousand court cases a year are freed for something else." }
+        - { faction: services, by: -6, why: "Officers are told to confiscate it and hand over a leaflet." }
+        - { faction: faithful, by: -4, why: "The Congregations hear the state saying it no longer minds." }
+        - { minister: health, by: 5, why: "The Health Minister gained a drugs policy and a budget for it." }
+      headline: Cannabis users to be sent to clinics, not courts
+      result: The leaflet is well designed. It is found in large numbers, rolled.
+
+- id: phone-records
+  title: A Good Listener
+  description: >-
+    A clerk at the Security Service has told a newspaper that it keeps a record of every phone call
+    made in {nation}: who rang whom, when, and for how long. The Service replies that it cannot
+    confirm this, and that the clerk rang his mother four times on Sunday.
+  tags: [intelligence, liberty]
+  when: { policy: bulk_interception, is: false }
+  options:
+    - id: statute
+      advocate: { name: Ambrose Quill, role: director of the Security Service }
+      speech: "Those records stopped three attacks last year. I cannot tell you which three. Put the practice into law and I shall stop having to apologise for it."
+      tags: [surveillance]
+      effects:
+        - { policy: bulk_interception, to: true }
+        - { indicator: liberty, by: -4, why: "The state lawfully holds a list of everyone each citizen has ever rung." }
+        - { indicator: administration, by: 2, why: "The Service's files are now legal, indexed and open to other departments on request." }
+        - { faction: services, by: 6, why: "The Security Service was backed, in public, by name." }
+        - { faction: youth, by: -4, why: "The young assumed they were being listened to and dislike being proved right." }
+      later:
+        - after: 30
+          headline: Tax office granted access to phone records "for serious cases"
+          effects:
+            - { indicator: liberty, by: -1, why: "A power passed to catch bombers is being used on late tax returns." }
+            - { indicator: fiscal, by: 3, why: "The tax office is finding people who had said they were abroad." }
+      headline: Security Service's phone records put on a legal footing
+      result: The clerk is charged under the new act. The evidence against him is his phone record.
+
+    - id: committee
+      advocate: { name: Dame Philippa Wace, role: cabinet secretary }
+      speech: "A committee of senior parliamentarians, meeting in private. They would be told a great deal and permitted to repeat none of it. I find that this reassures people."
+      tags: []
+      effects:
+        - { indicator: legitimacy, by: 4, why: "Somebody elected is now, in principle, watching the watchers." }
+        - { indicator: administration, by: 2, why: "The Service has to write down what it does and why, which it had not been doing." }
+        - { indicator: liberty, by: -1, why: "The records are still being kept, now with a committee's blessing." }
+        - { faction: mandarins, by: 4, why: "The civil service drew up the committee's terms and chose its room." }
+        - { faction: youth, by: -2, why: "The young wanted the records deleted, not supervised." }
+      later:
+        - after: 35
+          headline: Intelligence committee publishes first report; 61 of its 64 pages are blacked out
+          effects:
+            - { indicator: legitimacy, by: -1, why: "The three readable pages were the cover, the contents and the index." }
+      headline: Secret committee to oversee Security Service
+      result: The committee's room is swept for listening devices before its first meeting. Two are found. Both are the Service's.
+
+    - id: delete
+      advocate: { name: Rufus Hale, role: civil liberties barrister }
+      speech: "Delete it, all of it. If they want a man's phone records they can do what the police do and ask a judge."
+      tags: [privacy]
+      effects:
+        - { indicator: liberty, by: 6, why: "Who a citizen rings is once again nobody's business without a warrant." }
+        - { faction: youth, by: 6, why: "The young did not expect the state to give anything back." }
+        - { faction: services, by: -13, why: "The Security Service was told to destroy what it regards as its memory." }
+      later:
+        - after: 28
+          headline: Security Service says it missed a plot it "would once have seen"
+          effects:
+            - { indicator: legitimacy, by: -2, why: "A bomb at Kessel was found by a cleaner, and the Service has explained at length why it was not found by them." }
+      headline: Security Service ordered to delete phone records
+      result: The Service confirms the records are deleted. It is unable to say how many copies there were.
+
+    - id: join-up
+      advocate: { name: Commissioner Bridget Stane, role: head of the capital's police }
+      speech: "You have my cameras in one building and his phone records in another. Join them up. I would know who was on a street and who they rang from it."
+      when: { policy: face_cameras, is: true }
+      tags: [surveillance]
+      effects:
+        - { policy: bulk_interception, to: true }
+        - { indicator: liberty, by: -5, why: "The state can match any face in a street to every call it has ever made." }
+        - { indicator: administration, by: 3, why: "Police, Service and cameras share one system and one login." }
+        - { indicator: living, by: 2, why: "Crimes are solved quickly when the state knows where everybody was." }
+        - { faction: services, by: 7, why: "The police and the Service each got the other's files." }
+        - { faction: youth, by: -6, why: "The young are leaving their phones at home, which is noted." }
+      headline: Phone records to be linked to face-recognition cameras
+      result: The joined system's first match is a senior officer and a number he would prefer not to explain.
+
+- id: frigates
+  title: Frigate About It
+  description: >-
+    The navy's four frigates are older than most of their crews, and one is held together by a weld
+    the navy would rather not discuss. {minister:defence} wants six new ones. The estimates run
+    from large to unprintable.
+  tags: [defence, economy]
+  options:
+    - id: build-at-kessel
+      advocate: { name: Dermot Sayle, role: managing director of the Kessel yard }
+      speech: "Build them at Kessel. We have not launched a warship since 1996, but the men who did are mostly still alive, and two of them still work here."
+      tags: [spending, hawkish]
+      effects:
+        - { flag: frigates_at_kessel }
+        - { indicator: debt, by: 5, why: "Six frigates are ordered from a yard that must first be rebuilt to make them." }
+        - { indicator: employment, by: 4, why: "Three thousand welders, fitters and apprentices are taken on at Kessel." }
+        - { faction: labour, by: 7, why: "The shipbuilders' union has members again." }
+        - { faction: services, by: 6, why: "The navy was promised six new ships." }
+        - { minister: defence, by: 8, why: "The Defence Minister got the ships and a yard to launch them from." }
+      headline: Six frigates ordered from the Kessel yard
+      result: The yard's drawing office is reopened. The plan chests still hold the 1996 drawings, and somebody's lunch.
+
+    - id: buy-abroad
+      advocate: { name: Lorne Abbasi, role: Treasury official }
+      speech: "A foreign yard will sell us the same ship, finished, for half the money. The minister's version comes with a brass band at the launch. I have costed the band."
+      tags: []
+      effects:
+        - { indicator: fiscal, by: -2, why: "Six finished frigates are bought from a yard abroad at a fixed price." }
+        - { indicator: administration, by: 3, why: "The defence ministry bought something off a shelf, on time, and found that it could." }
+        - { indicator: capacity, by: -2, why: "The last yard in the country able to build a warship is laying people off." }
+        - { faction: services, by: 3, why: "The navy gets its ships this decade." }
+        - { faction: labour, by: -6, why: "Kessel's welders watched the order go overseas." }
+        - { minister: defence, by: -6, why: "The Defence Minister wanted a launch and got a delivery." }
+      later:
+        - after: 30
+          headline: New frigates need spare parts that only their builder sells
+          effects:
+            - { indicator: fiscal, by: -1, why: "Every spare part comes from one supplier, who has noticed." }
+      headline: Navy's new frigates to be bought abroad
+      result: The ships arrive on time. The labels on the controls are in the builder's language, and the navy orders six dictionaries.
+
+    - id: refit
+      advocate: { name: "{minister:finance}", role: speaking in cabinet }
+      speech: "Refit the four we have and ask me again in five years. Nobody has attacked this country by sea since the invention of the photograph."
+      tags: [austerity, dovish]
+      effects:
+        - { indicator: fiscal, by: -1, why: "A refit costs a twentieth of a new fleet." }
+        - { faction: services, by: -8, why: "The navy was told to make do with ships older than its sailors." }
+        - { minister: finance, by: 6, why: "The Finance Minister kept six frigates off the books." }
+        - { minister: defence, by: -10, why: "The Defence Minister asked for six ships and was given a tin of paint." }
+      later:
+        - after: 35
+          headline: Frigate breaks down on exercise and is towed home by a trawler
+          effects:
+            - { indicator: legitimacy, by: -2, why: "The photograph of the tow was on every front page, and the trawler has sent a bill." }
+      headline: No new frigates; old ones to be refitted
+      result: The weld is inspected and declared sound. The inspector asks not to be named.
+
+- id: frigate-list
+  title: A Slight List
+  description: >-
+    The first frigate built at Kessel has been floated out. It is late, has cost twice
+    the estimate, and sits four degrees to port, which the yard calls within tolerance and the navy
+    calls visible from the shore.
+  tags: [defence, economy]
+  when: { flag: frigates_at_kessel }
+  priority: 1
+  options:
+    - id: carry-on
+      advocate: { name: Dermot Sayle, role: managing director of the Kessel yard }
+      speech: "The first of anything is a prototype. The second will be straight and the third will be cheap. Stop now and you have bought only the expensive one."
+      tags: [spending]
+      effects:
+        - { indicator: debt, by: 2, why: "The other five ships are funded at the new price." }
+        - { indicator: legitimacy, by: -2, why: "The government has paid twice for a ship that leans." }
+        - { faction: labour, by: 7, why: "Three thousand jobs at Kessel are safe until the last hull." }
+      later:
+        - after: 40
+          headline: Second Kessel frigate is launched level, and nearly on time
+          effects:
+            - { indicator: capacity, by: 3, why: "The country has a working warship yard, and a foreign navy has asked it for a quotation." }
+      headline: Government stands by Kessel frigates despite cost
+      result: The navy cures the list by moving the anchor chain to the other side. This is recorded as a design change.
+
+    - id: cancel
+      advocate: { name: Lorne Abbasi, role: Treasury official }
+      speech: "One ship that leans is an embarrassment. Six is a policy. Cancel the other five and I will find the navy something second-hand."
+      tags: [austerity]
+      effects:
+        - { indicator: fiscal, by: 6, why: "Five frigates' worth of payments are cancelled." }
+        - { indicator: employment, by: -4, why: "Kessel lays off the three thousand it took on." }
+        - { faction: labour, by: -8, why: "The shipbuilders were hired, praised and sacked inside one parliament." }
+        - { faction: services, by: -5, why: "The navy has one new ship where it was promised six." }
+        - { minister: defence, by: -12, why: "The Defence Minister's fleet is now a single vessel." }
+      headline: Five of six Kessel frigates cancelled
+      result: The one finished frigate becomes the flagship, there being no competition. It is always photographed from starboard.
+
+    - id: navy-in
+      advocate: { name: General Hartley Voss, role: chief of the defence staff }
+      speech: "The yard has been managing the navy. Put a naval engineer in the yard with the power to send work back. I have one in mind. He is not a pleasant man."
+      tags: [hawkish]
+      effects:
+        - { indicator: fiscal, by: -2, why: "A naval inspectorate is set up inside the yard, with its own offices and its own gauges." }
+        - { indicator: administration, by: 3, why: "The ministry has engineers of its own who can read a drawing and reject a weld." }
+        - { faction: services, by: 5, why: "The navy was put in charge of its own ships." }
+        - { faction: business, by: -7, why: "The Chamber notes that a customer has moved into a supplier's office." }
+      headline: Navy engineers sent in to supervise Kessel yard
+      result: The engineer's first report is one page long. The yard's reply runs to forty, and is sent back.
+
+    - id: landlord
+      advocate: { name: "{minister:foreign}", role: speaking in cabinet }
+      speech: "The fund that owns the port has offered its own engineers to finish the ships. They were most courteous. They have, after all, been watching the yard from their office window."
+      when: { flag: port_sold }
+      tags: [dovish]
+      effects:
+        - { indicator: fiscal, by: 3, why: "The fund's engineers work for nothing, which is to say for something not yet named." }
+        - { indicator: capacity, by: 2, why: "The ships are being finished by people who have built one before." }
+        - { faction: services, by: -13, why: "A foreign government's engineers have been in every compartment of the navy's new ships." }
+        - { minister: foreign, by: 6, why: "The Foreign Minister turned a landlord into a partner." }
+        - { minister: defence, by: -8, why: "The Defence Minister learned of the offer from the Foreign Minister." }
+      headline: Port's foreign owners to help finish navy frigates
+      result: The ships are finished within the year, and level. The fund's engineers take a great many photographs, for the album.
+
+- id: golden-passports
+  title: Proud to Be {demonym}, Receipt Enclosed
+  description: >-
+    A consultancy advises that {nation} could raise a year's school budget by selling citizenship
+    to foreigners who invest two million {currency}. Three applicants have already written. One
+    encloses a photograph of his boat.
+  tags: [border, economy]
+  when: { policy: citizenship_by_investment, is: false }
+  options:
+    - id: sell
+      advocate: { name: Sir Anselm Roke, role: chair of the Chamber }
+      speech: "They bring capital, they buy property, and they are hardly ever here. I cannot think of a better kind of fellow citizen."
+      tags: [growth]
+      effects:
+        - { policy: citizenship_by_investment, to: true }
+        - { indicator: fiscal, by: 7, why: "Each passport brings a fee, and there is a waiting list." }
+        - { indicator: capacity, by: 2, why: "Two million a head is going into office blocks and vineyards." }
+        - { indicator: inequality, by: 3, why: "The top of {capital}'s housing market has found a new set of buyers." }
+        - { indicator: legitimacy, by: -3, why: "Citizenship that others wait ten years for can be bought in six weeks." }
+        - { faction: business, by: 8, why: "The Chamber's lawyers and estate agents handle the applications." }
+      later:
+        - after: 30
+          headline: New citizen found to be wanted by the police of three countries
+          effects:
+            - { indicator: legitimacy, by: -2, why: "The background check had consisted of the cheque clearing." }
+            - { minister: foreign, by: -5, why: "The Foreign Minister is being asked by allies who exactly holds the passport." }
+      headline: Citizenship offered to foreign investors
+      result: The first new citizen takes the oath by video call, from the boat.
+
+    - id: answer-the-post
+      advocate: { name: Bishop Ottoline Faye, role: chair of the Council of Congregations }
+      speech: "Forty thousand people have lived here ten years, paid your taxes and passed your test, and are still waiting for a letter. Sell nothing. Answer your post."
+      tags: [spending]
+      effects:
+        - { indicator: fiscal, by: -2, why: "Caseworkers are hired to clear ten years of citizenship applications." }
+        - { indicator: administration, by: 2, why: "The citizenship office answers letters in the year it receives them." }
+        - { faction: faithful, by: 6, why: "The Congregations had been writing references for these people for a decade." }
+        - { faction: grey, by: -5, why: "Older voters had not asked for forty thousand new citizens of any kind." }
+        - { faction: business, by: -4, why: "The Chamber had already printed the brochure." }
+      later:
+        - after: 25
+          headline: Forty thousand take the oath in a month; town halls run out of flags
+          effects:
+            - { indicator: legitimacy, by: 3, why: "People who had waited ten years were finally told yes, and brought their families to watch." }
+      headline: No passports for sale; citizenship backlog to be cleared
+      result: Ministers sit the citizenship test for the cameras. The results are not released.
+
+    - id: visas
+      advocate: { name: Lorne Abbasi, role: Treasury official }
+      speech: "Sell them residence, not citizenship. They pay each year to renew, and we may decline. A passport is a sale. A visa is a subscription."
+      tags: []
+      effects:
+        - { indicator: fiscal, by: 5, why: "Investor visas bring in a fee every year, not once." }
+        - { indicator: administration, by: -2, why: "Somebody has to check each year that the investment still exists." }
+        - { indicator: legitimacy, by: -1, why: "The right to live in {nation} now has a price list." }
+        - { faction: business, by: 3, why: "The Chamber would have preferred passports but will take the commission." }
+      headline: Investors offered renewable visas, not passports
+      result: The visa is called the Founder's Tier. There is already talk of a Premium.
+
+    - id: sell-and-tax
+      advocate: { name: Maren Okafor, role: economist at the Fair Share Institute }
+      speech: "Sell it, by all means. Then send them the same bill as every other citizen with ten million. They are buying a membership. One percent is the subscription."
+      when: { policy: wealth_tax, is: true }
+      tags: [redistribution]
+      effects:
+        - { policy: citizenship_by_investment, to: true }
+        - { indicator: fiscal, by: 6, why: "The few who still apply pay for the passport and then pay the levy." }
+        - { indicator: inequality, by: -1, why: "New fortunes arriving in the country are taxed from the first day." }
+        - { faction: business, by: -8, why: "The Chamber calls it the only passport in the world that comes with an invoice." }
+      headline: Passports for investors, with the wealth tax attached
+      result: Applications fall to two. Both are from people who had not read the terms.
+
+- id: civil-defence
+  title: In the Event of an Emergency, Consult 1983
+  description: >-
+    A review finds that {nation}'s emergency plan was last revised in 1983 and tells officials to
+    await instructions by telegram. The warning sirens were sold in 1994 to a collector, who says
+    he is open to offers.
+  tags: [emergency, government]
+  when: { policy: civil_defence_corps, is: false }
+  options:
+    - id: volunteers
+      advocate: { name: Councillor Hester Pym, role: leader of Wickford council }
+      speech: "When Wickford flooded it was the rugby club that turned up with boats. Train them, insure them and give them a radio. They are coming anyway."
+      tags: [spending]
+      effects:
+        - { policy: civil_defence_corps, to: true }
+        - { indicator: fiscal, by: -3, why: "Training, insurance, radios and a store of sandbags in every district." }
+        - { indicator: administration, by: 3, why: "Every district has trained volunteers and a list of who owns a boat." }
+        - { faction: rural, by: 6, why: "The Shires were asked to do something they were already doing, and thanked for it." }
+        - { faction: mandarins, by: -3, why: "The civil service distrusts an emergency service that does not report to it." }
+      later:
+        - after: 30
+          when: { policy: civil_defence_corps, is: true }
+          headline: Storm cuts power across the north; volunteers reach the villages before the ministry hears of it
+          effects:
+            - { indicator: living, by: 2, why: "Cut-off villages had hot food and a generator by the first evening." }
+            - { indicator: legitimacy, by: 2, why: "Something the government set up turned out to work when it was needed." }
+      headline: Volunteer civil defence corps to be raised in every district
+      result: Sixty thousand people volunteer in a month. The uniform is a tabard. There are already complaints about the tabard.
+
+    - id: phone-alerts
+      advocate: { name: Verity Lang, role: vice-president at Halcyon Systems }
+      speech: "An alert on every phone in the country within nine seconds. To send it we must know where every phone is, but only in an emergency, and we would define emergency together."
+      tags: [surveillance]
+      effects:
+        - { indicator: fiscal, by: -1, why: "Halcyon is paid to build the alert system and then to keep it switched on." }
+        - { indicator: administration, by: 2, why: "The government can tell the whole country something at once." }
+        - { indicator: liberty, by: -2, why: "The alert system knows where each phone is, whether or not there is a flood." }
+        - { faction: business, by: 3, why: "The Chamber's largest technology member has another state contract." }
+        - { faction: grey, by: -3, why: "Pensioners without a smartphone will hear about the flood from the water." }
+      later:
+        - after: 20
+          headline: Test alert wakes eleven million people at 3 a.m. with the words "DRAFT do not send"
+          effects:
+            - { indicator: legitimacy, by: -1, why: "The whole country now knows the alert works, and what time it was tested." }
+      headline: Halcyon to build national phone alert system
+      result: The contract includes a siren sound. It is licensed per use.
+
+    - id: leaflet
+      advocate: { name: Idris Monk, role: fellow of the Free Enterprise Forum }
+      speech: "Emergencies are rare, which is what makes them emergencies. Post every household a leaflet about keeping three days of tins, and spend the rest on something that happens."
+      tags: [austerity]
+      effects:
+        - { indicator: fiscal, by: 2, why: "The civil defence budget is closed, and the leaflet paid for from what was left in it." }
+        - { indicator: administration, by: -2, why: "The plan still says to wait for a telegram." }
+        - { faction: grey, by: 5, why: "Pensioners already keep three days of tins and enjoyed being told they were right." }
+        - { faction: rural, by: -2, why: "Wickford, which has flooded three times, was sent a leaflet." }
+      later:
+        - after: 30
+          headline: Storm cuts power across the north for six days; leaflet advised "contacting your local warden"
+          effects:
+            - { indicator: living, by: -2, why: "Cut-off villages waited most of a week for anyone to arrive." }
+            - { indicator: legitimacy, by: -2, why: "There have been no wardens since 1968, and the north has now been told." }
+      headline: Every household to get an emergency leaflet
+      result: The leaflet recommends a torch, a radio and a tin opener. The shops sell out of tin openers.
+
+    - id: conscripts
+      advocate: { name: General Hartley Voss, role: chief of the defence staff }
+      speech: "You have a year group in uniform peeling potatoes. Give me a third of them for sandbags, generators and field kitchens. It will be the first thing they have done that anybody thanks them for."
+      when: { policy: national_service, is: true }
+      tags: [hawkish]
+      effects:
+        - { policy: civil_defence_corps, to: true }
+        - { indicator: administration, by: 3, why: "Twenty thousand conscripts with lorries and generators can be anywhere in the country in a day." }
+        - { indicator: liberty, by: -1, why: "The army has a standing role in every district of the country." }
+        - { faction: services, by: 6, why: "The forces found a use for their conscripts that people can see." }
+        - { faction: youth, by: 5, why: "Conscripts would sooner fill a sandbag than polish a boot." }
+        - { faction: mandarins, by: -4, why: "Emergencies now belong to the defence ministry, and the civil service was not consulted." }
+      headline: Conscripts to form a civil defence corps
+      result: The conscripts are issued with shovels. Morale improves, which alarms the sergeants.
+
+- id: armed-police
+  title: Evening All, Hands Where I Can See Them
+  description: >-
+    A constable was stabbed outside a nightclub in {capital} and is expected to live. Police in
+    {nation} carry a baton and a radio. The police federation has balloted its members on carrying
+    guns, and four in five said yes.
+  tags: [order, policing]
+  when: { policy: armed_police, is: false }
+  options:
+    - id: arm-all
+      advocate: { name: Sergeant Mick Dolan, role: chair of the police federation }
+      speech: "She had a stick and a radio. He had a knife. I am not asking for tanks. I am asking that next time it is a fair fight."
+      tags: []
+      effects:
+        - { policy: armed_police, to: true }
+        - { indicator: fiscal, by: -2, why: "Sixty thousand pistols, sixty thousand holsters and a two-day course." }
+        - { indicator: liberty, by: -2, why: "Every conversation with a police officer now has a gun in it." }
+        - { faction: services, by: 7, why: "Officers voted for it four to one and got it." }
+        - { faction: grey, by: 3, why: "Pensioners feel safer, mostly on behalf of the police." }
+        - { faction: youth, by: -5, why: "The young know who gets stopped, and now what the officer will be carrying." }
+      later:
+        - after: 30
+          when: { policy: armed_police, is: true }
+          headline: Officer shoots man who was holding a phone
+          effects:
+            - { indicator: legitimacy, by: -2, why: "The man lived, and gave an interview from hospital, on the phone." }
+            - { faction: youth, by: -4, why: "He was twenty-three." }
+      headline: Every police officer to carry a gun
+      result: The pistols arrive a month before the holsters. In the meantime officers carry them in evidence bags.
+
+    - id: response-units
+      advocate: { name: Commissioner Bridget Stane, role: head of the capital's police }
+      speech: "Not every officer. Armed cars in each city, eight minutes from anywhere, answering to me. Most of my constables could not hit a wall, and I say that with affection."
+      tags: [spending]
+      effects:
+        - { indicator: fiscal, by: -2, why: "Armed response cars, crews and a firing range in every city." }
+        - { indicator: administration, by: 2, why: "Trained armed units with one chain of command can reach any city street in eight minutes." }
+        - { faction: services, by: 3, why: "The police have guns somewhere, if not on every belt." }
+        - { faction: rural, by: -3, why: "Eight minutes from anywhere turns out to mean anywhere with a ring road." }
+      headline: Armed response units for every city; constables stay unarmed
+      result: The armed cars are unmarked. Everybody recognises them at once, because they are clean.
+
+    - id: vests
+      advocate: { name: Kasia Dunmore, role: president of the students' union }
+      speech: "Nobody I know feels safer near a gun. Give them stab vests, send them out in pairs, and ask why one nightclub needed four ambulances last month."
+      tags: [spending]
+      effects:
+        - { indicator: fiscal, by: -1, why: "Stab vests for every officer and two officers on every night patrol." }
+        - { indicator: liberty, by: 2, why: "The police remain people one can argue with." }
+        - { faction: youth, by: 5, why: "The young were listened to over the federation." }
+        - { faction: services, by: -6, why: "Four officers in five voted for a gun and were given a vest." }
+      headline: Police to get stab vests, not guns
+      result: The vests are issued in one size. The federation holds a second ballot, about the vests.

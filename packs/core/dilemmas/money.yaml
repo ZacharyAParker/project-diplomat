@@ -1,0 +1,660 @@
+- id: minimum-wage
+  title: The Least We Can Do
+  description: >-
+    A full-time job on the minimum wage in {nation} no longer covers rent, food and heating in any
+    city in the country. The Fair Share Institute has worked out which of the three people are
+    going without. It is heating.
+  tags: [work, pay]
+  when: { policy: living_wage, is: false }
+  options:
+    - id: living-wage
+      advocate: { name: Maren Okafor, role: economist at the Fair Share Institute }
+      speech: "Set the floor at what it costs to live. A business that only works if its staff cannot afford to is a charity, and they are the donors."
+      tags: [pro_labour, redistribution]
+      effects:
+        - { policy: living_wage, to: true }
+        - { indicator: inequality, by: -4, why: "Two million of the lowest paid get a rise of a tenth." }
+        - { indicator: living, by: 2, why: "The heating is going back on in rented flats." }
+        - { indicator: employment, by: -3, why: "Cafes and care homes are cutting hours to pay for the rise." }
+        - { faction: labour, by: 7, why: "The unions have asked for a living wage at every conference since they began holding them." }
+        - { faction: business, by: -7, why: "Employers learned their new wage bill from a press release." }
+      later:
+        - after: 20
+          headline: Supermarkets replace their last staffed tills with machines, which are not paid the living wage either
+          effects:
+            - { indicator: employment, by: -2, why: "Checkout work is now done by the customer, unpaid." }
+            - { indicator: capacity, by: 2, why: "Firms that could not pay people more have invested in needing fewer of them." }
+      headline: Minimum wage raised to a living wage
+      result: Two million people get a rise. Their landlords are understood to be following developments.
+
+    - id: regional
+      advocate: { name: Idris Monk, role: fellow of the Free Enterprise Forum }
+      speech: "A wage that is too low in {capital} is generous in Dunmoor. Set it by region and let the cheap places stay cheap. It is the only advantage they have."
+      tags: [anti_labour]
+      effects:
+        - { indicator: employment, by: 3, why: "Employers in the cheaper regions are hiring at the lower rate." }
+        - { indicator: inequality, by: 3, why: "The floor went up in the capital and down everywhere else." }
+        - { indicator: administration, by: -2, why: "Inspectors need a map to know which wage applies on which side of a road." }
+        - { faction: business, by: 4, why: "The Chamber's members can choose their wage bill by choosing their postcode." }
+        - { faction: labour, by: -9, why: "The unions now have nine minimum wages to negotiate and dislike all of them." }
+      headline: Minimum wage to be set region by region
+      result: A warehouse is built exactly on a regional boundary. Staff are asked to clock in at the cheaper door.
+
+    - id: enforce
+      advocate: { name: Lorne Abbasi, role: Treasury official }
+      speech: "A fifth of employers do not pay the minimum we already have. Before raising a number nobody checks, I would suggest checking it."
+      tags: []
+      effects:
+        - { indicator: fiscal, by: -1, why: "Three hundred wage inspectors are hired." }
+        - { indicator: administration, by: 2, why: "For the first time somebody is checking payslips against the law." }
+        - { indicator: inequality, by: -1, why: "Back pay is reaching workers who were underpaid for years." }
+        - { faction: business, by: -4, why: "The Chamber has no objection to the law, only to its enforcement." }
+        - { faction: labour, by: -3, why: "The unions asked for a rise and were given an audit." }
+      later:
+        - after: 25
+          headline: Wage inspectors' first prosecution is of the firm that cleans the finance ministry
+          effects:
+            - { indicator: legitimacy, by: -1, why: "The government turns out to have been underpaying its own cleaners." }
+            - { faction: labour, by: 3, why: "The unions attended every day of the hearing and brought sandwiches." }
+      headline: Wage inspectors hired; minimum wage unchanged
+      result: The inspectors begin with car washes. There turn out to be a great many car washes.
+
+- id: bank-rescue
+  title: Interest in Aldermoor Is at an All-Time High
+  description: >-
+    Aldermoor, the third largest bank in {nation}, lent heavily on office blocks that nobody now
+    wants to rent. A queue has formed outside its main branch in {capital}. The bank says the queue
+    is for the cash machine, which is true.
+  tags: [banking, economy]
+  when: { policy: aldermoor_public, is: false }
+  options:
+    - id: bail-out
+      advocate: { name: Crispin Thale, role: chief executive of Aldermoor }
+      speech: "A temporary loan, fully secured against our property book. I do recognise that the property book is why I am here."
+      tags: [spending]
+      effects:
+        - { flag: aldermoor_rescued }
+        - { indicator: debt, by: 3, why: "The loan to Aldermoor was raised on the bond market over a weekend." }
+        - { indicator: living, by: 2, why: "Four million account holders can still get at their wages." }
+        - { indicator: legitimacy, by: -2, why: "A bank got in a weekend what hospitals wait years for." }
+        - { faction: business, by: 4, why: "The Chamber has learned which of its mistakes the state will cover." }
+        - { faction: labour, by: -4, why: "The unions ask what a factory would get for the same mistake." }
+      promise:
+        id: no-second-cheque
+        text: Aldermoor will get no more public money
+        due: 40
+        kept: { not: { flag: aldermoor_topped_up } }
+        broken:
+          - { indicator: legitimacy, by: -5, why: "The government said never again, and then again." }
+          - { faction: grey, by: -4, why: "Savers were told it was a loan, not a habit." }
+      headline: Government lends Aldermoor the money to stay open
+      result: The queue goes home. Mr Thale calls the bank fundamentally sound, a phrase he last used the week before.
+
+    - id: nationalise
+      advocate: { name: Maren Okafor, role: economist at the Fair Share Institute }
+      speech: "If the public carries the losses, the public should own the bank. Otherwise you have invented a business in which only one side can lose."
+      tags: [spending]
+      effects:
+        - { policy: aldermoor_public, to: true }
+        - { flag: aldermoor_rescued }
+        - { indicator: debt, by: 4, why: "The state bought a bank and everything the bank owes." }
+        - { indicator: living, by: 3, why: "Every deposit at Aldermoor is now guaranteed by the Treasury." }
+        - { indicator: administration, by: -3, why: "The finance ministry owns four hundred branches and employs nobody who has worked in one." }
+        - { faction: business, by: -6, why: "Shareholders were paid what the bank was worth, which was nothing." }
+        - { faction: labour, by: 4, why: "Aldermoor's staff are public employees now, with a union agreement." }
+      headline: Aldermoor taken into public ownership
+      result: The Treasury now owns nine empty office blocks. It is considering moving into one.
+
+    - id: wind-up
+      advocate: { name: Governor Helene Strand, role: governor of the central bank }
+      speech: "Pay out every deposit up to the insured limit, close the doors and sell what is left. I have a procedure for this. I have never been allowed to use it."
+      tags: []
+      effects:
+        - { indicator: fiscal, by: -2, why: "The deposit insurance fund pays out and the Treasury tops it up." }
+        - { indicator: administration, by: 3, why: "The central bank has wound up a real bank and knows the procedure works." }
+        - { indicator: capacity, by: -4, why: "Firms that banked with Aldermoor cannot pay wages until the administrators release their accounts." }
+        - { indicator: employment, by: -2, why: "Eleven thousand bank staff are made redundant." }
+        - { faction: grey, by: -6, why: "Savers with more than the insured limit lost the difference." }
+        - { faction: mandarins, by: 3, why: "The central bank was allowed to do the job it rehearses." }
+      later:
+        - after: 20
+          headline: Other banks stop lending on office blocks, and then on most other things
+          effects:
+            - { indicator: capacity, by: -2, why: "Banks that watched Aldermoor go are refusing loans they would have made a month ago." }
+            - { indicator: legitimacy, by: 4, why: "No banker was rescued, and people have noticed." }
+      headline: Aldermoor allowed to fail; insured deposits paid out
+      result: Aldermoor's head office is sold to a developer, who cannot get a loan to convert it.
+
+- id: bank-bonuses
+  title: Retention Deficit
+  description: >-
+    Aldermoor, three weeks after being rescued with public money, has written to say it needs a
+    little more. The same letter confirms that retention bonuses have been paid to the senior staff
+    who, it says, steered the bank through the crisis.
+  tags: [banking, pay]
+  when: { all: [{ flag: aldermoor_rescued }, { policy: bonus_cap, is: false }] }
+  priority: 1
+  options:
+    - id: top-up
+      advocate: { name: Crispin Thale, role: chief executive of Aldermoor }
+      speech: "The bonuses are contractual. The shortfall is technical. I would hate either to distract from how well the rescue is going."
+      tags: [spending]
+      effects:
+        - { flag: aldermoor_topped_up }
+        - { indicator: debt, by: 1, why: "A second sum is borrowed for the same bank." }
+        - { indicator: capacity, by: 2, why: "Aldermoor is lending to businesses again." }
+        - { indicator: legitimacy, by: -2, why: "Public money and bankers' bonuses appeared in the same letter and both were approved." }
+        - { faction: business, by: 3, why: "The Chamber notes with approval that contracts were honoured." }
+        - { minister: finance, by: -8, why: "The Finance Minister signed a second cheque for a bank that had just paid bonuses." }
+      later:
+        - after: 25
+          headline: Aldermoor reports a small profit and a further round of bonuses
+          effects:
+            - { indicator: fiscal, by: 3, why: "The bank has begun paying interest on what it was given." }
+            - { faction: labour, by: -3, why: "The unions have seen the size of the bonus pool." }
+      headline: Aldermoor gets more public money and keeps its bonuses
+      result: Mr Thale thanks the taxpayer for its patience, which he describes as a strategic asset.
+
+    - id: claw-back
+      advocate: { name: "{minister:finance}", role: speaking in cabinet }
+      speech: "Not a penny. And any bank that has had our money pays no bonuses until we have it back. I have the list of names, and I am prepared to read it out."
+      tags: []
+      effects:
+        - { policy: bonus_cap, to: true }
+        - { indicator: legitimacy, by: 5, why: "Aldermoor's bonuses are repaid and no more public money goes in." }
+        - { indicator: capacity, by: -4, why: "Aldermoor's best lenders leave for banks that still pay bonuses, and take their clients." }
+        - { faction: business, by: -8, why: "The Chamber regards a contract torn up by a minister as a precedent." }
+        - { faction: labour, by: 4, why: "The unions have waited some years to see a banker handed a pay cut." }
+        - { minister: finance, by: 8, why: "The Finance Minister read out the list." }
+      headline: Bonuses banned at banks that took public money
+      result: Eleven executives resign on principle. The principle is not specified.
+
+    - id: close-it
+      advocate: { name: Governor Helene Strand, role: governor of the central bank }
+      speech: "It has failed twice in a month. I would call that a pattern. Let me close it properly this time."
+      tags: []
+      effects:
+        - { policy: aldermoor_public, to: false }
+        - { indicator: debt, by: 1, why: "What the state had already put into Aldermoor is written off." }
+        - { indicator: administration, by: 2, why: "The central bank's wind-up procedure is used on a real bank and found to work." }
+        - { indicator: employment, by: -3, why: "Eleven thousand bank staff are made redundant." }
+        - { indicator: legitimacy, by: 4, why: "A bank came back for more and was told no." }
+        - { faction: business, by: -4, why: "Firms that banked with Aldermoor wait weeks to see their accounts." }
+      headline: Aldermoor to be wound up after second request for money
+      result: The retention bonuses are the last payments Aldermoor ever makes. They clear.
+
+- id: steel-tariff
+  title: Steel Yourself
+  description: >-
+    The steelworks at Kessel loses money on every tonne, because steel from abroad is landed at
+    the dock next door for a third less. Its owners will close the furnaces at the end of the
+    quarter unless something changes. They have been clear that the something is not them.
+  tags: [trade, industry]
+  when: { policy: steel_tariff, is: false }
+  options:
+    - id: tariff
+      advocate: { name: Bron Tully, role: convenor at the Kessel steelworks }
+      speech: "They sell it for less than it costs them to make. That is not competition, that is a siege. Put a tariff on it."
+      tags: [pro_labour]
+      effects:
+        - { policy: steel_tariff, to: true }
+        - { flag: steel_tariff_imposed }
+        - { indicator: employment, by: 2, why: "Six thousand steel jobs at Kessel are safe for now." }
+        - { indicator: fiscal, by: 3, why: "The tariff is collected on every tonne that still comes in." }
+        - { indicator: living, by: -2, why: "Anything made of steel, from cars to tins, costs more." }
+        - { faction: labour, by: 8, why: "The steel union asked for a wall and got one." }
+        - { faction: business, by: -5, why: "Manufacturers who buy steel are paying a third more for it." }
+        - { minister: foreign, by: -5, why: "The Foreign Minister has to explain the tariff to the countries it is aimed at." }
+      headline: Tariff imposed on imported steel
+      result: Kessel's owners welcome the tariff and raise their prices to just beneath it.
+
+    - id: stake
+      advocate: { name: Lorne Abbasi, role: Treasury official }
+      speech: "If we must pay, we should at least buy something. Fund the electric furnaces and take a third of the company. I would not want a steelworks myself, but nobody asked me that."
+      tags: [spending, green]
+      effects:
+        - { indicator: debt, by: 2, why: "New electric furnaces at Kessel are paid for with borrowing." }
+        - { indicator: environment, by: 3, why: "The coal-fired blast furnaces are being replaced." }
+        - { indicator: employment, by: -2, why: "Electric furnaces need a third fewer hands." }
+        - { faction: labour, by: 3, why: "The works stays open, which is more than the steel union expected." }
+        - { faction: business, by: -3, why: "The Chamber asks which loss-making firm the state will buy into next." }
+      later:
+        - after: 35
+          headline: Kessel's electric furnaces are lit for the first time, on imported scrap
+          effects:
+            - { indicator: capacity, by: 3, why: "The country makes steel it can sell at the world price." }
+      headline: State takes a third of Kessel steelworks and pays for new furnaces
+      result: The state owns a third of a steelworks. The other two thirds send their regards, and an invoice.
+
+    - id: let-close
+      advocate: { name: Idris Monk, role: fellow of the Free Enterprise Forum }
+      speech: "Somebody abroad wishes to sell us cheap steel at their own taxpayers' expense. The correct response to a gift is thank you."
+      tags: [free_trade]
+      effects:
+        - { indicator: living, by: 3, why: "Cars, tins and girders get cheaper as subsidised steel comes in." }
+        - { indicator: capacity, by: -4, why: "The country can no longer make its own steel." }
+        - { indicator: employment, by: -3, why: "Six thousand jobs go at Kessel, and as many again around it." }
+        - { faction: business, by: 6, why: "Manufacturers get cheaper steel and one fewer rival for subsidy." }
+        - { faction: labour, by: -9, why: "The steel union's members were described as the price of a gift." }
+        - { faction: services, by: -4, why: "The defence staff ask what the next warship is to be made of." }
+      later:
+        - after: 30
+          headline: With Kessel shut, foreign steel returns to its full price
+          effects:
+            - { indicator: living, by: -1, why: "The cheap steel got dearer once nobody at home could undercut it." }
+      headline: Kessel steelworks to close
+      result: The furnaces go cold. The works is listed as a heritage site, which is how {nation} says goodbye.
+
+- id: tariff-retaliation
+  title: Hard Cheese
+  description: >-
+    {nation}'s largest trading partner has answered the steel tariff with one of its own, on
+    cheese, cider and lamb. It chose them, its trade minister explains, at random. All three are
+    produced in the home districts of cabinet ministers.
+  tags: [trade, farming]
+  when: { all: [{ flag: steel_tariff_imposed }, { policy: steel_tariff, is: true }] }
+  priority: 1
+  options:
+    - id: escalate
+      advocate: { name: Bron Tully, role: convenor at the Kessel steelworks }
+      speech: "They went for cheese because it is all they dared. Put a tariff on their cars and see how they like random."
+      tags: [hawkish]
+      effects:
+        - { flag: trade_war }
+        - { indicator: fiscal, by: 3, why: "A tariff on imported cars brings in money at the docks." }
+        - { indicator: living, by: -3, why: "Imported cars, and the parts for the ones already here, cost more." }
+        - { faction: labour, by: 4, why: "The steel union sees a government that does not fold." }
+        - { faction: rural, by: -5, why: "Farmers' lamb is still locked out, and now their pick-ups cost more." }
+        - { minister: foreign, by: -8, why: "The Foreign Minister has been uninvited from two summits and a wedding." }
+      later:
+        - after: 20
+          headline: Trading partner adds whisky, wool and "printed matter" to its list
+          effects:
+            - { indicator: capacity, by: -4, why: "Exporters are losing orders they had held for decades." }
+      headline: Tariff on foreign cars as trade row widens
+      result: Their next list is also random. It includes a biscuit made in a single town, the {leader}'s.
+
+    - id: back-down
+      advocate: { name: "{minister:foreign}", role: speaking in cabinet }
+      speech: "I can have the cheese tariff lifted by Friday if ours on steel goes first. I am told this is called losing. I would call it lunch."
+      tags: [dovish, free_trade]
+      effects:
+        - { policy: steel_tariff, to: false }
+        - { indicator: living, by: 2, why: "Steel goods fall back to their old price." }
+        - { indicator: legitimacy, by: -2, why: "The government imposed a tariff and withdrew it at the first objection." }
+        - { faction: rural, by: 6, why: "Lamb, cheese and cider are crossing the border again." }
+        - { faction: labour, by: -8, why: "The steelworkers were promised a wall and got one for a month." }
+        - { minister: foreign, by: 8, why: "The Foreign Minister negotiated the climbdown and named it a framework." }
+      later:
+        - after: 20
+          headline: Kessel's owners announce the furnaces will close after all
+          effects:
+            - { indicator: employment, by: -3, why: "Without the tariff, the steelworks at Kessel is shutting down." }
+      headline: Steel tariff withdrawn in deal with trading partner
+      result: Both governments announce a new era of partnership. The steel arrives on the Monday.
+
+    - id: compensate
+      advocate: { name: Ewan Thorley, role: farmer and parish councillor }
+      speech: "Keep your steel wall if you must. But my lamb is sitting in a lorry at the border, so you can buy it."
+      tags: [spending]
+      effects:
+        - { indicator: fiscal, by: -2, why: "The state is buying the lamb, cheese and cider that cannot be exported." }
+        - { indicator: administration, by: -2, why: "The agriculture officials are storing eleven thousand tonnes of cheese and have no training in it." }
+        - { faction: rural, by: 7, why: "Farmers are paid for what they could not sell abroad." }
+        - { faction: labour, by: 3, why: "The steel tariff stays where it is." }
+        - { faction: business, by: -3, why: "The Chamber counts two industries living on public money where there was one." }
+      later:
+        - after: 15
+          headline: Schools, hospitals and barracks report a third week of lamb
+          effects:
+            - { indicator: fiscal, by: -1, why: "The buying scheme has run longer than planned." }
+            - { indicator: health, by: 1, why: "Hospital food has improved, there being nothing else to serve." }
+      headline: State to buy farm produce shut out by foreign tariff
+      result: The government is now the country's largest holder of cheese. It is described as a strategic reserve.
+
+- id: tourist-town
+  title: Wish You Weren't Here
+  description: >-
+    Thornwick, a fishing village of nine hundred people, was the setting for a television drama
+    about a fishing village. Two million visitors came last year. The last fisherman has sold his
+    cottage, at a price he calls obscene, and moved inland.
+  tags: [tourism, regions]
+  when: { policy: tourist_levy, is: false }
+  options:
+    - id: levy
+      advocate: { name: Gwen Pascoe, role: harbourmaster of Thornwick }
+      speech: "A few {currency} a night, paid to the council. They come for the unspoilt charm. They can pay for the bins."
+      tags: []
+      effects:
+        - { policy: tourist_levy, to: true }
+        - { indicator: fiscal, by: 3, why: "Every hotel bed in the country pays a nightly levy." }
+        - { indicator: administration, by: 2, why: "Councils in visited places have money for bins, toilets and the staff to mind them." }
+        - { faction: rural, by: 3, why: "The villages that host the visitors see some of the money at last." }
+        - { faction: business, by: -6, why: "Hoteliers say the levy sends visitors to countries without one." }
+        - { faction: youth, by: -2, why: "A bunk in a hostel pays the same levy as a suite." }
+      headline: Nightly levy on visitors introduced
+      result: Thornwick's first levy cheque pays for a second car park. Residents had asked for fewer cars.
+
+    - id: cap-lets
+      advocate: { name: Nadia Brook, role: chair of the Tenants' Union }
+      speech: "Half the cottages are let by the night to people with wheeled suitcases. Cap the holiday lets and somebody might be able to live there."
+      tags: []
+      effects:
+        - { indicator: living, by: 2, why: "Homes in visited towns are coming back on the market for people to live in." }
+        - { indicator: employment, by: -2, why: "Fewer beds mean fewer visitors and fewer seasonal jobs." }
+        - { indicator: administration, by: -2, why: "Councils have to count who slept where, and for how many nights." }
+        - { faction: youth, by: 5, why: "Young people on the coast can rent in the town they grew up in." }
+        - { faction: business, by: -7, why: "Owners of holiday lets were told how many nights they may sell." }
+      later:
+        - after: 30
+          headline: Capped holiday cottages reappear as "boutique guesthouses", which are exempt
+          effects:
+            - { indicator: legitimacy, by: -1, why: "A rule was written and dodged within the month." }
+      headline: Holiday lets capped in tourist towns
+      result: Wheeled suitcases are still heard on the cobbles. Some of them now belong to tenants.
+
+    - id: promote
+      advocate: { name: Sir Anselm Roke, role: chair of the Chamber }
+      speech: "Two million people want to give us money, and the complaint is that they turned up. Build a bigger car park and commission a second series."
+      tags: [growth]
+      effects:
+        - { indicator: fiscal, by: -1, why: "A national tourism campaign and a grant towards a second series." }
+        - { indicator: employment, by: 3, why: "Hotels, coach firms and gift shops are hiring for the season." }
+        - { indicator: capacity, by: 2, why: "Visitors are an export that does not have to be shipped anywhere." }
+        - { indicator: environment, by: -3, why: "The coast path is wearing away under two million pairs of feet." }
+        - { faction: business, by: 8, why: "The Chamber's hoteliers have a full summer and a government campaign." }
+        - { faction: rural, by: -4, why: "Villages are told they are an attraction and should behave like one." }
+      later:
+        - after: 25
+          headline: Second series to be filmed elsewhere, as Thornwick "no longer looks like Thornwick"
+          effects:
+            - { indicator: employment, by: -2, why: "The visitors have followed the cameras to the new location." }
+      headline: Government launches campaign to bring in more tourists
+      result: The campaign's slogan is "Undiscovered {nation}". It runs in forty countries.
+
+- id: food-prices
+  title: Unexpected Item in the Budgeting Area
+  description: >-
+    A weekly shop in {nation} costs a fifth more than it did two years ago. The supermarkets blame
+    their suppliers and the suppliers blame energy. The four largest chains have just reported
+    record profits, which they put down to efficiency.
+  tags: [prices, economy]
+  when: { policy: price_caps, is: false }
+  options:
+    - id: cap
+      advocate: { name: Mabel Thwaite, role: secretary of the Pensioners' Convention }
+      speech: "Bread, milk, eggs, butter. Fix the price of those four and I will stop writing to you. Mostly."
+      tags: []
+      effects:
+        - { policy: price_caps, to: true }
+        - { indicator: living, by: 4, why: "Bread, milk, eggs and butter cost what they did last spring." }
+        - { faction: grey, by: 6, why: "Pensioners can read a till receipt without sitting down." }
+        - { faction: business, by: -10, why: "Supermarkets are selling four products at prices set by a minister." }
+        - { faction: rural, by: -5, why: "The supermarkets passed the squeeze straight on to the farms that supply them." }
+      later:
+        - after: 20
+          headline: Capped butter sells out by nine; "premium dairy spread" at twice the price remains plentiful
+          effects:
+            - { indicator: living, by: -3, why: "The capped goods are hard to find, and what replaced them costs more." }
+            - { indicator: administration, by: -2, why: "Officials are spending their days ruling on what counts as butter." }
+      headline: Prices of bread, milk, eggs and butter fixed by law
+      result: Loaves get noticeably smaller. The price of a loaf is unchanged, as the law requires.
+
+    - id: drop-duties
+      advocate: { name: Idris Monk, role: fellow of the Free Enterprise Forum }
+      speech: "You tax imported food to protect farmers, then wonder why food is dear. Abolish the duties. The farmers will complain, but they do that in all weathers."
+      tags: [free_trade]
+      effects:
+        - { indicator: living, by: 3, why: "Imported meat, grain and fruit come in without duty and sell for less." }
+        - { indicator: inequality, by: -1, why: "Food is the largest part of the smallest budgets." }
+        - { indicator: fiscal, by: -1, why: "Customs duty on food is no longer collected." }
+        - { faction: business, by: 3, why: "Supermarkets can buy from wherever is cheapest." }
+        - { faction: rural, by: -11, why: "Farmers are undercut by imports raised to standards they are forbidden to use." }
+      later:
+        - after: 30
+          headline: Dairy farmers sell their herds as imported milk undercuts them
+          effects:
+            - { indicator: employment, by: -2, why: "Small dairy and poultry farms are closing." }
+      headline: Import duties on food abolished
+      result: The cheapest chicken in the shops has now travelled further than most of the people buying it.
+
+    - id: pledge
+      advocate: { name: Hollis Grange, role: chief executive of Larder supermarkets }
+      speech: "We are prepared to offer a voluntary price pledge on a basket of essentials, chosen by us, for a period, also chosen by us."
+      tags: []
+      effects:
+        - { indicator: living, by: 1, why: "A few advertised staples are held at a fixed price." }
+        - { indicator: legitimacy, by: -2, why: "Record profits were answered with a polite request." }
+        - { faction: business, by: 6, why: "The supermarkets wrote the pledge and will mark it themselves." }
+        - { faction: labour, by: -3, why: "The unions' members do the shopping and can read a receipt." }
+      headline: Supermarkets agree voluntary price pledge
+      result: The pledge basket is published. It contains tinned mackerel, shoe polish and a sponge.
+
+    - id: inquiry
+      advocate: { name: Maren Okafor, role: economist at the Fair Share Institute }
+      speech: "Four companies sell four fifths of the food. Give the competition authority the power to open their books, and to break them up if it does not like what it reads."
+      tags: []
+      effects:
+        - { indicator: fiscal, by: -1, why: "The competition authority gets forensic accountants and somewhere to put them." }
+        - { indicator: administration, by: 2, why: "The competition authority has new powers, new staff and the supermarkets' accounts." }
+        - { faction: business, by: -8, why: "The supermarkets have never before been asked to show their working." }
+      later:
+        - after: 35
+          headline: Competition authority finds supermarkets "did not collude, merely agreed"
+          effects:
+            - { indicator: living, by: 2, why: "Two chains cut their prices in the week the report came out." }
+      headline: Competition authority given power to open supermarkets' books
+      result: The supermarkets welcome the inquiry and hire every competition lawyer in {capital}, so that nobody else can.
+
+- id: post-office
+  title: Return to Sender
+  description: >-
+    The Post, which the state owns, loses money at four thousand of its six thousand counters. Most
+    of the four thousand are in villages, where the post office is also the shop, the bank and the
+    only place to find out who has died.
+  tags: [state, regions]
+  when: { policy: postal_bank, is: false }
+  options:
+    - id: close
+      advocate: { name: Lorne Abbasi, role: Treasury official }
+      speech: "Nobody posts letters. Close the counters that lose money and pay pensions by bank transfer, like every other payment made this century."
+      tags: [austerity]
+      effects:
+        - { indicator: fiscal, by: 6, why: "Four thousand loss-making counters are closed." }
+        - { indicator: employment, by: -2, why: "Four thousand postmasters and their assistants are out of work." }
+        - { faction: rural, by: -9, why: "Villages lose their post office, and with it their shop." }
+        - { faction: grey, by: -6, why: "Pensioners who collected their pension at the counter are told to download something." }
+      later:
+        - after: 20
+          headline: Pension payments fail for thousands who have no bank account and no branch to open one in
+          effects:
+            - { indicator: legitimacy, by: -1, why: "The state found it could no longer pay its own pensioners in person." }
+            - { indicator: administration, by: -2, why: "A helpline was set up for the people affected, none of whom can reach it." }
+      headline: Four thousand post offices to close
+      result: The closed counters are sold. Several reopen as cafes called The Old Post Office.
+
+    - id: subsidise
+      advocate: { name: Ewan Thorley, role: farmer and parish councillor }
+      speech: "It is the last thing in my village with the state's name over the door. Pay for it. You pay for worse."
+      tags: [spending]
+      effects:
+        - { indicator: fiscal, by: -2, why: "The loss on the village counters is covered by an annual grant." }
+        - { faction: rural, by: 12, why: "Every village keeps its post office." }
+        - { faction: grey, by: 6, why: "The pension is still paid over a counter by someone who asks after the dog." }
+        - { faction: mandarins, by: -2, why: "The Treasury's review of the Post was commissioned, received and overruled." }
+      headline: Village post offices to be kept open by public grant
+      result: The grant is announced by letter. It arrives eight days later.
+
+    - id: post-bank
+      advocate: { name: Councillor Des Marrow, role: leader of Harrowgate council }
+      speech: "Every bank has left my high street. You own six thousand counters with a safe behind each one. I am no economist, but I know a bank when I am standing in it."
+      tags: [spending]
+      effects:
+        - { policy: postal_bank, to: true }
+        - { indicator: debt, by: 1, why: "The Post is given the capital it needs to take deposits and lend." }
+        - { indicator: administration, by: 2, why: "Six thousand counters can handle benefits, licences and tax as well as stamps." }
+        - { indicator: living, by: 2, why: "Towns the banks left have somewhere to pay in a cheque." }
+        - { faction: rural, by: 5, why: "The village post office is busier than it has been in thirty years." }
+        - { faction: business, by: -7, why: "The banks object to a rival that is not allowed to go bust." }
+      later:
+        - after: 30
+          headline: "Post bank publishes its first loan book: nine hundred tractors and one ambitious chip shop"
+          effects:
+            - { indicator: capacity, by: 2, why: "Small firms the banks ignored are borrowing from the Post." }
+            - { indicator: fiscal, by: -1, why: "The counters still lose money, now with a banking licence." }
+      headline: Post offices to become a public bank
+      result: The queue at the post office is now for mortgages. It moves at the same speed.
+
+    - id: merge
+      advocate: { name: "{minister:finance}", role: speaking in cabinet }
+      speech: "We own a bank that nobody trusts and a post office with no money. I propose we introduce them."
+      when: { policy: aldermoor_public, is: true }
+      tags: []
+      effects:
+        - { policy: postal_bank, to: true }
+        - { indicator: fiscal, by: 3, why: "Aldermoor's branches close and its accounts move to post office counters." }
+        - { indicator: administration, by: 2, why: "The state runs one network of counters where it had two." }
+        - { indicator: employment, by: -3, why: "Bank branch staff are let go as the post office counters take over." }
+        - { faction: rural, by: 6, why: "The village post office has a bank inside it and a reason to stay open." }
+        - { faction: labour, by: -3, why: "The bank staff's union agreement did not survive the move." }
+        - { minister: finance, by: 6, why: "The Finance Minister disposed of two embarrassments with one announcement." }
+      headline: State bank to be folded into the Post
+      result: Aldermoor's name comes down from four hundred branches. The post offices decline to put it up.
+
+- id: high-street
+  title: Everything Must Go
+  description: >-
+    One shop in six on {nation}'s high streets is empty. Shops pay a property tax by the square
+    metre, and the warehouses that deliver to their customers' doors pay a fraction of it, on land
+    outside town. Dunmoor's last ironmonger has put a notice in the window. It is quite long.
+  tags: [business, tax]
+  when: { policy: online_sales_levy, is: false }
+  options:
+    - id: parcel-levy
+      advocate: { name: Winifred Markham, role: ironmonger and chair of the Federation of Small Traders }
+      speech: "Put a few pence on every parcel and take it off my rates. I have sold screws singly for thirty years. I would like to lose to a van on level ground."
+      tags: []
+      effects:
+        - { policy: online_sales_levy, to: true }
+        - { indicator: employment, by: 2, why: "Small shops that were about to close are keeping their staff." }
+        - { indicator: living, by: -2, why: "Everything ordered online costs a little more at the door." }
+        - { faction: rural, by: 3, why: "Market towns keep the shops they still have." }
+        - { faction: business, by: -4, why: "The Chamber's largest members are the ones with the warehouses." }
+        - { faction: youth, by: -5, why: "The young buy everything online and now subsidise shops they have never entered." }
+      headline: Levy on parcels to pay for lower shop rates
+      result: Retailers respond by sending each order as one parcel. A customer in Dunmoor receives a sofa with a toothbrush taped to it.
+
+    - id: go-online
+      advocate: { name: Tomas Reiker, role: head of policy at Scoot }
+      speech: "The high street is not dying. It is relocating to people's phones. Help the shops follow it. We have a platform for that, and a commission."
+      tags: [growth]
+      effects:
+        - { indicator: fiscal, by: -1, why: "Small shops get a grant to start selling online." }
+        - { indicator: capacity, by: 2, why: "Shops that take the grant are selling to the whole country from a back room." }
+        - { indicator: employment, by: -2, why: "A shop that sells from a back room needs nobody at the till." }
+        - { faction: business, by: 6, why: "The platforms gain several thousand shops as customers, at public expense." }
+        - { faction: rural, by: -2, why: "The shopfronts in market towns stay dark." }
+      later:
+        - after: 25
+          headline: Scoot raises its commission on small shops to "reflect the value of the platform"
+          effects:
+            - { indicator: inequality, by: 2, why: "A third of every small shop's online takings goes to the platform." }
+      headline: Grants to move high street shops online
+      result: The ironmonger now sells nationwide. Her best seller is the notice from the window, as a print.
+
+    - id: convert
+      advocate: { name: Garrick Hume, role: director of the Homebuilders' Federation }
+      speech: "Nobody wants the shops and everybody wants flats. Let us convert them without planning permission. It is practically recycling."
+      tags: [growth]
+      effects:
+        - { indicator: living, by: 3, why: "Empty shops are becoming flats in the middle of towns." }
+        - { indicator: capacity, by: 2, why: "Builders have work that needs no new land." }
+        - { indicator: employment, by: -2, why: "A shop converted to a flat does not go back to being a shop." }
+        - { faction: youth, by: 5, why: "A flat in an old shop is the cheapest new home on the market." }
+        - { faction: grey, by: -7, why: "Older residents are losing the last shops they could walk to." }
+      headline: Empty shops may be turned into flats without permission
+      result: The former ironmonger's is advertised as a characterful studio with original shelving.
+
+    - id: revalue
+      advocate: { name: Dame Philippa Wace, role: cabinet secretary }
+      speech: "The rates are set on a valuation from eleven years ago, when the shops were worth something. We might revalue them annually. I accept that it is not an exciting proposal. That is its chief merit."
+      tags: []
+      effects:
+        - { indicator: administration, by: 2, why: "The valuation office reassesses every commercial property each year." }
+        - { indicator: fiscal, by: -2, why: "Shops in declining towns pay rates on what they are worth now." }
+        - { faction: rural, by: 3, why: "Rates on market town shops fall by a third." }
+        - { faction: business, by: -4, why: "Firms on the capital's best streets get a larger bill." }
+      headline: Shop rates to be revalued every year
+      result: Rates fall in Dunmoor and rise in {capital}, where the outrage is better connected.
+
+- id: tax-gap
+  title: Evasive Action
+  description: >-
+    The tax office estimates that a tenth of what is owed in {nation} is never paid. It cannot be
+    more precise, because the team that produced the estimate was cut last year to save money.
+  tags: [tax, government]
+  when: { policy: flat_tax, is: false }
+  options:
+    - id: inspectors
+      advocate: { name: Dame Philippa Wace, role: cabinet secretary }
+      speech: "Every tax inspector brings in eleven times their salary. I mention it annually. It is already in my leaving speech."
+      tags: [spending]
+      effects:
+        - { indicator: fiscal, by: -2, why: "Two thousand tax inspectors are hired and trained before they collect anything." }
+        - { indicator: administration, by: 3, why: "The tax office can answer its telephone and open its post." }
+        - { faction: mandarins, by: 4, why: "The civil service was given staff where it expected a target." }
+        - { faction: business, by: -7, why: "The Chamber's members are being asked about years they regarded as closed." }
+      later:
+        - after: 30
+          headline: New inspectors recover a year's unpaid tax, a surprising share of it from dentists
+          effects:
+            - { indicator: fiscal, by: 6, why: "The inspectors are bringing in several times what they cost." }
+      headline: Two thousand tax inspectors to be hired
+      result: The new inspectors begin with the easiest cases. Window cleaners nationwide report a difficult month.
+
+    - id: flat-rate
+      advocate: { name: Idris Monk, role: fellow of the Free Enterprise Forum }
+      speech: "People avoid tax because the code is nine thousand pages long and the rates are an insult. One low rate, no exemptions. Nobody hides from a bill they can afford."
+      tags: []
+      effects:
+        - { policy: flat_tax, to: true }
+        - { indicator: administration, by: 2, why: "A tax return fits on a postcard, and the tax office can check a postcard." }
+        - { indicator: capacity, by: 2, why: "Money that was parked abroad is being declared and invested at home." }
+        - { indicator: inequality, by: 5, why: "The highest earners pay the same rate as their cleaners." }
+        - { indicator: fiscal, by: -2, why: "The single rate brings in less than the top rates did." }
+        - { faction: business, by: 11, why: "The Chamber has wanted this since before it had a building." }
+        - { faction: labour, by: -6, why: "The unions' members got a simpler form and their employers got a tax cut." }
+      headline: Single flat rate of income tax introduced
+      result: The tax return now fits on a postcard. A consultancy opens to help people fill in the postcard.
+
+    - id: amnesty
+      advocate: { name: Sir Anselm Roke, role: chair of the Chamber }
+      speech: "A great many of my members have made honest mistakes, over many years, all in the same direction. Offer them a clean slate at a modest rate and you will be surprised what turns up."
+      tags: []
+      effects:
+        - { indicator: fiscal, by: 6, why: "Undeclared money is brought home and taxed once, at a reduced rate." }
+        - { indicator: legitimacy, by: -2, why: "People who paid in full watched those who had not get a discount." }
+        - { indicator: inequality, by: 1, why: "The discount went to people with something to declare." }
+        - { faction: business, by: 8, why: "The Chamber's members slept well for the first time in several tax years." }
+        - { faction: labour, by: -4, why: "The unions' members are taxed before they are paid and were offered no discount." }
+      later:
+        - after: 30
+          headline: Amnesty closes; undeclared income rises as taxpayers wait for the next one
+          effects:
+            - { indicator: fiscal, by: -2, why: "People have stopped declaring in the hope of a second amnesty." }
+      headline: Tax amnesty for undeclared income
+      result: The amnesty form has a box for "reason for late declaration". The commonest entry is "forgot".
+
+    - id: read-the-ledger
+      advocate: { name: Governor Helene Strand, role: governor of the central bank }
+      speech: "Every payment made in digital {currency} is already on my ledger. I have never looked. I am only saying where the ledger is kept."
+      when: { flag: digital_ledger_open }
+      tags: [surveillance]
+      effects:
+        - { indicator: fiscal, by: 7, why: "The tax office matches every digital payment against every tax return." }
+        - { indicator: administration, by: 2, why: "Tax returns arrive already filled in." }
+        - { indicator: liberty, by: -3, why: "The state now reads what everyone bought, and from whom." }
+        - { faction: youth, by: -6, why: "The young used the digital {currency} most and feel the most read." }
+        - { faction: business, by: -4, why: "The Chamber's members find their takings were known before they declared them." }
+      headline: Tax office given access to digital {currency} records
+      result: A plumber in Dunmoor receives his completed return, a note commending his honesty, and a question about a boat.

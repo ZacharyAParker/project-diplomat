@@ -1,0 +1,7 @@
+- id: fortress_economy
+  name: Fortress Economy
+  description: "{nation} keeps foreign goods out and its own prices in. Opening a gate in the wall is taken as surrender."
+  earn: { all: [{ policy: steel_tariff, is: true }, { any: [{ flag: trade_war }, { policy: price_caps, is: true }] }] }
+  lose: { policy: steel_tariff, is: false }
+  opposes: [free_trade]
+  penalty: 3

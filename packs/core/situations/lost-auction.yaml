@@ -1,0 +1,203 @@
+id: lost-auction
+title: The Failed Auction
+description: >-
+  The Treasury tried to sell ten-year bonds this morning and a third of them found no buyer. This
+  has not happened to {nation} before. The lenders, the ratings agencies and the central bank have
+  each been in touch, and each has a short list of things it would like.
+when: { indicator: debt, gte: 66 }
+gauge: Lenders' confidence
+start: 40
+pressures:
+  - { tag: austerity, by: 5 }
+  - { tag: growth, by: 3 }
+  - { tag: spending, by: -5 }
+
+stages:
+  - title: The Morning After
+    description: >-
+      The unsold bonds are sitting on the Treasury's own books and the {currency} has had a bad
+      morning. The dealers want to hear something before the markets open tomorrow.
+    options:
+      - id: promise-borrowing-limit
+        advocate: { name: Lorne Abbasi, role: Treasury official }
+        speech: "Announce a ceiling on borrowing tonight, with a number in it. The number matters less than the fact that we said one."
+        tags: [austerity]
+        effects:
+          - { situation: lost-auction, by: 10, why: "The dealers were given a number and have decided to believe it for now." }
+          - { faction: labour, by: -4, why: "The Unions can work out whose pay a borrowing ceiling comes out of." }
+          - { faction: grey, by: -3, why: "The Grey Vote heard the word ceiling and thought of pensions." }
+          - { minister: finance, by: 3, why: "The Treasury's line became the government's line." }
+        headline: Government sets a ceiling on borrowing
+        result: The statement is four sentences long. The dealers read it twice, looking for the fifth.
+
+      - id: sell-at-any-rate
+        advocate: { name: "{minister:finance}", role: speaking in cabinet }
+        speech: "Run the auction again and take whatever rate clears it. Dear money is still money."
+        effects:
+          - { situation: lost-auction, by: 3, why: "The bonds sold at the second attempt, at a rate that made the news." }
+          - { indicator: fiscal, by: -3, why: "The new bonds pay half as much again in interest as the old ones." }
+        headline: Bonds sold at the highest rate in a generation
+        result: The auction is covered. The Finance Minister calls this a vote of confidence, with a straight face.
+
+      - id: blame-the-speculators
+        advocate: { name: Maren Okafor, role: economist at the Fair Share Institute }
+        speech: "Three funds are betting against this country and telling their friends. Name them, and tax the trade."
+        effects:
+          - { situation: lost-auction, by: -8, why: "Lenders who had no view on {nation} now have one." }
+          - { faction: labour, by: 3, why: "The Unions enjoyed hearing bankers named on the news." }
+          - { faction: youth, by: 3, why: "The Young enjoyed it too." }
+          - { faction: business, by: -5, why: "The Chamber's members were described as wreckers from the dispatch box." }
+        headline: "{leader} blames speculators for failed bond sale"
+        result: The three funds issue a joint statement thanking the government for the publicity.
+
+  - title: The Rating
+    description: >-
+      A ratings agency has put {nation} on watch for a downgrade. Two analysts have arrived in
+      {capital} with one suitcase each. They would like to see the books, including the parts that
+      are kept in a different building.
+    options:
+      - id: open-the-books
+        advocate: { name: Dame Philippa Wace, role: cabinet secretary }
+        speech: "Show them everything, including what we have not shown parliament. They will find it anyway, and they mark down for hiding things."
+        effects:
+          - { situation: lost-auction, by: 8, why: "The analysts found nothing they had not already assumed, and said so." }
+          - { indicator: legitimacy, by: -2, why: "Two visitors with suitcases have seen figures that parliament has not." }
+          - { faction: mandarins, by: -3, why: "The Mandarins had to explain their filing to strangers." }
+        headline: Ratings agency given the run of the Treasury
+        result: The rating is held. The analysts leave a note complimenting the canteen.
+
+      - id: tidy-the-books
+        advocate: { name: "{minister:finance}", role: speaking in cabinet }
+        speech: "Move the hospital building programme off the balance sheet before they arrive. It is quite legal. I have asked."
+        effects:
+          - { situation: lost-auction, by: 3, why: "The headline debt figure looked better on the day the analysts read it." }
+          - { minister: finance, by: 2, why: "The Finance Minister got a tidier set of accounts." }
+          - { flag: debt_moved_off_books }
+        later:
+          - after: 20
+            headline: Paper finds the hospitals the Treasury hid
+            effects:
+              - { indicator: legitimacy, by: -4, why: "A newspaper found a building programme that had been moved off the books for the analysts' visit." }
+        headline: Treasury restates the national accounts
+        result: The debt falls by a tenth overnight. No hospital has moved.
+
+      - id: send-them-home
+        advocate: { name: Petra Hallam, role: general secretary of the rail union }
+        speech: "These people gave top marks to every bank that fell over. Send them home and tell them why."
+        effects:
+          - { situation: lost-auction, by: -7, why: "The agency cut the rating from the departure lounge." }
+          - { faction: labour, by: 3, why: "The Unions liked seeing the men with suitcases shown the door." }
+          - { indicator: legitimacy, by: 2, why: "Telling a ratings agency where to go is popular with nearly everyone who does not lend money." }
+        headline: Ratings analysts refused entry to the Treasury
+        result: The downgrade arrives by fax. Nobody is sure where they found a fax machine.
+
+  - title: The Governor
+    description: >-
+      The central bank could buy the unsold bonds itself and end the panic by tea-time. Governor
+      Helene Strand is willing. She would like something in writing first.
+    options:
+      - id: sign-the-fiscal-rule
+        advocate: { name: Governor Helene Strand, role: governor of the central bank }
+        speech: "I will buy the bonds. You will sign a rule that says the budget balances within five years, and you will mean it."
+        tags: [austerity]
+        effects:
+          - { situation: lost-auction, by: 12, why: "The central bank is buying and the lenders have stopped selling." }
+          - { faction: labour, by: -4, why: "The Unions see five years of pay restraint with a signature on it." }
+          - { faction: youth, by: -3, why: "The Young have been told what cannot be afforded until they are older." }
+          - { indicator: legitimacy, by: -1, why: "The budget for the next five years was agreed with someone nobody voted for." }
+          - { flag: fiscal_rule_signed }
+        headline: Government signs fiscal rule as central bank steps in
+        result: The Governor keeps the signed copy in her own safe. She has had the combination changed.
+
+      - id: governor-says-ready
+        advocate: { name: Lorne Abbasi, role: Treasury official }
+        speech: "Ask her for a sentence, not a purchase. 'The bank stands ready.' It costs her nothing and us nothing, and it might do."
+        effects:
+          - { situation: lost-auction, by: 4, why: "The Governor said the bank stands ready. Lenders are waiting to see for what." }
+          - { faction: mandarins, by: 2, why: "The Mandarins admire a crisis handled with one sentence." }
+        headline: Central bank "stands ready", says Governor
+        result: The sentence is analysed for two days. Opinion divides on the word "ready".
+
+      - id: order-the-bank-to-buy
+        advocate: { name: Maren Okafor, role: economist at the Fair Share Institute }
+        speech: "It is the country's bank. Instruct it to buy the debt, with no conditions. That is what a central bank is for."
+        effects:
+          - { situation: lost-auction, by: -6, why: "Lenders do not want bonds from a country that prints the money to buy its own." }
+          - { indicator: debt, by: -3, why: "The central bank bought a slice of the debt with money it made that morning." }
+          - { indicator: living, by: -3, why: "The {currency} fell and everything imported costs more." }
+          - { minister: finance, by: -4, why: "The Finance Minister had to give the Governor the order in person." }
+          - { flag: central_bank_overruled }
+        headline: Central bank ordered to buy government debt
+        result: Governor Strand complies, in writing, and sends the newspapers a copy of the letter.
+
+  - title: The Package
+    description: >-
+      Statements and signatures have bought a week. The lenders now want to see where the money
+      will come from, and there are three places it could.
+    options:
+      - id: cut-across-the-board
+        advocate: { name: Lorne Abbasi, role: Treasury official }
+        speech: "A twentieth off every department, no exceptions. It is crude, and they can see it from abroad, which is the point."
+        tags: [austerity]
+        effects:
+          - { situation: lost-auction, by: 10, why: "Lenders can count a cut, and they have counted this one." }
+          - { indicator: fiscal, by: 6, why: "Every department is spending a twentieth less." }
+          - { indicator: health, by: -3, why: "Hospitals have closed wards to meet the number." }
+          - { indicator: education, by: -2, why: "Schools have let their supply teachers go." }
+          - { faction: labour, by: -6, why: "The Unions' members are the twentieth." }
+        headline: Every department's budget cut by a twentieth
+        result: Each ministry is asked to find its own savings. Each proposes closing the thing people like most.
+
+      - id: levy-on-fortunes
+        advocate: { name: Maren Okafor, role: economist at the Fair Share Institute }
+        speech: "A single emergency levy on the largest fortunes. The people who hold the bonds can help pay them off."
+        tags: [redistribution]
+        effects:
+          - { situation: lost-auction, by: 6, why: "It is money, and lenders are less particular about where it comes from than they pretend." }
+          - { indicator: fiscal, by: 5, why: "A one-off levy on the largest fortunes came in above forecast." }
+          - { indicator: inequality, by: -2, why: "The very top is a little less far away than it was." }
+          - { faction: business, by: -8, why: "The Chamber's members received a bill with a date on it." }
+        headline: Emergency levy on large fortunes
+        result: Several fortunes turn out to live abroad. The rest pay, and write to the newspapers.
+
+      - id: borrow-to-grow
+        advocate: { name: Sir Anselm Roke, role: chair of the Chamber }
+        speech: "Cut nothing. Borrow more and build roads, ports and power stations with it. A bigger economy makes a smaller debt."
+        tags: [spending, growth]
+        effects:
+          - { situation: lost-auction, by: -8, why: "The answer to a failed bond sale was a larger bond sale." }
+          - { indicator: fiscal, by: -4, why: "A building programme paid for at the new, higher rate." }
+          - { indicator: capacity, by: 3, why: "The roads and ports are being built all the same." }
+          - { faction: business, by: 3, why: "The Chamber's members have the contracts." }
+        headline: Government answers debt crisis with a building programme
+        result: The first road is announced the same day. It leads to Kessel, where the bonds are printed.
+
+outcomes:
+  - gte: 65
+    headline: The lenders come back
+    text: >-
+      The next auction is covered twice over. The same dealers who would not buy a month ago explain
+      on television that they never doubted {nation} for a moment.
+    effects:
+      - { indicator: debt, by: -3, why: "Old debt was refinanced at the lower rate while the lenders were in a good mood." }
+      - { indicator: legitimacy, by: 3, why: "The panic passed and the government was seen to have ended it." }
+      - { flag: bond_crisis_calmed }
+  - gte: 40
+    headline: The debt is sold, at a price
+    text: >-
+      The bonds find buyers in the end. They pay a rate that will be felt in every budget for ten
+      years, and the Treasury has stopped announcing auctions in advance.
+    effects:
+      - { indicator: fiscal, by: -4, why: "Everything the country borrows now costs more than it did." }
+      - { indicator: legitimacy, by: -1, why: "The country was seen to be short of money and of friends." }
+      - { flag: bond_crisis_costly }
+  - headline: The rescue arrives, with conditions
+    text: >-
+      Nobody will lend. An international fund will, and its inspectors take two floors of the
+      Treasury and the better car park. Budgets are now sent to them first.
+    effects:
+      - { indicator: legitimacy, by: -10, why: "The budget is now written in {capital} and approved somewhere else." }
+      - { indicator: living, by: -5, why: "The rescue's conditions arrived as dearer food, dearer fuel and smaller pensions." }
+      - { indicator: administration, by: -3, why: "Every ministry needs a signature from the fund's inspectors before it spends." }
+      - { faction: grey, by: -8, why: "The Grey Vote's pensions were on the first page of the conditions." }
+      - { flag: bailout_programme }

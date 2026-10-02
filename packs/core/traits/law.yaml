@@ -1,0 +1,6 @@
+- id: firm_hand
+  name: Firm Hand
+  description: The police carry guns and the courts have dispensed with juries. Mercy from this government now looks like a change of management.
+  earn: { all: [{ policy: armed_police, is: true }, { policy: judge_only_trials, is: true }] }
+  opposes: [lenient]
+  penalty: 3

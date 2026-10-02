@@ -4,6 +4,7 @@
     A survey finds the average fourteen-year-old in {nation} checks a phone ninety times during the
     school day. Teachers suspect the figure is low, because the survey was conducted by phone.
   tags: [education, technology]
+  when: { policy: phone_ban_schools, is: false }
   options:
     - id: ban
       advocate: { name: Agnes Whitlow, role: head teacher }
@@ -11,9 +12,9 @@
       tags: [paternalist]
       effects:
         - { policy: phone_ban_schools, to: true }
-        - { indicator: education, by: 4, why: "Lessons are being listened to, in some cases for the first time." }
-        - { indicator: liberty, by: -2, why: "A national rule now governs what is in a child's pocket." }
-        - { faction: youth, by: -6, why: "The young regard it as an act of war." }
+        - { indicator: education, by: 3, why: "Lessons are being listened to, in some cases for the first time." }
+        - { indicator: liberty, by: -1, why: "A national rule now governs what is in a child's pocket." }
+        - { faction: youth, by: -5, why: "The young regard it as an act of war." }
         - { faction: grey, by: 4, why: "Grandparents approve of anything that takes a phone away." }
       headline: Phones banned in schools
       result: A thriving black market in decoy phones emerges within the week.
@@ -25,7 +26,7 @@
       effects:
         - { indicator: education, by: 1, why: "Some schools ban phones and see results." }
         - { indicator: inequality, by: 2, why: "The schools that ban them are mostly the ones already doing well." }
-        - { faction: mandarins, by: 2, why: "The civil service prefers guidance to law." }
+        - { faction: mandarins, by: 3, why: "The civil service prefers guidance to law." }
         - { minister: education, by: 6, why: "The Education Minister's line carried." }
       headline: Phone rules left to head teachers
       result: Parents begin choosing schools by phone policy, then complaining about the one they chose.
@@ -35,10 +36,10 @@
       speech: "The phone is the most powerful learning device ever made. Ban it and you are teaching children for a world that has gone."
       tags: [permissive]
       effects:
-        - { indicator: fiscal, by: -2, why: "Schools get a grant for educational apps and the wifi to run them." }
+        - { indicator: fiscal, by: -1, why: "Schools get a grant for educational apps and the wifi to run them." }
         - { indicator: education, by: -3, why: "The apps are used for about a week." }
-        - { faction: youth, by: 5, why: "The young cannot believe their luck." }
-        - { faction: business, by: 3, why: "The technology firms have a new market." }
+        - { faction: youth, by: 9, why: "The young cannot believe their luck." }
+        - { faction: business, by: 5, why: "The technology firms have a new market." }
       headline: Phones to be used in lessons
       result: The first approved educational app is found to contain a slot machine.
 
@@ -49,6 +50,7 @@
     age of eleven, and proposes a levy on sweetened drinks. The drinks industry proposes a
     conversation about personal responsibility.
   tags: [health, tax]
+  when: { policy: sugar_tax, is: false }
   options:
     - id: levy
       advocate: { name: Dr Imogen Sayer, role: chief medical officer }
@@ -57,9 +59,9 @@
       effects:
         - { policy: sugar_tax, to: true }
         - { indicator: health, by: 4, why: "Manufacturers cut the sugar to stay under the levy." }
-        - { indicator: fiscal, by: 2, why: "The levy brings in money from the drinks that did not change." }
+        - { indicator: fiscal, by: 3, why: "The levy brings in money from the drinks that did not change." }
         - { indicator: inequality, by: 2, why: "It takes the largest share from the smallest incomes." }
-        - { faction: business, by: -5, why: "The drinks industry has many friends in the Chamber." }
+        - { faction: business, by: -7, why: "The drinks industry has many friends in the Chamber." }
       headline: Sugar levy introduced
       result: Fizz relaunches as Fizz Zero. It tastes of regret and sells extremely well.
 
@@ -68,8 +70,8 @@
       speech: "Consumers are adults. Put clearer labels on the can and trust them. It has the advantage of costing us nothing."
       tags: [permissive]
       effects:
-        - { indicator: liberty, by: 1, why: "Nobody is told what to drink." }
-        - { faction: business, by: 3, why: "The industry got the option it wrote." }
+        - { indicator: liberty, by: 2, why: "Nobody is told what to drink." }
+        - { faction: business, by: 5, why: "The industry got the option it wrote." }
         - { indicator: health, by: -2, why: "The labels are accurate and nobody reads them." }
         - { minister: health, by: -8, why: "The Health Minister backed the levy in public." }
       headline: Clearer labels instead of a sugar levy
@@ -80,10 +82,10 @@
       speech: "Tax the can if you like. But the one meal you control is the one I serve at noon. Fund that properly."
       tags: [spending]
       effects:
-        - { indicator: fiscal, by: -4, why: "Free school lunches for every primary pupil cost real money." }
+        - { indicator: fiscal, by: -2, why: "Free school lunches for every primary pupil cost real money." }
         - { indicator: health, by: 3, why: "Every child gets one proper meal a day." }
         - { indicator: education, by: 2, why: "Fed children concentrate in the afternoon." }
-        - { faction: rural, by: 3, why: "The contracts specify local produce." }
+        - { faction: rural, by: 5, why: "The contracts specify local produce." }
       headline: Free school lunches for all primary pupils
       result: A generation learns to distrust any vegetable described as seasonal.
 
@@ -94,6 +96,7 @@
     the poorest districts have fallen for the third year. The universities would like more money,
     and do not mind where it comes from.
   tags: [education]
+  when: { policy: tuition_fees, is: true }
   options:
     - id: abolish
       advocate: { name: Kasia Dunmore, role: president of the students' union }
@@ -101,9 +104,9 @@
       tags: [spending, redistribution]
       effects:
         - { policy: tuition_fees, to: false }
-        - { indicator: fiscal, by: -7, why: "The Treasury now pays what students used to borrow." }
-        - { indicator: education, by: 4, why: "Applications from poorer districts recover." }
-        - { faction: youth, by: 10, why: "The single thing the young most wanted." }
+        - { indicator: fiscal, by: -4, why: "The Treasury now pays what students used to borrow." }
+        - { indicator: education, by: 3, why: "Applications from poorer districts recover." }
+        - { faction: youth, by: 13, why: "The single thing the young most wanted." }
         - { faction: grey, by: -3, why: "Pensioners suspect they are paying for it." }
       headline: Tuition fees abolished
       result: Students celebrate by taking out exactly the same loans, for rent.
@@ -113,10 +116,10 @@
       speech: "World-class universities cost world-class money. Lift the cap and let us charge what the education is worth."
       tags: [austerity]
       effects:
-        - { indicator: fiscal, by: 3, why: "Universities need less from the Treasury." }
+        - { indicator: fiscal, by: 5, why: "Universities need less from the Treasury." }
         - { indicator: capacity, by: 2, why: "Research budgets grow with the fee income." }
         - { indicator: inequality, by: 3, why: "The most expensive courses are now the ones that lead to the best-paid work." }
-        - { faction: youth, by: -9, why: "The young were hoping for the opposite." }
+        - { faction: youth, by: -11, why: "The young were hoping for the opposite." }
       headline: Cap on tuition fees lifted
       result: The vice-chancellor's salary rises in line with his university's ambition.
 
@@ -127,9 +130,9 @@
       effects:
         - { policy: tuition_fees, to: false }
         - { indicator: inequality, by: -2, why: "High-earning graduates pay more than low-earning ones." }
-        - { indicator: fiscal, by: -2, why: "The tax takes years to bring in what fees did." }
-        - { indicator: administration, by: -3, why: "The tax office has to track every graduate for thirty years." }
-        - { faction: youth, by: 4, why: "No debt, though the young read the small print." }
+        - { indicator: fiscal, by: -1, why: "The tax takes years to bring in what fees did." }
+        - { indicator: administration, by: -4, why: "The tax office has to track every graduate for thirty years." }
+        - { faction: youth, by: 7, why: "No debt, though the young read the small print." }
       headline: Fees replaced with a graduate tax
       result: Several thousand graduates discover a sudden wish to work abroad.
 
@@ -139,6 +142,7 @@
     One school in five in {nation} is run by a religious body and paid for by the state. An
     inspection has found that a handful teach the age of the Earth as a matter of opinion.
   tags: [education, religion]
+  when: { policy: faith_schools_funded, is: true }
   options:
     - id: defund
       advocate: { name: Rufus Hale, role: civil liberties barrister }
@@ -147,8 +151,8 @@
       effects:
         - { policy: faith_schools_funded, to: false }
         - { indicator: education, by: 2, why: "Every state-funded school now teaches the same curriculum." }
-        - { indicator: administration, by: -4, why: "The state has to take over or replace a fifth of all schools." }
-        - { faction: faithful, by: -12, why: "The Congregations see it as an attack on their existence." }
+        - { indicator: administration, by: -5, why: "The state has to take over or replace a fifth of all schools." }
+        - { faction: faithful, by: -11, why: "The Congregations see it as an attack on their existence." }
         - { faction: youth, by: 3, why: "The young are the least religious generation on record." }
       headline: State funding withdrawn from faith schools
       result: Church halls fill with meetings. The hymns are noticeably angrier.
@@ -160,7 +164,7 @@
       effects:
         - { indicator: education, by: 3, why: "The handful of failing schools are made to teach the curriculum." }
         - { indicator: administration, by: -2, why: "More inspectors, more inspections." }
-        - { faction: faithful, by: -4, why: "The Congregations resent being inspected on doctrine." }
+        - { faction: faithful, by: -5, why: "The Congregations resent being inspected on doctrine." }
         - { minister: education, by: 5, why: "A compromise with the Education Minister's name on it." }
       headline: Faith schools keep funding but face inspection
       result: One school amends its science syllabus to say the Earth is "at least" six thousand years old.
@@ -170,9 +174,9 @@
       speech: "We educated this nation's children for four centuries before there was a ministry. A little humility would suit you."
       tags: []
       effects:
-        - { faction: faithful, by: 7, why: "The Congregations were shown respect." }
+        - { faction: faithful, by: 13, why: "The Congregations were shown respect." }
         - { indicator: education, by: -2, why: "The failing schools carry on as before." }
-        - { indicator: legitimacy, by: -2, why: "The inspection report was commissioned, published and ignored." }
+        - { indicator: legitimacy, by: -1, why: "The inspection report was commissioned, published and ignored." }
       headline: No change for faith schools
       result: The inspectors' report is filed under miscellaneous revelation.
 
@@ -189,10 +193,10 @@
       speech: "We are the only newsroom in the country that nobody owns. That is worth a sandwich."
       tags: []
       effects:
-        - { indicator: legitimacy, by: 2, why: "A broadcaster the government does not control still reports on it." }
+        - { indicator: legitimacy, by: 4, why: "A broadcaster the government does not control still reports on it." }
         - { indicator: education, by: 1, why: "Its schools programming is used in most classrooms." }
         - { faction: grey, by: 4, why: "Pensioners watch it more than anyone." }
-        - { faction: business, by: -4, why: "Commercial rivals wanted its audience." }
+        - { faction: business, by: -6, why: "Commercial rivals wanted its audience." }
         - { faction: youth, by: -2, why: "The young pay the fee and watch something else." }
       headline: Licence fee renewed
       result: The broadcaster marks the occasion with a four-part drama about a broadcaster under threat.
@@ -205,7 +209,7 @@
         - { policy: public_broadcaster, to: false }
         - { indicator: living, by: 1, why: "Households keep the price of the licence." }
         - { faction: business, by: 5, why: "Commercial broadcasters inherit the audience." }
-        - { faction: grey, by: -8, why: "Pensioners lose the channels they watch, or pay more for them." }
+        - { faction: grey, by: -11, why: "Pensioners lose the channels they watch, or pay more for them." }
         - { indicator: education, by: -2, why: "The schools programming did not survive the business plan." }
       headline: Licence fee scrapped; broadcaster goes subscription
       result: The nine o'clock news now opens with a word from its sponsor.
@@ -215,10 +219,10 @@
       speech: "Abolish the fee and fund it from general taxation. Fairer for the poor. And we would naturally respect its independence."
       tags: [spending]
       effects:
-        - { indicator: fiscal, by: -3, why: "The broadcaster is now a line in the budget." }
+        - { indicator: fiscal, by: -2, why: "The broadcaster is now a line in the budget." }
         - { indicator: inequality, by: -1, why: "A flat fee was replaced by progressive tax." }
-        - { indicator: liberty, by: -3, why: "The newsroom's budget is now set each year by the people it reports on." }
-        - { faction: mandarins, by: 3, why: "The civil service gained a lever." }
+        - { indicator: liberty, by: -2, why: "The newsroom's budget is now set each year by the people it reports on." }
+        - { faction: mandarins, by: 4, why: "The civil service gained a lever." }
       headline: Broadcaster to be funded directly by government
       result: Coverage of the Treasury becomes noticeably more respectful around budget time.
 
@@ -237,10 +241,10 @@
       effects:
         - { policy: pension_age, to: 68 }
         - { flag: pension_age_raised }
-        - { indicator: fiscal, by: 7, why: "Three fewer years of pension for everyone who has not yet retired." }
+        - { indicator: fiscal, by: 8, why: "Three fewer years of pension for everyone who has not yet retired." }
         - { indicator: capacity, by: 2, why: "Older workers stay in their jobs." }
-        - { faction: grey, by: -6, why: "Current pensioners are unaffected and angry anyway." }
-        - { faction: labour, by: -9, why: "Three more years on the tools, for people whose knees are already gone." }
+        - { faction: grey, by: -8, why: "Current pensioners are unaffected and angry anyway." }
+        - { faction: labour, by: -13, why: "Three more years on the tools, for people whose knees are already gone." }
       headline: Pension age to rise to 68
       result: A man of sixty-four is interviewed on every channel. He is not pleased.
 
@@ -249,10 +253,10 @@
       speech: "We paid in for forty years on a promise. Find the money somewhere else."
       tags: [spending]
       effects:
-        - { indicator: fiscal, by: -5, why: "The pension bill grows every year people keep living." }
-        - { faction: grey, by: 8, why: "The promise was kept." }
-        - { faction: labour, by: 4, why: "The unions fought for sixty-five in the first place." }
-        - { faction: youth, by: -5, why: "The young are paying for a pension they do not expect to get." }
+        - { indicator: fiscal, by: -3, why: "The pension bill grows every year people keep living." }
+        - { faction: grey, by: 11, why: "Sixty-five stays sixty-five, as printed in the pension book." }
+        - { faction: labour, by: 6, why: "The unions fought for sixty-five in the first place." }
+        - { faction: youth, by: -4, why: "The young are paying for a pension they do not expect to get." }
       promise:
         id: pension-age-held
         text: The pension age stays at 65
@@ -269,10 +273,10 @@
       speech: "Keep sixty-five. Stop paying the state pension to people with a yacht."
       tags: [redistribution]
       effects:
-        - { indicator: fiscal, by: 3, why: "The wealthiest tenth of pensioners no longer draw a state pension." }
+        - { indicator: fiscal, by: 5, why: "The wealthiest tenth of pensioners no longer draw a state pension." }
         - { indicator: inequality, by: -2, why: "The saving comes entirely from the top." }
-        - { indicator: administration, by: -3, why: "Every pension claim now needs an assessment of means." }
-        - { faction: grey, by: -4, why: "Even pensioners who keep it dislike being assessed." }
+        - { indicator: administration, by: -4, why: "Every pension claim now needs an assessment of means." }
+        - { faction: grey, by: -5, why: "Even pensioners who keep it dislike being assessed." }
       headline: State pension to be means-tested
       result: Sales of small, modest-looking yachts are reported to be strong.
 
@@ -290,8 +294,8 @@
       speech: "We knew this would be unpopular. If we fold now, we fold on everything."
       tags: []
       effects:
-        - { indicator: legitimacy, by: -3, why: "The largest march in a decade was ignored." }
-        - { faction: grey, by: -5, why: "Pensioners were not listened to." }
+        - { indicator: legitimacy, by: -2, why: "The largest march in a decade was ignored." }
+        - { faction: grey, by: -7, why: "Two hundred thousand pensioners crossed the capital on foot and were not asked in." }
         - { faction: business, by: 4, why: "The Chamber admires a government that does not blink." }
         - { minister: finance, by: 6, why: "The Finance Minister's reform survived." }
       headline: Government refuses to back down on pension age
@@ -302,10 +306,10 @@
       speech: "Exempt the manual trades. A roofer of sixty-seven is not a policy, it is an accident waiting."
       tags: [pro_labour]
       effects:
-        - { indicator: fiscal, by: -3, why: "The exemption gives back part of the saving." }
+        - { indicator: fiscal, by: -2, why: "The exemption gives back part of the saving." }
         - { indicator: administration, by: -2, why: "Someone has to decide which jobs count as manual." }
-        - { faction: labour, by: 6, why: "The unions won something concrete." }
-        - { faction: grey, by: 2, why: "A concession, at least." }
+        - { faction: labour, by: 8, why: "The unions won something concrete." }
+        - { faction: grey, by: 3, why: "Pensioners count any retreat as a start." }
       headline: Manual workers exempted from higher pension age
       result: The list of manual trades grows daily. It now includes, after lobbying, "senior management".
 
@@ -315,9 +319,9 @@
       tags: [spending]
       effects:
         - { policy: pension_age, to: 65 }
-        - { indicator: fiscal, by: -7, why: "The whole saving is given back." }
-        - { indicator: legitimacy, by: -4, why: "The government announced a reform and abandoned it within weeks." }
-        - { faction: grey, by: 9, why: "The Grey Vote has learned that marching works." }
+        - { indicator: fiscal, by: -4, why: "The whole saving is given back." }
+        - { indicator: legitimacy, by: -2, why: "The government announced a reform and abandoned it within weeks." }
+        - { faction: grey, by: 11, why: "The Grey Vote has learned that marching works." }
         - { minister: finance, by: -15, why: "The Finance Minister was overruled in public." }
       headline: Pension age U-turn
       result: The actuaries resubmit their report. The cover is still black.

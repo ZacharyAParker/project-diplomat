@@ -1,0 +1,6 @@
+- { id: judge_only_trials, name: Judge-only trials, description: All but the gravest charges are tried by a judge sitting alone. }
+- { id: cannabis_legal, name: Legal cannabis, description: Cannabis is sold in licensed shops and taxed. }
+- { id: bulk_interception, name: Bulk phone records, description: The Security Service keeps a record of every call made in the country. }
+- { id: citizenship_by_investment, name: Passports for investors, description: Citizenship can be had in return for a large investment. }
+- { id: civil_defence_corps, name: Civil defence corps, description: Trained volunteers in every district stand ready for the next flood or storm. }
+- { id: armed_police, name: Armed police, description: Every officer on patrol carries a pistol. }

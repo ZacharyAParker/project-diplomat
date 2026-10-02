@@ -1,0 +1,4 @@
+- { id: vaccine_mandate, name: School jab rule, description: A child needs the standard vaccinations to take up a school place. }
+- { id: tobacco_age_rising, name: Rising tobacco age, description: The age for buying tobacco goes up by a year every year. }
+- { id: free_childcare, name: Free nursery hours, description: The state pays for thirty hours of nursery a week from a child's first birthday. }
+- { id: sunday_trading, name: Sunday trading, description: Large shops may open on Sundays. }

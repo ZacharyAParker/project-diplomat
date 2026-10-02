@@ -1,0 +1,9 @@
+- { id: living_wage, name: Living wage, description: The minimum wage is set at what it costs to live. }
+- { id: aldermoor_public, name: State-owned bank, description: The state owns Aldermoor and everything Aldermoor owes. }
+- { id: bonus_cap, name: Bonus cap, description: Banks that have had public money may not pay bonuses. }
+- { id: steel_tariff, name: Steel tariff, description: Imported steel pays a duty at the dock. }
+- { id: tourist_levy, name: Visitor levy, description: Every hotel bed pays a nightly charge to the local council. }
+- { id: price_caps, name: Price caps, description: "The prices of bread, milk, eggs and butter are set by law." }
+- { id: postal_bank, name: Post bank, description: Post office counters take deposits and make loans. }
+- { id: online_sales_levy, name: Parcel levy, description: Every parcel delivered to a door pays a small charge. }
+- { id: flat_tax, name: Flat tax, description: "Everyone pays one rate of income tax, with no exemptions." }
