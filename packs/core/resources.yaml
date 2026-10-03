@@ -1,0 +1,24 @@
+- id: energy
+  name: Energy
+  need: { all: [{ policy: coal_phaseout, is: true }, { policy: nuclear_power, is: false }] }
+  surplus: { policy: nuclear_power, is: true }
+
+- id: food
+  name: Food
+  need: { any: [{ policy: farm_subsidies, is: false }, { faction: rural, lt: 35 }] }
+  surplus: { all: [{ policy: farm_subsidies, is: true }, { faction: rural, gte: 55 }] }
+
+- id: capital
+  name: Capital
+  need: { indicator: debt, gte: 62 }
+  surplus: { all: [{ indicator: debt, lt: 40 }, { indicator: fiscal, gte: 52 }] }
+
+- id: manufactures
+  name: Manufactured goods
+  need: { indicator: capacity, lt: 45 }
+  surplus: { indicator: capacity, gte: 62 }
+
+- id: workers
+  name: Workers
+  need: { indicator: employment, gte: 64 }
+  surplus: { indicator: employment, lt: 46 }

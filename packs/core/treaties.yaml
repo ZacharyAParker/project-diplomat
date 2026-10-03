@@ -1,0 +1,39 @@
+- id: energy-supply
+  name: Energy Agreement
+  description: Power and gas from a neighbour, paid for weekly, at a price agreed in advance.
+  headline: Power from {neighbour} keeps the lights on for another week
+  weekly:
+    - { indicator: capacity, by: 0.5, why: "Power from {neighbour} keeps the factories running at full shifts." }
+    - { indicator: fiscal, by: -1, why: "The weekly bill for {neighbour}'s power has been paid." }
+
+- id: food-supply
+  name: Grain Agreement
+  description: Grain and produce from a neighbour, duty free, in agreed quantities.
+  headline: Another week of {neighbour}'s grain in the bakeries
+  weekly:
+    - { indicator: living, by: 1, why: "Bread made with {neighbour}'s grain is cheaper than it was." }
+    - { faction: rural, by: -1, why: "Home farmers are being undercut by {neighbour}'s harvest." }
+
+- id: investment-pact
+  name: Investment Pact
+  description: A neighbour's money, invested in the nation's bonds and businesses, on terms.
+  headline: "{neighbour}'s money keeps working"
+  weekly:
+    - { indicator: capacity, by: 0.5, why: "Money from {neighbour} is building warehouses, wind farms and car parks." }
+    - { indicator: inequality, by: 1, why: "Most of the returns from {neighbour}'s money go to people who already had some." }
+
+- id: trade-agreement
+  name: Trade Agreement
+  description: Goods cross the border without tariffs or paperwork, both ways.
+  headline: Goods cross the border with {neighbour}, both ways
+  weekly:
+    - { indicator: capacity, by: 0.5, why: "Exporters can sell into {neighbour} without filling in a form." }
+    - { faction: labour, by: -1, why: "The unions say jobs are leaking across the border to {neighbour}." }
+
+- id: labour-mobility
+  name: Visa Scheme
+  description: Workers may go and work in a neighbour's country and send their wages home.
+  headline: Wages sent home from {neighbour}
+  weekly:
+    - { indicator: employment, by: 1, why: "People who could not find work at home are working in {neighbour}." }
+    - { faction: grey, by: -1, why: "Grandparents are seeing their grandchildren on a screen, in {neighbour}." }

@@ -1,0 +1,556 @@
+# Dilemmas about other countries. Each comes up with whichever neighbour fits it, and
+# {neighbour}, {neighbour:demonym} and {neighbour:leader} name that neighbour.
+
+- id: energy-offer
+  title: The Pipeline Has Two Ends
+  description: >-
+    With the coal plants closing and nothing built to replace them, {nation} is short of power.
+    {neighbour} has offered a long-term supply at a fixed price. The offer arrived by courier, with
+    a map showing where the cable would come ashore, already drawn.
+  tags: [foreign, energy]
+  when: { resource: energy, is: need }
+  abroad: { supplies: energy, noTreaty: energy-supply }
+  priority: 1
+  options:
+    - id: sign
+      advocate: { name: Dr Per Ohlsen, role: chief engineer at the grid operator }
+      speech: "I have to keep the lights on in January. I do not much mind whose electrons they are."
+      tags: [dovish]
+      effects:
+        - { treaty: energy-supply }
+        - { standing: 10, why: "{neighbour} has a customer for ten years and is pleased to have one." }
+        - { indicator: capacity, by: 3, why: "Factories that were rationing power can run full shifts again." }
+        - { faction: services, by: -4, why: "The defence staff do not like the country's lights depending on a foreign switch." }
+      headline: Energy deal signed with {neighbour}
+      result: The cable comes ashore exactly where the map said. Nobody is quite sure who drew the map.
+
+    - id: haggle
+      advocate: { name: Lorne Abbasi, role: Treasury official }
+      speech: "They need a buyer more than we need a seller. Offer them two years at a lower price and watch their face."
+      tags: []
+      effects:
+        - { treaty: energy-supply, days: 60 }
+        - { standing: -4, why: "{neighbour} agreed to the lower price and will remember being asked." }
+        - { indicator: fiscal, by: 2, why: "The price was talked down before anything was signed." }
+        - { indicator: capacity, by: 2, why: "The power flows, for now." }
+      headline: Short energy deal struck with {neighbour} after hard bargaining
+      result: "{neighbour:leader} describes the talks as frank. In diplomacy this means someone threw a pen."
+
+    - id: refuse
+      advocate: { name: Dr Wren Calloway, role: ecologist }
+      speech: "We closed our own chimneys to stop burning gas. Buying somebody else's is not a policy, it is a relocation."
+      tags: [green]
+      effects:
+        - { standing: -6, why: "{neighbour} offered help and was turned down in public." }
+        - { indicator: capacity, by: -3, why: "Factories are still rationing power on cold evenings." }
+        - { indicator: environment, by: 2, why: "No new fuel is being burned on the country's behalf." }
+        - { faction: youth, by: 3, why: "The young admired the principle, from a warm flat." }
+      headline: "{nation} turns down {neighbour}'s energy offer"
+      result: The government urges households to wear a jumper. Sales of jumpers are the economy's one bright spot.
+
+- id: grain-offer
+  title: Daily Bread, Imported
+  description: >-
+    Home farming has shrunk and bread prices are up a fifth. {neighbour} has a surplus and offers to
+    sell grain duty free, in quantity, for as long as {nation} wants it. Home farmers would like a
+    word first.
+  tags: [foreign, farming]
+  when: { resource: food, is: need }
+  abroad: { supplies: food, noTreaty: food-supply }
+  priority: 1
+  options:
+    - id: sign
+      advocate: { name: Hollis Grange, role: chief executive of Larder supermarkets }
+      speech: "Our customers do not ask where the wheat grew. They ask why the loaf costs more. This is the answer to that question."
+      tags: [free_trade]
+      effects:
+        - { treaty: food-supply }
+        - { standing: 8, why: "{neighbour}'s farmers have a new market and its government has a new friend." }
+        - { indicator: living, by: 3, why: "Bread and flour are cheaper within the month." }
+        - { faction: rural, by: -6, why: "Home farmers are now competing with {neighbour} at a price they cannot match." }
+      headline: Grain agreement signed with {neighbour}
+      result: The supermarkets put "partner grain" on the packaging, in letters small enough not to annoy anyone.
+
+    - id: quota
+      advocate: { name: Ewan Thorley, role: farmer and parish councillor }
+      speech: "Buy what we cannot grow this year and not a sack more. Next year we grow it ourselves."
+      tags: []
+      effects:
+        - { treaty: food-supply, days: 45 }
+        - { standing: 2, why: "{neighbour} sold less than it hoped and more than nothing." }
+        - { indicator: living, by: 1, why: "The worst of the price rise is taken off." }
+        - { indicator: administration, by: -2, why: "Someone has to count every sack against the quota." }
+        - { faction: rural, by: 2, why: "Home farmers were protected." }
+      headline: Limited grain imports from {neighbour}
+      result: The quota is set in tonnes. The customs officers measure it in sacks. The difference is under review.
+
+    - id: refuse
+      advocate: { name: Ewan Thorley, role: farmer and parish councillor }
+      speech: "A country that cannot feed itself is a country that does what it is told. Pay farmers to grow it here."
+      tags: [spending]
+      effects:
+        - { standing: -5, why: "{neighbour} was told its grain was not wanted." }
+        - { indicator: fiscal, by: -3, why: "Emergency payments to home farmers to plant more." }
+        - { indicator: living, by: -2, why: "Bread stays dear until the new harvest." }
+        - { faction: rural, by: 6, why: "The countryside was chosen over cheap bread." }
+      headline: "{nation} declines {neighbour}'s grain"
+      result: A loaf becomes a talking point at dinner parties, in the sense of being discussed rather than eaten.
+
+- id: capital-offer
+  title: Friends With Money
+  description: >-
+    The debt is high and the bond markets are nervous. {neighbour} has offered to buy a large block
+    of government bonds and invest in {nation}'s firms, in return for "a voice in decisions that
+    concern our investment". The note does not say which decisions those are.
+  tags: [foreign, economy]
+  when: { resource: capital, is: need }
+  abroad: { supplies: capital, noTreaty: investment-pact }
+  priority: 1
+  options:
+    - id: accept
+      advocate: { name: "{minister:finance}", role: speaking in cabinet }
+      speech: "Lenders are asking for more every month. These lenders are asking for a seat at the table. I prefer the seat."
+      tags: [growth]
+      effects:
+        - { treaty: investment-pact }
+        - { standing: 10, why: "{neighbour} has a large stake in the country and intends to look after it." }
+        - { indicator: debt, by: -6, why: "{neighbour} bought bonds the markets would only take at a punishing rate." }
+        - { indicator: liberty, by: -2, why: "{neighbour} now has views on regulations, and they are heard." }
+        - { faction: labour, by: -4, why: "The unions ask who is running the country now." }
+      headline: "{neighbour} buys into {nation}"
+      result: "{neighbour}'s ambassador is given an office in the Finance Ministry. It is described as a courtesy."
+
+    - id: bonds-only
+      advocate: { name: Governor Helene Strand, role: governor of the central bank }
+      speech: "Take their money for the bonds and nothing else. A creditor may have opinions. A creditor may not have a vote."
+      tags: []
+      effects:
+        - { standing: -3, why: "{neighbour} wanted influence and got interest." }
+        - { indicator: debt, by: -3, why: "{neighbour} bought a block of bonds at a fair price." }
+        - { indicator: fiscal, by: -1, why: "The interest on the new bonds is paid every quarter." }
+        - { faction: business, by: 2, why: "The Chamber likes a calmer bond market." }
+      headline: "{neighbour} buys government bonds, and only bonds"
+      result: The note from {neighbour} accepting the terms is two lines long and noticeably cold.
+
+    - id: decline
+      advocate: { name: Rufus Hale, role: civil liberties barrister }
+      speech: "A government that borrows from a neighbour will one day be asked for a favour it cannot refuse. Pay the market's price instead."
+      tags: [hawkish]
+      effects:
+        - { standing: -6, why: "{neighbour} offered money and was refused, which nobody does." }
+        - { indicator: legitimacy, by: 2, why: "The country kept its decisions to itself, and people noticed." }
+        - { indicator: fiscal, by: -2, why: "The markets charged what the markets charge." }
+      headline: "{nation} turns down {neighbour}'s money"
+      result: The bond markets take this as a sign of confidence and charge slightly less. Nobody can explain why.
+
+- id: trade-talks
+  title: Free at the Border
+  description: >-
+    Relations with {neighbour} are good enough that {neighbour:leader} has proposed a trade
+    agreement: no tariffs, no paperwork, and a joint committee that will meet twice a year to agree
+    that the agreement is working.
+  tags: [foreign, trade]
+  when: { day: { gte: 15 } }
+  abroad: { standing: { gte: 20 }, noTreaty: trade-agreement }
+  options:
+    - id: sign
+      advocate: { name: Sir Anselm Roke, role: chair of the Chamber }
+      speech: "Every form at the border is a tax nobody voted for. Sign it before they change their minds."
+      tags: [free_trade, growth]
+      effects:
+        - { treaty: trade-agreement }
+        - { standing: 10, why: "{neighbour} has its trade agreement and is delighted." }
+        - { indicator: capacity, by: 3, why: "Exporters are already taking orders from {neighbour}." }
+        - { faction: labour, by: -5, why: "The unions fear factory jobs will cross the border with the lorries." }
+      headline: Trade agreement signed with {neighbour}
+      result: The joint committee holds its first meeting. It agrees the agreement is working. It is the shortest meeting in the history of either country.
+
+    - id: protect
+      advocate: { name: Bron Tully, role: convenor at the Kessel steelworks }
+      speech: "Sign it with steel, cars and ships left out. If they want those, they can ask nicely, and then we say no."
+      tags: [pro_labour]
+      effects:
+        - { treaty: trade-agreement }
+        - { standing: 2, why: "{neighbour} signed, and noticed what was left out." }
+        - { indicator: capacity, by: 1, why: "Some exporters gain, the heavy industries stay protected." }
+        - { indicator: administration, by: -2, why: "Customs now has to check which goods are in the agreement and which are not." }
+        - { faction: labour, by: 3, why: "The steelworks and shipyards are protected." }
+      headline: Trade agreement with {neighbour}, with heavy industry excluded
+      result: The list of excluded goods runs to three hundred pages and includes, by an oversight, cheese.
+
+    - id: decline
+      advocate: { name: Petra Hallam, role: general secretary of the rail union }
+      speech: "Free trade means free to close our factories and open theirs. We have seen this film. It does not end well for the people in it."
+      tags: []
+      effects:
+        - { standing: -8, why: "{neighbour} proposed a partnership and was turned down." }
+        - { faction: labour, by: 5, why: "The unions saw jobs defended." }
+        - { faction: business, by: -5, why: "The Chamber saw a market closed." }
+      headline: "{nation} says no to a trade deal with {neighbour}"
+      result: Lorries continue to queue at the border, where the drivers have formed a choir.
+
+- id: they-need-power
+  title: Seller's Market
+  description: >-
+    {neighbour} is short of power this winter and {nation}, for once, has some to spare. Their
+    energy minister has called three times today. Your grid operator would like to know what to
+    tell them.
+  tags: [foreign, energy]
+  when: { resource: energy, is: surplus }
+  abroad: { wants: energy }
+  options:
+    - id: sell-fair
+      advocate: { name: "{minister:foreign}", role: speaking in cabinet }
+      speech: "Sell it at the going rate. They will remember who helped, and we will need that one day."
+      tags: [dovish]
+      effects:
+        - { standing: 10, why: "{neighbour} got power when it needed it, at a fair price." }
+        - { indicator: fiscal, by: 3, why: "The power sold brings in steady money." }
+        - { indicator: capacity, by: -1, why: "The grid runs closer to its limit at home." }
+      headline: "{nation} sells spare power to {neighbour}"
+      result: "{neighbour:leader} sends a thank-you note, which is framed and hung in the grid control room."
+
+    - id: sell-dear
+      advocate: { name: Idris Monk, role: fellow of the Free Enterprise Forum }
+      speech: "The market price is whatever they will pay in January. That is not cruelty, it is a price."
+      tags: [growth]
+      effects:
+        - { standing: -10, why: "{neighbour} paid three times the usual price and will not forget it." }
+        - { indicator: fiscal, by: 6, why: "The power was sold at a winter premium." }
+        - { faction: business, by: 3, why: "The Chamber admires a deal well struck." }
+      headline: "{nation} sells power to {neighbour} at a premium"
+      result: "{neighbour}'s newspapers print the price on the front page, next to a photograph of the {leader}."
+
+    - id: keep
+      advocate: { name: Dr Per Ohlsen, role: chief engineer at the grid operator }
+      speech: "Spare power in October is not spare power in February. I would rather keep a margin than sell one."
+      tags: []
+      effects:
+        - { standing: -6, why: "{neighbour} asked for help and got a lecture on grid margins." }
+        - { indicator: capacity, by: 1, why: "The grid keeps its margin through the winter." }
+        - { indicator: legitimacy, by: 1, why: "The lights never flicker at home." }
+      headline: "{nation} keeps its spare power at home"
+      result: The margin is never needed. The grid operator describes this as proof that it was.
+
+- id: they-need-food
+  title: The Neighbour's Larder
+  description: >-
+    {neighbour} has had a poor harvest, and {nation}'s farmers have grain in their barns. A
+    delegation from {neighbour} has arrived to ask, politely and somewhat urgently, how much.
+  tags: [foreign, farming]
+  when: { resource: food, is: surplus }
+  abroad: { wants: food }
+  options:
+    - id: sell
+      advocate: { name: Ewan Thorley, role: farmer and parish councillor }
+      speech: "Sell it to them. My barns are full and their prices are high. This is the good year we were promised."
+      tags: [growth]
+      effects:
+        - { standing: 8, why: "{neighbour} has bread on its shelves and knows where it came from." }
+        - { faction: rural, by: 6, why: "Farmers are selling their surplus at the best prices in years." }
+        - { indicator: living, by: -1, why: "With so much going abroad, food prices at home creep up." }
+      headline: "{nation}'s grain goes to {neighbour}"
+      result: The harvest festival in Wickford is the most cheerful anyone can remember. It is held in a barn that is, for once, empty.
+
+    - id: aid
+      advocate: { name: Bishop Ottoline Faye, role: chair of the Council of Congregations }
+      speech: "Their children are hungry. Send it as a gift. Nations, like people, are known by what they do when it costs them."
+      tags: [spending, dovish]
+      effects:
+        - { standing: 14, why: "{neighbour} will tell this story for a generation." }
+        - { indicator: fiscal, by: -3, why: "The grain was bought from farmers and given away." }
+        - { faction: faithful, by: 5, why: "The Congregations organised the convoys." }
+        - { faction: grey, by: -2, why: "Older voters ask whether charity should begin at home." }
+      headline: "{nation} sends grain to {neighbour} as a gift"
+      result: "{neighbour:leader} meets the first convoy at the border, in the rain, which photographs beautifully."
+
+    - id: hold
+      advocate: { name: Mabel Thwaite, role: secretary of the Pensioners' Convention }
+      speech: "Keep it. Every hard winter I have known started with a good harvest that was sold."
+      tags: []
+      effects:
+        - { standing: -6, why: "{neighbour} went hungry next door to a full barn." }
+        - { indicator: living, by: 1, why: "Food prices at home stay low." }
+        - { faction: rural, by: -3, why: "Farmers wanted the foreign prices." }
+      headline: "{nation} keeps its grain"
+      result: The grain is stored against a hard winter. The winter is mild. The grain is fed to pigs, who are grateful.
+
+- id: visa-scheme
+  title: Help Wanted, Abroad
+  description: >-
+    Work is scarce in {nation} and plentiful in {neighbour}, which is short of hands in its
+    hospitals, hotels and building sites. {neighbour:leader} proposes a visa scheme so that
+    {demonym} workers can go where the jobs are.
+  tags: [foreign, work]
+  when: { resource: workers, is: surplus }
+  abroad: { wants: workers, noTreaty: labour-mobility }
+  options:
+    - id: sign
+      advocate: { name: Dalia Renn, role: delivery rider }
+      speech: "I have three cousins who would go tomorrow. They are not leaving the country. They are going to work. There is a difference."
+      tags: []
+      effects:
+        - { treaty: labour-mobility }
+        - { standing: 8, why: "{neighbour} gets the workers it needs." }
+        - { indicator: employment, by: 2, why: "The first few thousand have already found work in {neighbour}." }
+        - { faction: youth, by: 4, why: "The young have somewhere to go." }
+        - { faction: grey, by: -4, why: "Older voters watch the young leave and do not like what it says." }
+      headline: Visa scheme agreed with {neighbour}
+      result: The first coach leaves from the bus station in Dunmoor. The mayor waves it off, then quietly asks how many seats are left.
+
+    - id: seasonal
+      advocate: { name: "{minister:interior}", role: speaking in cabinet }
+      speech: "Seasonal visas only. Six months there, then home. Their wages come back with them."
+      tags: []
+      effects:
+        - { treaty: labour-mobility, days: 90 }
+        - { standing: 3, why: "{neighbour} gets workers, though not for long." }
+        - { indicator: employment, by: 1, why: "Seasonal work in {neighbour} soaks up some of the unemployed." }
+        - { indicator: administration, by: -1, why: "Somebody has to check that everybody comes back." }
+      headline: Seasonal work visas agreed with {neighbour}
+      result: Most of them come back. Several come back married, which the scheme did not anticipate.
+
+    - id: refuse
+      advocate: { name: Councillor Des Marrow, role: leader of Harrowgate council }
+      speech: "If the young go, they do not come back, and the towns go with them. Bring the jobs here instead."
+      tags: [spending]
+      effects:
+        - { standing: -5, why: "{neighbour} offered jobs and was turned down." }
+        - { indicator: fiscal, by: -2, why: "A jobs programme for the towns was announced instead." }
+        - { faction: grey, by: 3, why: "The towns keep their young, for now." }
+        - { faction: youth, by: -4, why: "The young were told to stay and wait." }
+      headline: "{nation} refuses {neighbour}'s visa scheme"
+      result: The jobs programme opens an office in Harrowgate. Its first vacancy is for someone to run the office.
+
+- id: state-visit
+  title: The Full Ceremonial
+  description: >-
+    {neighbour:leader} is coming on a state visit. Protocol wants to know the scale of the welcome:
+    a banquet, a working lunch, or the minimum the treaties require, which is a handshake at the
+    airport and a car with a flag on it.
+  tags: [foreign]
+  when: { day: { gte: 8 } }
+  abroad: { standing: { gte: -30 } }
+  repeat: 40
+  options:
+    - id: banquet
+      advocate: { name: "{minister:foreign}", role: speaking in cabinet }
+      speech: "Give them the gold plate, the band and the long table. Flattery is the cheapest thing in diplomacy."
+      tags: [dovish]
+      effects:
+        - { standing: 10, why: "{neighbour:leader} was given a banquet and a guard of honour." }
+        - { indicator: fiscal, by: -1, why: "The gold plate does not polish itself." }
+        - { indicator: legitimacy, by: -1, why: "A banquet during hard times reads badly at home." }
+      headline: "{neighbour:leader} welcomed with a state banquet"
+      result: Eleven courses. The visitor's speech mentions "our two great peoples" seven times and the trade figures once.
+
+    - id: working
+      advocate: { name: Dame Philippa Wace, role: cabinet secretary }
+      speech: "A working lunch, an agenda and a joint statement. It is what both sides will privately prefer."
+      tags: []
+      effects:
+        - { standing: 4, why: "{neighbour}'s delegation got a serious day of talks." }
+        - { indicator: administration, by: 1, why: "Three small agreements were actually finished." }
+        - { faction: mandarins, by: 2, why: "The civil service likes a visit with paperwork at the end." }
+        - { faction: grey, by: -1, why: "Older voters miss a proper procession." }
+      headline: Working visit by {neighbour:leader}
+      result: The joint statement is agreed by two in the afternoon. Both delegations are visibly relieved to be home for dinner.
+
+    - id: minimum
+      advocate: { name: General Hartley Voss, role: chief of the defence staff }
+      speech: "A handshake at the airport. They will understand the message. That is the point of sending one."
+      tags: [hawkish]
+      effects:
+        - { standing: -8, why: "{neighbour:leader} was met at the airport by a junior minister and a car." }
+        - { indicator: legitimacy, by: 1, why: "Voters enjoyed a {leader} who would not bow and scrape." }
+        - { faction: services, by: 2, why: "The forces enjoyed it most of all." }
+      headline: "{neighbour:leader} gets the minimum"
+      result: The visit lasts four hours. The car has a flag on it. The flag is the right way up, which protocol regards as a victory.
+
+- id: spy-ring
+  title: The Cultural Attaché
+  description: >-
+    The security service has caught three members of {neighbour}'s embassy photographing the
+    plans of a naval dockyard. One of them is the cultural attaché, who says he was interested in
+    the architecture.
+  tags: [foreign, order]
+  when: { day: { gte: 12 } }
+  abroad: { standing: { lt: 10 } }
+  options:
+    - id: expel
+      advocate: { name: General Hartley Voss, role: chief of the defence staff }
+      speech: "Put all three on the next plane, and the ambassador with them. Anything less is an invitation."
+      tags: [hawkish]
+      effects:
+        - { standing: -12, why: "Three of {neighbour}'s diplomats and its ambassador were expelled." }
+        - { indicator: legitimacy, by: 2, why: "The government looked like it could protect the country." }
+        - { faction: services, by: 5, why: "The security service was backed in public." }
+      headline: "{neighbour}'s diplomats expelled over spying"
+      result: "{neighbour} expels three {demonym} diplomats in return, including the one who ran the embassy's choir."
+
+    - id: quiet-word
+      advocate: { name: "{minister:foreign}", role: speaking in cabinet }
+      speech: "Send the attaché home quietly and keep the rest. Everybody spies. The trick is not to make the other side announce it."
+      tags: [dovish]
+      effects:
+        - { standing: -2, why: "{neighbour} lost an attaché and kept its face." }
+        - { faction: services, by: -4, why: "The security service caught spies and was told to keep it quiet." }
+        - { indicator: liberty, by: -1, why: "The story was kept out of the papers by a word in the right ear." }
+        - { indicator: legitimacy, by: 1, why: "No spy story ran on the evening news, so nobody asked how the spies got in." }
+      headline: Embassy official leaves quietly for {neighbour}
+      result: The attaché leaves with a book on dockyard architecture, a gift from the security service, with a note in it.
+
+    - id: turn
+      advocate: { name: "{minister:interior}", role: speaking in cabinet }
+      speech: "Let them go. Then feed them the wrong plans. If they are going to read our post, we may as well write it."
+      tags: [surveillance]
+      effects:
+        - { standing: 2, why: "{neighbour} believes it got away with it." }
+        - { faction: services, by: 3, why: "The security service gets to run an operation, which it loves." }
+        - { indicator: liberty, by: -2, why: "The security service was given wider powers to watch the embassy." }
+        - { indicator: administration, by: -1, why: "A deception operation takes people away from everything else." }
+      headline: Nothing to report from the dockyard, officially
+      result: "{neighbour}'s navy commissions a dry dock to a design it obtained at some expense. It does not hold water."
+
+- id: extradition
+  title: Wanted Abroad
+  description: >-
+    {neighbour} has asked for the extradition of a journalist who fled to {nation} after publishing
+    accounts of how its government awards contracts. The charge is "insulting the state". She is
+    currently living above a launderette in {capital}.
+  tags: [foreign, liberty]
+  when: { day: { gte: 20 } }
+  abroad: { standing: { gte: -40 } }
+  options:
+    - id: hand-over
+      advocate: { name: "{minister:interior}", role: speaking in cabinet }
+      speech: "We have an extradition treaty. Either we honour it or we stop pretending we have one."
+      tags: [surveillance]
+      effects:
+        - { standing: 12, why: "{neighbour} got the journalist it asked for." }
+        - { indicator: liberty, by: -5, why: "A journalist was sent back to be tried for what she wrote." }
+        - { faction: youth, by: -5, why: "The young followed the case and did not forgive it." }
+        - { indicator: legitimacy, by: -2, why: "Every editor in the country printed her photograph." }
+      headline: Journalist extradited to {neighbour}
+      result: She is sentenced to four years. Her book is translated into nine languages, including {neighbour:demonym}.
+
+    - id: courts
+      advocate: { name: Rufus Hale, role: civil liberties barrister }
+      speech: "Let the courts decide. The courts will say no, and then it was not your decision."
+      tags: []
+      effects:
+        - { standing: -4, why: "{neighbour} is told the matter is for the courts, which it hears as no." }
+        - { indicator: liberty, by: 2, why: "The courts refused to extradite for a political offence." }
+        - { indicator: administration, by: -1, why: "The case takes eleven months and two appeals." }
+      headline: Courts refuse to extradite journalist to {neighbour}
+      result: The judgment runs to ninety pages. Page forty-one defines "insulting the state" and finds that it is not a crime.
+
+    - id: asylum
+      advocate: { name: Kasia Dunmore, role: president of the students' union }
+      speech: "Give her asylum, a press conference and a column. If they want her silent, the loudest answer is the best one."
+      tags: [privacy]
+      effects:
+        - { standing: -12, why: "{neighbour}'s critic was given asylum and a platform." }
+        - { indicator: liberty, by: 3, why: "The country made a public point of protecting a writer." }
+        - { indicator: legitimacy, by: 2, why: "It was a popular stand, and it looked like one." }
+        - { faction: services, by: -2, why: "The security service now has a high-profile guest to protect." }
+      headline: "{nation} grants asylum to {neighbour}'s critic"
+      result: Her column runs every Thursday. {neighbour}'s embassy buys every copy, for reasons it describes as cultural.
+
+- id: river-spill
+  title: Downstream
+  description: >-
+    The river that runs from {neighbour} into {nation} has turned a colour the environment agency
+    describes as "not one of the river's usual colours". The source is a chemical works on the
+    {neighbour:demonym} side of the border.
+  tags: [foreign, environment]
+  when: { day: { gte: 25 } }
+  abroad: { standing: { gte: -50 } }
+  options:
+    - id: protest
+      advocate: { name: Dr Wren Calloway, role: ecologist }
+      speech: "Lodge a formal protest and publish the samples. Polluters behave when they are watched."
+      tags: [green]
+      effects:
+        - { standing: -6, why: "{neighbour} was publicly blamed for the spill." }
+        - { indicator: environment, by: 2, why: "{neighbour} closed the works while it was inspected." }
+        - { faction: rural, by: 3, why: "Farmers downstream saw someone stand up for their river." }
+      headline: "{nation} protests to {neighbour} over river pollution"
+      result: "{neighbour} denies everything, then closes the works for routine maintenance, for the first time in thirty years."
+
+    - id: joint-cleanup
+      advocate: { name: "{minister:environment}", role: speaking in cabinet }
+      speech: "Offer to share the cost of a clean-up. They save face, we get a clean river. Rivers do not care whose fault it was."
+      tags: [green, spending]
+      effects:
+        - { standing: 6, why: "{neighbour} was offered a way out and took it." }
+        - { indicator: fiscal, by: -2, why: "{nation} paid half the cost of cleaning up a spill it did not cause." }
+        - { indicator: environment, by: 3, why: "The river is being cleaned from both banks." }
+        - { minister: environment, by: 5, why: "The Environment Minister got a joint press conference and a clean river." }
+      headline: Joint clean-up agreed with {neighbour}
+      result: The two environment ministers are photographed in waders. The photograph does more for relations than any treaty.
+
+    - id: let-it-pass
+      advocate: { name: "{minister:foreign}", role: speaking in cabinet }
+      speech: "Rivers clear. Relations take longer. Say nothing in public and a little in private."
+      tags: [dovish]
+      effects:
+        - { standing: 3, why: "{neighbour} was spared any embarrassment." }
+        - { indicator: environment, by: -3, why: "The river took most of a season to clear." }
+        - { faction: rural, by: -4, why: "Farmers downstream lost fish, stock and patience." }
+      headline: Government says little about the river
+      result: The river clears by the autumn. The anglers do not, and form a pressure group.
+
+- id: ambassador-tape
+  kind: minor
+  title: Off the Record, On the Tape
+  description: >-
+    {nation}'s ambassador to {neighbour} has been recorded at a dinner describing {neighbour:leader}
+    as "a filing cabinet with ambitions". The recording is on every channel in {neighbour}.
+  tags: [foreign]
+  abroad: { standing: { gte: -60 } }
+  options:
+    - id: recall
+      advocate: { name: "{minister:foreign}", role: speaking in cabinet }
+      speech: "Bring him home. He was right, which is the problem."
+      effects:
+        - { standing: 4, why: "{neighbour} got an apology and an ambassador's head." }
+        - { minister: foreign, by: -3, why: "The Foreign Minister lost a good ambassador to a bad microphone." }
+      headline: Ambassador to {neighbour} recalled
+      result: He returns to a job in the ministry and a publishing deal.
+
+    - id: stand-by
+      advocate: { name: General Hartley Voss, role: chief of the defence staff }
+      speech: "Say nothing. Everyone in that room had a glass of wine and an opinion."
+      effects:
+        - { standing: -5, why: "{neighbour} waited for an apology that did not come." }
+        - { indicator: legitimacy, by: 1, why: "Voters rather enjoyed the remark." }
+      headline: Government stands by its ambassador to {neighbour}
+      result: The phrase "a filing cabinet with ambitions" is printed on souvenir mugs in both countries.
+
+- id: away-fans
+  kind: minor
+  title: Away Fixture
+  description: >-
+    Supporters of {nation}'s football team have been arrested in {neighbour} after a match, for
+    singing. The song has nine verses and the {neighbour:demonym} police object to the sixth.
+  tags: [foreign, culture]
+  abroad: { standing: { gte: -60 } }
+  options:
+    - id: apologise
+      advocate: { name: "{minister:foreign}", role: speaking in cabinet }
+      speech: "Apologise for the sixth verse. Nobody can defend the sixth verse."
+      effects:
+        - { standing: 3, why: "{neighbour} got an apology for the sixth verse." }
+        - { faction: youth, by: -2, why: "The fans felt the government took the other side." }
+      headline: Government apologises to {neighbour} for football song
+      result: The song is withdrawn from the official songbook. Sales of the unofficial songbook rise.
+
+    - id: defend
+      advocate: { name: Kasia Dunmore, role: president of the students' union }
+      speech: "Singing is not a crime. Badly, maybe. Ask for them back."
+      effects:
+        - { standing: -3, why: "{neighbour} was told its police had overreacted." }
+        - { faction: youth, by: 3, why: "The fans were defended, verse by verse." }
+      headline: "{nation} demands release of football fans held in {neighbour}"
+      result: The fans are released and greeted at the airport by a crowd singing the sixth verse.

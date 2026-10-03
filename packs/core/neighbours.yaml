@@ -1,0 +1,77 @@
+# The countries round about. Each notices one or two kinds of decision, whoever they were
+# about, and says so in its own way.
+
+- id: eskerland
+  name: Eskerland
+  demonym: Eskerlander
+  leader: Premier Halvor Brask
+  description: >-
+    Gas fields, steelworks and a government that has been in office for nineteen years and regards
+    that as modest. Sells energy to anyone, and remembers who bought.
+  standing: 0
+  needs: [food]
+  surpluses: [energy, manufactures]
+  likes: [hawkish]
+  dislikes: [green]
+  pleased: Premier Brask calls it the first sensible thing {nation} has done in years.
+  displeased: Eskerland's state radio devotes an evening to {nation}'s "windmill economics".
+
+- id: morvaine
+  name: Morvaine
+  demonym: Morvainer
+  leader: Prime Minister Agathe Sorel
+  description: >-
+    Wheat, vineyards and cathedrals. Its government is pious, its farmers are rich and its
+    newspapers still print the sermon on Mondays.
+  standing: 10
+  needs: [manufactures]
+  surpluses: [food]
+  likes: [paternalist]
+  dislikes: [permissive]
+  pleased: Morvaine's bishops mention {nation} approvingly in Sunday's sermons.
+  displeased: Morvaine's papers describe {nation} as having "lost its way", on the front page, under a photograph of a nightclub.
+
+- id: caravel
+  name: Caravel
+  demonym: Islander
+  leader: Chief Minister Odile Marr
+  description: >-
+    The Caravel Isles: eleven islands, four hundred banks and no income tax. The Isles are very
+    interested in your country's prosperity and would like to hold some of it for you.
+  standing: 5
+  needs: [workers]
+  surpluses: [capital]
+  likes: [free_trade]
+  dislikes: [redistribution]
+  pleased: Caravel's banks issue a note praising {nation}'s "maturity".
+  displeased: Several Caravel banks quietly raise the rate they charge {nation}'s firms.
+
+- id: velsa
+  name: Velsa
+  demonym: Velsan
+  leader: President Liv Arnesen
+  description: >-
+    Mountains, hydro dams and a population that recycles with an intensity outsiders find
+    alarming. Velsa runs on rivers and has electricity to spare.
+  standing: 15
+  needs: [workers]
+  surpluses: [energy]
+  likes: [green]
+  dislikes: [surveillance, polluting]
+  pleased: President Arnesen sends a congratulatory note, printed on recycled paper, twice.
+  displeased: Velsa's foreign ministry expresses "disappointment", which in Velsa is considered shouting.
+
+- id: ardune
+  name: Ardune
+  demonym: Ardunese
+  leader: Chancellor Marek Doln
+  description: >-
+    The big neighbour. Factories, shipyards, the strongest unions on the continent and a habit of
+    calling every trade dispute a matter of national honour.
+  standing: -5
+  needs: [energy, capital]
+  surpluses: [manufactures, workers]
+  likes: [pro_labour]
+  dislikes: [anti_labour]
+  pleased: Ardune's unions send {nation}'s unions a telegram of solidarity, and Chancellor Doln does not object.
+  displeased: Chancellor Doln warns that "what is done to workers in {nation} will be remembered in Ardune".
