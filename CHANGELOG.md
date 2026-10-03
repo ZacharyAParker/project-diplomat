@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.4.0
+
+A new look, in the style of the nation games it descends from.
+
+- A menu down the left, a landscape strip across the top drawn from each nation's flag, Georgia
+  for reading and green links and buttons.
+- The desk is now Issues. Each issue reads as the issue, then the debate, with numbered positions
+  and an Accept button under each. What a position will do is still shown before you accept it.
+- The nation page leads with the flag, the name, its classification, three pills for civil
+  liberties, the economy and public trust, and a written description of the country built from its
+  numbers.
+- The first morning and the front page show the biggest changes and fold the rest away.
+- On a phone the menu is a bar along the top instead of along the bottom.
+- The bundled fonts are gone; the page is lighter.
+
 ## 0.3.0
 
 Neighbours.

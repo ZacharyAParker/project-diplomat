@@ -106,21 +106,23 @@ it can be read again from the next morning's paper and from the record.
 
 ## Design rules
 
-It is meant to look like a broadsheet crossed with a minister's box: ink on newsprint, hairline
-rules, one red. These are the rules I hold myself to.
+It is meant to look like the nation games I grew up on: a parchment-grey menu down the left, a
+landscape strip across the top with the flag set into it, Georgia for anything read, Helvetica or
+Verdana for anything worked, green links and green buttons. The look lives in `styles/world.css`,
+loaded last. These are the rules I hold myself to.
 
 1. **Tokens only.** Every colour, type size and gap comes from `styles/tokens.css`, and there are no
-   colour values anywhere else. The night edition is the same names with different values, so nothing
-   is written twice. Flag colours are the one exception, because a flag is the same in both.
-2. **Two typefaces.** Besley for headlines and the nameplate, Source Serif for everything read.
-   Anything that names a thing (section heads, datelines, field labels) uses the `.label` class:
-   small spaced capitals, never bold display type.
-3. **Rules, not boxes.** A section is a `Sheet`, which is a heavy rule and a kicker. The boxed
-   `look="paper"` is for the few things handed to the player to deal with. If a screen starts to look
-   like a grid of cards, it is wrong.
-4. **Square corners, no shadows, no gradients.**
-5. **Red is rare.** The accent marks the current thing, the confirming action, and bad news. One
-   accent button per screen at most.
+   colour values anywhere else, apart from the banner and the bevels on buttons and pills. The night
+   edition is the same names with different values. Flag colours are the other exception, because a
+   flag is the same in both.
+2. **Two voices.** Georgia (`--font-text`, `--font-display`) for headings and everything read. The
+   UI stack (`--font-ui`) for menus, buttons, labels and figures.
+3. **An issue is an issue.** Title, "The issue", "The debate", numbered positions, the forecast
+   under each, and an Accept button under that. One click decides.
+4. **Green means yes.** Accept, End the day and the main action on a screen are green. Red is for
+   bad news and crises.
+5. **No section kickers.** A heading speaks for itself. A small line under a title is allowed only
+   when it carries information, like which country an issue is about.
 6. **Never colour alone.** A change is an arrow, a name, a size in words, blocks, and "for the
    better" or "for the worse" in text. Debt going up reads as worse because `changes.ts` says so, not
    because someone picked a colour. Use `ChangeLine` and `ChangeList` and don't rebuild them.
@@ -128,7 +130,7 @@ rules, one red. These are the rules I hold myself to.
    an indicator's bar) are numbers. Movements are words.
 8. **Every screen is a `Screen`.** It owns the `h1`, sets the tab title, and takes focus after
    navigation. A link goes somewhere (`LinkTo`, `TextLink`), a button does something (`Button`).
-9. **Phone first.** Layouts are one column that works at 360 px, and widen with `min-width` queries.
+9. **Phone first.** Everything works at 360 px. Under 48rem the menu becomes a bar along the top.
    Tap targets are at least `--tap` high. Long names wrap.
 10. **Motion goes through `--turn`.** It is zero under reduced motion, whether the system or the
     setting asks for it, so nothing needs its own media query.
@@ -136,9 +138,10 @@ rules, one red. These are the rules I hold myself to.
     are drawn through `flagShapes`, which trusts neither the layout nor the colours.
 12. **Copy is dry and short.** British spelling, no exclamation marks, and an error says what is
     wrong and what can be done about it.
+13. **Our own furniture.** The layout follows the genre's conventions, but the wordmark, icons,
+    banners and colours are ours. Nothing is taken from NationStates.
 
 ## Dependencies
 
-React, Vite and Vitest with jsdom and Testing Library, and two font packages (`@fontsource/besley`,
-`@fontsource/source-serif-4`) so the fonts are bundled and nothing is loaded from a CDN. No UI kit,
-no CSS framework, no router, no state library.
+React, Vite and Vitest with jsdom and Testing Library. The typefaces are system fonts, so nothing is
+bundled and nothing is loaded from a CDN. No UI kit, no CSS framework, no router, no state library.

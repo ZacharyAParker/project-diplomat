@@ -16,7 +16,7 @@ Set in a fictional present day. "Project Diplomat" is a codename until I settle 
 
 ## Status
 
-Version 0.3.0: the single-player game, playable in the browser. See the
+Version 0.4.0: the single-player game, playable in the browser. See the
 [changelog](CHANGELOG.md) for what's in it and what isn't.
 
 - Found a nation, give it a flag, and answer a few questions about its character.
