@@ -62,7 +62,8 @@ function play(start: GameState, content: Content, days: number): GameState {
     for (const id of [state.agenda.major, ...state.agenda.minors]) {
       if (!id) continue
       const dilemma = content.dilemmas.find((d) => d.id === id)!
-      state = decide(state, content, id, pick(rng, availableOptions(dilemma.options, state)).id)
+      const option = pick(rng, availableOptions(dilemma.options, state))
+      state = decide(state, content, id, option.id, option.custom ? `Simulated ${option.custom.field}` : undefined)
     }
     state = endDay(state, content)
   }

@@ -8,6 +8,8 @@ import {
   type Effect,
   type EntryKind,
   type Identity,
+  IDENTITY_LIMITS,
+  type IdentityField,
   type IndicatorId,
   type NationState,
   type NeighbourDef,
@@ -174,6 +176,9 @@ export function render(text: string, state: NationState, content: Content, neigh
     if (key === 'currency') return state.identity.currency
     if (key === 'demonym') return state.identity.demonym
     if (key === 'leader') return state.identity.leaderTitle
+    if (key === 'animal') return state.identity.animal ?? 'unnamed national animal'
+    if (key === 'motto') return state.identity.motto ?? ''
+    if (key === 'faith') return state.identity.faith ?? 'no faith in particular'
     if (key === 'minister' && arg) {
       const title = content.portfolios.find((p) => p.id === arg)?.title
       const name = state.cabinet[arg]?.name
@@ -302,9 +307,22 @@ function stageOption(state: GameState, content: Content, optionId: string): Opti
   return option
 }
 
-export function decide(input: GameState, content: Content, dilemmaId: string, optionId: string): GameState {
+// text is what the player wrote, for an option that asks them to name something.
+export function decide(
+  input: GameState,
+  content: Content,
+  dilemmaId: string,
+  optionId: string,
+  text?: string,
+): GameState {
   const state = structuredClone(input)
-  const option = agendaOption(state, content, dilemmaId, optionId)
+  const chosen = agendaOption(state, content, dilemmaId, optionId)
+  const option = chosen.custom
+    ? {
+        ...chosen,
+        effects: [...chosen.effects, { identity: chosen.custom.field, to: cleanName(chosen.custom.field, text) }],
+      }
+    : chosen
 
   enact(state, content, option, dilemmaId, 'decision', state.agenda.bound[dilemmaId])
   state.answered[dilemmaId] = state.day
@@ -428,7 +446,9 @@ function explain(change: Change, state: NationState, content: Content, neighbour
 
 function apply(state: GameState, effects: readonly Effect[], changes: Change[], neighbour?: string) {
   for (const effect of effects) {
-    if ('standing' in effect) {
+    if ('identity' in effect) {
+      state.identity[effect.identity] = effect.to
+    } else if ('standing' in effect) {
       if (neighbour === undefined || !Object.hasOwn(state.neighbours, neighbour)) continue
       state.neighbours[neighbour] = clampStanding(state.neighbours[neighbour]! + effect.standing)
       changes.push({ kind: 'neighbour', target: neighbour, by: effect.standing, why: effect.why })
@@ -780,4 +800,79 @@ function findSituation(content: Content, id: string): Situation {
   const situation = content.situations.find((s) => s.id === id)
   if (!situation) throw new Error(`unknown situation ${id}`)
   return situation
+}
+
+// What a player types for a name: one line, no control characters, no runs of spaces,
+// and no longer than the field allows. Anything that cleans down to nothing is refused.
+export function cleanName(field: IdentityField, text: string | undefined): string {
+  const cleaned = (text ?? '')
+    .replace(/[\u0000-\u001f\u007f-\u009f\u200b-\u200f\u2028-\u202e\u2066-\u2069\ufeff]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+  if (!cleaned) throw new Error(`a ${field} needs a name`)
+  return [...cleaned].slice(0, IDENTITY_LIMITS[field]).join('').trim()
+}
+
+// The sandbox. Each of these changes the nation in a way the rules would not, says so in
+// the record, and marks the nation as sandboxed for good.
+
+export type Adjustment =
+  | { indicator: IndicatorId; to: number }
+  | { faction: string; to: number }
+  | { neighbour: string; to: number }
+  | { policy: string; to: boolean | number }
+
+export function adjust(input: GameState, content: Content, adjustments: readonly Adjustment[]): GameState {
+  const state = structuredClone(input)
+  const changes: Change[] = []
+  const why = 'Set by hand in the sandbox.'
+  for (const a of adjustments) {
+    if ('indicator' in a) {
+      const by = clamp(a.to) - state.indicators[a.indicator]
+      apply(state, [{ indicator: a.indicator, by, why }], changes)
+    } else if ('faction' in a) {
+      const faction = state.factions[a.faction]
+      if (!faction) throw new Error(`unknown faction ${a.faction}`)
+      apply(state, [{ faction: a.faction, by: clamp(a.to) - faction.approval, why }], changes)
+    } else if ('neighbour' in a) {
+      if (!content.neighbours.some((n) => n.id === a.neighbour)) throw new Error(`unknown neighbour ${a.neighbour}`)
+      const was = standingWith(state, content, a.neighbour)
+      state.neighbours[a.neighbour] = was
+      apply(state, [{ standing: clampStanding(a.to) - was, why }], changes, a.neighbour)
+    } else {
+      if (!content.policies.some((p) => p.id === a.policy)) throw new Error(`unknown policy ${a.policy}`)
+      apply(state, [{ policy: a.policy, to: a.to }], changes)
+    }
+  }
+  state.sandbox = true
+  record(state, content, 'sandbox', 'Figures changed in the sandbox', changes.filter((c) => c.by !== 0))
+  return state
+}
+
+// Puts any dilemma on today's desk, whether or not it is due or its conditions hold.
+export function callUp(input: GameState, content: Content, dilemmaId: string): GameState {
+  const state = structuredClone(input)
+  const dilemma = findDilemma(content, dilemmaId)
+  if (dilemma.kind === 'major') state.agenda.major = dilemma.id
+  else if (!state.agenda.minors.includes(dilemma.id)) state.agenda.minors = [...state.agenda.minors, dilemma.id]
+  if (dilemma.abroad) {
+    const fits = candidates(dilemma, state, content)
+    const neighbour = fits[0] ?? content.neighbours[0]?.id
+    if (neighbour) state.agenda.bound = { ...state.agenda.bound, [dilemma.id]: neighbour }
+  }
+  state.sandbox = true
+  record(state, content, 'sandbox', `Called up in the sandbox: ${dilemma.title}`, [])
+  return state
+}
+
+// Starts any crisis now, at its first stage, in place of any that is running.
+export function startCrisis(input: GameState, content: Content, situationId: string): GameState {
+  const state = structuredClone(input)
+  const situation = findSituation(content, situationId)
+  state.situation = { id: situation.id, stage: 0, gauge: situation.start }
+  state.situationsDone = state.situationsDone.filter((id) => id !== situation.id)
+  state.agenda.situation = true
+  state.sandbox = true
+  record(state, content, 'sandbox', `Crisis started in the sandbox: ${situation.title}`, [], situation.description)
+  return state
 }

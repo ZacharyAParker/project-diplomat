@@ -1,5 +1,5 @@
 import type { GameState } from './engine.ts'
-import { ENTRY_KINDS, INDICATORS } from './types.ts'
+import { ENTRY_KINDS, IDENTITY_FIELDS, INDICATORS } from './types.ts'
 
 export const SAVE_VERSION = 2
 
@@ -26,6 +26,7 @@ const shaped = (shape: Record<string, Check>): Check => (value) =>
 const bound = optional(isNumber)
 const BOUNDS = { gt: bound, gte: bound, lt: bound, lte: bound }
 const isIndicator = oneOf(INDICATORS)
+const isField = oneOf(IDENTITY_FIELDS)
 
 // The branches are tried in the order the engine reads a condition or an effect,
 // so anything that passes here is read the same way when the day is played.
@@ -40,6 +41,7 @@ const isCondition: Check = (value) => {
   if ('flag' in value) return shaped({ flag: isString, days: optional(isDay) })(value)
   if ('trait' in value) return isString(value['trait'])
   if ('resource' in value) return shaped({ resource: isString, is: isBalance })(value)
+  if ('identity' in value) return shaped({ identity: isField, set: isBoolean })(value)
   if ('treaty' in value) return isString(value['treaty'])
   return shaped(BOUNDS)(value['day'])
 }
@@ -47,6 +49,7 @@ const isCondition: Check = (value) => {
 const isEffect: Check = (value) => {
   if (!isObject(value)) return false
   const moves = { by: isNumber, why: isString }
+  if ('identity' in value) return shaped({ identity: isField, to: isString })(value)
   if ('standing' in value) return shaped({ standing: isNumber, why: isString })(value)
   if ('treaty' in value) return shaped({ treaty: isString, days: optional(isDay) })(value)
   if ('endTreaty' in value) return isString(value['endTreaty'])
@@ -75,6 +78,9 @@ const SHAPE: Record<string, Check> = {
     currency: isString,
     demonym: isString,
     leaderTitle: isString,
+    animal: optional(isString),
+    motto: optional(isString),
+    faith: optional(isString),
     flag: shaped({ layout: isString, colours: listOf(isString) }),
   }),
   indicators: shaped(Object.fromEntries(INDICATORS.map((id) => [id, isScore]))),
@@ -119,6 +125,7 @@ const SHAPE: Record<string, Check> = {
   neighbours: mapOf(isStanding),
   treaties: listOf(shaped({ kind: isString, with: isString, since: isDay, until: optional(isDay) })),
   resources: mapOf(isBalance),
+  sandbox: optional(isBoolean),
   agenda: shaped({
     major: (value) => value === null || isString(value),
     minors: listOf(isString),

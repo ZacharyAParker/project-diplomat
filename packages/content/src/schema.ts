@@ -1,9 +1,10 @@
 import { z } from 'zod'
-import { INDICATORS, type Condition } from '@diplomat/engine'
+import { IDENTITY_FIELDS, INDICATORS, type Condition } from '@diplomat/engine'
 
 const id = z.string().regex(/^[a-z][a-z0-9_-]*$/, 'ids are lowercase with dashes or underscores')
 const text = z.string().trim().min(1)
 const indicator = z.enum(INDICATORS)
+const identityField = z.enum(IDENTITY_FIELDS)
 
 const bounds = {
   gt: z.number().optional(),
@@ -25,6 +26,7 @@ export const condition: z.ZodType<Condition> = z.lazy(() =>
     z.strictObject({ day: z.strictObject(bounds) }),
     z.strictObject({ resource: id, is: z.enum(['need', 'surplus', 'even']) }),
     z.strictObject({ treaty: id }),
+    z.strictObject({ identity: identityField, set: z.boolean() }),
   ]),
 )
 
@@ -38,6 +40,7 @@ export const effect = z.union([
   z.strictObject({ standing: z.number(), why: text }),
   z.strictObject({ treaty: id, days: z.number().int().min(7).max(365).optional() }),
   z.strictObject({ endTreaty: id }),
+  z.strictObject({ identity: identityField, to: text }),
 ])
 
 const option = z.strictObject({
@@ -66,6 +69,7 @@ const option = z.strictObject({
       broken: z.array(effect).min(1),
     })
     .optional(),
+  custom: z.strictObject({ field: identityField, label: text }).optional(),
   headline: text,
   result: text,
 })

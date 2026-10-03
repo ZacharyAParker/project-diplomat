@@ -7,6 +7,7 @@ import {
   type Effect,
   type FoundingEffect,
   type Option,
+  IDENTITY_LIMITS,
 } from '@diplomat/engine'
 import type { Problem } from './load.ts'
 
@@ -17,7 +18,7 @@ export const LIMITS = { indicator: 10, faction: 15, minister: 20, situation: 20,
 export const FOUNDING_RANGE = { min: 25, max: 75 }
 
 const MACROS = /\{([a-z]+)(?::([a-z_]+))?\}/g
-const PLAIN_MACROS = new Set(['nation', 'capital', 'currency', 'demonym', 'leader'])
+const PLAIN_MACROS = new Set(['nation', 'capital', 'currency', 'demonym', 'leader', 'animal', 'motto', 'faith'])
 const NEIGHBOUR_MACROS = new Set([undefined, 'demonym', 'leader'])
 const BUILT_IN_FLAGS = new Set(['government_fell', 'election_lost'])
 
@@ -116,6 +117,10 @@ export function validate(content: Content): Problem[] {
       } else if ('treaty' in e) {
         if (!treaties.has(e.treaty)) say(where, `unknown treaty ${e.treaty}`)
         if (!abroad) say(where, 'a treaty can only be signed in a dilemma about another country')
+      } else if ('identity' in e) {
+        if ([...e.to].length > IDENTITY_LIMITS[e.identity]) {
+          say(where, `${e.identity} ${e.to} is longer than ${IDENTITY_LIMITS[e.identity]} characters`)
+        }
       } else if ('endTreaty' in e) {
         if (!treaties.has(e.endTreaty)) say(where, `unknown treaty ${e.endTreaty}`)
       } else if (!e.clear) {

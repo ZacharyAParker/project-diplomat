@@ -80,6 +80,7 @@ export type Condition =
   | { day: Compare }
   | { resource: string; is: ResourceBalance }
   | { treaty: string }
+  | { identity: IdentityField; set: boolean }
 
 // Where the nation stands on one resource: short of it, with some to spare, or neither.
 export type ResourceBalance = 'need' | 'surplus' | 'even'
@@ -95,6 +96,8 @@ export type Effect =
   | { standing: number; why: string }
   | { treaty: string; days?: number }
   | { endTreaty: string }
+  // Names part of the nation: its capital, its currency, its national animal.
+  | { identity: IdentityField; to: string }
 
 export interface Delayed {
   after: number
@@ -120,6 +123,8 @@ export interface Option {
   effects: Effect[]
   later: Delayed[]
   promise?: PromiseDef
+  // An option where the player writes the name. Whatever they type becomes this field.
+  custom?: { field: IdentityField; label: string }
   headline: string
   result: string
 }
@@ -277,12 +282,39 @@ export interface Content {
   treaties: TreatyDef[]
 }
 
+export const IDENTITY_FIELDS = [
+  'capital',
+  'currency',
+  'demonym',
+  'leaderTitle',
+  'animal',
+  'motto',
+  'faith',
+] as const
+
+export type IdentityField = (typeof IDENTITY_FIELDS)[number]
+
+// The longest a name the player writes may be. A motto gets a sentence.
+export const IDENTITY_LIMITS: Record<IdentityField, number> = {
+  capital: 40,
+  currency: 30,
+  demonym: 30,
+  leaderTitle: 40,
+  animal: 40,
+  motto: 100,
+  faith: 60,
+}
+
 export interface Identity {
   name: string
   capital: string
   currency: string
   demonym: string
   leaderTitle: string
+  // Settled by issues over time, so a new nation has none of them.
+  animal?: string
+  motto?: string
+  faith?: string
   // The engine never looks inside the flag. Whoever draws it decides what the words mean.
   flag: { layout: string; colours: string[] }
 }
@@ -306,6 +338,7 @@ export const ENTRY_KINDS = [
   'situation',
   'budget',
   'treaty',
+  'sandbox',
 ] as const
 
 export type EntryKind = (typeof ENTRY_KINDS)[number]
@@ -365,4 +398,6 @@ export interface NationState {
   treaties: Treaty[]
   // Worked out at the start of each day from the pack's resource rules.
   resources: Record<string, ResourceBalance>
+  // Set for good the first time the sandbox changes anything, so a doctored nation says so.
+  sandbox?: boolean
 }

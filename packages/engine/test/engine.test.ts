@@ -20,6 +20,10 @@ import {
   forecast,
   forecastDecision,
   holds,
+  adjust,
+  callUp,
+  cleanName,
+  startCrisis,
   forecastSituation,
   newNation,
   render,
@@ -1068,4 +1072,86 @@ test('a version 1 save loads with nobody abroad, and the next day fills the neig
   assert.deepEqual(loaded.neighbours, {})
   const next = endDay(loaded, content)
   assert.deepEqual(next.neighbours, { east: 10, west: -5 })
+})
+
+const animalIssue = (): Dilemma =>
+  dilemma('animal', [
+    option('stag', { effects: [{ identity: 'animal', to: 'red stag' }, { indicator: 'living', by: 1, why: 'x' }] }),
+    option('own', {
+      custom: { field: 'animal', label: 'The national animal' },
+      headline: '{nation} picks the {animal}',
+    }),
+  ], { when: { identity: 'animal', set: false } })
+
+test('an identity issue names part of the nation, and stops coming once it has', () => {
+  const content = pack({ dilemmas: [animalIssue()] })
+  const state = newNation(content, identity, 1)
+  assert.equal(state.agenda.major, 'animal')
+  const after = decide(state, content, 'animal', 'stag')
+  assert.equal(after.identity.animal, 'red stag')
+  assert.equal(holds({ identity: 'animal', set: true }, after), true)
+})
+
+test('a write-your-own option takes the player\'s text, cleaned, and refuses an empty one', () => {
+  const content = pack({ dilemmas: [animalIssue()] })
+  const state = newNation(content, identity, 1)
+  const named = decide(state, content, 'animal', 'own', '  Lesser\u0000   spotted‮ owl  ')
+  assert.equal(named.identity.animal, 'Lesser spotted owl')
+  assert.equal(named.timeline.at(-1)!.headline, 'Testland picks the Lesser spotted owl')
+  assert.throws(() => decide(state, content, 'animal', 'own', ' ​ '), /animal needs a name/)
+  assert.throws(() => decide(state, content, 'animal', 'own'), /animal needs a name/)
+  assert.equal(cleanName('animal', 'x'.repeat(100)).length, 40)
+})
+
+test('the sandbox sets figures, records what it did and marks the nation for good', () => {
+  const content = abroadPack()
+  const state = newNation(content, identity, 1)
+  assert.equal(state.sandbox, undefined)
+  const after = adjust(state, content, [
+    { indicator: 'debt', to: 90 },
+    { faction: 'labour', to: 10 },
+    { neighbour: 'east', to: -80 },
+    { policy: 'wealth_tax', to: true },
+  ])
+  assert.equal(after.indicators.debt, 90)
+  assert.equal(after.factions['labour']!.approval, 10)
+  assert.equal(after.neighbours['east'], -80)
+  assert.equal(after.policies['wealth_tax'], true)
+  assert.equal(after.sandbox, true)
+  const entry = after.timeline.at(-1)!
+  assert.equal(entry.kind, 'sandbox')
+  assert.deepEqual(entry.changes.map((c) => c.target), ['debt', 'labour', 'east'])
+  assert.throws(() => adjust(state, content, [{ faction: 'nobody', to: 1 }]), /unknown faction/)
+  assert.deepEqual(deserialize(serialize(after)), after)
+})
+
+test('the sandbox can call up any dilemma and start any crisis', () => {
+  const content = abroadPack({
+    dilemmas: [gasOffer(), dilemma('later', [option('a'), option('b')], { when: { day: { gte: 99 } } })],
+    situations: [
+      {
+        id: 'crisis',
+        title: 'The Crisis',
+        description: 'It begins.',
+        when: { day: { gte: 999 } },
+        gauge: 'Level',
+        start: 30,
+        pressures: [],
+        stages: [
+          { title: 'One', description: '', options: [option('a'), option('b')] },
+          { title: 'Two', description: '', options: [option('a'), option('b')] },
+        ],
+        outcomes: [{ headline: 'Over', text: 'Done.', effects: [] }],
+      },
+    ],
+  })
+  let state = newNation(content, identity, 1)
+  state = callUp(state, content, 'later')
+  assert.equal(state.agenda.major, 'later')
+  state = startCrisis(state, content, 'crisis')
+  assert.deepEqual(state.situation, { id: 'crisis', stage: 0, gauge: 30 })
+  assert.equal(state.agenda.situation, true)
+  assert.equal(state.sandbox, true)
+  state = decide(state, content, 'later', 'a')
+  assert.equal(state.answered['later'], 1)
 })
