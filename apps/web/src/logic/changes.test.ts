@@ -178,3 +178,16 @@ group('grouping', () => {
     expect(totalMovement(changes)).toBe(10)
   })
 })
+
+group('changes abroad', () => {
+  it('names the neighbour and words relations warming and cooling', () => {
+    const warm: Change = { kind: 'neighbour', target: 'velsa', by: 8, why: 'They liked it.' }
+    const cool: Change = { kind: 'neighbour', target: 'velsa', by: -2, why: 'They did not.' }
+    expect(targetName(warm, content)).toBe('Velsa')
+    expect(describe(warm, content).group).toBe('abroad')
+    expect(describe(warm, content).clause).toBe('relations with Velsa warm')
+    expect(describe(cool, content).clause).toBe('relations with Velsa cool a little')
+    expect(tone(cool)).toBe('bad')
+    expect(groupChanges([warm]).map((g) => g.label)).toEqual(['Abroad'])
+  })
+})

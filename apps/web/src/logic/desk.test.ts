@@ -60,7 +60,7 @@ describe('agendaCards', () => {
   })
 
   it('is empty on a day with nothing to decide', () => {
-    const state: GameState = { ...founded(), agenda: { major: null, minors: [], situation: false } }
+    const state: GameState = { ...founded(), agenda: { major: null, minors: [], situation: false, bound: {} } }
     expect(cardsOf(state)).toEqual([])
   })
 })
@@ -136,7 +136,7 @@ describe('boxNotice', () => {
   const bare = (state: GameState, answered: Record<string, number>): GameState => ({
     ...state,
     answered,
-    agenda: { major: null, minors: [], situation: false },
+    agenda: { major: null, minors: [], situation: false, bound: {} },
   })
 
   it('says nothing while a major dilemma is on the desk', () => {

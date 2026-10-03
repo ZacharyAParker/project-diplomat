@@ -14,6 +14,7 @@ export const FILTERS = [
   { id: 'aftermath', label: 'Aftermath', kinds: ['consequence'] },
   { id: 'promises', label: 'Promises', kinds: ['promise'] },
   { id: 'treasury', label: 'Treasury', kinds: ['budget'] },
+  { id: 'abroad', label: 'Abroad', kinds: ['treaty'] },
   { id: 'power', label: 'Power', kinds: ['founding', 'election', 'government', 'cabinet'] },
   { id: 'reputation', label: 'Reputation', kinds: ['trait'] },
 ] as const satisfies readonly Filter[]

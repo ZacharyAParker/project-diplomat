@@ -51,13 +51,15 @@ export interface BarProps {
   value: number
   // Where the value stood before, drawn as a notch on the track.
   was?: number
+  // Shown and read out instead of the number, for a scale that is better put in words.
+  valueText?: string
   // Goes after the number: a change since yesterday, a trend line.
   note?: ReactNode
 }
 
 // The compact row for lists of numbers: name, bar, figure. Built from spans, so it can
 // sit inside a summary.
-export function Bar({ label, name, value, was, note }: BarProps) {
+export function Bar({ label, name, value, valueText, was, note }: BarProps) {
   const text = name ?? (typeof label === 'string' ? label : undefined)
   return (
     <span className="bar">
@@ -69,12 +71,13 @@ export function Bar({ label, name, value, was, note }: BarProps) {
         aria-valuemin={0}
         aria-valuemax={100}
         aria-valuenow={Math.round(clamp(value))}
+        {...(valueText === undefined ? {} : { 'aria-valuetext': valueText })}
       >
         <span className="bar__fill" style={{ width: `${clamp(value)}%` }} />
         {was !== undefined && <span className="bar__was" style={{ left: `${clamp(was)}%` }} />}
       </span>
       <span className="bar__value figures" aria-hidden="true">
-        {Math.round(value)}
+        {valueText ?? Math.round(value)}
       </span>
       {note && <span className="bar__note">{note}</span>}
     </span>

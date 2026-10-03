@@ -8,9 +8,11 @@ import {
   factionRows,
   hasPending,
   indicatorRows,
+  neighbourRows,
   ordinal,
   policyGroups,
   promiseRows,
+  resourceLines,
   traitRows,
   type PolicyGroup,
 } from '../logic/nation.ts'
@@ -75,6 +77,8 @@ export function Nation({ current }: { current: Current }) {
   const traits = useMemo(() => traitRows(state, content), [state, content])
   const promises = useMemo(() => promiseRows(state, content), [state, content])
   const crisis = useMemo(() => crisisRow(state, content), [state, content])
+  const neighbours = useMemo(() => neighbourRows(state, content), [state, content])
+  const resources = useMemo(() => resourceLines(state, content), [state, content])
 
   return (
     <Screen title="The nation" kicker={`${identity.name}, day ${state.day}`} className="nation">
@@ -177,6 +181,44 @@ export function Nation({ current }: { current: Current }) {
               ))}
             </ul>
           </Sheet>
+
+          {neighbours.length > 0 && (
+            <Sheet kicker="Abroad" title="The neighbours">
+              <p className="small soft">
+                {resources.short} {resources.spare} Relations run from hostile to close. Open a country to see
+                what it wants and what it has.
+              </p>
+              <ul className="indicators">
+                {neighbours.map((row) => (
+                  <li key={row.id}>
+                    <details className="fold fold--row">
+                      <summary>
+                        <Bar
+                          label={row.name}
+                          name={`Relations with ${row.name}`}
+                          value={(row.standing + 100) / 2}
+                          valueText={row.mood}
+                          note={
+                            row.treaties.length ? (
+                              <span className="small">{row.treaties.join('; ')}</span>
+                            ) : (
+                              <span className="small soft">No treaty</span>
+                            )
+                          }
+                        />
+                      </summary>
+                      <div className="fold__body small stack">
+                        <p>{row.description}</p>
+                        <p>
+                          Led by {row.leader}. {row.wants} {row.offers}
+                        </p>
+                      </div>
+                    </details>
+                  </li>
+                ))}
+              </ul>
+            </Sheet>
+          )}
         </div>
 
         <div className="nation__side">

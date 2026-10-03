@@ -3,7 +3,7 @@ import { INDICATORS, INDICATOR_INFO, type Change, type Content, type IndicatorId
 export type Direction = 'up' | 'down' | 'none'
 export type Size = 'small' | 'moderate' | 'large'
 export type Tone = 'good' | 'bad' | 'neutral'
-export type GroupId = 'country' | 'factions' | 'cabinet' | 'situation'
+export type GroupId = 'country' | 'factions' | 'cabinet' | 'situation' | 'abroad'
 
 export interface Described {
   group: GroupId
@@ -22,13 +22,20 @@ export interface Described {
 
 // The most one effect is allowed to move each kind of number. The pack validator holds
 // authors to the same figures, so a "large" move here is a large one by the house rules.
-const FULL_SCALE: Record<Change['kind'], number> = { indicator: 10, faction: 15, minister: 20, situation: 20 }
+const FULL_SCALE: Record<Change['kind'], number> = {
+  indicator: 10,
+  faction: 15,
+  minister: 20,
+  situation: 20,
+  neighbour: 15,
+}
 
 const GROUP_OF: Record<Change['kind'], GroupId> = {
   indicator: 'country',
   faction: 'factions',
   minister: 'cabinet',
   situation: 'situation',
+  neighbour: 'abroad',
 }
 
 export const GROUP_LABELS: Record<GroupId, string> = {
@@ -36,9 +43,10 @@ export const GROUP_LABELS: Record<GroupId, string> = {
   factions: 'Factions',
   cabinet: 'Cabinet',
   situation: 'The situation',
+  abroad: 'Abroad',
 }
 
-const GROUP_ORDER: readonly GroupId[] = ['situation', 'country', 'factions', 'cabinet']
+const GROUP_ORDER: readonly GroupId[] = ['situation', 'country', 'factions', 'cabinet', 'abroad']
 
 export const SIZE_WORDS: Record<Size, string> = { small: 'a little', moderate: 'somewhat', large: 'a lot' }
 
@@ -88,6 +96,7 @@ export function targetName(change: Pick<Change, 'kind' | 'target'>, content: Con
   if (kind === 'indicator') return isIndicator(target) ? INDICATOR_INFO[target].name : target
   if (kind === 'faction') return content.factions.find((f) => f.id === target)?.name ?? target
   if (kind === 'minister') return content.portfolios.find((p) => p.id === target)?.title ?? target
+  if (kind === 'neighbour') return content.neighbours.find((n) => n.id === target)?.name ?? target
   return content.situations.find((s) => s.id === target)?.gauge ?? target
 }
 
@@ -107,6 +116,10 @@ function clause(change: Change, content: Content): string {
   const moves = way === 'none' ? 'does not move' : `${way === 'up' ? 'rises' : 'falls'}${adverb}`
   if (change.kind === 'faction') return `approval among ${lowerThe(name)} ${moves}`
   if (change.kind === 'minister') return `the ${name}'s standing ${moves}`
+  if (change.kind === 'neighbour') {
+    if (way === 'none') return `relations with ${name} do not change`
+    return `relations with ${name} ${way === 'up' ? 'warm' : 'cool'}${adverb}`
+  }
   return gaugeClause(name, way, size(change))
 }
 

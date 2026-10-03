@@ -1,4 +1,5 @@
 import {
+  standingWith,
   INDICATORS,
   INDICATOR_INFO,
   render,
@@ -289,6 +290,64 @@ export function crisisRow(state: GameState, content: Content): CrisisRow | null 
     gauge: render(situation.gauge, state, content),
     value: running.gauge,
     note: `Stage ${Math.min(running.stage + 1, stages)} of ${stages}.`,
+  }
+}
+
+export interface NeighbourRow {
+  id: string
+  name: string
+  leader: string
+  description: string
+  standing: number
+  // "Warm", "Cool" and so on, so the figure never has to speak for itself.
+  mood: string
+  treaties: string[]
+  wants: string
+  offers: string
+}
+
+export function moodWord(standing: number): string {
+  if (standing >= 60) return 'Close'
+  if (standing >= 25) return 'Warm'
+  if (standing >= -10) return 'Correct'
+  if (standing >= -40) return 'Cool'
+  return 'Hostile'
+}
+
+const resourceNames = (ids: readonly string[], content: Content) =>
+  listWords(ids.map((id) => (content.resources.find((r) => r.id === id)?.name ?? id).toLowerCase()))
+
+export function neighbourRows(state: GameState, content: Content): NeighbourRow[] {
+  return content.neighbours.map((n) => {
+    const standing = standingWith(state, content, n.id)
+    return {
+      id: n.id,
+      name: n.name,
+      leader: n.leader,
+      description: render(n.description, state, content, n.id),
+      standing,
+      mood: moodWord(standing),
+      treaties: state.treaties
+        .filter((t) => t.with === n.id)
+        .map((t) => {
+          const name = content.treaties.find((d) => d.id === t.kind)?.name ?? t.kind
+          return t.until === undefined ? name : `${name}, ${Math.max(0, t.until - state.day)} days left`
+        }),
+      wants: n.needs.length ? `Short of ${resourceNames(n.needs, content)}.` : '',
+      offers: n.surpluses.length ? `Has ${resourceNames(n.surpluses, content)} to spare.` : '',
+    }
+  })
+}
+
+// What the nation itself is short of and has to spare, as two lines of plain words.
+export function resourceLines(state: GameState, content: Content): { short: string; spare: string } {
+  const named = (balance: string) =>
+    content.resources.filter((r) => state.resources[r.id] === balance).map((r) => r.name.toLowerCase())
+  const short = named('need')
+  const spare = named('surplus')
+  return {
+    short: short.length ? `Short of ${listWords(short).replace(/ or ([^ ]+)$/, ' and $1')}.` : 'Short of nothing in particular.',
+    spare: spare.length ? `Has ${listWords(spare).replace(/ or ([^ ]+)$/, ' and $1')} to spare.` : 'Nothing to spare.',
   }
 }
 

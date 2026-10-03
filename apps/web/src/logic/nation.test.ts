@@ -9,9 +9,12 @@ import {
   hasPending,
   indicatorRows,
   listWords,
+  moodWord,
+  neighbourRows,
   ordinal,
   policyGroups,
   promiseRows,
+  resourceLines,
   sparkPoints,
   tagWords,
   traitRows,
@@ -249,5 +252,38 @@ describe('ordinal', () => {
     expect(ordinal(11)).toBe('11th')
     expect(ordinal(22)).toBe('22nd')
     expect(ordinal(103)).toBe('103rd')
+  })
+})
+
+describe('the neighbours', () => {
+  it('lists every neighbour in the pack with its mood, needs and treaties', () => {
+    const state: GameState = {
+      ...founded(),
+      neighbours: { ...founded().neighbours, eskerland: 30 },
+      treaties: [{ kind: 'energy-supply', with: 'eskerland', since: 1, until: 40 }],
+    }
+    const rows = neighbourRows(state, content)
+    expect(rows.map((r) => r.id)).toEqual(content.neighbours.map((n) => n.id))
+    const esk = rows.find((r) => r.id === 'eskerland')!
+    expect(esk.mood).toBe('Warm')
+    expect(esk.treaties).toEqual([`Energy Agreement, ${40 - state.day} days left`])
+    expect(esk.wants).toBe('Short of food.')
+    expect(esk.offers).toBe('Has energy or manufactured goods to spare.')
+  })
+
+  it('puts standing into words at every band', () => {
+    expect([80, 30, 0, -20, -70].map(moodWord)).toEqual(['Close', 'Warm', 'Correct', 'Cool', 'Hostile'])
+  })
+
+  it('says what the nation is short of and has to spare', () => {
+    const state: GameState = { ...founded(), resources: { energy: 'need', food: 'surplus', capital: 'surplus' } }
+    expect(resourceLines(state, content)).toEqual({
+      short: 'Short of energy.',
+      spare: 'Has food and capital to spare.',
+    })
+    expect(resourceLines({ ...founded(), resources: {} }, content)).toEqual({
+      short: 'Short of nothing in particular.',
+      spare: 'Nothing to spare.',
+    })
   })
 })

@@ -28,18 +28,20 @@ export interface Card {
   // Null for a situation stage, which is decided without naming a dilemma.
   dilemmaId: string | null
   kicker: string
+  // The other country, for a dilemma about one.
+  abroad?: string
   title: string
   description: string
   options: OptionView[]
   gauge?: { label: string; value: number }
 }
 
-function optionViews(options: Option[], state: GameState, content: Content): OptionView[] {
+function optionViews(options: Option[], state: GameState, content: Content, neighbour?: string): OptionView[] {
   return availableOptions(options, state).map((option) => ({
     id: option.id,
-    name: render(option.advocate.name, state, content),
-    role: render(option.advocate.role, state, content),
-    speech: render(option.speech, state, content),
+    name: render(option.advocate.name, state, content, neighbour),
+    role: render(option.advocate.role, state, content, neighbour),
+    speech: render(option.speech, state, content, neighbour),
   }))
 }
 
@@ -62,14 +64,22 @@ export function agendaCards(agenda: AgendaItems, state: GameState, content: Cont
   }
   const dilemmas = agenda.major ? [agenda.major, ...agenda.minors] : agenda.minors
   for (const dilemma of dilemmas) {
+    const neighbour = state.agenda.bound[dilemma.id]
+    const about = (raw: string) => render(raw, state, content, neighbour)
+    const abroad = content.neighbours.find((n) => n.id === neighbour)?.name
     cards.push({
       key: dilemma.id,
       kind: dilemma.kind,
       dilemmaId: dilemma.id,
-      kicker: dilemma.kind === 'major' ? 'The main business' : 'Also in the box',
-      title: text(dilemma.title),
-      description: text(dilemma.description),
-      options: optionViews(dilemma.options, state, content),
+      kicker: abroad
+        ? `Abroad: ${abroad}`
+        : dilemma.kind === 'major'
+          ? 'The main business'
+          : 'Also in the box',
+      ...(abroad === undefined ? {} : { abroad }),
+      title: about(dilemma.title),
+      description: about(dilemma.description),
+      options: optionViews(dilemma.options, state, content, neighbour),
     })
   }
   return cards
