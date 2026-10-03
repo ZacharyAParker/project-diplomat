@@ -1205,3 +1205,113 @@ html {
     padding-top: 0.1rem;
   }
 }
+
+/* Sandbox and admin */
+
+.sandbox-mark {
+  display: inline-block;
+  margin-left: var(--space-2);
+  padding: 0.05rem 0.4rem;
+  border: var(--hair) solid var(--mid);
+  border-radius: 2px;
+  font-family: var(--font-ui);
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--mid);
+  vertical-align: middle;
+}
+
+.sandbox > * + *,
+.admin > * + * {
+  margin-top: var(--space-6);
+}
+
+.sandbox__groups {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  gap: var(--space-5);
+  margin-bottom: var(--space-4);
+}
+
+.sandbox__group legend {
+  margin-bottom: var(--space-2);
+}
+
+.sandbox__row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 5.5rem auto;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 0.2rem 0;
+  border-top: var(--hair) solid var(--rule-soft);
+  font-family: var(--font-ui);
+  font-size: 0.8125rem;
+}
+
+.sandbox__laws {
+  columns: 2 18rem;
+  column-gap: var(--space-6);
+  margin-bottom: var(--space-4);
+}
+
+.sandbox__laws .sandbox__row {
+  grid-template-columns: minmax(0, 1fr) 9rem;
+  break-inside: avoid;
+}
+
+.sandbox__number {
+  width: 100%;
+  min-height: 2rem;
+  padding: 0.2rem 0.4rem;
+}
+
+.sandbox .row select.field__input {
+  min-height: 2.25rem;
+  max-width: 100%;
+}
+
+.admin__table {
+  width: 100%;
+  margin-block: var(--space-3);
+  border-collapse: collapse;
+  font-family: var(--font-ui);
+  font-size: 0.8125rem;
+}
+
+.admin__table th,
+.admin__table td {
+  padding: 0.35rem 0.5rem;
+  border-bottom: var(--hair) solid var(--rule-soft);
+  text-align: left;
+  vertical-align: top;
+}
+
+.admin__table thead th {
+  font-size: 0.6875rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.debate__write {
+  margin-top: var(--space-3);
+  max-width: 28rem;
+}
+
+.sandbox__number,
+.sandbox__row select.field__input,
+.sandbox .row select.field__input {
+  min-height: 2rem;
+  padding: 0.2rem 0.4rem;
+  border: var(--hair) solid var(--rule);
+  border-radius: var(--round);
+  background: var(--paper);
+  font-family: var(--font-ui);
+  font-size: 0.8125rem;
+}
+
+.sandbox .row select.field__input {
+  flex: 1 1 18rem;
+}

@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest'
 import { content, founded, played } from '../test/fixtures.ts'
 import {
   INDEX_KEY,
+  MAX_IMPORT,
   SAVE_FORMAT,
   decode,
   encode,
@@ -280,5 +281,15 @@ describe('export and import', () => {
     expect(randomId()).toMatch(/^[0-9a-f]{16}$/)
     expect(randomId()).not.toBe(randomId())
     expect(Number.isSafeInteger(randomSeed())).toBe(true)
+  })
+})
+
+describe('importing an oversized file', () => {
+  it('refuses it without reading it', () => {
+    const kv = memoryStore()
+    const result = importSave(kv, 'x'.repeat(MAX_IMPORT + 1), content, () => 'fresh')
+    expect(result.ok).toBe(false)
+    expect(!result.ok && result.problem).toMatch(/too large/)
+    expect(kv.length).toBe(0)
   })
 })

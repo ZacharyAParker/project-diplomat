@@ -39,6 +39,10 @@ type Actions = Pick<
   | 'decide'
   | 'decideSituation'
   | 'endDay'
+  | 'adjust'
+  | 'callUp'
+  | 'startCrisis'
+  | 'skipDays'
   | 'setIdentity'
   | 'remove'
   | 'exportSave'
@@ -99,6 +103,10 @@ export function useGame(): Game {
       decide: store.decide,
       decideSituation: store.decideSituation,
       endDay: store.endDay,
+      adjust: store.adjust,
+      callUp: store.callUp,
+      startCrisis: store.startCrisis,
+      skipDays: store.skipDays,
       setIdentity: store.setIdentity,
       remove: store.remove,
       exportSave: store.exportSave,

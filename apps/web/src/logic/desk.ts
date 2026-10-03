@@ -1,4 +1,5 @@
 import {
+  IDENTITY_LIMITS,
   availableOptions,
   render,
   type AgendaItems,
@@ -18,6 +19,8 @@ export interface OptionView {
   name: string
   role: string
   speech: string
+  // Set when the player names the thing themselves: the label and the longest it may be.
+  custom?: { label: string; max: number }
 }
 
 // One thing on the desk that wants a decision, with every macro already filled in.
@@ -42,6 +45,9 @@ function optionViews(options: Option[], state: GameState, content: Content, neig
     name: render(option.advocate.name, state, content, neighbour),
     role: render(option.advocate.role, state, content, neighbour),
     speech: render(option.speech, state, content, neighbour),
+    ...(option.custom
+      ? { custom: { label: option.custom.label, max: IDENTITY_LIMITS[option.custom.field] } }
+      : {}),
   }))
 }
 

@@ -29,6 +29,7 @@ function NationRow({ nation }: { nation: Summary }) {
       <div className="nations__text">
         <p className="nations__name">
           <TextLink to={to}>{nation.name}</TextLink>
+          {nation.sandbox && <span className="sandbox-mark">Sandbox</span>}
         </p>
         <p className="label soft">
           {nation.className}

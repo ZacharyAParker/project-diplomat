@@ -1,7 +1,7 @@
 export const FOUND_STEPS = ['identity', 'flag', 'questions'] as const
 export type FoundStep = (typeof FOUND_STEPS)[number]
 
-export const NATION_PAGES = ['morning', 'desk', 'nation', 'record', 'settings'] as const
+export const NATION_PAGES = ['morning', 'desk', 'nation', 'record', 'settings', 'sandbox'] as const
 export type NationPage = (typeof NATION_PAGES)[number]
 
 export type Route =
@@ -9,6 +9,7 @@ export type Route =
   | { name: 'found'; step: FoundStep }
   | { name: 'nation'; id: string; page: NationPage }
   | { name: 'kit' }
+  | { name: 'admin' }
   | { name: 'lost' }
 
 const oneOf = <T extends string>(list: readonly T[], value: string | undefined): value is T =>
@@ -33,6 +34,7 @@ export function parseRoute(hash: string): Route {
   if (first === 'found' && parts.length === 2 && oneOf(FOUND_STEPS, second))
     return { name: 'found', step: second }
   if (first === 'kit' && parts.length === 1) return { name: 'kit' }
+  if (first === 'admin' && parts.length === 1) return { name: 'admin' }
   if (first === 'n' && second !== undefined && parts.length <= 3) {
     const id = decodePart(second)
     if (id === null) return { name: 'lost' }
@@ -46,5 +48,6 @@ export function routeHref(route: Route): string {
   if (route.name === 'found') return route.step === 'identity' ? '#/found' : `#/found/${route.step}`
   if (route.name === 'nation') return `#/n/${encodeURIComponent(route.id)}/${route.page}`
   if (route.name === 'kit') return '#/kit'
+  if (route.name === 'admin') return '#/admin'
   return '#/'
 }

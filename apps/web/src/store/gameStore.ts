@@ -1,4 +1,8 @@
 import {
+  adjust,
+  callUp,
+  startCrisis,
+  type Adjustment,
   decide,
   decideSituation,
   endDay,
@@ -56,9 +60,16 @@ export interface GameStore {
   open(id: string): boolean
   close(): void
   found(identity: Identity, answers: Record<string, string>): string
-  decide(dilemmaId: string, optionId: string): TimelineEntry
+  // text names the thing, for an option that asks the player to.
+  decide(dilemmaId: string, optionId: string, text?: string): TimelineEntry
   decideSituation(optionId: string): TimelineEntry
   endDay(): TimelineEntry[]
+  // The sandbox. Each marks the nation as sandboxed, apart from skipping days, which is
+  // only ending them without deciding anything.
+  adjust(adjustments: readonly Adjustment[]): void
+  callUp(dilemmaId: string): void
+  startCrisis(situationId: string): void
+  skipDays(days: number): void
   setIdentity(identity: Identity): void
   remove(id: string): void
   exportSave(id: string): { filename: string; text: string } | null
@@ -142,8 +153,8 @@ export function createGameStore(
       return id
     },
 
-    decide(dilemmaId, optionId) {
-      const next = decide(playing().state, content, dilemmaId, optionId)
+    decide(dilemmaId, optionId, text) {
+      const next = decide(playing().state, content, dilemmaId, optionId, text)
       commit(next)
       return next.timeline[next.timeline.length - 1]!
     },
@@ -159,6 +170,27 @@ export function createGameStore(
       const next = endDay(before.state, content)
       commit(next, withDayEnd(before.history, next))
       return next.timeline.slice(before.state.timeline.length)
+    },
+
+    adjust(adjustments) {
+      commit(adjust(playing().state, content, adjustments))
+    },
+
+    callUp(dilemmaId) {
+      commit(callUp(playing().state, content, dilemmaId))
+    },
+
+    startCrisis(situationId) {
+      commit(startCrisis(playing().state, content, situationId))
+    },
+
+    skipDays(days) {
+      let { state, history } = playing()
+      for (let i = 0; i < days; i++) {
+        state = endDay(state, content)
+        history = withDayEnd(history, state)
+      }
+      commit(state, history)
     },
 
     setIdentity(identity) {

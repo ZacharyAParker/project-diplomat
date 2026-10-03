@@ -58,6 +58,7 @@ export const KICKERS: Record<EntryKind, string> = {
   situation: 'Crisis',
   budget: 'Treasury',
   treaty: 'Abroad',
+  sandbox: 'Sandbox',
 }
 
 const QUIET: readonly { headline: string; text: string }[] = [

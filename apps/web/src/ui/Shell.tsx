@@ -13,6 +13,8 @@ export interface MastheadNation {
   className: string
   support: number
   electionIn: number
+  // True once the sandbox has changed it, which every page then says.
+  sandbox?: boolean
   // The newest few headlines from the record, newest first, for the sidebar.
   latest?: readonly { day: number; headline: string }[]
 }
@@ -29,6 +31,7 @@ const PAGES: readonly { page: NationPage; label: string; icon: IconName }[] = [
   { page: 'nation', label: 'Nation', icon: 'nation' },
   { page: 'record', label: 'Record', icon: 'record' },
   { page: 'settings', label: 'Settings', icon: 'settings' },
+  { page: 'sandbox', label: 'Sandbox', icon: 'sandbox' },
 ]
 
 function Wordmark() {
@@ -84,6 +87,12 @@ function Side({ nation, page }: MastheadProps) {
                 <span>New nation</span>
               </a>
             </li>
+            <li className="side__away">
+              <a className="side__link" href={routeHref({ name: 'admin' })}>
+                <Icon name="admin" />
+                <span>Admin</span>
+              </a>
+            </li>
           </ul>
         </nav>
       )}
@@ -130,7 +139,10 @@ export function Masthead({ nation, page }: MastheadProps) {
           <a className="masthead__name" href={routeHref({ name: 'nation', id: nation.id, page: 'nation' })}>
             {identity.name}
           </a>
-          <p className="masthead__class">{nation.className}</p>
+          <p className="masthead__class">
+            {nation.className}
+            {nation.sandbox && <span className="sandbox-mark">Sandbox</span>}
+          </p>
         </div>
       </div>
       <ul className="masthead__dateline" aria-label="The state of the nation">

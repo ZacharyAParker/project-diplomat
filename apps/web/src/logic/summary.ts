@@ -144,7 +144,8 @@ export function summary(state: GameState, content: Content): string[] {
   const first =
     `${identity.name} is a nation of ${say(state, 'environment')}, governed by its ` +
     `${identity.leaderTitle} from ${identity.capital}. Its ${people} ${say(state, 'liberty')}, ` +
-    `${say(state, 'living')}.`
+    `${say(state, 'living')}.` +
+    (identity.animal ? ` Its national animal is the ${identity.animal}.` : '')
 
   const second =
     `The country runs on ${say(state, 'capacity')}. ${say(state, 'employment')}. ` +
@@ -152,7 +153,8 @@ export function summary(state: GameState, content: Content): string[] {
 
   const third =
     `${identity.name} has ${say(state, 'health')} and ${say(state, 'education')}, and ` +
-    `${say(state, 'administration')}. ${say(state, 'legitimacy')}`
+    `${say(state, 'administration')}. ${say(state, 'legitimacy')}` +
+    (identity.faith ? ` The national faith is given as ${identity.faith}.` : '')
 
   const reputation = known.length
     ? ` Abroad it is known as a ${known.join(' and a ')}.`

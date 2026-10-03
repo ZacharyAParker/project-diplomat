@@ -166,11 +166,11 @@ function Day({ current, onEnd, onReport }: DayProps) {
   const total = slots.length + earlier.length
   const undecided = cards.filter((card) => !left.includes(card.key))
 
-  function decide(card: Card, optionId: string, view: ForecastView) {
+  function decide(card: Card, optionId: string, view: ForecastView, text?: string) {
     const index = state.timeline.length
     try {
       const entry =
-        card.dilemmaId === null ? game.decideSituation(optionId) : game.decide(card.dilemmaId, optionId)
+        card.dilemmaId === null ? game.decideSituation(optionId) : game.decide(card.dilemmaId, optionId, text)
       setRefused(null)
       setDone((old) => ({ ...old, [card.key]: { index, title: card.title, view } }))
       announce(`Decided. ${entry.headline}`)
@@ -279,7 +279,7 @@ function Day({ current, onEnd, onReport }: DayProps) {
                 card={card}
                 current={current}
                 content={content}
-                onDecide={(optionId, view) => decide(card, optionId, view)}
+                onDecide={(optionId, view, text) => decide(card, optionId, view, text)}
                 onLeave={() => setLeft([...left, key])}
               />
             )

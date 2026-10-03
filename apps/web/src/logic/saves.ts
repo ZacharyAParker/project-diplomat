@@ -75,6 +75,8 @@ export interface Summary {
   support: number
   updatedAt: string
   problem?: string
+  // True once the sandbox has changed it.
+  sandbox?: boolean
 }
 
 export type Opened =
@@ -208,6 +210,7 @@ export function summarise(nation: Nation, content: Content): Summary {
     day: state.day,
     support: support(state),
     updatedAt: nation.updatedAt,
+    ...(state.sandbox ? { sandbox: true } : {}),
   }
 }
 
@@ -327,7 +330,14 @@ export function removeNation(kv: KeyValue, id: string) {
 
 // An import never overwrites. If a nation with the same id is already here, the
 // imported one is stored beside it under a new id.
+// Far bigger than any real save, and small enough that a hostile file cannot fill the
+// browser's storage or stall the page while it is read.
+export const MAX_IMPORT = 5_000_000
+
 export function importSave(kv: KeyValue, text: string, content: Content, freshId: () => string): Opened {
+  if (text.length > MAX_IMPORT) {
+    return { ok: false, id: '', problem: 'That file is too large to be a save from this game.', raw: '' }
+  }
   const opened = decode(text, content)
   if (!opened.ok) return opened
   const taken = storedIds(kv)

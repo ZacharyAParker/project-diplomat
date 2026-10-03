@@ -128,7 +128,7 @@ describe('identity', () => {
     await user.type(name, 'New Vesland')
     await user.click(screen.getByRole('radio', { name: 'Disc' }))
     await user.click(screen.getByRole('button', { name: 'Save name and flag' }))
-    expect(screen.getByText('Saved. The papers have been told.')).toBeDefined()
+    expect(screen.getAllByText('Saved. The papers have been told.')[0]).toBeDefined()
 
     const saved = store.get().nation!.state
     expect(saved.identity.name).toBe('New Vesland')

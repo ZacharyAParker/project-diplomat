@@ -1,8 +1,8 @@
 import type { Content } from '@diplomat/engine'
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { forecastView, type Card, type ForecastView, type OptionView } from '../../logic/desk.ts'
 import type { Current } from '../../store/game.tsx'
-import { Button, ChangeList, Meter, Tag } from '../../ui/index.ts'
+import { Button, ChangeList, Meter, Tag, TextField } from '../../ui/index.ts'
 
 // Everything about an option that is not a movement: laws, reputations, promises, and
 // the fact (never the content) of consequences still to come.
@@ -35,12 +35,22 @@ interface OptionProps {
   option: OptionView
   view: ForecastView
   content: Content
-  onAccept(): void
+  onAccept(text?: string): void
 }
 
 // One numbered position in the debate: who argues it, what it would do, and the button
 // that makes it law.
 function Position({ number, option, view, content, onAccept }: OptionProps) {
+  const [text, setText] = useState('')
+  const [missing, setMissing] = useState(false)
+  const written = text.trim()
+
+  function accept() {
+    if (!option.custom) return onAccept()
+    if (!written) return setMissing(true)
+    onAccept(written)
+  }
+
   return (
     <li className="debate__option">
       <p className="debate__speech">
@@ -60,8 +70,23 @@ function Position({ number, option, view, content, onAccept }: OptionProps) {
           </>
         )}
       </div>
+      {option.custom && (
+        <div className="debate__write">
+          <TextField
+            label={option.custom.label}
+            value={text}
+            maxLength={option.custom.max}
+            onChange={(value) => {
+              setText(value)
+              setMissing(false)
+            }}
+            hint={`Your own choice, up to ${option.custom.max} characters.`}
+            error={missing ? 'Write a name first, or back one of the others.' : null}
+          />
+        </div>
+      )}
       <p className="debate__accept">
-        <Button look="accent" onClick={onAccept} aria-label={`Accept position ${number}: ${option.name}`}>
+        <Button look="accent" onClick={accept} aria-label={`Accept position ${number}: ${option.name}`}>
           Accept
         </Button>
       </p>
@@ -73,8 +98,8 @@ export interface AgendaCardProps {
   card: Card
   current: Current
   content: Content
-  // Called with the accepted option and what was forecast for it.
-  onDecide(optionId: string, view: ForecastView): void
+  // Called with the accepted option, what was forecast for it, and any name the player wrote.
+  onDecide(optionId: string, view: ForecastView, text?: string): void
   onLeave(): void
 }
 
@@ -121,7 +146,7 @@ export function AgendaCard({ card, current, content, onDecide, onLeave }: Agenda
               option={option}
               view={views.get(option.id)!}
               content={content}
-              onAccept={() => onDecide(option.id, views.get(option.id)!)}
+              onAccept={(text) => onDecide(option.id, views.get(option.id)!, text)}
             />
           ))}
         </ol>

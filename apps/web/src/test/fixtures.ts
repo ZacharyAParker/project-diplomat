@@ -41,7 +41,8 @@ export function played(days: number, seed = 7): GameState {
     }
     for (const dilemma of [agenda.major, ...agenda.minors]) {
       if (!dilemma) continue
-      state = decide(state, content, dilemma.id, availableOptions(dilemma.options, state)[0]!.id)
+      const option = availableOptions(dilemma.options, state)[0]!
+      state = decide(state, content, dilemma.id, option.id, option.custom ? 'Testing' : undefined)
     }
     state = endDay(state, content)
   }

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { version } from '../package.json'
 import type { NationPage } from './logic/router.ts'
+import { Admin } from './screens/Admin.tsx'
 import { Desk } from './screens/Desk.tsx'
 import { EMPTY_DRAFT, Founding } from './screens/Founding.tsx'
 import { Home } from './screens/Home.tsx'
@@ -9,6 +10,7 @@ import { Morning } from './screens/Morning.tsx'
 import { Nation } from './screens/Nation.tsx'
 import { Lost, Unreadable } from './screens/Other.tsx'
 import { TheRecord } from './screens/Record.tsx'
+import { Sandbox } from './screens/Sandbox.tsx'
 import { Settings } from './screens/Settings.tsx'
 import { useGame, type Current } from './store/game.tsx'
 import { useRoute } from './store/route.ts'
@@ -34,6 +36,7 @@ function NationPages({ current, page }: { current: Current; page: NationPage }) 
   if (page === 'desk') return <Desk current={current} />
   if (page === 'nation') return <Nation current={current} />
   if (page === 'record') return <TheRecord current={current} />
+  if (page === 'sandbox') return <Sandbox current={current} />
   return <Settings current={current} />
 }
 
@@ -63,6 +66,7 @@ function NationRoute({ id, page }: { id: string; page: NationPage }) {
     className: current.nationClass.name,
     support: current.support,
     electionIn: current.electionIn,
+    sandbox: current.state.sandbox === true,
     latest: current.state.timeline
       .slice(-5)
       .reverse()
@@ -102,6 +106,7 @@ export function App({ persistent = true }: AppProps) {
       {route.name === 'home' && <Home persistent={persistent} />}
       {route.name === 'found' && <Founding step={route.step} draft={draft} onDraft={setDraft} />}
       {route.name === 'kit' && <Kit />}
+      {route.name === 'admin' && <Admin />}
       {route.name === 'lost' && <Lost />}
     </Shell>
   )

@@ -7,6 +7,8 @@ interface SettingsApi {
   // What is actually on screen, after "follow the system" has been resolved.
   theme: 'light' | 'dark'
   change(next: Partial<Settings>): void
+  // The browser storage everything is kept in, for the few screens that need it directly.
+  kv: KeyValue
 }
 
 const SettingsContext = createContext<SettingsApi | null>(null)
@@ -50,7 +52,7 @@ export function SettingsProvider({ kv, children }: { kv: KeyValue; children: Rea
     [kv],
   )
 
-  const api = useMemo(() => ({ settings, theme, change }), [settings, theme, change])
+  const api = useMemo(() => ({ settings, theme, change, kv }), [settings, theme, change, kv])
   return <SettingsContext.Provider value={api}>{children}</SettingsContext.Provider>
 }
 

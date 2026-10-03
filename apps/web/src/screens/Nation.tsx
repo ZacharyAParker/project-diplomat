@@ -89,7 +89,7 @@ export function Nation({ current }: { current: Current }) {
         <Flag flag={identity.flag} className="nationhead__flag" label={`The flag of ${identity.name}`} />
         <p className="nationhead__class">{nationClass.name}</p>
         <p className="nationhead__motto">
-          <q>{nationClass.description}</q>
+          <q>{identity.motto ?? nationClass.description}</q>
         </p>
         <ul className="pills" aria-label="At a glance">
           {glance.map((pill) => (
@@ -127,6 +127,18 @@ export function Nation({ current }: { current: Current }) {
               <dt>Currency</dt>
               <dd>{identity.currency}</dd>
             </div>
+            {identity.animal && (
+              <div>
+                <dt>Animal</dt>
+                <dd>{identity.animal}</dd>
+              </div>
+            )}
+            {identity.faith && (
+              <div>
+                <dt>Faith</dt>
+                <dd>{identity.faith}</dd>
+              </div>
+            )}
             <div>
               <dt>In office</dt>
               <dd>The {ordinal(state.government)} government</dd>
