@@ -21,5 +21,7 @@ export function holds(condition: Condition | undefined, state: NationState): boo
     return state.day - state.flags[condition.flag]! >= (condition.days ?? 0)
   }
   if ('trait' in condition) return state.traits.includes(condition.trait)
+  if ('resource' in condition) return (state.resources[condition.resource] ?? 'even') === condition.is
+  if ('treaty' in condition) return state.treaties.some((t) => t.kind === condition.treaty)
   return compare(state.day, condition.day)
 }

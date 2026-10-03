@@ -10,6 +10,7 @@ import {
   type Identity,
   type IndicatorId,
   type NationState,
+  type NeighbourDef,
   type Option,
   type Situation,
   type SituationStage,
@@ -19,6 +20,8 @@ export interface Agenda {
   major: string | null
   minors: string[]
   situation: boolean
+  // Which neighbour each dilemma about another country was put on the desk with.
+  bound: Record<string, string>
 }
 
 export interface GameState extends NationState {
@@ -80,8 +83,12 @@ const RESIGN_STANDING = 10
 const BORROW_DIVISOR = 6
 const FISCAL_RECOVERY = 0.3
 const DEBT_CRISIS = 80
+const OPINION_STEP = 2
+const OPINION_CAP = 4
+const WALKOUT_LEGITIMACY = 2
 
 const clamp = (n: number) => Math.round(Math.min(100, Math.max(0, n)) * 10) / 10
+const clampStanding = (n: number) => Math.round(Math.min(100, Math.max(-100, n)) * 10) / 10
 
 export function newNation(
   content: Content,
@@ -108,10 +115,14 @@ export function newNation(
     situationsDone: [],
     government: 1,
     timeline: [],
-    agenda: { major: null, minors: [], situation: false },
+    neighbours: Object.fromEntries(content.neighbours.map((n) => [n.id, n.standing])),
+    treaties: [],
+    resources: {},
+    agenda: { major: null, minors: [], situation: false, bound: {} },
   }
   appointCabinet(state, content)
   found(state, content, answers)
+  assess(state, content)
   state.agenda = buildAgenda(state, content)
   return state
 }
@@ -149,8 +160,15 @@ export function support(state: NationState): number {
   return clamp(factions.reduce((sum, f) => sum + f.clout * f.approval, 0) / clout)
 }
 
-export function render(text: string, state: NationState, content: Content): string {
+export function render(text: string, state: NationState, content: Content, neighbour?: string): string {
+  const abroad = neighbour === undefined ? undefined : content.neighbours.find((n) => n.id === neighbour)
   return text.replace(/\{([a-z]+)(?::([a-z_]+))?\}/g, (whole, key: string, arg?: string) => {
+    if (key === 'neighbour' && abroad) {
+      if (arg === undefined) return abroad.name
+      if (arg === 'demonym') return abroad.demonym
+      if (arg === 'leader') return abroad.leader
+      return whole
+    }
     if (key === 'nation') return state.identity.name
     if (key === 'capital') return state.identity.capital
     if (key === 'currency') return state.identity.currency
@@ -221,15 +239,20 @@ export function forecast(option: Option, state: GameState, content: Content): Fo
   const itself = (o: Option) => o === option
   const sameId = (o: Option) => o.id === option.id
 
+  const bound = (same: (o: Option) => boolean) => {
+    const owner = dilemmas.find((d) => d.options.some(same))
+    return owner ? state.agenda.bound[owner.id] : undefined
+  }
   if (atStage(itself)) return dryRun(state, content, option, 'situation')
-  if (onDilemma(itself)) return dryRun(state, content, option, 'decision')
+  if (onDilemma(itself)) return dryRun(state, content, option, 'decision', bound(itself))
   if (atStage(sameId) && onDilemma(sameId)) {
     throw new Error(
       `a copy of option ${option.id} could belong to a dilemma or to the situation: ` +
         'use forecastDecision or forecastSituation',
     )
   }
-  return dryRun(state, content, option, atStage(sameId) ? 'situation' : 'decision')
+  if (atStage(sameId)) return dryRun(state, content, option, 'situation')
+  return dryRun(state, content, option, 'decision', bound(sameId))
 }
 
 export function forecastDecision(
@@ -238,7 +261,8 @@ export function forecastDecision(
   dilemmaId: string,
   optionId: string,
 ): Forecast {
-  return dryRun(state, content, agendaOption(state, content, dilemmaId, optionId), 'decision')
+  const option = agendaOption(state, content, dilemmaId, optionId)
+  return dryRun(state, content, option, 'decision', state.agenda.bound[dilemmaId])
 }
 
 export function forecastSituation(state: GameState, content: Content, optionId: string): Forecast {
@@ -252,9 +276,10 @@ function dryRun(
   content: Content,
   option: Option,
   kind: 'decision' | 'situation',
+  neighbour?: string,
 ): Forecast {
   const scratch: GameState = structuredClone({ ...state, timeline: [] })
-  return enact(scratch, content, option, '', kind)
+  return enact(scratch, content, option, '', kind, neighbour)
 }
 
 function agendaIds(state: GameState): string[] {
@@ -281,7 +306,7 @@ export function decide(input: GameState, content: Content, dilemmaId: string, op
   const state = structuredClone(input)
   const option = agendaOption(state, content, dilemmaId, optionId)
 
-  enact(state, content, option, dilemmaId, 'decision')
+  enact(state, content, option, dilemmaId, 'decision', state.agenda.bound[dilemmaId])
   state.answered[dilemmaId] = state.day
   if (state.agenda.major === dilemmaId) state.agenda.major = null
   state.agenda.minors = state.agenda.minors.filter((id) => id !== dilemmaId)
@@ -301,6 +326,7 @@ export function endDay(input: GameState, content: Content): GameState {
   const state = structuredClone(input)
 
   if (state.day % 7 === 0) settleBudget(state, content)
+  if (state.day % 7 === 0) settleTreaties(state, content)
   runPending(state, content)
   settlePromises(state, content)
   advanceSituation(state, content)
@@ -310,6 +336,7 @@ export function endDay(input: GameState, content: Content): GameState {
   if (!fell && state.day % TERM_DAYS === 0) holdElection(state, content)
 
   state.day += 1
+  assess(state, content)
   state.agenda = buildAgenda(state, content)
   return state
 }
@@ -320,10 +347,12 @@ function enact(
   option: Option,
   source: string,
   kind: 'decision' | 'situation',
+  neighbour?: string,
 ): Forecast {
   const policies = policyChanges(state, option.effects)
   const changes: Change[] = []
-  apply(state, option.effects, changes)
+  apply(state, option.effects, changes, neighbour)
+  opinions(state, content, option, changes)
 
   const penalties: (Change & { trait: string })[] = []
   for (const trait of content.traits) {
@@ -354,6 +383,7 @@ function enact(
       headline: later.headline,
       effects: structuredClone(later.effects),
       source,
+      ...(neighbour === undefined ? {} : { neighbour }),
     })
   }
   if (option.promise) {
@@ -363,11 +393,12 @@ function enact(
       dueDay: state.day + option.promise.due,
       kept: structuredClone(option.promise.kept),
       broken: structuredClone(option.promise.broken),
+      ...(neighbour === undefined ? {} : { neighbour }),
     })
   }
-  record(state, content, kind, option.headline, [...changes, ...penalties, ...pressure], option.result)
+  record(state, content, kind, option.headline, [...changes, ...penalties, ...pressure], option.result, neighbour)
 
-  const explained = (c: Change) => explain(c, state, content)
+  const explained = (c: Change) => explain(c, state, content, neighbour)
   return {
     changes: changes.map(explained),
     penalties: penalties.map((p) => ({ ...explained(p), trait: p.trait })),
@@ -375,7 +406,7 @@ function enact(
     policies,
     hasLater: option.later.length > 0,
     ...(option.promise
-      ? { promise: { text: render(option.promise.text, state, content), due: option.promise.due } }
+      ? { promise: { text: render(option.promise.text, state, content, neighbour), due: option.promise.due } }
       : {}),
   }
 }
@@ -390,13 +421,27 @@ function policyChanges(state: GameState, effects: Effect[]): { policy: string; t
 }
 
 // Builds the stored form field by field, so nothing extra rides along into a save.
-function explain(change: Change, state: NationState, content: Content): Change {
-  return { kind: change.kind, target: change.target, by: change.by, why: render(change.why, state, content) }
+function explain(change: Change, state: NationState, content: Content, neighbour?: string): Change {
+  const why = render(change.why, state, content, change.kind === 'neighbour' ? change.target : neighbour)
+  return { kind: change.kind, target: change.target, by: change.by, why }
 }
 
-function apply(state: GameState, effects: readonly Effect[], changes: Change[]) {
+function apply(state: GameState, effects: readonly Effect[], changes: Change[], neighbour?: string) {
   for (const effect of effects) {
-    if ('indicator' in effect) {
+    if ('standing' in effect) {
+      if (neighbour === undefined || !Object.hasOwn(state.neighbours, neighbour)) continue
+      state.neighbours[neighbour] = clampStanding(state.neighbours[neighbour]! + effect.standing)
+      changes.push({ kind: 'neighbour', target: neighbour, by: effect.standing, why: effect.why })
+    } else if ('treaty' in effect) {
+      if (neighbour === undefined) continue
+      if (state.treaties.some((t) => t.kind === effect.treaty && t.with === neighbour)) continue
+      const until = effect.days === undefined ? {} : { until: state.day + effect.days }
+      state.treaties.push({ kind: effect.treaty, with: neighbour, since: state.day, ...until })
+    } else if ('endTreaty' in effect) {
+      const ends = (t: { kind: string; with: string }) =>
+        t.kind === effect.endTreaty && (neighbour === undefined || t.with === neighbour)
+      state.treaties = state.treaties.filter((t) => !ends(t))
+    } else if ('indicator' in effect) {
       state.indicators[effect.indicator] = clamp(state.indicators[effect.indicator] + effect.by)
       changes.push({ kind: 'indicator', target: effect.indicator, by: effect.by, why: effect.why })
     } else if ('faction' in effect) {
@@ -430,13 +475,14 @@ function record(
   headline: string,
   changes: Change[],
   text?: string,
+  neighbour?: string,
 ) {
   state.timeline.push({
     day: state.day,
     kind,
-    headline: render(headline, state, content),
-    ...(text === undefined ? {} : { text: render(text, state, content) }),
-    changes: changes.map((c) => explain(c, state, content)),
+    headline: render(headline, state, content, neighbour),
+    ...(text === undefined ? {} : { text: render(text, state, content, neighbour) }),
+    changes: changes.map((c) => explain(c, state, content, neighbour)),
   })
 }
 
@@ -482,8 +528,8 @@ function runPending(state: GameState, content: Content) {
   for (const item of due) {
     if (!holds(item.when, state)) continue
     const changes: Change[] = []
-    apply(state, item.effects, changes)
-    record(state, content, 'consequence', item.headline, changes)
+    apply(state, item.effects, changes, item.neighbour)
+    record(state, content, 'consequence', item.headline, changes, undefined, item.neighbour)
   }
 }
 
@@ -496,8 +542,8 @@ function settlePromises(state: GameState, content: Content) {
       apply(state, [{ indicator: 'legitimacy', by: 2, why: 'A promise was made and kept.' }], changes)
       record(state, content, 'promise', `Promise kept: ${promise.text}`, changes)
     } else {
-      apply(state, promise.broken, changes)
-      record(state, content, 'promise', `Promise broken: ${promise.text}`, changes)
+      apply(state, promise.broken, changes, promise.neighbour)
+      record(state, content, 'promise', `Promise broken: ${promise.text}`, changes, undefined, promise.neighbour)
     }
   }
 }
@@ -609,7 +655,11 @@ function newName(state: GameState, content: Content, purpose: string): string {
 
 function buildAgenda(state: GameState, content: Content): Agenda {
   const eligible = content.dilemmas.filter(
-    (d) => isDue(d, state) && holds(d.when, state) && availableOptions(d.options, state).length >= 2,
+    (d) =>
+      isDue(d, state) &&
+      holds(d.when, state) &&
+      availableOptions(d.options, state).length >= 2 &&
+      (d.abroad === undefined || candidates(d, state, content).length > 0),
   )
   const rng = rngFor(state.seed, state.day, 'agenda')
 
@@ -625,10 +675,91 @@ function buildAgenda(state: GameState, content: Content): Agenda {
     minors.push(next)
   }
 
+  const bound: Record<string, string> = {}
+  for (const dilemma of major ? [major, ...minors] : minors) {
+    if (dilemma.abroad === undefined) continue
+    bound[dilemma.id] = pick(rngFor(state.seed, state.day, `abroad:${dilemma.id}`), candidates(dilemma, state, content))
+  }
+
   return {
     major: major?.id ?? null,
     minors: minors.map((d) => d.id),
     situation: currentStage(state, content) !== null,
+    bound,
+  }
+}
+
+// The neighbours a dilemma about another country could be put on the desk with today.
+export function candidates(dilemma: Dilemma, state: NationState, content: Content): string[] {
+  const want = dilemma.abroad
+  if (!want) return []
+  const has = (n: NeighbourDef, kind: string) => state.treaties.some((t) => t.kind === kind && t.with === n.id)
+  return content.neighbours
+    .filter(
+      (n) =>
+        (want.supplies === undefined || n.surpluses.includes(want.supplies)) &&
+        (want.wants === undefined || n.needs.includes(want.wants)) &&
+        (want.standing === undefined || compare(standingWith(state, content, n.id), want.standing)) &&
+        (want.treaty === undefined || has(n, want.treaty)) &&
+        (want.noTreaty === undefined || !has(n, want.noTreaty)),
+    )
+    .map((n) => n.id)
+}
+
+export function standingWith(state: NationState, content: Content, neighbour: string): number {
+  if (Object.hasOwn(state.neighbours, neighbour)) return state.neighbours[neighbour]!
+  return content.neighbours.find((n) => n.id === neighbour)?.standing ?? 0
+}
+
+// Where the nation stands on each resource, by the pack's rules. Short of something wins
+// over having it to spare when a rule allows both.
+function assess(state: GameState, content: Content) {
+  for (const n of content.neighbours) {
+    if (!Object.hasOwn(state.neighbours, n.id)) state.neighbours[n.id] = n.standing
+  }
+  state.resources = Object.fromEntries(
+    content.resources.map((r) => [r.id, holds(r.need, state) ? 'need' : holds(r.surplus, state) ? 'surplus' : 'even']),
+  )
+}
+
+// Every neighbour reads the papers. An option carrying a tag a neighbour cares about moves
+// standing with that neighbour, whatever the decision was about.
+function opinions(state: GameState, content: Content, option: Option, changes: Change[]) {
+  for (const n of content.neighbours) {
+    const liked = option.tags.filter((tag) => n.likes.includes(tag)).length
+    const disliked = option.tags.filter((tag) => n.dislikes.includes(tag)).length
+    const by = Math.max(-OPINION_CAP, Math.min(OPINION_CAP, (liked - disliked) * OPINION_STEP))
+    if (by === 0) continue
+    const why = by > 0 ? n.pleased : n.displeased
+    apply(state, [{ standing: by, why }], changes, n.id)
+  }
+}
+
+// Once a week every treaty pays out, runs its course, or is walked out of by the other
+// side if relations have fallen far enough.
+function settleTreaties(state: GameState, content: Content) {
+  for (const treaty of [...state.treaties]) {
+    const def = content.treaties.find((t) => t.id === treaty.kind)
+    if (!def) continue
+    const remove = () => {
+      state.treaties = state.treaties.filter((t) => t !== treaty)
+    }
+    if (treaty.until !== undefined && treaty.until <= state.day) {
+      remove()
+      record(state, content, 'treaty', `The ${def.name.toLowerCase()} with {neighbour} runs its course`, [], undefined, treaty.with)
+      continue
+    }
+    if (standingWith(state, content, treaty.with) < def.breaksBelow) {
+      remove()
+      const changes: Change[] = []
+      const why = `{neighbour} walked out of the ${def.name.toLowerCase()}, and it was noticed.`
+      apply(state, [{ indicator: 'legitimacy', by: -WALKOUT_LEGITIMACY, why }], changes)
+      record(state, content, 'treaty', `{neighbour} walks out of the ${def.name.toLowerCase()}`, changes, undefined, treaty.with)
+      continue
+    }
+    const changes: Change[] = []
+    apply(state, def.weekly, changes, treaty.with)
+    record(state, content, 'treaty', def.headline, changes, undefined, treaty.with)
   }
 }
 

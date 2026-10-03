@@ -78,6 +78,11 @@ export type Condition =
   | { flag: string; days?: number }
   | { trait: string }
   | { day: Compare }
+  | { resource: string; is: ResourceBalance }
+  | { treaty: string }
+
+// Where the nation stands on one resource: short of it, with some to spare, or neither.
+export type ResourceBalance = 'need' | 'surplus' | 'even'
 
 export type Effect =
   | { indicator: IndicatorId; by: number; why: string }
@@ -86,6 +91,10 @@ export type Effect =
   | { situation: string; by: number; why: string }
   | { policy: string; to: boolean | number }
   | { flag: string; clear?: boolean }
+  // The next three act on the neighbour a dilemma was put on the desk with.
+  | { standing: number; why: string }
+  | { treaty: string; days?: number }
+  | { endTreaty: string }
 
 export interface Delayed {
   after: number
@@ -127,6 +136,8 @@ export interface Dilemma {
   weight: number
   // Days before an answered dilemma may come round again. Most never do.
   repeat?: number
+  // A dilemma about another country. It only comes up when a neighbour fits.
+  abroad?: AbroadSelector
   author?: string
   options: Option[]
 }
@@ -157,6 +168,53 @@ export interface Trait {
   lose?: Condition
   opposes: string[]
   penalty: number
+}
+
+export interface AbroadSelector {
+  // The neighbour has a surplus of this to offer.
+  supplies?: string
+  // The neighbour is short of this.
+  wants?: string
+  standing?: Compare
+  // The neighbour already has, or has not got, this treaty with the nation.
+  treaty?: string
+  noTreaty?: string
+}
+
+export interface NeighbourDef {
+  id: string
+  name: string
+  demonym: string
+  leader: string
+  description: string
+  standing: number
+  needs: string[]
+  surpluses: string[]
+  // Option tags this neighbour notices, whoever the decision was about.
+  likes: string[]
+  dislikes: string[]
+  // What the papers report when this neighbour notices one of those tags.
+  pleased: string
+  displeased: string
+}
+
+export interface ResourceDef {
+  id: string
+  name: string
+  need: Condition
+  surplus: Condition
+}
+
+export interface TreatyDef {
+  id: string
+  name: string
+  description: string
+  // Printed each week the treaty pays out. {neighbour} is the other party.
+  headline: string
+  // Applied once a week for as long as the treaty stands.
+  weekly: Effect[]
+  // The other side walks away if standing falls this low.
+  breaksBelow: number
 }
 
 export interface Faction {
@@ -214,6 +272,9 @@ export interface Content {
   situations: Situation[]
   founding: { questions: FoundingQuestion[] }
   classes: ClassDef[]
+  neighbours: NeighbourDef[]
+  resources: ResourceDef[]
+  treaties: TreatyDef[]
 }
 
 export interface Identity {
@@ -227,7 +288,7 @@ export interface Identity {
 }
 
 export interface Change {
-  kind: 'indicator' | 'faction' | 'minister' | 'situation'
+  kind: 'indicator' | 'faction' | 'minister' | 'situation' | 'neighbour'
   target: string
   by: number
   why: string
@@ -244,6 +305,7 @@ export const ENTRY_KINDS = [
   'government',
   'situation',
   'budget',
+  'treaty',
 ] as const
 
 export type EntryKind = (typeof ENTRY_KINDS)[number]
@@ -262,6 +324,7 @@ export interface Pending {
   headline: string
   effects: Effect[]
   source: string
+  neighbour?: string
 }
 
 export interface ActivePromise {
@@ -270,6 +333,14 @@ export interface ActivePromise {
   dueDay: number
   kept: Condition
   broken: Effect[]
+  neighbour?: string
+}
+
+export interface Treaty {
+  kind: string
+  with: string
+  since: number
+  until?: number
 }
 
 export interface NationState {
@@ -289,4 +360,9 @@ export interface NationState {
   situationsDone: string[]
   government: number
   timeline: TimelineEntry[]
+  // Standing with each neighbour, from -100 to 100.
+  neighbours: Record<string, number>
+  treaties: Treaty[]
+  // Worked out at the start of each day from the pack's resource rules.
+  resources: Record<string, ResourceBalance>
 }

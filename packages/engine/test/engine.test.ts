@@ -19,6 +19,7 @@ import {
   endDay,
   forecast,
   forecastDecision,
+  holds,
   forecastSituation,
   newNation,
   render,
@@ -64,6 +65,9 @@ function pack(extra: Partial<Content> = {}): Content {
   return {
     pack: { id: 'test', name: 'Test Pack', version: '1.2.3' },
     founding: { questions: [] },
+    neighbours: [],
+    resources: [],
+    treaties: [],
     classes: [],
     factions: [
       { id: 'labour', name: 'Labour', description: '', clout: 50 },
@@ -746,7 +750,7 @@ test('anything that is not a save of a supported version is refused', () => {
   assert.throws(() => deserialize('[1, 2, 3]'), /no version number/)
   assert.throws(() => deserialize('null'), /no version number/)
   assert.throws(() => deserialize('{"day": 1}'), /no version number/)
-  assert.throws(() => deserialize(save({ version: 2 })), /this save is version 2, and only version 1 can be read/)
+  assert.throws(() => deserialize(save({ version: 3 })), /this save is version 3, and only version 2 can be read/)
   assert.throws(() => deserialize(save({ version: '1' })), /no version number/)
   assert.throws(() => deserialize(save({ indicators: { fiscal: 50 } })), /indicators is missing or malformed/)
   assert.throws(() => deserialize(save({ timeline: 'long' })), /timeline is missing or malformed/)
@@ -860,7 +864,7 @@ test('the day is complete once nothing is left to decide', () => {
 test('a day with nothing to decide is legal and can be ended', () => {
   const content = pack({ dilemmas: [] })
   let state = newNation(content, identity, 1)
-  assert.deepEqual(state.agenda, { major: null, minors: [], situation: false })
+  assert.deepEqual(state.agenda, { major: null, minors: [], situation: false, bound: {} })
   assert.deepEqual(agendaItems(state, content), { major: null, minors: [], situation: null })
   assert.equal(dayComplete(state), true)
 
@@ -904,4 +908,164 @@ test('a dilemma with no repeat never returns', () => {
   let state = decide(newNation(content, identity, 1), content, 'only', 'a')
   state = skip(state, content, 200)
   assert.equal(state.agenda.major, null)
+})
+
+function abroadPack(extra: Partial<Content> = {}): Content {
+  return pack({
+    neighbours: [
+      {
+        id: 'east',
+        name: 'Eastmark',
+        demonym: 'Eastmarker',
+        leader: 'the Chancellor of Eastmark',
+        description: '',
+        standing: 10,
+        needs: ['food'],
+        surpluses: ['energy'],
+        likes: ['green'],
+        dislikes: ['hawkish'],
+        pleased: '{neighbour} approves.',
+        displeased: '{neighbour} disapproves.',
+      },
+      {
+        id: 'west',
+        name: 'Westmoor',
+        demonym: 'Westmoorer',
+        leader: 'the Doge of Westmoor',
+        description: '',
+        standing: -5,
+        needs: ['energy'],
+        surpluses: ['food'],
+        likes: [],
+        dislikes: [],
+        pleased: 'Pleased.',
+        displeased: 'Displeased.',
+      },
+    ],
+    resources: [
+      { id: 'energy', name: 'Energy', need: { policy: 'wealth_tax', is: true }, surplus: { day: { gte: 1000 } } },
+      { id: 'food', name: 'Food', need: { day: { gte: 1000 } }, surplus: { day: { gte: 1 } } },
+    ],
+    treaties: [
+      {
+        id: 'gas',
+        name: 'Gas Agreement',
+        description: '',
+        headline: 'Gas arrives from {neighbour}',
+        weekly: [{ indicator: 'capacity', by: 1, why: 'Gas from {neighbour} keeps the factories running.' }],
+        breaksBelow: -30,
+      },
+    ],
+    ...extra,
+  })
+}
+
+const gasOffer = (extra: Partial<Option> = {}) =>
+  dilemma(
+    'gas-offer',
+    [
+      option('sign', {
+        effects: [
+          { treaty: 'gas' },
+          { standing: 10, why: '{neighbour} wanted a buyer.' },
+          { indicator: 'fiscal', by: -2, why: 'Gas is not free.' },
+        ],
+        ...extra,
+      }),
+      option('refuse', { effects: [{ standing: -40, why: '{neighbour} took it badly.' }] }),
+    ],
+    { abroad: { supplies: 'energy' } },
+  )
+
+test('neighbours start at the standing the pack gives them, and resources are assessed', () => {
+  const content = abroadPack()
+  const state = newNation(content, identity, 1)
+  assert.deepEqual(state.neighbours, { east: 10, west: -5 })
+  assert.deepEqual(state.resources, { energy: 'even', food: 'surplus' })
+})
+
+test('a dilemma about another country only comes up with a neighbour that fits, and is bound to it', () => {
+  const content = abroadPack({ dilemmas: [gasOffer()] })
+  const state = newNation(content, identity, 1)
+  assert.equal(state.agenda.major, 'gas-offer')
+  assert.equal(state.agenda.bound['gas-offer'], 'east')
+
+  const none = abroadPack({ dilemmas: [dilemma('wheat', [option('a'), option('b')], { abroad: { supplies: 'steel' } })] })
+  assert.equal(newNation(none, identity, 1).agenda.major, null)
+})
+
+test('deciding acts on the bound neighbour, signs the treaty and names the neighbour in the record', () => {
+  const content = abroadPack({ dilemmas: [gasOffer()] })
+  const before = newNation(content, identity, 1)
+  const ahead = forecastDecision(before, content, 'gas-offer', 'sign')
+  const after = decide(before, content, 'gas-offer', 'sign')
+
+  assert.equal(after.neighbours['east'], 20)
+  assert.equal(after.neighbours['west'], -5)
+  assert.deepEqual(after.treaties, [{ kind: 'gas', with: 'east', since: 1 }])
+  const entry = after.timeline.at(-1)!
+  assert.deepEqual(entry.changes[0], { kind: 'neighbour', target: 'east', by: 10, why: 'Eastmark wanted a buyer.' })
+  assert.deepEqual(ahead.changes, entry.changes)
+})
+
+test('every neighbour reacts to the tags it cares about, whatever the decision was about', () => {
+  const content = abroadPack({ dilemmas: [dilemma('home', [option('a', { tags: ['green', 'hawkish', 'green'] }), option('b', { tags: ['hawkish'] })])] })
+  const state = newNation(content, identity, 1)
+  const green = decide(state, content, 'home', 'a')
+  const hawk = decide(state, content, 'home', 'b')
+  assert.equal(green.neighbours['east'], 12)
+  assert.equal(hawk.neighbours['east'], 8)
+  assert.equal(green.neighbours['west'], -5)
+  assert.match(hawk.timeline.at(-1)!.changes[1]!.why, /^Eastmark disapproves/)
+})
+
+test('a treaty pays out weekly, and the other side walks out if relations collapse', () => {
+  const content = abroadPack({ dilemmas: [gasOffer()] })
+  let state = decide(newNation(content, identity, 1), content, 'gas-offer', 'sign')
+  const capacity = state.indicators.capacity
+  state = skip(state, content, 7)
+  const paid = state.timeline.find((e) => e.kind === 'treaty')!
+  assert.equal(paid.headline, 'Gas arrives from Eastmark')
+  assert.equal(state.treaties.length, 1)
+  assert.ok(state.indicators.capacity > capacity)
+
+  state.neighbours['east'] = -31
+  state = skip(state, content, 7)
+  assert.equal(state.treaties.length, 0)
+  assert.equal(state.timeline.filter((e) => e.kind === 'treaty').at(-1)!.headline, 'Eastmark walks out of the gas agreement')
+})
+
+test('a treaty with an end date runs its course', () => {
+  const content = abroadPack({
+    dilemmas: [gasOffer({ effects: [{ treaty: 'gas', days: 7 }, { standing: 2, why: 'x' }, { indicator: 'fiscal', by: -1, why: 'x' }] })],
+  })
+  let state = decide(newNation(content, identity, 1), content, 'gas-offer', 'sign')
+  assert.deepEqual(state.treaties, [{ kind: 'gas', with: 'east', since: 1, until: 8 }])
+  state = skip(state, content, 14)
+  assert.equal(state.treaties.length, 0)
+  assert.ok(state.timeline.some((e) => e.headline === 'The gas agreement with Eastmark runs its course'))
+})
+
+test('resource and treaty conditions read the state', () => {
+  const content = abroadPack({ dilemmas: [gasOffer()] })
+  let state = newNation(content, identity, 1)
+  assert.equal(holds({ resource: 'food', is: 'surplus' }, state), true)
+  assert.equal(holds({ treaty: 'gas' }, state), false)
+  state = decide(state, content, 'gas-offer', 'sign')
+  assert.equal(holds({ treaty: 'gas' }, state), true)
+})
+
+test('a version 1 save loads with nobody abroad, and the next day fills the neighbours in', () => {
+  const content = abroadPack()
+  const old = JSON.parse(serialize(newNation(content, identity, 1)))
+  delete old.neighbours
+  delete old.treaties
+  delete old.resources
+  delete old.agenda.bound
+  old.version = 1
+  const loaded = deserialize(JSON.stringify(old))
+  assert.equal(loaded.version, 2)
+  assert.deepEqual(loaded.neighbours, {})
+  const next = endDay(loaded, content)
+  assert.deepEqual(next.neighbours, { east: 10, west: -5 })
 })

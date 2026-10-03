@@ -1,7 +1,7 @@
 import type { GameState } from './engine.ts'
 import { ENTRY_KINDS, INDICATORS } from './types.ts'
 
-export const SAVE_VERSION = 1
+export const SAVE_VERSION = 2
 
 type Check = (value: unknown) => boolean
 
@@ -14,6 +14,8 @@ const isSetting: Check = (value) => isBoolean(value) || isNumber(value)
 const isScore: Check = (value) => isNumber(value) && (value as number) >= 0 && (value as number) <= 100
 const isCount: Check = (value) => Number.isSafeInteger(value) && (value as number) >= 0
 const isDay: Check = (value) => Number.isSafeInteger(value) && (value as number) >= 1
+const isStanding: Check = (value) => isNumber(value) && (value as number) >= -100 && (value as number) <= 100
+const isBalance: Check = (value) => value === 'need' || value === 'surplus' || value === 'even'
 const oneOf = (list: readonly string[]): Check => (value) => list.includes(value as string)
 const optional = (check: Check): Check => (value) => value === undefined || check(value)
 const listOf = (item: Check): Check => (value) => Array.isArray(value) && value.every(item)
@@ -37,12 +39,17 @@ const isCondition: Check = (value) => {
   if ('policy' in value) return shaped({ policy: isString, is: isSetting })(value)
   if ('flag' in value) return shaped({ flag: isString, days: optional(isDay) })(value)
   if ('trait' in value) return isString(value['trait'])
+  if ('resource' in value) return shaped({ resource: isString, is: isBalance })(value)
+  if ('treaty' in value) return isString(value['treaty'])
   return shaped(BOUNDS)(value['day'])
 }
 
 const isEffect: Check = (value) => {
   if (!isObject(value)) return false
   const moves = { by: isNumber, why: isString }
+  if ('standing' in value) return shaped({ standing: isNumber, why: isString })(value)
+  if ('treaty' in value) return shaped({ treaty: isString, days: optional(isDay) })(value)
+  if ('endTreaty' in value) return isString(value['endTreaty'])
   if ('indicator' in value) return shaped({ indicator: isIndicator, ...moves })(value)
   if ('faction' in value) return shaped({ faction: isString, ...moves })(value)
   if ('minister' in value) return shaped({ minister: isString, ...moves })(value)
@@ -52,7 +59,7 @@ const isEffect: Check = (value) => {
 }
 
 const isChange = shaped({
-  kind: oneOf(['indicator', 'faction', 'minister', 'situation']),
+  kind: oneOf(['indicator', 'faction', 'minister', 'situation', 'neighbour']),
   target: isString,
   by: isNumber,
   why: isString,
@@ -77,7 +84,14 @@ const SHAPE: Record<string, Check> = {
   traits: listOf(isString),
   cabinet: mapOf(shaped({ name: isString, standing: isScore })),
   promises: listOf(
-    shaped({ id: isString, text: isString, dueDay: isDay, kept: isCondition, broken: listOf(isEffect) }),
+    shaped({
+      id: isString,
+      text: isString,
+      dueDay: isDay,
+      kept: isCondition,
+      broken: listOf(isEffect),
+      neighbour: optional(isString),
+    }),
   ),
   pending: listOf(
     shaped({
@@ -86,6 +100,7 @@ const SHAPE: Record<string, Check> = {
       headline: isString,
       effects: listOf(isEffect),
       source: isString,
+      neighbour: optional(isString),
     }),
   ),
   answered: mapOf(isDay),
@@ -101,11 +116,26 @@ const SHAPE: Record<string, Check> = {
       changes: listOf(isChange),
     }),
   ),
+  neighbours: mapOf(isStanding),
+  treaties: listOf(shaped({ kind: isString, with: isString, since: isDay, until: optional(isDay) })),
+  resources: mapOf(isBalance),
   agenda: shaped({
     major: (value) => value === null || isString(value),
     minors: listOf(isString),
     situation: isBoolean,
+    bound: mapOf(isString),
   }),
+}
+
+// Version 1 saves predate other countries. They load with nobody abroad yet; the engine
+// fills in each neighbour at its starting standing the next time a day ends.
+function upgrade(raw: Record<string, unknown>) {
+  if (raw['version'] !== 1) return
+  raw['neighbours'] = {}
+  raw['treaties'] = []
+  raw['resources'] = {}
+  if (isObject(raw['agenda'])) raw['agenda']['bound'] = {}
+  raw['version'] = 2
 }
 
 export function serialize(state: GameState): string {
@@ -126,6 +156,7 @@ export function deserialize(text: string): GameState {
   if (!isObject(raw) || !isNumber(raw['version'])) {
     throw new Error('not a save file: it has no version number')
   }
+  upgrade(raw)
   if (raw['version'] !== SAVE_VERSION) {
     throw new Error(`this save is version ${raw['version']}, and only version ${SAVE_VERSION} can be read`)
   }

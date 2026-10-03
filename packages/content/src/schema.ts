@@ -23,6 +23,8 @@ export const condition: z.ZodType<Condition> = z.lazy(() =>
     z.strictObject({ flag: id, days: z.number().int().min(1).max(120).optional() }),
     z.strictObject({ trait: id }),
     z.strictObject({ day: z.strictObject(bounds) }),
+    z.strictObject({ resource: id, is: z.enum(['need', 'surplus', 'even']) }),
+    z.strictObject({ treaty: id }),
   ]),
 )
 
@@ -33,6 +35,9 @@ export const effect = z.union([
   z.strictObject({ situation: id, by: z.number(), why: text }),
   z.strictObject({ policy: id, to: z.union([z.boolean(), z.number()]) }),
   z.strictObject({ flag: id, clear: z.boolean().optional() }),
+  z.strictObject({ standing: z.number(), why: text }),
+  z.strictObject({ treaty: id, days: z.number().int().min(7).max(365).optional() }),
+  z.strictObject({ endTreaty: id }),
 ])
 
 const option = z.strictObject({
@@ -76,6 +81,15 @@ export const dilemma = z.strictObject({
   priority: z.number().int().default(0),
   weight: z.number().positive().default(1),
   repeat: z.number().int().min(7).max(180).optional(),
+  abroad: z
+    .strictObject({
+      supplies: id.optional(),
+      wants: id.optional(),
+      standing: z.strictObject(bounds).optional(),
+      treaty: id.optional(),
+      noTreaty: id.optional(),
+    })
+    .optional(),
   author: z.string().optional(),
   options: z.array(option).min(2).max(4),
 })
@@ -147,5 +161,31 @@ export const founding = z.strictObject({
 })
 
 export const nationClass = z.strictObject({ id, name: text, description: text, when: condition.optional() })
+
+export const neighbour = z.strictObject({
+  id,
+  name: text,
+  demonym: text,
+  leader: text,
+  description: text,
+  standing: z.number().min(-100).max(100).default(0),
+  needs: z.array(id).default([]),
+  surpluses: z.array(id).default([]),
+  likes: z.array(id).default([]),
+  dislikes: z.array(id).default([]),
+  pleased: text,
+  displeased: text,
+})
+
+export const resource = z.strictObject({ id, name: text, need: condition, surplus: condition })
+
+export const treaty = z.strictObject({
+  id,
+  name: text,
+  description: text,
+  headline: text,
+  weekly: z.array(effect).min(1),
+  breaksBelow: z.number().min(-100).max(0).default(-30),
+})
 
 export const oneOrMany = <T extends z.ZodType>(item: T) => z.union([z.array(item), item.transform((one) => [one])])

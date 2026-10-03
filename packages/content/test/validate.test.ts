@@ -37,6 +37,9 @@ function pack(options: Option[], extra: Partial<Dilemma> = {}): Content {
   return {
     pack: { id: 'test', name: 'Test Pack', version: '0.0.1' },
     founding: { questions: [] },
+    neighbours: [],
+    resources: [],
+    treaties: [],
     classes: [{ id: 'plain', name: 'Plain', description: 'Plain.' }],
     factions: [{ id: 'labour', name: 'Labour', description: '', clout: 100 }],
     policies: [{ id: 'wealth_tax', name: 'Wealth tax', description: '', default: false }],
@@ -422,4 +425,51 @@ test('a founding answer may not schedule anything or touch flags and ministers',
   withPack({ 'founding.yaml': bad }, (dir) => {
     assert.ok(loadPack(dir).problems.some((p) => p.where.startsWith('founding.yaml questions.0.answers.0.effects.1')))
   })
+})
+
+const abroadParts: Pick<Content, 'neighbours' | 'resources' | 'treaties'> = {
+  neighbours: [
+    {
+      id: 'east',
+      name: 'Eastmark',
+      demonym: 'Eastmarker',
+      leader: 'the Chancellor',
+      description: 'East.',
+      standing: 0,
+      needs: [],
+      surpluses: ['energy'],
+      likes: [],
+      dislikes: [],
+      pleased: '{neighbour} is pleased.',
+      displeased: '{neighbour} is not.',
+    },
+  ],
+  resources: [{ id: 'energy', name: 'Energy', need: { day: { gte: 99 } }, surplus: { day: { gte: 999 } } }],
+  treaties: [],
+}
+
+test('standing and neighbour names only belong in dilemmas about another country', () => {
+  const content = {
+    ...pack([option('a', { effects: [{ standing: 4, why: '{neighbour} likes it.' }, { faction: 'labour', by: -2, why: 'x' }] }), option('b')]),
+    ...abroadParts,
+  }
+  const found = messages(content)
+  assert.ok(found.includes('standing can only move in a dilemma about another country'))
+  assert.ok(found.includes('{neighbour} only means something in a dilemma about another country'))
+
+  content.dilemmas[0]!.abroad = { supplies: 'energy' }
+  assert.deepEqual(messages(content), [])
+})
+
+test('a dilemma about another country needs a neighbour that could fit it, and real resources', () => {
+  const content = { ...pack([option('a'), option('b')], { abroad: { supplies: 'grain', wants: 'energy' } }), ...abroadParts }
+  const found = messages(content)
+  assert.ok(found.includes('unknown resource grain'))
+  assert.ok(found.includes('no neighbour in the pack fits this dilemma'))
+})
+
+test('a resource rule cannot lean on another resource', () => {
+  const content = { ...pack([option('a'), option('b')]), ...abroadParts }
+  content.resources = [{ id: 'energy', name: 'Energy', need: { resource: 'energy', is: 'need' }, surplus: { day: { gte: 9 } } }]
+  assert.ok(messages(content).includes('a resource rule cannot depend on another resource'))
 })

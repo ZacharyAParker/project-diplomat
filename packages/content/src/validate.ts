@@ -11,13 +11,14 @@ import {
 import type { Problem } from './load.ts'
 
 // How far one effect may move a number. Delayed effects get a little more room.
-export const LIMITS = { indicator: 10, faction: 15, minister: 20, situation: 20, laterBonus: 2 }
+export const LIMITS = { indicator: 10, faction: 15, minister: 20, situation: 20, standing: 15, laterBonus: 2 }
 
 // Where founding may leave a starting indicator or a faction's approval, however it is answered.
 export const FOUNDING_RANGE = { min: 25, max: 75 }
 
 const MACROS = /\{([a-z]+)(?::([a-z_]+))?\}/g
 const PLAIN_MACROS = new Set(['nation', 'capital', 'currency', 'demonym', 'leader'])
+const NEIGHBOUR_MACROS = new Set([undefined, 'demonym', 'leader'])
 const BUILT_IN_FLAGS = new Set(['government_fell', 'election_lost'])
 
 // Checks the things a schema can't: references, bounds, and the house rules.
@@ -30,6 +31,10 @@ export function validate(content: Content): Problem[] {
   const traits = new Set(content.traits.map((t) => t.id))
   const portfolios = new Set(content.portfolios.map((p) => p.id))
   const situations = new Set(content.situations.map((s) => s.id))
+  const resources = new Set(content.resources.map((r) => r.id))
+  const treaties = new Set(content.treaties.map((t) => t.id))
+  // True while checking something that is about one particular neighbour.
+  let abroad = false
   const flagsSet = new Set(BUILT_IN_FLAGS)
   const flagsRead = new Map<string, string>()
   const tagsUsed = new Set<string>()
@@ -42,6 +47,9 @@ export function validate(content: Content): Problem[] {
     situation: content.situations,
     class: content.classes,
     'founding question': content.founding.questions,
+    neighbour: content.neighbours,
+    resource: content.resources,
+    treaty: content.treaties,
   })) {
     const seen = new Set<string>()
     for (const item of list) {
@@ -54,6 +62,10 @@ export function validate(content: Content): Problem[] {
     for (const [whole, key, arg] of value.matchAll(MACROS)) {
       if (key === 'minister' && arg && portfolios.has(arg)) continue
       if (key && !arg && PLAIN_MACROS.has(key)) continue
+      if (key === 'neighbour' && NEIGHBOUR_MACROS.has(arg)) {
+        if (!abroad) say(where, `${whole} only means something in a dilemma about another country`)
+        continue
+      }
       say(where, `unknown macro ${whole}`)
     }
   }
@@ -71,6 +83,8 @@ export function validate(content: Content): Problem[] {
     if ('policy' in c && !policies.has(c.policy)) say(where, `unknown policy ${c.policy}`)
     if ('trait' in c && !traits.has(c.trait)) say(where, `unknown trait ${c.trait}`)
     if ('flag' in c && !flagsRead.has(c.flag)) flagsRead.set(c.flag, where)
+    if ('resource' in c && !resources.has(c.resource)) say(where, `unknown resource ${c.resource}`)
+    if ('treaty' in c && !treaties.has(c.treaty)) say(where, `unknown treaty ${c.treaty}`)
   }
 
   function checkEffects(where: string, effects: Effect[], extra = 0) {
@@ -94,6 +108,16 @@ export function validate(content: Content): Problem[] {
         else if (typeof usual !== typeof e.to) {
           say(where, `policy ${e.policy} is a ${typeof usual} and cannot be set to ${e.to}`)
         }
+      } else if ('standing' in e) {
+        if (!abroad) say(where, 'standing can only move in a dilemma about another country')
+        if (Math.abs(e.standing) > LIMITS.standing + extra) {
+          say(where, `standing moves by ${e.standing}; the limit is ${LIMITS.standing + extra}`)
+        }
+      } else if ('treaty' in e) {
+        if (!treaties.has(e.treaty)) say(where, `unknown treaty ${e.treaty}`)
+        if (!abroad) say(where, 'a treaty can only be signed in a dilemma about another country')
+      } else if ('endTreaty' in e) {
+        if (!treaties.has(e.endTreaty)) say(where, `unknown treaty ${e.endTreaty}`)
       } else if (!e.clear) {
         flagsSet.add(e.flag)
       }
@@ -105,6 +129,11 @@ export function validate(content: Content): Problem[] {
     let good = false
     let bad = false
     for (const e of effects) {
+      if ('standing' in e && e.standing !== 0) {
+        if (e.standing > 0) good = true
+        else bad = true
+        continue
+      }
       if (!('by' in e) || e.by === 0 || 'situation' in e) continue
       const helps = 'indicator' in e && LOWER_IS_BETTER.has(e.indicator) ? e.by < 0 : e.by > 0
       if (helps) good = true
@@ -165,11 +194,55 @@ export function validate(content: Content): Problem[] {
   }
 
   for (const d of content.dilemmas) {
+    abroad = d.abroad !== undefined
     checkCondition(d.id, d.when)
     checkText(d.id, d.title)
     checkText(d.id, d.description)
     checkOptions(d.id, d.options, d.kind === 'major')
+    if (d.abroad) checkAbroad(d.id, d.abroad)
   }
+  abroad = false
+
+  function checkAbroad(where: string, want: NonNullable<Content['dilemmas'][number]['abroad']>) {
+    for (const r of [want.supplies, want.wants]) if (r !== undefined && !resources.has(r)) say(where, `unknown resource ${r}`)
+    for (const t of [want.treaty, want.noTreaty]) if (t !== undefined && !treaties.has(t)) say(where, `unknown treaty ${t}`)
+    const fits = content.neighbours.filter(
+      (n) =>
+        (want.supplies === undefined || n.surpluses.includes(want.supplies)) &&
+        (want.wants === undefined || n.needs.includes(want.wants)),
+    )
+    if (fits.length === 0) say(where, 'no neighbour in the pack fits this dilemma')
+  }
+
+  for (const n of content.neighbours) {
+    const where = `neighbours/${n.id}`
+    checkText(where, n.description)
+    abroad = true
+    checkText(where, n.pleased)
+    checkText(where, n.displeased)
+    abroad = false
+    for (const r of [...n.needs, ...n.surpluses]) if (!resources.has(r)) say(where, `unknown resource ${r}`)
+    const both = n.needs.filter((r) => n.surpluses.includes(r))
+    if (both.length) say(where, `cannot both need and have to spare ${both.join(', ')}`)
+  }
+
+  for (const r of content.resources) {
+    const where = `resources/${r.id}`
+    checkCondition(where, r.need)
+    checkCondition(where, r.surplus)
+    if (JSON.stringify([r.need, r.surplus]).includes('"resource"')) {
+      say(where, 'a resource rule cannot depend on another resource')
+    }
+  }
+
+  abroad = true
+  for (const t of content.treaties) {
+    const where = `treaties/${t.id}`
+    checkText(where, t.headline)
+    checkText(where, t.description)
+    checkEffects(where, t.weekly)
+  }
+  abroad = false
 
   for (const s of content.situations) {
     checkCondition(s.id, s.when)
@@ -225,6 +298,11 @@ export function validate(content: Content): Problem[] {
   }
   for (const t of content.traits) {
     for (const tag of t.opposes) if (!tagsUsed.has(tag)) say(t.id, `opposed tag ${tag} is not used by any option`)
+  }
+  for (const n of content.neighbours) {
+    for (const tag of [...n.likes, ...n.dislikes]) {
+      if (!tagsUsed.has(tag)) say(`neighbours/${n.id}`, `tag ${tag} is not used by any option`)
+    }
   }
   for (const [flag, where] of flagsRead) {
     if (!flagsSet.has(flag)) say(where, `checks flag ${flag}, which nothing sets`)

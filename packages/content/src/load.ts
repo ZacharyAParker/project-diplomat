@@ -56,6 +56,11 @@ export function loadPack(dir: string): Loaded {
     return [...(read(root, item.array()) ?? []), ...folder]
   }
 
+  // For the parts of a pack that are allowed to be absent.
+  function readIfThere<T extends z.ZodType>(file: string, shape: T): z.output<T> | undefined {
+    return existsSync(file) ? read(file, shape) : undefined
+  }
+
   const cabinet = read(join(dir, 'cabinet.yaml'), schema.cabinet)
   const content: Content = {
     pack: read(join(dir, 'pack.yaml'), schema.pack) ?? { id: 'unknown', name: 'Unknown', version: '0.0.0' },
@@ -68,6 +73,9 @@ export function loadPack(dir: string): Loaded {
     names: cabinet?.names ?? { given: [], family: [] },
     dilemmas: readAll('dilemmas', schema.dilemma),
     situations: readAll('situations', schema.situation),
+    neighbours: readIfThere(join(dir, 'neighbours.yaml'), schema.neighbour.array()) ?? [],
+    resources: readIfThere(join(dir, 'resources.yaml'), schema.resource.array()) ?? [],
+    treaties: readIfThere(join(dir, 'treaties.yaml'), schema.treaty.array()) ?? [],
   }
   return { content, problems }
 }
