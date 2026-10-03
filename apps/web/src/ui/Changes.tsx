@@ -31,7 +31,7 @@ export interface ChangeLineProps {
 // used for a forecast before a choice and for the record after it.
 export function ChangeLine({ change, content, reason = 'shown' }: ChangeLineProps) {
   const d = describe(change, content)
-  const line = (
+  const line = (more: boolean) => (
     <span className="change__line">
       <Arrow direction={d.direction} />
       <span className="change__name">{d.name}</span>
@@ -44,7 +44,10 @@ export function ChangeLine({ change, content, reason = 'shown' }: ChangeLineProp
     return (
       <li className={`change change--${d.tone}`}>
         <details>
-          <summary>{line}</summary>
+          <summary>
+            {line(true)}
+            <span className="change__more">Why</span>
+          </summary>
           <p className="change__why small soft">{d.why}</p>
         </details>
       </li>
@@ -52,7 +55,7 @@ export function ChangeLine({ change, content, reason = 'shown' }: ChangeLineProp
   }
   return (
     <li className={`change change--${d.tone}`}>
-      {line}
+      {line(false)}
       {reason === 'shown' && d.why && <p className="change__why small soft">{d.why}</p>}
     </li>
   )

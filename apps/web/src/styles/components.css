@@ -358,7 +358,7 @@
 .meter__fill {
   height: 100%;
   background: var(--ink);
-  transition: width var(--turn) var(--ease);
+
 }
 
 .meter__ticks {
@@ -400,7 +400,7 @@
   display: block;
   height: 100%;
   background: var(--ink);
-  transition: width var(--turn) var(--ease);
+
 }
 
 .bar__was {

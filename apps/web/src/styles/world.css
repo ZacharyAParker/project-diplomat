@@ -1,0 +1,1207 @@
+/*
+  The look: a nation game of the old browser school. A menu down the left on a parchment
+  grey, a landscape strip across the top with the flag set into it, Georgia for anything
+  read, a Helvetica and Verdana stack for anything worked, green links, and green buttons
+  that look pressable. Loaded last, so it has the final word over the older sheets.
+*/
+
+/* Base */
+
+body {
+  font-family: var(--font-text);
+  font-size: var(--size-text);
+  line-height: 1.6;
+  font-variant-numeric: normal;
+  background: var(--paper);
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-display);
+  font-weight: 400;
+  letter-spacing: 0;
+}
+
+h1 {
+  font-size: var(--size-h1);
+  line-height: 1.15;
+}
+
+a {
+  color: var(--link);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+}
+
+.label,
+.button,
+.side,
+.masthead__dateline,
+.field__label,
+.tag,
+.pill,
+.issue__meta,
+.issue__section,
+.infobox dt,
+.colophon,
+.steps {
+  font-family: var(--font-ui);
+}
+
+.label {
+  font-size: var(--size-label);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+
+::selection {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
+:focus-visible {
+  outline: 2px solid var(--link);
+  outline-offset: 2px;
+}
+
+html {
+  scrollbar-color: var(--rule) var(--side);
+}
+
+/* The page: menu on the left, everything else beside it */
+
+.shell,
+.shell--nation {
+  display: grid;
+  grid-template-columns: var(--side-width) minmax(0, 1fr);
+  max-width: none;
+  min-height: 100dvh;
+  margin: 0;
+  padding: 0;
+}
+
+.shell__page {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.shell__main {
+  flex: 1;
+  width: 100%;
+  max-width: var(--page);
+  padding: var(--space-5) var(--gutter) var(--space-7);
+}
+
+.colophon {
+  max-width: var(--page);
+  width: 100%;
+  padding: var(--space-4) var(--gutter) var(--space-5);
+  border-top: var(--hair) solid var(--rule-soft);
+  font-size: 0.75rem;
+  text-align: left;
+}
+
+/* The menu */
+
+.side {
+  position: sticky;
+  top: 0;
+  align-self: start;
+  height: 100dvh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-4) 0;
+  background: var(--side);
+  border-right: var(--hair) solid var(--side-edge);
+  font-size: 0.75rem;
+}
+
+.side__mark {
+  display: flex;
+  flex-direction: column;
+  padding: 0 var(--space-3) var(--space-3);
+  border-bottom: var(--hair) solid var(--side-edge);
+  color: var(--ink);
+  font-family: var(--font-display);
+  line-height: 1;
+  text-shadow: 0 1px 0 rgb(255 255 255 / 0.7);
+}
+
+.side__mark:hover {
+  text-decoration: none;
+}
+
+.side__mark-word {
+  font-size: 0.875rem;
+  font-variant: small-caps;
+  letter-spacing: 0.08em;
+  color: var(--ink-soft);
+}
+
+.side__mark-word--big {
+  font-size: 1.5rem;
+  font-variant: small-caps;
+  letter-spacing: 0.02em;
+  color: var(--ink);
+}
+
+.side__mark-by {
+  margin-top: var(--space-1);
+  font-family: var(--font-ui);
+  font-size: 0.625rem;
+  font-style: italic;
+  color: var(--ink-soft);
+  text-shadow: none;
+}
+
+.side__nav ul {
+  display: flex;
+  flex-direction: column;
+}
+
+.side__link {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--tap);
+  padding: 0 var(--space-3);
+  color: var(--ink);
+  font-weight: 700;
+  font-size: 0.6875rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.side__link .icon {
+  flex: none;
+  color: var(--ink-soft);
+}
+
+.side__link:hover {
+  background: var(--wash);
+  text-decoration: none;
+}
+
+.side__link[aria-current='page'] {
+  background: var(--paper);
+  box-shadow: inset 3px 0 0 var(--accent);
+}
+
+.side__link[aria-current='page'] .icon {
+  color: var(--accent);
+}
+
+.side__away {
+  margin-top: var(--space-2);
+  border-top: var(--hair) solid var(--side-edge);
+}
+
+.side__latest {
+  padding: var(--space-3) var(--space-3) 0;
+  border-top: var(--hair) solid var(--side-edge);
+}
+
+.side__heading {
+  margin-bottom: var(--space-2);
+  font-family: var(--font-ui);
+  font-size: 0.625rem;
+  color: var(--ink-soft);
+  text-align: center;
+}
+
+.side__latest li + li {
+  margin-top: var(--space-2);
+}
+
+.side__latest a {
+  font-size: 0.6875rem;
+  line-height: 1.35;
+}
+
+/* The banner and the flag set into it */
+
+.masthead {
+  position: relative;
+  display: block;
+  padding: 0;
+  text-align: left;
+  border-bottom: var(--hair) solid var(--side-edge);
+}
+
+.masthead::after {
+  display: none;
+}
+
+.banner {
+  display: block;
+  width: 100%;
+  height: 7.5rem;
+}
+
+.masthead__plate {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-4);
+  margin-top: -3.25rem;
+  padding: 0 var(--gutter);
+}
+
+.masthead__flag-link {
+  flex: none;
+  line-height: 0;
+}
+
+.masthead__flag {
+  width: 7.5rem;
+  border: 3px solid #fff;
+  box-shadow: 0 2px 8px rgb(0 0 0 / 0.3);
+}
+
+.masthead__names {
+  min-width: 0;
+  padding-bottom: var(--space-1);
+}
+
+.masthead__name {
+  display: block;
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-size: clamp(1.5rem, 1.1rem + 2vw, 2.5rem);
+  line-height: 1.1;
+  overflow-wrap: anywhere;
+}
+
+.masthead__name:hover {
+  text-decoration: none;
+  color: var(--link);
+}
+
+.masthead__class {
+  margin-top: var(--space-1);
+  font-family: var(--font-ui);
+  font-size: clamp(0.8125rem, 0.7rem + 0.5vw, 1rem);
+  color: var(--ink-soft);
+  letter-spacing: 0.22em;
+}
+
+.masthead__dateline {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--space-1) var(--space-4);
+  padding: var(--space-2) var(--gutter);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.masthead__dateline li + li {
+  padding-left: 0;
+  border-left: 0;
+}
+
+.masthead--bare .banner {
+  height: 5.5rem;
+}
+
+/* Screens */
+
+.screen__head {
+  margin-bottom: var(--space-5);
+}
+
+.screen__head > .label {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 400;
+  font-style: italic;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+/* Buttons: bevelled, pressable, the green ones meaning yes */
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: 2.25rem;
+  padding: 0.35rem 1rem;
+  border: var(--hair) solid var(--rule);
+  border-radius: var(--round);
+  background: linear-gradient(var(--paper), var(--sheet));
+  box-shadow: 0 1px 0 rgb(255 255 255 / 0.6) inset, 0 1px 2px rgb(0 0 0 / 0.12);
+  color: var(--ink);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  text-transform: none;
+  cursor: pointer;
+}
+
+.button:hover {
+  border-color: var(--ink-soft);
+  text-decoration: none;
+}
+
+.button:active {
+  transform: translateY(1px);
+  box-shadow: 0 0 2px rgb(0 0 0 / 0.2) inset;
+}
+
+.button--accent,
+.button--primary {
+  border-color: var(--accent-deep);
+  background: linear-gradient(#4aa950, var(--accent) 55%, var(--accent-deep));
+  color: var(--on-accent);
+  text-shadow: 0 -1px 0 rgb(0 0 0 / 0.25);
+  box-shadow: 0 1px 0 rgb(255 255 255 / 0.25) inset, 0 1px 2px rgb(0 0 0 / 0.2);
+}
+
+.button--accent:hover,
+.button--primary:hover {
+  background: linear-gradient(#55b65b, #339039 55%, var(--accent-deep));
+  border-color: var(--accent-deep);
+}
+
+.button--danger {
+  border-color: #7d2015;
+  background: linear-gradient(#c4463a, var(--bad));
+  color: #fff;
+}
+
+.button--quiet {
+  min-height: 0;
+  padding: 0.25rem 0;
+  border: 0;
+  background: none;
+  box-shadow: none;
+  color: var(--link);
+  font-weight: 400;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+.button--quiet:hover {
+  background: none;
+  color: var(--ink);
+}
+
+.button--small {
+  min-height: 1.875rem;
+  padding: 0.2rem 0.75rem;
+  font-size: 0.75rem;
+}
+
+.button--wide {
+  width: 100%;
+}
+
+/* Sheets and notices */
+
+.sheet--column {
+  padding-top: var(--space-4);
+  border-top: var(--hair) solid var(--rule-soft);
+}
+
+.sheet--paper {
+  padding: var(--space-4) var(--space-5);
+  background: var(--sheet);
+  border: var(--hair) solid var(--rule-soft);
+  border-radius: var(--round);
+  box-shadow: none;
+}
+
+.sheet__title {
+  font-size: var(--size-h2);
+}
+
+.sheet__kicker {
+  color: var(--ink-soft);
+}
+
+.notice {
+  border: var(--hair) solid var(--rule-soft);
+  border-radius: var(--round);
+  background: var(--buff);
+}
+
+.notice--problem {
+  border-color: var(--bad);
+}
+
+.tag {
+  border-radius: 2px;
+  font-size: 0.625rem;
+}
+
+/* Changes: an arrow, the name, how far, and a "Why" to open the reason */
+
+.change summary::before {
+  display: none;
+}
+
+.change summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-1) var(--space-3);
+  padding-left: 0;
+}
+
+.change__more {
+  margin-left: auto;
+  font-family: var(--font-ui);
+  font-size: 0.6875rem;
+  color: var(--link);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+.change details[open] .change__more {
+  color: var(--ink-soft);
+}
+
+.change details > .change__why {
+  padding-left: calc(12px + var(--space-2));
+}
+
+.change__line {
+  font-family: var(--font-ui);
+  font-size: 0.8125rem;
+}
+
+.change__name {
+  font-weight: 700;
+}
+
+.change__verdict {
+  font-size: 0.625rem;
+}
+
+/* Issues: the issue, the debate, and a button under every position */
+
+.desk__layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 18.5rem;
+  gap: var(--space-6);
+  align-items: start;
+}
+
+.desk__box {
+  grid-column: 1;
+  grid-row: 1;
+  min-width: 0;
+}
+
+.desk__paper {
+  grid-column: 2;
+  grid-row: 1;
+  position: sticky;
+  top: var(--space-4);
+}
+
+.desk__box-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding-bottom: var(--space-2);
+  border-bottom: var(--heavy) solid var(--rule);
+  margin-bottom: var(--space-5);
+}
+
+.desk__box-head h2 {
+  font-size: var(--size-h2);
+}
+
+.desk__cards > * + * {
+  margin-top: var(--space-6);
+}
+
+.issue {
+  padding: var(--space-5);
+  background: var(--paper);
+  border: var(--hair) solid var(--rule-soft);
+  border-top: 4px solid var(--accent);
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.06);
+}
+
+.issue--situation {
+  border-top-color: var(--bad);
+}
+
+.issue--left {
+  padding-block: var(--space-3);
+  border-top-width: var(--hair);
+  background: var(--sheet);
+}
+
+.issue__head {
+  margin-bottom: var(--space-4);
+}
+
+.issue__title {
+  font-size: clamp(1.375rem, 1.15rem + 1vw, 1.875rem);
+  line-height: 1.2;
+}
+
+.issue__meta {
+  margin-top: var(--space-1);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.issue__section {
+  margin: var(--space-5) 0 var(--space-2);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+
+.issue__text {
+  max-width: var(--measure);
+}
+
+.issue__dismiss {
+  margin-top: var(--space-4);
+  padding-top: var(--space-3);
+  border-top: var(--hair) solid var(--rule-soft);
+  text-align: right;
+}
+
+.debate {
+  counter-reset: none;
+}
+
+.debate__option {
+  padding: var(--space-4) 0;
+  border-top: var(--hair) dotted var(--rule);
+}
+
+.debate__option:first-child {
+  border-top: 0;
+  padding-top: var(--space-1);
+}
+
+.debate__speech {
+  max-width: var(--measure);
+}
+
+.debate__number {
+  font-weight: 700;
+}
+
+.debate__speech q {
+  font-style: normal;
+}
+
+.debate__who {
+  font-weight: 700;
+}
+
+.debate__role {
+  font-style: italic;
+}
+
+.debate__forecast {
+  margin-top: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  background: var(--sheet);
+  border: var(--hair) solid var(--rule-soft);
+  border-radius: var(--round);
+}
+
+.debate__forecast .changes > * + * {
+  margin-top: var(--space-2);
+}
+
+.debate__forecast .changes__group > .label {
+  margin-bottom: var(--space-1);
+}
+
+.debate__accept {
+  margin-top: var(--space-3);
+  text-align: right;
+}
+
+.notes {
+  font-family: var(--font-ui);
+  font-size: 0.8125rem;
+}
+
+.result {
+  border-top-color: var(--rule);
+}
+
+.desk__close {
+  margin-top: var(--space-6);
+  padding: var(--space-4) var(--space-5);
+  background: var(--sheet);
+  border: var(--hair) solid var(--rule-soft);
+  border-radius: var(--round);
+}
+
+/* The morning paper, kept to a column at the side */
+
+.paper {
+  padding: var(--space-4);
+  background: var(--sheet);
+  border: var(--hair) solid var(--rule-soft);
+  border-radius: var(--round);
+  box-shadow: none;
+  font-size: 0.9375rem;
+}
+
+.paper__plate {
+  padding-bottom: var(--space-2);
+  border-bottom: var(--hair) solid var(--rule);
+  text-align: center;
+}
+
+.paper__name {
+  font-size: 1.25rem;
+  font-variant: small-caps;
+  letter-spacing: 0.03em;
+}
+
+.paper__headline {
+  font-size: 1.375rem;
+  line-height: 1.2;
+}
+
+.paper__body,
+.paper__body p {
+  columns: auto;
+}
+
+.paper__rest summary {
+  font-family: var(--font-ui);
+  font-size: 0.75rem;
+  color: var(--link);
+  cursor: pointer;
+}
+
+.paper__briefs h3 {
+  margin-top: var(--space-4);
+}
+
+/* The nation page: flag, name, classification, pills, then the country in prose */
+
+.nation {
+  display: grid;
+  grid-template-columns: 13rem minmax(0, 1fr);
+  column-gap: var(--space-6);
+}
+
+.nation > * {
+  grid-column: 1 / -1;
+}
+
+.nation > .screen__head {
+  grid-column: 2;
+  grid-row: 1;
+  align-self: end;
+  margin-bottom: 0;
+}
+
+.nation > .screen__head h1 {
+  font-size: clamp(2rem, 1.4rem + 2.6vw, 3.25rem);
+  line-height: 1.05;
+}
+
+.nationhead {
+  display: contents;
+}
+
+.nationhead__flag {
+  grid-column: 1;
+  grid-row: 1 / span 2;
+  width: 100%;
+  margin-top: -4rem;
+  border: 4px solid #fff;
+  box-shadow: 0 3px 10px rgb(0 0 0 / 0.3);
+}
+
+.nationhead__class {
+  grid-column: 2;
+  grid-row: 2;
+  margin-top: var(--space-2);
+  font-family: var(--font-ui);
+  font-size: clamp(0.9375rem, 0.75rem + 0.8vw, 1.375rem);
+  letter-spacing: 0.24em;
+  color: #9a998f;
+}
+
+.nationhead__motto {
+  margin: var(--space-5) auto var(--space-4);
+  max-width: 36rem;
+  font-style: italic;
+  font-size: 1.0625rem;
+  text-align: center;
+}
+
+.nationhead__motto q {
+  quotes: '\201C' '\201D';
+}
+
+.nationhead__motto q::before,
+.nationhead__motto q::after {
+  font-family: var(--font-display);
+  font-size: 2.25rem;
+  line-height: 0;
+  vertical-align: -0.35em;
+  color: var(--rule);
+}
+
+.pills {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-6);
+}
+
+.pill {
+  display: flex;
+  flex-direction: column;
+  min-width: 8.5rem;
+  border: var(--hair) solid var(--rule);
+  border-radius: var(--round);
+  overflow: hidden;
+  text-align: center;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.1);
+}
+
+.pill__label {
+  padding: 0.15rem 0.5rem;
+  background: var(--pill-label);
+  font-size: 0.6875rem;
+  color: var(--ink-soft);
+}
+
+.pill__word {
+  padding: 0.3rem 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #fff;
+  text-shadow: 0 -1px 0 rgb(0 0 0 / 0.3);
+}
+
+.pill--high .pill__word {
+  background: linear-gradient(#58b05c, #2f8235);
+}
+
+.pill--middling .pill__word {
+  background: linear-gradient(#b99a3c, #8a6a12);
+}
+
+.pill--low .pill__word {
+  background: linear-gradient(#c75a46, #9b2c1d);
+}
+
+.nationbody {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 15rem;
+  gap: var(--space-6);
+  align-items: start;
+  margin-bottom: var(--space-6);
+}
+
+.nationbody__prose {
+  font-size: 1.0625rem;
+  line-height: 1.7;
+}
+
+.nationbody__prose p + p {
+  margin-top: var(--space-4);
+}
+
+.infobox {
+  padding: var(--space-3);
+  background: var(--sheet);
+  border: var(--hair) solid var(--rule-soft);
+  border-radius: var(--round);
+  font-size: 0.8125rem;
+}
+
+.infobox__name {
+  font-size: 1.125rem;
+  text-align: center;
+  color: var(--link);
+}
+
+.infobox__flag {
+  width: 70%;
+  margin: var(--space-2) auto var(--space-3);
+  border: var(--hair) solid var(--flag-edge);
+}
+
+.infobox .facts {
+  display: block;
+}
+
+.infobox .facts > div {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: 0.3rem 0;
+  border-top: var(--hair) solid var(--rule-soft);
+}
+
+.infobox dt {
+  color: var(--ink-soft);
+  font-size: 0.75rem;
+}
+
+.infobox dd {
+  text-align: right;
+  font-weight: 700;
+}
+
+/* Fields keep their sheets but take the new corners */
+
+.field__row,
+.field__input {
+  border-radius: var(--round);
+}
+
+/* Phones: the menu folds into a bar across the top */
+
+@media (max-width: 48rem) {
+  .shell,
+  .shell--nation {
+    grid-template-columns: minmax(0, 1fr);
+    padding-bottom: 0;
+  }
+
+  .side {
+    position: sticky;
+    top: 0;
+    z-index: 3;
+    height: auto;
+    flex-direction: row;
+    align-items: center;
+    gap: var(--space-2);
+    padding: 0 var(--space-2);
+    overflow-x: auto;
+    border-right: 0;
+    border-bottom: var(--hair) solid var(--side-edge);
+  }
+
+  .side__mark {
+    flex: none;
+    padding: var(--space-2) var(--space-2) var(--space-2) 0;
+    border-bottom: 0;
+    border-right: var(--hair) solid var(--side-edge);
+  }
+
+  .side__mark-word,
+  .side__mark-by {
+    display: none;
+  }
+
+  .side__mark-word--big {
+    display: block;
+    font-size: 1.125rem;
+  }
+
+  .side__nav ul {
+    flex-direction: row;
+  }
+
+  .side__link {
+    flex-direction: column;
+    justify-content: center;
+    gap: 2px;
+    min-width: 3.5rem;
+    padding: var(--space-1) var(--space-2);
+    font-size: 0.5625rem;
+  }
+
+  .side__link[aria-current='page'] {
+    box-shadow: inset 0 -3px 0 var(--accent);
+  }
+
+  .side__away {
+    margin-top: 0;
+    border-top: 0;
+  }
+
+  .side__latest {
+    display: none;
+  }
+
+  .banner {
+    height: 5rem;
+  }
+
+  .masthead__plate {
+    margin-top: -2rem;
+  }
+
+  .masthead__flag {
+    width: 4.5rem;
+  }
+
+  .masthead__dateline {
+    justify-content: flex-start;
+  }
+
+  .desk__layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .desk__paper {
+    grid-column: 1;
+    grid-row: 2;
+    position: static;
+  }
+
+  .issue {
+    padding: var(--space-4);
+  }
+
+  .nation {
+    grid-template-columns: 6.5rem minmax(0, 1fr);
+    column-gap: var(--space-4);
+  }
+
+  .nationhead__flag {
+    margin-top: -2.5rem;
+    border-width: 3px;
+  }
+
+  .nationhead__class {
+    grid-column: 1 / -1;
+    grid-row: auto;
+    letter-spacing: 0.16em;
+  }
+
+  .nationbody {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .pill {
+    min-width: 0;
+    flex: 1 1 6.5rem;
+  }
+}
+
+/* Fixes from the first look */
+
+/* The menu's parchment runs the full height of a long page, not just the first screen. */
+.shell {
+  background: linear-gradient(to right, var(--side) var(--side-width), var(--side-edge) var(--side-width),
+      var(--side-edge) calc(var(--side-width) + 1px), var(--paper) calc(var(--side-width) + 1px));
+}
+
+.side {
+  border-right: 0;
+}
+
+.masthead__plate {
+  display: flex;
+  justify-content: flex-start;
+  max-width: none;
+  font-size: inherit;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+
+.masthead__plate:hover {
+  text-decoration: none;
+}
+
+.nationhead__flag,
+.masthead__flag {
+  position: relative;
+  z-index: 1;
+}
+
+.nationhead__motto,
+.pills {
+  grid-column: 1 / -1;
+}
+
+.pills {
+  align-items: flex-start;
+}
+
+.pill {
+  align-self: flex-start;
+}
+
+.bar {
+  grid-template-columns: minmax(7rem, 1.2fr) minmax(4rem, 2fr) minmax(2.25rem, auto);
+}
+
+.bar__value {
+  white-space: nowrap;
+}
+
+@media (max-width: 48rem) {
+  .shell {
+    background: var(--paper);
+  }
+
+  .side__away span {
+    display: none;
+  }
+
+  .side__away .side__link::after {
+    content: 'Nations';
+  }
+}
+
+
+/* Bars and meters show their value at once rather than sliding the width. */
+.meter__fill,
+.bar__fill {
+  transition: none;
+}
+
+/* Second pass */
+
+:root {
+  --page: 72rem;
+}
+
+.banner {
+  height: 9rem;
+}
+
+/* Only the flag reaches into the banner; the name sits on the page below it, so it reads
+   in either edition. */
+.masthead__plate {
+  align-items: flex-start;
+  margin-top: -3.5rem;
+}
+
+.masthead__names {
+  padding-top: 3.9rem;
+  padding-bottom: 0;
+}
+
+.change__more {
+  margin-left: var(--space-1);
+}
+
+/* The law runs across the width in columns, not down one side. */
+.nation__groups {
+  display: block;
+}
+
+.nation__groups > * + * {
+  margin-top: var(--space-5);
+}
+
+.nation__groups .policies {
+  columns: 3 15rem;
+  column-gap: var(--space-6);
+}
+
+.nation__groups .policies li {
+  break-inside: avoid;
+  margin-bottom: var(--space-3);
+}
+
+.morning .paper__rest {
+  margin-top: var(--space-4);
+}
+
+@media (max-width: 48rem) {
+  .banner {
+    height: 5.5rem;
+  }
+
+  .masthead__plate {
+    margin-top: -2.25rem;
+  }
+
+  .masthead__names {
+    padding-top: 2.4rem;
+  }
+
+  .side__link {
+    min-width: 0;
+    padding: var(--space-1) 0.4rem;
+  }
+
+  .nation > .screen__head,
+  .nationhead__class {
+    text-align: left;
+  }
+
+  .nation > .screen__head {
+    align-self: end;
+  }
+}
+
+@media (max-width: 30rem) {
+  .side__mark {
+    display: none;
+  }
+
+  .side__nav,
+  .side__nav ul {
+    width: 100%;
+  }
+
+  .side__nav li {
+    flex: 1;
+  }
+
+  .side__link {
+    width: 100%;
+  }
+}
+
+@media (max-width: 48rem) {
+  .nation > .screen__head,
+  .nation > .screen__head h1 {
+    text-align: left;
+  }
+}
+
+/* Third pass: the classification stays beside the flag on a phone too. */
+@media (max-width: 48rem) {
+  .nationhead__class {
+    grid-column: 2;
+    grid-row: 2;
+    letter-spacing: 0.12em;
+  }
+}
+
+/* On a phone the effect wraps, so "Why" takes a column of its own at the top right of each
+   row, the same place every time. */
+@media (max-width: 48rem) {
+  .change summary {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: start;
+  }
+
+  .change__more {
+    margin-left: 0;
+    padding-top: 0.1rem;
+  }
+}

@@ -1,12 +1,8 @@
-import '@fontsource/besley/latin-700.css'
-import '@fontsource/besley/latin-800.css'
-import '@fontsource/source-serif-4/latin-400.css'
-import '@fontsource/source-serif-4/latin-400-italic.css'
-import '@fontsource/source-serif-4/latin-600.css'
 import './styles/tokens.css'
 import './styles/base.css'
 import './styles/components.css'
 import './styles/screens.css'
+import './styles/world.css'
 
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'

@@ -2,7 +2,9 @@ import type { Identity } from '@diplomat/engine'
 import type { ReactNode } from 'react'
 import { dayLabel, electionLabel, percent } from '../logic/changes.ts'
 import { routeHref, type NationPage } from '../logic/router.ts'
+import { Banner } from './Banner.tsx'
 import { Flag } from './Flag.tsx'
+import { Icon, type IconName } from './Icons.tsx'
 
 export interface MastheadNation {
   id: string
@@ -11,6 +13,8 @@ export interface MastheadNation {
   className: string
   support: number
   electionIn: number
+  // The newest few headlines from the record, newest first, for the sidebar.
+  latest?: readonly { day: number; headline: string }[]
 }
 
 export interface MastheadProps {
@@ -20,57 +24,120 @@ export interface MastheadProps {
   page?: NationPage
 }
 
-const PAGES: readonly { page: NationPage; label: string }[] = [
-  { page: 'desk', label: 'Desk' },
-  { page: 'nation', label: 'Nation' },
-  { page: 'record', label: 'Record' },
-  { page: 'settings', label: 'Settings' },
+const PAGES: readonly { page: NationPage; label: string; icon: IconName }[] = [
+  { page: 'desk', label: 'Issues', icon: 'desk' },
+  { page: 'nation', label: 'Nation', icon: 'nation' },
+  { page: 'record', label: 'Record', icon: 'record' },
+  { page: 'settings', label: 'Settings', icon: 'settings' },
 ]
 
-// The top of every page, set like a newspaper's nameplate: the name large, a dateline
-// under it, and a thick and thin rule to close it off.
+function Wordmark() {
+  return (
+    <a className="side__mark" href={routeHref({ name: 'home' })}>
+      <span className="side__mark-word">Project</span>
+      <span className="side__mark-word side__mark-word--big">Diplomat</span>
+      <span className="side__mark-by">a nation game</span>
+    </a>
+  )
+}
+
+// The menu down the left of every page. On a phone it folds into a bar along the top.
+function Side({ nation, page }: MastheadProps) {
+  return (
+    <aside className="side" aria-label="Menu">
+      <Wordmark />
+      {nation ? (
+        <nav className="side__nav" aria-label="Pages">
+          <ul>
+            {PAGES.map((item) => (
+              <li key={item.page}>
+                <a
+                  className="side__link"
+                  href={routeHref({ name: 'nation', id: nation.id, page: item.page })}
+                  aria-current={item.page === page ? 'page' : undefined}
+                >
+                  <Icon name={item.icon} />
+                  <span>{item.label}</span>
+                </a>
+              </li>
+            ))}
+            <li className="side__away">
+              <a className="side__link" href={routeHref({ name: 'home' })}>
+                <Icon name="nations" />
+                <span>All nations</span>
+              </a>
+            </li>
+          </ul>
+        </nav>
+      ) : (
+        <nav className="side__nav" aria-label="Pages">
+          <ul>
+            <li>
+              <a className="side__link" href={routeHref({ name: 'home' })}>
+                <Icon name="nations" />
+                <span>All nations</span>
+              </a>
+            </li>
+            <li>
+              <a className="side__link" href={routeHref({ name: 'found', step: 'identity' })}>
+                <Icon name="found" />
+                <span>New nation</span>
+              </a>
+            </li>
+          </ul>
+        </nav>
+      )}
+      {nation?.latest && nation.latest.length > 0 && (
+        <section className="side__latest" aria-labelledby="side-latest">
+          <p id="side-latest" className="side__heading">
+            Latest in the record
+          </p>
+          <ul>
+            {nation.latest.map((item, i) => (
+              <li key={i}>
+                <a href={routeHref({ name: 'nation', id: nation.id, page: 'record' })}>{item.headline}</a>{' '}
+                <span className="soft">(day {item.day})</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+    </aside>
+  )
+}
+
+// The nation's strip across the top: its landscape, its flag, its name, and the four figures
+// a player checks every morning.
 export function Masthead({ nation, page }: MastheadProps) {
-  if (!nation) {
+  if (!nation) return null
+  const { identity } = nation
+  // The nation page sets out the flag and the name at full size itself.
+  if (page === 'nation') {
     return (
-      <header className="masthead">
-        <a className="masthead__plate" href={routeHref({ name: 'home' })}>
-          Project Diplomat
-        </a>
-        <p className="masthead__dateline label soft">A nation game. No right answers.</p>
+      <header className="masthead masthead--bare">
+        <Banner id={nation.id} flag={identity.flag} />
       </header>
     )
   }
-  const { identity } = nation
   return (
-    <header className="masthead masthead--nation">
-      <a className="masthead__back label" href={routeHref({ name: 'home' })}>
-        All nations
-      </a>
-      <a className="masthead__plate" href={routeHref({ name: 'nation', id: nation.id, page: 'desk' })}>
-        <Flag flag={identity.flag} width="1.5em" className="masthead__flag" />
-        <span>{identity.name}</span>
-      </a>
-      <ul className="masthead__dateline label" aria-label="The state of the nation">
+    <header className="masthead">
+      <Banner id={nation.id} flag={identity.flag} />
+      <div className="masthead__plate">
+        <a className="masthead__flag-link" href={routeHref({ name: 'nation', id: nation.id, page: 'nation' })}>
+          <Flag flag={identity.flag} className="masthead__flag" />
+        </a>
+        <div className="masthead__names">
+          <a className="masthead__name" href={routeHref({ name: 'nation', id: nation.id, page: 'nation' })}>
+            {identity.name}
+          </a>
+          <p className="masthead__class">{nation.className}</p>
+        </div>
+      </div>
+      <ul className="masthead__dateline" aria-label="The state of the nation">
         <li>{dayLabel(nation.day)}</li>
-        <li>{nation.className}</li>
         <li>{electionLabel(nation.electionIn)}</li>
         <li>Support {percent(nation.support)}</li>
       </ul>
-      <nav className="nav" aria-label="Pages">
-        <ul>
-          {PAGES.map((item) => (
-            <li key={item.page}>
-              <a
-                className="nav__link label"
-                href={routeHref({ name: 'nation', id: nation.id, page: item.page })}
-                aria-current={item.page === page ? 'page' : undefined}
-              >
-                {item.label}
-              </a>
-            </li>
-          ))}
-        </ul>
-      </nav>
     </header>
   )
 }
@@ -87,11 +154,14 @@ export function Shell({ nation, page, colophon, children }: ShellProps) {
       <a className="skip" href="#main" onClick={skipToMain}>
         Skip to the page
       </a>
-      <Masthead nation={nation} page={page} />
-      <main id="main" className="shell__main" tabIndex={-1}>
-        {children}
-      </main>
-      <footer className="colophon small soft">{colophon}</footer>
+      <Side nation={nation} page={page} />
+      <div className="shell__page">
+        <Masthead nation={nation} page={page} />
+        <main id="main" className="shell__main" tabIndex={-1}>
+          {children}
+        </main>
+        <footer className="colophon small soft">{colophon}</footer>
+      </div>
     </div>
   )
 }

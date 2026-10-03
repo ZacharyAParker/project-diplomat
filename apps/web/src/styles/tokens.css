@@ -6,17 +6,20 @@
 */
 
 :root {
-  --font-display: 'Besley', Rockwell, 'Clarendon', Georgia, serif;
-  --font-text: 'Source Serif 4', 'Iowan Old Style', 'Palatino Linotype', Georgia, serif;
+  /* Georgia for anything read, a Helvetica and Verdana stack for anything worked: the
+     two voices of the old nation-game browser era this is built in. */
+  --font-display: Georgia, "Times New Roman", Times, serif;
+  --font-text: Georgia, "Times New Roman", Times, serif;
+  --font-ui: "Helvetica Neue", Helvetica, Verdana, Tahoma, Arial, sans-serif;
 
-  --size-label: 0.75rem;
-  --size-small: 0.9375rem;
-  --size-text: 1.0625rem;
-  --size-lede: 1.25rem;
+  --size-label: 0.6875rem;
+  --size-small: 0.875rem;
+  --size-text: 1rem;
+  --size-lede: 1.125rem;
   --size-h3: 1.1875rem;
-  --size-h2: clamp(1.375rem, 1.2rem + 0.9vw, 1.75rem);
-  --size-h1: clamp(1.875rem, 1.3rem + 2.8vw, 3rem);
-  --size-plate: clamp(1.75rem, 1.1rem + 3.6vw, 3.5rem);
+  --size-h2: clamp(1.375rem, 1.25rem + 0.6vw, 1.625rem);
+  --size-h1: clamp(1.75rem, 1.4rem + 1.8vw, 2.5rem);
+  --size-plate: clamp(2rem, 1.4rem + 3vw, 3.25rem);
 
   --space-1: 0.25rem;
   --space-2: 0.5rem;
@@ -27,53 +30,67 @@
   --space-7: 3rem;
   --space-8: 4.5rem;
 
-  --gutter: clamp(1rem, 0.4rem + 3vw, 2.5rem);
-  --page: 72rem;
-  --measure: 34rem;
+  --gutter: clamp(1rem, 0.6rem + 2vw, 2rem);
+  --page: 62rem;
+  --side-width: 9.5rem;
+  --measure: 40rem;
   --tap: 2.75rem;
 
-  --veil: rgb(10 12 14 / 0.6);
+  --veil: rgb(10 12 10 / 0.55);
 
   --hair: 1px;
-  --heavy: 3px;
+  --heavy: 2px;
+  --round: 4px;
 
-  --turn: 220ms;
+  --turn: 180ms;
   --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
 }
 
 :root,
 [data-theme='light'] {
   color-scheme: light;
-  --paper: #ecebe6;
-  --sheet: #f8f7f3;
-  --ink: #17191c;
-  --ink-soft: #4b4f55;
-  --rule: #17191c;
-  --rule-soft: #c2c1b9;
-  --wash: rgb(23 25 28 / 0.06);
-  --accent: #a3122a;
+  --paper: #ffffff;
+  --sheet: #f7f6f0;
+  --side: #e7e6db;
+  --side-edge: #c9c8ba;
+  --ink: #141414;
+  --ink-soft: #55554f;
+  --rule: #8d8c80;
+  --rule-soft: #d6d5c9;
+  --wash: rgb(20 20 20 / 0.05);
+  --link: #1d6f22;
+  --accent: #2c7d31;
+  --accent-deep: #1f5e23;
   --on-accent: #ffffff;
-  --good: #1c5a41;
-  --bad: #a3122a;
-  --buff: #dfd3b4;
-  --flag-edge: rgb(23 25 28 / 0.35);
+  --good: #1d6f22;
+  --bad: #a82d1e;
+  --mid: #8a6a12;
+  --buff: #efeee3;
+  --flag-edge: rgb(20 20 20 / 0.45);
+  --pill-label: #f1f0e6;
 }
 
 [data-theme='dark'] {
   color-scheme: dark;
-  --paper: #14181d;
-  --sheet: #1c2128;
-  --ink: #e8e4da;
-  --ink-soft: #a9aca6;
-  --rule: #e8e4da;
-  --rule-soft: #3a414b;
-  --wash: rgb(232 228 218 / 0.08);
-  --accent: #e5596c;
-  --on-accent: #14181d;
-  --good: #86c9a6;
-  --bad: #f07f8c;
-  --buff: #3b3628;
-  --flag-edge: rgb(232 228 218 / 0.4);
+  --paper: #161713;
+  --sheet: #1e1f1a;
+  --side: #23241e;
+  --side-edge: #3a3b33;
+  --ink: #e7e5da;
+  --ink-soft: #aaa99f;
+  --rule: #6f6e64;
+  --rule-soft: #34352e;
+  --wash: rgb(231 229 218 / 0.06);
+  --link: #8ccf86;
+  --accent: #3f9c45;
+  --accent-deep: #2f7d35;
+  --on-accent: #ffffff;
+  --good: #8ccf86;
+  --bad: #f08d7c;
+  --mid: #dcbd6a;
+  --buff: #2a2b24;
+  --flag-edge: rgb(231 229 218 / 0.45);
+  --pill-label: #2a2b24;
 }
 
 @media (prefers-reduced-motion: reduce) {
