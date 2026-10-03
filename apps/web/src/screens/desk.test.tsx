@@ -16,8 +16,8 @@ afterEach(() => {
   cleanup()
 })
 
-const paper = () => screen.getByRole('article', { name: /./ })
-const box = () => screen.getByRole('region', { name: 'The agenda' })
+const paper = () => document.querySelector<HTMLElement>('article.paper')!
+const box = () => screen.getByRole('region', { name: "Today's issues" })
 
 async function endTheDay(user: ReturnType<typeof userEvent.setup>) {
   await user.click(screen.getByRole('button', { name: 'End the day' }))
@@ -44,7 +44,7 @@ describe('a day at the desk, from the founding', () => {
     }
     await heading('The first morning')
     await user.click(screen.getByRole('link', { name: 'To work' }))
-    await heading('The desk')
+    await heading('Issues')
 
     const first = store.get().nation!
     const name = first.state.identity.name
@@ -60,18 +60,14 @@ describe('a day at the desk, from the founding', () => {
     expect(within(box()).getByText(`0 of ${cards.length} decided.`)).toBeDefined()
 
     const sheet = within(box()).getByRole('heading', { level: 3, name: card.title }).closest('article')!
-    expect(within(sheet).getAllByRole('radio')).toHaveLength(card.options.length)
-    expect(within(sheet).getAllByText('What it will do')).toHaveLength(card.options.length)
+    const accepts = within(sheet).getAllByRole('button', { name: /^Accept position \d: / })
+    expect(accepts).toHaveLength(card.options.length)
+    expect(within(sheet).getByRole('heading', { name: 'The debate' })).toBeDefined()
     expect(sheet.textContent).not.toMatch(/[+-]\d/)
-
-    await user.click(within(sheet).getByRole('button', { name: 'Confirm' }))
-    expect(within(sheet).getByRole('alert').textContent).toMatch(/Nobody is picked yet/)
     expect(store.get().nation!.state.timeline).toHaveLength(first.state.timeline.length)
 
     const option = card.options[0]!
-    await user.click(within(sheet).getAllByRole('radio')[0]!)
-    expect(store.get().nation!.state.timeline).toHaveLength(first.state.timeline.length)
-    await user.click(within(sheet).getByRole('button', { name: `Confirm: back ${option.name}` }))
+    await user.click(within(sheet).getByRole('button', { name: `Accept position 1: ${option.name}` }))
 
     const decided = store.get().nation!.state
     const entry = decided.timeline.at(-1)!
@@ -80,12 +76,12 @@ describe('a day at the desk, from the founding', () => {
     const result = within(box()).getByRole('heading', { level: 3, name: entry.headline })
     expect(document.activeElement).toBe(result)
     const resultSheet = result.closest('article')!
-    expect(within(resultSheet).getByText(`Decided: ${card.title}`)).toBeDefined()
+    expect(within(resultSheet).getByText(`The talking point: ${card.title}`)).toBeDefined()
     if (entry.text) expect(within(resultSheet).getByText(entry.text)).toBeDefined()
     for (const change of entry.changes) {
       expect(within(resultSheet).getAllByText(change.why).length).toBeGreaterThan(0)
     }
-    expect(within(resultSheet).queryByRole('radio')).toBeNull()
+    expect(within(resultSheet).queryByRole('button', { name: /^Accept/ })).toBeNull()
     expect(within(box()).getByText(`1 of ${cards.length} decided.`)).toBeDefined()
 
     await endTheDay(user)
@@ -98,7 +94,7 @@ describe('a day at the desk, from the founding', () => {
     expect(stored.ok && stored.nation).toEqual(night)
 
     await user.click(screen.getByRole('button', { name: 'To the morning paper' }))
-    expect(document.activeElement).toBe(await heading('The desk'))
+    expect(document.activeElement).toBe(await heading('Issues'))
     expect(screen.getByText('Day 2')).toBeDefined()
     expect(within(paper()).getByText(/^Morning edition, day 2\./)).toBeDefined()
     expect(within(paper()).getByRole('heading', { name: entry.headline })).toBeDefined()
@@ -112,10 +108,10 @@ describe('leaving things on the desk', () => {
     const user = userEvent.setup()
     window.location.hash = '#/n/kept/desk'
     const { store } = mount(holding(founded()))
-    await heading('The desk')
+    await heading('Issues')
 
     await user.click(screen.getByRole('button', { name: 'End the day' }))
-    expect(screen.getByRole('heading', { name: 'End the day with papers on the desk?' })).toBeDefined()
+    expect(screen.getByRole('heading', { name: 'End the day with issues still open?' })).toBeDefined()
     await user.click(screen.getByRole('button', { name: 'Back to the desk' }))
     expect(store.get().nation!.state.day).toBe(1)
 
@@ -130,16 +126,16 @@ describe('leaving things on the desk', () => {
     const user = userEvent.setup()
     window.location.hash = '#/n/kept/desk'
     const { store } = mount(holding(founded()))
-    await heading('The desk')
+    await heading('Issues')
 
-    const leave = screen.getAllByRole('button', { name: /^Leave it on the desk: / })
+    const leave = screen.getAllByRole('button', { name: /^Dismiss issue: / })
     for (const button of leave) await user.click(button)
-    expect(screen.queryAllByRole('radio')).toHaveLength(0)
-    expect(screen.getAllByText('Left on the desk')).toHaveLength(leave.length)
+    expect(screen.queryAllByRole('button', { name: /^Accept/ })).toHaveLength(0)
+    expect(screen.getAllByText('Dismissed')).toHaveLength(leave.length)
 
     await user.click(screen.getAllByRole('button', { name: /^Pick it back up: / })[0]!)
-    expect(screen.getAllByRole('radio').length).toBeGreaterThan(1)
-    await user.click(screen.getAllByRole('button', { name: /^Leave it on the desk: / })[0]!)
+    expect(screen.getAllByRole('button', { name: /^Accept/ }).length).toBeGreaterThan(1)
+    await user.click(screen.getAllByRole('button', { name: /^Dismiss issue: / })[0]!)
 
     await user.click(screen.getByRole('button', { name: 'End the day' }))
     await heading('Overnight')
@@ -157,24 +153,25 @@ describe('a day with nothing in the box', () => {
     const user = userEvent.setup()
     window.location.hash = '#/n/kept/desk'
     const { store } = mount(holding(spent()))
-    await heading('The desk')
+    await heading('Issues')
 
     expect(screen.getByText('The pack has run out')).toBeDefined()
     expect(screen.getByText(/the routine goes on/)).toBeDefined()
     expect(screen.getByText(/More dilemmas arrive with later versions/)).toBeDefined()
     expect(screen.getByText('Nothing needs deciding.')).toBeDefined()
     expect(screen.getByText(/^The box is empty/)).toBeDefined()
-    expect(screen.queryAllByRole('radio')).toHaveLength(0)
+    expect(screen.queryAllByRole('button', { name: /^Accept/ })).toHaveLength(0)
 
     await user.click(screen.getByRole('button', { name: 'End the day' }))
     await heading('Overnight')
     await user.click(screen.getByRole('button', { name: 'To the morning paper' }))
-    await heading('The desk')
+    await heading('Issues')
     expect(store.get().nation!.state.day).toBe(3)
     expect(screen.queryByText('The pack has run out')).toBeNull()
     expect(screen.queryByText('No major business today.')).toBeNull()
     expect(screen.getByText(/^The box is empty/)).toBeDefined()
-    expect(within(paper()).getByText('Home news')).toBeDefined()
+    expect(paper().classList.contains('paper--quiet')).toBe(true)
+    expect(within(paper()).getByRole('heading', { level: 3 })).toBeDefined()
   })
 })
 
@@ -183,7 +180,7 @@ describe('election night', () => {
     const user = userEvent.setup()
     window.location.hash = '#/n/kept/desk'
     const { store } = mount(holding(played(TERM_DAYS - 1)))
-    await heading('The desk')
+    await heading('Issues')
     expect(screen.getByText('Election tonight')).toBeDefined()
     expect(screen.getByText(/The country votes tonight\.$/)).toBeDefined()
 
@@ -207,13 +204,13 @@ describe('election night', () => {
       await user.click(screen.getByRole('button', { name: 'To the morning paper' }))
     }
 
-    await heading('The desk')
+    await heading('Issues')
     expect(within(paper()).getByRole('heading', { level: 3, name: election.headline })).toBeDefined()
     await user.click(within(paper()).getByRole('button', { name: 'Read the term report' }))
     await heading('Election night')
     expect(screen.getByRole('table')).toBeDefined()
     await user.click(screen.getByRole('button', { name: 'Back to the desk' }))
-    await heading('The desk')
+    await heading('Issues')
   })
 })
 
@@ -224,7 +221,7 @@ describe('the fall of a government', () => {
     const doomed: GameState = { ...start, indicators: { ...start.indicators, legitimacy: 0 } }
     window.location.hash = '#/n/kept/desk'
     const { store } = mount(holding(doomed))
-    await heading('The desk')
+    await heading('Issues')
 
     await endTheDay(user)
     await heading('The government falls')
@@ -238,7 +235,7 @@ describe('the fall of a government', () => {
     if (on.textContent === 'The rest of the night') {
       await user.click(screen.getByRole('button', { name: 'To the morning paper' }))
     }
-    await heading('The desk')
+    await heading('Issues')
     expect(within(paper()).getByRole('heading', { level: 3, name: 'The government falls' })).toBeDefined()
     expect(within(paper()).getByRole('button', { name: 'Read the term report' })).toBeDefined()
   })
@@ -249,7 +246,7 @@ describe('awkward nations', () => {
     const long = { ...identity, name: 'The <i>Most</i> Serene and Indivisible Commonwealth of Upper Vesland' }
     window.location.hash = '#/n/kept/desk'
     mount(holding({ ...founded(), identity: long }))
-    await heading('The desk')
+    await heading('Issues')
     expect(screen.getByRole('link', { name: long.name })).toBeDefined()
     expect(document.querySelector('i')).toBeNull()
   })
@@ -259,10 +256,10 @@ describe('awkward nations', () => {
     const old: GameState = { ...founded(), pack: { id: content.pack.id, version: '0.0.1' } }
     window.location.hash = '#/n/kept/desk'
     mount(holding(old))
-    await heading('The desk')
+    await heading('Issues')
     expect(screen.getByText(/last played with version 0\.0\.1/)).toBeDefined()
     await user.click(screen.getByRole('button', { name: 'Understood' }))
     expect(screen.queryByText(/last played with version 0\.0\.1/)).toBeNull()
-    expect(screen.getAllByRole('radio').length).toBeGreaterThan(1)
+    expect(screen.getAllByRole('button', { name: /^Accept/ }).length).toBeGreaterThan(1)
   })
 })

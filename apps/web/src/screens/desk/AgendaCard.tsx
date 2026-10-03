@@ -1,8 +1,8 @@
 import type { Content } from '@diplomat/engine'
-import { useId, useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import { forecastView, type Card, type ForecastView, type OptionView } from '../../logic/desk.ts'
 import type { Current } from '../../store/game.tsx'
-import { Button, ChangeList, Meter, Sheet, Tag } from '../../ui/index.ts'
+import { Button, ChangeList, Meter, Tag } from '../../ui/index.ts'
 
 // Everything about an option that is not a movement: laws, reputations, promises, and
 // the fact (never the content) of consequences still to come.
@@ -31,41 +31,28 @@ export function ForecastNotes({ view }: { view: ForecastView }) {
 }
 
 interface OptionProps {
+  number: number
   option: OptionView
   view: ForecastView
   content: Content
-  group: string
-  chosen: boolean
-  onChoose(): void
+  onAccept(): void
 }
 
-function OptionBlock({ option, view, content, group, chosen, onChoose }: OptionProps) {
-  const forecast = useId()
+// One numbered position in the debate: who argues it, what it would do, and the button
+// that makes it law.
+function Position({ number, option, view, content, onAccept }: OptionProps) {
   return (
-    <div className={chosen ? 'option option--chosen' : 'option'}>
-      <label className="option__pick">
-        <input
-          type="radio"
-          name={group}
-          className="choices__radio"
-          checked={chosen}
-          onChange={onChoose}
-          aria-describedby={forecast}
-        />
-        <span className="option__text">
-          <span className="option__who">
-            <span className="option__name">{option.name}</span>
-            <span className="visually-hidden">, </span>
-            <span className="option__role label soft">{option.role}</span>
-          </span>
-          <span className="visually-hidden">: </span>
-          <span className="option__speech">{option.speech}</span>
-        </span>
-      </label>
-      <div id={forecast} className="option__forecast">
-        <p className="label soft">What it will do</p>
+    <li className="debate__option">
+      <p className="debate__speech">
+        <span className="debate__number figures" aria-hidden="true">
+          {number}.
+        </span>{' '}
+        <q>{option.speech}</q> says <strong className="debate__who">{option.name}</strong>,{' '}
+        <span className="debate__role">{option.role}</span>.
+      </p>
+      <div className="debate__forecast">
         {view.nothing ? (
-          <p className="soft">Nothing that anyone can measure.</p>
+          <p className="soft small">Nothing that anyone can measure.</p>
         ) : (
           <>
             <ChangeList changes={view.changes} content={content} reason="folded" />
@@ -73,7 +60,12 @@ function OptionBlock({ option, view, content, group, chosen, onChoose }: OptionP
           </>
         )}
       </div>
-    </div>
+      <p className="debate__accept">
+        <Button look="accent" onClick={onAccept} aria-label={`Accept position ${number}: ${option.name}`}>
+          Accept
+        </Button>
+      </p>
+    </li>
   )
 }
 
@@ -81,17 +73,14 @@ export interface AgendaCardProps {
   card: Card
   current: Current
   content: Content
-  // Called with the chosen option and what was forecast for it, once it is confirmed.
+  // Called with the accepted option and what was forecast for it.
   onDecide(optionId: string, view: ForecastView): void
   onLeave(): void
 }
 
-// One paper from the box. Choosing is two steps on purpose: pick a voice, then confirm.
+// One issue, set out the way the genre always has: the issue, then the debate, then a
+// button under each position.
 export function AgendaCard({ card, current, content, onDecide, onLeave }: AgendaCardProps) {
-  const group = useId()
-  const [chosen, setChosen] = useState<string | null>(null)
-  const [missing, setMissing] = useState(false)
-
   const views = useMemo(() => {
     const forecast = (optionId: string) =>
       card.dilemmaId === null
@@ -100,18 +89,15 @@ export function AgendaCard({ card, current, content, onDecide, onLeave }: Agenda
     return new Map(card.options.map((option) => [option.id, forecastView(forecast(option.id), content)]))
   }, [card, current, content])
 
-  // An option can stop being available when another paper is decided first.
-  const picked = card.options.find((option) => option.id === chosen) ?? null
-
-  function confirm() {
-    const view = picked && views.get(picked.id)
-    if (!picked || !view) return setMissing(true)
-    onDecide(picked.id, view)
-  }
-
   return (
-    <Sheet as="article" look="paper" level={3} kicker={card.kicker} title={card.title} className="card">
-      <p className="card__brief">{card.description}</p>
+    <article className={`issue issue--${card.kind}`} aria-labelledby={`issue-${card.key}`}>
+      <header className="issue__head">
+        <h3 id={`issue-${card.key}`} className="issue__title">
+          {card.title}
+        </h3>
+        {(card.abroad || card.kind === 'situation') && <p className="issue__meta">{card.kicker}</p>}
+      </header>
+
       {card.gauge && (
         <Meter
           label={card.gauge.label}
@@ -120,44 +106,33 @@ export function AgendaCard({ card, current, content, onDecide, onLeave }: Agenda
         />
       )}
 
+      <h4 className="issue__section">The issue</h4>
+      <p className="issue__text">{card.description}</p>
+
+      <h4 className="issue__section">The debate</h4>
       {card.options.length === 0 ? (
         <p className="soft">Nobody has anything to propose. This one passes on its own tonight.</p>
       ) : (
-        <fieldset className="card__options">
-          <legend className="label soft">Who do you back?</legend>
-          {card.options.map((option) => (
-            <OptionBlock
+        <ol className="debate">
+          {card.options.map((option, i) => (
+            <Position
               key={option.id}
+              number={i + 1}
               option={option}
               view={views.get(option.id)!}
               content={content}
-              group={group}
-              chosen={picked?.id === option.id}
-              onChoose={() => {
-                setChosen(option.id)
-                setMissing(false)
-              }}
+              onAccept={() => onDecide(option.id, views.get(option.id)!)}
             />
           ))}
-        </fieldset>
+        </ol>
       )}
 
-      {missing && (
-        <p className="field__error small" role="alert">
-          Nobody is picked yet. Back one of them, or leave it on the desk.
-        </p>
-      )}
-      <div className="card__actions">
-        {card.options.length > 0 && (
-          <Button look="primary" onClick={confirm}>
-            {picked ? `Confirm: back ${picked.name}` : 'Confirm'}
-          </Button>
-        )}
-        <Button look="quiet" onClick={onLeave} aria-label={`Leave it on the desk: ${card.title}`}>
-          Leave it on the desk
+      <p className="issue__dismiss">
+        <Button look="quiet" size="small" onClick={onLeave} aria-label={`Dismiss issue: ${card.title}`}>
+          Dismiss issue
         </Button>
-      </div>
-    </Sheet>
+      </p>
+    </article>
   )
 }
 
@@ -166,27 +141,24 @@ export interface LeftCardProps {
   onReturn(): void
 }
 
-// A paper the player has pushed to one side. It stays where it was, a line high.
+// An issue the player has set aside. It keeps its place, a line high.
 export function LeftCard({ card, onReturn }: LeftCardProps) {
   return (
-    <Sheet
-      as="article"
-      look="paper"
-      level={3}
-      kicker="Left on the desk"
-      title={card.title}
-      className="card card--left"
-    >
-      <p className="soft">
+    <article className="issue issue--left">
+      <header className="issue__head">
+        <h3 className="issue__title">{card.title}</h3>
+        <p className="issue__meta">Dismissed</p>
+      </header>
+      <p className="soft small">
         {card.kind === 'situation'
-          ? 'Undecided. The crisis moves on tonight without a word from you.'
-          : 'Undecided. It goes back tonight, and may not come round again.'}
+          ? 'The crisis moves on tonight without a word from you.'
+          : 'It goes back tonight, and may not come round again.'}
       </p>
-      <div className="card__actions">
+      <p className="issue__dismiss">
         <Button size="small" onClick={onReturn} aria-label={`Pick it back up: ${card.title}`}>
           Pick it back up
         </Button>
-      </div>
-    </Sheet>
+      </p>
+    </article>
   )
 }

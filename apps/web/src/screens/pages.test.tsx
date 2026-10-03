@@ -19,7 +19,7 @@ describe('the nation', () => {
     const state = founded()
     window.location.hash = '#/n/kept/nation'
     mount(holding(state))
-    await heading('The nation')
+    await heading('Vesland')
 
     for (const id of INDICATORS) {
       expect(screen.getByRole('meter', { name: INDICATOR_INFO[id].name })).toBeDefined()
@@ -40,7 +40,7 @@ describe('the nation', () => {
     const user = userEvent.setup()
     window.location.hash = '#/n/kept/nation'
     mount(holding(founded()))
-    await heading('The nation')
+    await heading('Vesland')
     const debt = screen.getByRole('meter', { name: 'Debt' }).closest('details')!
     await user.click(debt.querySelector('summary')!)
     expect(debt.open).toBe(true)
@@ -60,7 +60,7 @@ describe('the nation', () => {
     }
     window.location.hash = '#/n/kept/nation'
     mount(holding(state))
-    await heading('The nation')
+    await heading('Vesland')
 
     expect(screen.getByRole('heading', { level: 3, name: trait.name })).toBeDefined()
     expect(screen.getByText(/^Costs legitimacy: /)).toBeDefined()

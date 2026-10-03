@@ -16,6 +16,7 @@ import {
   traitRows,
   type PolicyGroup,
 } from '../logic/nation.ts'
+import { pills, summary } from '../logic/summary.ts'
 import { useGame, type Current } from '../store/game.tsx'
 import { Bar, Flag, Meter, Screen, Sheet, Spark, Tag } from '../ui/index.ts'
 
@@ -79,41 +80,68 @@ export function Nation({ current }: { current: Current }) {
   const crisis = useMemo(() => crisisRow(state, content), [state, content])
   const neighbours = useMemo(() => neighbourRows(state, content), [state, content])
   const resources = useMemo(() => resourceLines(state, content), [state, content])
+  const glance = useMemo(() => pills(state), [state])
+  const prose = useMemo(() => summary(state, content), [state, content])
 
   return (
-    <Screen title="The nation" kicker={`${identity.name}, day ${state.day}`} className="nation">
-      <div className="nation__head">
-        <Flag flag={identity.flag} width="min(100%, 13rem)" label={`The flag of ${identity.name}`} />
-        <div className="nation__class stack">
-          <Sheet kicker="What the world makes of it" title={nationClass.name}>
-            <p className="lede">{nationClass.description}</p>
-          </Sheet>
+    <Screen title={identity.name} kicker="The nation of" className="nation">
+      <div className="nationhead">
+        <Flag flag={identity.flag} className="nationhead__flag" label={`The flag of ${identity.name}`} />
+        <p className="nationhead__class">{nationClass.name}</p>
+        <p className="nationhead__motto">
+          <q>{nationClass.description}</q>
+        </p>
+        <ul className="pills" aria-label="At a glance">
+          {glance.map((pill) => (
+            <li key={pill.id} className={`pill pill--${pill.tone}`}>
+              <span className="pill__label">{pill.label}</span>
+              <span className="pill__word">{pill.word}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <div className="nationbody">
+        <div className="nationbody__prose">
+          {prose.map((paragraph, i) => (
+            <p key={i}>{paragraph}</p>
+          ))}
+        </div>
+        <aside className="infobox" aria-label={`${identity.name} at a glance`}>
+          <h2 className="infobox__name">{identity.name}</h2>
+          <Flag flag={identity.flag} className="infobox__flag" />
           <dl className="facts">
             <div>
-              <dt className="label soft">Capital</dt>
+              <dt>Capital</dt>
               <dd>{identity.capital}</dd>
             </div>
             <div>
-              <dt className="label soft">People</dt>
+              <dt>Leader</dt>
+              <dd>{identity.leaderTitle}</dd>
+            </div>
+            <div>
+              <dt>People</dt>
               <dd>{identity.demonym}</dd>
             </div>
             <div>
-              <dt className="label soft">Currency</dt>
+              <dt>Currency</dt>
               <dd>{identity.currency}</dd>
             </div>
             <div>
-              <dt className="label soft">In office</dt>
-              <dd>
-                The {ordinal(state.government)} government, under its {identity.leaderTitle}
-              </dd>
+              <dt>In office</dt>
+              <dd>The {ordinal(state.government)} government</dd>
+            </div>
+            <div>
+              <dt>Day</dt>
+              <dd>{state.day}</dd>
             </div>
           </dl>
-        </div>
+        </aside>
       </div>
 
       <div className="nation__layout">
         <div className="nation__main">
-          <Sheet kicker="The numbers" title="How the country stands">
+          <Sheet title="How the country stands">
             <p className="small soft">
               Each runs from 0 to 100. The red notch is where it stood yesterday morning. Open one to see what
               it measures.
@@ -147,7 +175,7 @@ export function Nation({ current }: { current: Current }) {
             </ul>
           </Sheet>
 
-          <Sheet kicker="Who is with you" title="Support and the factions">
+          <Sheet title="Support and the factions">
             <div className="measure">
               <Meter
                 label="Support"
@@ -183,7 +211,7 @@ export function Nation({ current }: { current: Current }) {
           </Sheet>
 
           {neighbours.length > 0 && (
-            <Sheet kicker="Abroad" title="The neighbours">
+            <Sheet title="The neighbours">
               <p className="small soft">
                 {resources.short} {resources.spare} Relations run from hostile to close. Open a country to see
                 what it wants and what it has.
@@ -223,13 +251,13 @@ export function Nation({ current }: { current: Current }) {
 
         <div className="nation__side">
           {crisis && (
-            <Sheet kicker="A crisis is running" title={crisis.title} look="paper">
+            <Sheet title={crisis.title} look="paper">
               <Meter label={crisis.gauge} value={crisis.value} />
               <p className="small soft">{crisis.note}</p>
             </Sheet>
           )}
 
-          <Sheet kicker="Cabinet" title="The ministers">
+          <Sheet title="The ministers">
             <p className="small soft">
               Standing is how secure each one is. A minister who runs out of it resigns.
             </p>
@@ -252,7 +280,7 @@ export function Nation({ current }: { current: Current }) {
             </ul>
           </Sheet>
 
-          <Sheet kicker="Reputation" title="What the country is known for">
+          <Sheet title="What the country is known for">
             {traits.length === 0 ? (
               <p className="soft">Nothing yet. It takes a while to become known for something.</p>
             ) : (
@@ -268,7 +296,7 @@ export function Nation({ current }: { current: Current }) {
             )}
           </Sheet>
 
-          <Sheet kicker="Promises" title="What has been promised">
+          <Sheet title="What has been promised">
             {promises.length === 0 ? (
               <p className="soft">No promises are outstanding.</p>
             ) : (
@@ -283,7 +311,7 @@ export function Nation({ current }: { current: Current }) {
             )}
           </Sheet>
 
-          <Sheet kicker="Still to come" title="Consequences">
+          <Sheet title="Consequences">
             <p className={hasPending(state) ? undefined : 'soft'}>
               {hasPending(state)
                 ? 'Some decisions have not finished with the country yet. What they bring, and when, is not known.'
@@ -293,7 +321,7 @@ export function Nation({ current }: { current: Current }) {
         </div>
       </div>
 
-      <Sheet kicker="The law as it stands" title="Policies" className="nation__policies">
+      <Sheet title="Policies" className="nation__policies">
         <div className="nation__groups">
           {policies.map((group) => (
             <Policies key={group.id} group={group} />

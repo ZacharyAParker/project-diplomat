@@ -63,6 +63,10 @@ function NationRoute({ id, page }: { id: string; page: NationPage }) {
     className: current.nationClass.name,
     support: current.support,
     electionIn: current.electionIn,
+    latest: current.state.timeline
+      .slice(-5)
+      .reverse()
+      .map((entry) => ({ day: entry.day, headline: entry.headline })),
   }
   return (
     <Shell nation={nation} page={page === 'morning' ? undefined : page} colophon={<Colophon />}>

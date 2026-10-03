@@ -140,8 +140,8 @@ describe('founding a nation', () => {
     expect(screen.queryByText(/[+-]\d/)).toBeNull()
 
     await user.click(screen.getByRole('link', { name: 'To work' }))
-    expect(document.activeElement).toBe(await heading('The desk'))
-    expect(screen.getByRole('link', { name: 'Desk' }).getAttribute('aria-current')).toBe('page')
+    expect(document.activeElement).toBe(await heading('Issues'))
+    expect(screen.getByRole('link', { name: 'Issues' }).getAttribute('aria-current')).toBe('page')
     expect(screen.getByText('Day 1')).toBeDefined()
   })
 
@@ -177,7 +177,7 @@ describe('coming back', () => {
   it('opens a nation straight from its address', async () => {
     window.location.hash = '#/n/home-test/desk'
     mount(seeded())
-    expect(await heading('The desk')).toBeDefined()
+    expect(await heading('Issues')).toBeDefined()
     expect(screen.getByRole('link', { name: 'All nations' })).toBeDefined()
   })
 

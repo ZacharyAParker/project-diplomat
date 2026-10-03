@@ -116,7 +116,7 @@ export function Desk({ current }: { current: Current }) {
 
   return (
     <Screen
-      title="The desk"
+      title="Issues"
       kicker={`${dayLabel(state.day)} in ${state.identity.capital}`}
       focusKey={`day ${state.day}`}
       className="desk"
@@ -190,8 +190,8 @@ function Day({ current, onEnd, onReport }: DayProps) {
         {cards.length > 0 && (
           <p className="desk__jump">
             <Button look="quiet" size="small" onClick={toBox}>
-              {cards.length === 1 ? 'One paper is waiting' : `${cards.length} papers are waiting`}: skip to
-              the box
+              {cards.length === 1 ? 'One issue is waiting' : `${cards.length} issues are waiting`}: skip to
+              them
             </Button>
           </p>
         )}
@@ -211,10 +211,9 @@ function Day({ current, onEnd, onReport }: DayProps) {
       </div>
 
       <section className="desk__box" aria-labelledby="box-title">
-        <header className="sheet sheet--column">
-          <p className="sheet__kicker label">In the box today</p>
+        <header className="desk__box-head">
           <h2 id="box-title" ref={box} tabIndex={-1}>
-            The agenda
+            Today's issues
           </h2>
           <p className="soft">
             {total === 0 ? 'Nothing needs deciding.' : `${total - cards.length} of ${total} decided.`}
@@ -259,7 +258,7 @@ function Day({ current, onEnd, onReport }: DayProps) {
                   entry={entry}
                   content={content}
                   look="paper"
-                  kicker={`Decided: ${result.title}`}
+                  kicker={`The talking point: ${result.title}`}
                   empty="Nothing moved."
                   className="result result--fresh"
                   takeFocus
@@ -287,7 +286,7 @@ function Day({ current, onEnd, onReport }: DayProps) {
           })}
         </div>
 
-        <Sheet kicker="When you are done" title="Close the box" className="desk__close">
+        <Sheet title="End the day" className="desk__close">
           <p>{closingLine(total, cards.length, current.electionIn)}</p>
           <Button look="accent" wide onClick={() => (undecided.length > 0 ? setAsking(true) : onEnd())}>
             End the day
@@ -297,7 +296,7 @@ function Day({ current, onEnd, onReport }: DayProps) {
 
       <Dialog
         open={asking}
-        title="End the day with papers on the desk?"
+        title="End the day with issues still open?"
         onClose={() => setAsking(false)}
         actions={
           <>

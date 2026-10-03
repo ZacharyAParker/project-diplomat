@@ -23,6 +23,9 @@ export interface FrontPageProps {
   after?: ReactNode
 }
 
+// Paragraphs of the lead story printed before the rest is folded away.
+const SHOWN = 2
+
 // The morning paper. It reports the day before in sentences, and never prints a figure
 // for a movement.
 export function FrontPage({ page, capital, after }: FrontPageProps) {
@@ -39,14 +42,21 @@ export function FrontPage({ page, capital, after }: FrontPageProps) {
       </header>
 
       <div className="paper__lead">
-        <p className="label paper__kicker">{lead.kicker}</p>
         <h3 className="paper__headline">{lead.headline}</h3>
         {lead.text && <p className="paper__standfirst">{lead.text}</p>}
         {lead.paragraphs.length > 0 && (
           <div className="paper__body">
-            {lead.paragraphs.map((paragraph, i) => (
+            {lead.paragraphs.slice(0, SHOWN).map((paragraph, i) => (
               <p key={i}>{paragraph}</p>
             ))}
+            {lead.paragraphs.length > SHOWN && (
+              <details className="paper__rest">
+                <summary>The full story</summary>
+                {lead.paragraphs.slice(SHOWN).map((paragraph, i) => (
+                  <p key={i}>{paragraph}</p>
+                ))}
+              </details>
+            )}
           </div>
         )}
         {after}

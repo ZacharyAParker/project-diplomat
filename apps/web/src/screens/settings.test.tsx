@@ -70,7 +70,7 @@ describe('export, delete and import', () => {
     await heading('Your nations')
     expect(screen.getByText('Imported Vesland.')).toBeDefined()
     await user.click(screen.getByRole('link', { name: 'Open Vesland' }))
-    await heading('The desk')
+    await heading('Issues')
     expect(store.get().nation).toEqual(before)
     expect(screen.getByText('Day 3')).toBeDefined()
   })
