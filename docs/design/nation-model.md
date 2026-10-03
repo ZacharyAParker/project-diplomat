@@ -232,6 +232,14 @@ name, a leader, what it is short of, what it has to spare, and a **standing** wi
   runs its course or the other side walks out, which it does if standing falls below the treaty's
   limit (usually -30). A walk-out costs 2 legitimacy.
 
+## The sandbox
+
+A page of levers the rules keep out of reach: set any figure, any faction's approval, relations
+with any neighbour, any law; put any issue on today's desk; start any crisis. Each change is
+written into the record as a `sandbox` entry and sets `sandbox: true` on the nation for good,
+which every page then shows. Skipping days is the one thing on the page that does not mark the
+nation, because it is only ending days without deciding anything.
+
 ## Not built yet
 
 Regional projects, offices, disputes and the census of comic rankings. Disputes are sketched in

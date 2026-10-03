@@ -109,7 +109,7 @@ that large.
 
 ## Text macros
 
-`{nation}`, `{capital}`, `{currency}`, `{demonym}`, `{leader}` (the title the player chose, such as
+`{nation}`, `{capital}`, `{currency}`, `{demonym}`, `{animal}`, `{motto}`, `{faith}`, `{leader}` (the title the player chose, such as
 Prime Minister; there is no macro for the leader's name because the leader has none), and
 `{minister:finance}` (any portfolio from `cabinet.yaml`), which becomes the title and name of
 whoever holds the job. A minister can be an advocate:
@@ -216,6 +216,19 @@ and three more effects:
 A standing change counts for the no-right-answer rule like anything else. Most of these dilemmas
 are in `abroad.yaml`. Pair the `abroad` selector with a `when` on the nation's own resources so
 the offer makes sense: nobody offers you gas you don't need.
+
+## Issues that name the nation
+
+Some issues settle part of the nation's identity: its national animal, motto, faith, capital,
+currency, demonym or the leader's title. Two pieces make them work.
+
+- An effect that sets the field: `{ identity: animal, to: red stag }`.
+- An option the player names themselves: `custom: { field: animal, label: "The national animal" }`.
+  The game shows a text box under that option, cleans what is typed, and sets the field to it.
+
+Gate them with `{ identity: animal, set: false }` so they stop once settled, give them
+`priority: 1` so they arrive on schedule, and use `{animal}`, `{motto}` or `{faith}` in the
+result to print the new name. The ones in the core pack are in `identity.yaml`.
 
 ## What the validator checks
 

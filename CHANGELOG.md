@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.5.0
+
+- Issues that settle who the nation is: a national animal, a motto, an official faith, a new
+  capital, a currency reform and a new title for the head of government. Each is a debate like
+  any other, and one position always lets you write the answer yourself. The nation page shows
+  what has been settled.
+- A sandbox for every nation: skip days, set any figure, law or relationship, call up any issue,
+  start any crisis. Anything but skipping days is written in the record and marks the nation as
+  sandboxed on every page, for good.
+- An admin page, locked with a password of your choosing, for looking after the browser the game
+  is played in: every nation listed, export them all, delete them all, and look through the pack.
+- Security: a Content Security Policy on the built page, security headers on the local server, a
+  size limit on imported saves, cleaning of every name a player types, and a write-up of all of it
+  in SECURITY.md.
+
 ## 0.4.0
 
 A new look, in the style of the nation games it descends from.
