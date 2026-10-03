@@ -1,0 +1,287 @@
+# The issues that settle what a nation is called, what it believes in and what it puts on
+# its coins. Each comes once, in its own time, and one option always lets the player
+# write the answer themselves.
+
+- id: national-animal
+  title: A Beast for the Coat of Arms
+  description: >-
+    The heralds report that {nation} is one of very few countries without a national animal,
+    which they describe as "an embarrassment at international dinners". A shortlist has been
+    drawn up, and three interested parties have been to see you about it.
+  tags: [culture]
+  when: { all: [{ day: { gte: 4 } }, { identity: animal, set: false }] }
+  priority: 1
+  options:
+    - id: stag
+      advocate: { name: Ewan Thorley, role: farmer and parish councillor }
+      speech: "The red stag. It lives on our hills, it fights for what it has, and it is very good on a flag."
+      effects:
+        - { identity: animal, to: red stag }
+        - { faction: rural, by: 4, why: "The countryside got its animal on the coat of arms." }
+        - { faction: youth, by: -2, why: "The young found the choice a little bit stately." }
+      headline: The red stag is chosen as the national animal
+      result: Stag antlers appear on the coins within the year, and on the hats of the national football team by the weekend.
+
+    - id: otter
+      advocate: { name: Dr Wren Calloway, role: ecologist }
+      speech: "The river otter. It came back to our rivers when we cleaned them, and it will leave again if we stop."
+      tags: [green]
+      effects:
+        - { identity: animal, to: river otter }
+        - { indicator: environment, by: 1, why: "The otter's rivers now have a national symbol to protect them." }
+        - { faction: business, by: -2, why: "The Chamber can see a planning objection with a face on it." }
+      headline: The river otter is chosen as the national animal
+      result: Every planning application near a river now includes a paragraph about otters. Some of them are true.
+
+    - id: bulldog
+      advocate: { name: General Hartley Voss, role: chief of the defence staff }
+      speech: "Something that does not let go. I have a short list. It has one animal on it."
+      tags: [hawkish]
+      effects:
+        - { identity: animal, to: bulldog }
+        - { faction: services, by: 4, why: "The forces got an animal they can put on a badge." }
+        - { faction: youth, by: -3, why: "The young think it is a choice their grandfathers would have made." }
+      headline: The bulldog is chosen as the national animal
+      result: The regimental mascot is promoted to sergeant. The bulldog breeders' association reports a surge in enquiries.
+
+    - id: own
+      advocate: { name: Kasia Dunmore, role: president of the students' union }
+      speech: "Why should three people with an interest decide? Name it yourself, and let the heralds catch up."
+      custom: { field: animal, label: "The national animal" }
+      effects:
+        - { indicator: legitimacy, by: 1, why: "A national symbol chosen without a committee was well received." }
+        - { faction: mandarins, by: -2, why: "The heralds had already printed the shortlist." }
+      headline: "{nation} chooses the {animal} as its national animal"
+      result: The heralds add the {animal} to the coat of arms after some research into what it looks like.
+
+- id: national-motto
+  title: Words to Live By, Preferably in Latin
+  description: >-
+    The new passports go to print next month and there is a space under the coat of arms for a
+    national motto. The printers would like to know what to put in it, and would prefer it to be
+    short.
+  tags: [culture]
+  when: { all: [{ day: { gte: 8 } }, { identity: motto, set: false }] }
+  priority: 1
+  options:
+    - id: steady
+      advocate: { name: Dame Philippa Wace, role: cabinet secretary }
+      speech: "Something no one could object to. I have drafted forty. They are all, I promise, entirely unobjectionable."
+      effects:
+        - { identity: motto, to: "Steady as she goes" }
+        - { faction: mandarins, by: 3, why: "The civil service wrote the motto and is quietly proud of it." }
+        - { faction: youth, by: -2, why: "The young read it as a motto for doing nothing." }
+      headline: '"Steady as she goes" chosen as the national motto'
+      result: The motto is printed on every passport, and quoted back at the government at every opportunity.
+
+    - id: liberty
+      advocate: { name: Rufus Hale, role: civil liberties barrister }
+      speech: "Put the thing we are meant to be for on the front of the passport. Then it is harder to forget."
+      tags: [privacy]
+      effects:
+        - { identity: motto, to: "Free to speak, free to leave" }
+        - { faction: youth, by: 3, why: "The young liked a motto that promised them something." }
+        - { faction: services, by: -2, why: "The police note that the motto now has a legal opinion attached." }
+      headline: '"Free to speak, free to leave" chosen as the national motto'
+      result: Within a week a court case cites the motto. Within a month the government regrets it.
+
+    - id: work
+      advocate: { name: Sir Anselm Roke, role: chair of the Chamber }
+      speech: "We are a country that earns its living. Say so. Investors read passports too."
+      tags: [growth]
+      effects:
+        - { identity: motto, to: "Industry and honest dealing" }
+        - { faction: business, by: 3, why: "The Chamber got a motto that sounds like a company report." }
+        - { faction: labour, by: -2, why: "The unions ask whose industry and whose honesty." }
+      headline: '"Industry and honest dealing" chosen as the national motto'
+      result: The motto appears on the Chamber's letterhead the following morning, without permission.
+
+    - id: own
+      advocate: { name: Jory Pell, role: organiser of the Four Day Campaign }
+      speech: "Write it yourself. Nobody remembers a motto written by a committee, and nobody forgives one either."
+      custom: { field: motto, label: "The national motto" }
+      effects:
+        - { indicator: legitimacy, by: 1, why: "A motto that sounds like a person wrote it was well received." }
+        - { faction: mandarins, by: -2, why: "Forty drafted mottoes went unused." }
+      headline: "{nation} adopts a national motto: {motto}"
+      result: The printers set it under the coat of arms and ask, politely, whether it will be changing again.
+
+- id: national-faith
+  title: In Whom We Trust, If Anyone
+  description: >-
+    The constitution has a blank where an older country would name its established church. The
+    Council of Congregations would like it filled. The Secular Society would like it left blank
+    and laminated.
+  tags: [religion]
+  when: { all: [{ day: { gte: 15 } }, { identity: faith, set: false }] }
+  priority: 1
+  options:
+    - id: established
+      advocate: { name: Bishop Ottoline Faye, role: chair of the Council of Congregations }
+      speech: "Name the old church, as every generation before this one would have. It asks for nothing but recognition, and a seat at the coronation."
+      tags: [paternalist]
+      effects:
+        - { identity: faith, to: The Old Church }
+        - { faction: faithful, by: 7, why: "The Congregations are named in the constitution." }
+        - { faction: youth, by: -4, why: "The least religious generation on record now has an official church." }
+        - { indicator: liberty, by: -1, why: "Other faiths are now, constitutionally, the other faiths." }
+      headline: The Old Church becomes the established faith
+      result: The bishop is given a seat in the upper house and a parking space outside it, in that order of importance.
+
+    - id: secular
+      advocate: { name: Rufus Hale, role: civil liberties barrister }
+      speech: "Write nothing in the blank. A state that believes in nothing in particular can protect everyone who believes in something."
+      tags: [permissive]
+      effects:
+        - { identity: faith, to: none established }
+        - { indicator: liberty, by: 2, why: "No faith is favoured by the constitution over any other." }
+        - { faction: faithful, by: -5, why: "The Congregations were written out of a blank they had hoped to fill." }
+      headline: "{nation} declares itself a secular state"
+      result: The Secular Society holds a celebration. Attendance is low, since it was held on a Sunday morning.
+
+    - id: own
+      advocate: { name: Mabel Thwaite, role: secretary of the Pensioners' Convention }
+      speech: "People believe all sorts. Put down whatever it is this country actually believes in, and see who argues."
+      custom: { field: faith, label: "The national faith" }
+      effects:
+        - { indicator: legitimacy, by: 1, why: "The country's faith was named in its own words." }
+        - { faction: faithful, by: -2, why: "The Congregations had expected to be asked." }
+      headline: "{nation} names its national faith: {faith}"
+      result: The constitution is amended in a ceremony attended by three bishops, a humanist and a man from the press who came for the buffet.
+
+- id: new-capital
+  title: The Seat of Government, Unseated
+  description: >-
+    {capital} is overcrowded, flood-prone and so expensive that junior ministers commute two hours
+    each way. A commission has recommended building a new capital from scratch. The commission was
+    chaired by an architect.
+  tags: [government, regions]
+  when: { all: [{ day: { gte: 30 } }, { not: { flag: capital_question_settled } }] }
+  priority: 1
+  options:
+    - id: dunmoor
+      advocate: { name: Councillor Des Marrow, role: leader of Harrowgate council }
+      speech: "Move it north, to Dunmoor. The land is cheap, the people are willing, and it would do the country good to see where it actually lives."
+      tags: [spending]
+      effects:
+        - { identity: capital, to: Dunmoor }
+        - { flag: capital_question_settled }
+        - { indicator: fiscal, by: -4, why: "Moving the whole government north is the most expensive removal in the country's history." }
+        - { indicator: inequality, by: -3, why: "Government money and jobs have landed in a town that had neither." }
+        - { faction: mandarins, by: -10, why: "The civil service has been told to pack." }
+        - { faction: rural, by: 7, why: "The provinces finally have the capital." }
+      headline: Seat of government moves to Dunmoor
+      result: The first cabinet meeting in the new capital is held in a school gymnasium. The basketball hoops stay.
+
+    - id: stay
+      advocate: { name: Dame Philippa Wace, role: cabinet secretary }
+      speech: "A capital is not a building. It is four centuries of people knowing where to find each other. Fix the trains instead."
+      tags: []
+      effects:
+        - { flag: capital_question_settled }
+        - { indicator: administration, by: 2, why: "Nothing was moved, so nothing was lost in the move." }
+        - { faction: mandarins, by: 4, why: "The civil service stays where its lunches are." }
+        - { faction: rural, by: -4, why: "The provinces were told the capital is fine as it is, from the capital." }
+      headline: "{capital} stays the capital"
+      result: The commission's report is filed. The architect's model of the new capital is put on display in the old one.
+
+    - id: own
+      advocate: { name: Garrick Hume, role: director of the Homebuilders' Federation }
+      speech: "Build a new one, on an empty field, and give it whatever name you like. We have several fields. We are attached to none of them."
+      custom: { field: capital, label: "The new capital" }
+      tags: [spending, growth]
+      effects:
+        - { flag: capital_question_settled }
+        - { indicator: fiscal, by: -5, why: "A capital built from nothing costs everything." }
+        - { indicator: capacity, by: 4, why: "Building a city from scratch keeps half the construction industry in work." }
+        - { faction: business, by: 5, why: "The builders have the contract of the century." }
+        - { faction: mandarins, by: -8, why: "The civil service is moving to a field." }
+      headline: "{nation} will build a new capital: {capital}"
+      result: "{capital} is a field, a sign and a model under glass. The sign is very good."
+
+- id: currency-reform
+  title: Small Change
+  description: >-
+    The central bank wants to issue new notes and coins. The old ones are worn, forged and
+    illustrated with a monarch nobody can name. While it is reprinting everything, the Governor
+    asks, should the money keep its name?
+  tags: [economy]
+  when: { day: { gte: 40 } }
+  priority: 1
+  options:
+    - id: keep
+      advocate: { name: Governor Helene Strand, role: governor of the central bank }
+      speech: "Reprint the notes and keep the name. People trust money they recognise. That is most of what money is."
+      tags: []
+      effects:
+        - { indicator: fiscal, by: -1, why: "New notes and coins have to be printed and struck." }
+        - { indicator: capacity, by: 1, why: "Forgers lost the old notes they were best at." }
+        - { faction: grey, by: 2, why: "Pensioners kept the name they have counted in all their lives." }
+      headline: New notes for the {currency}, same name
+      result: The new notes show a famous scientist, a bridge and a watermark nobody has yet managed to see.
+
+    - id: rename
+      advocate: { name: Lorne Abbasi, role: Treasury official }
+      speech: "Call it the crown. It sounds solid. Money is mostly a matter of sounding solid."
+      tags: []
+      effects:
+        - { identity: currency, to: crown }
+        - { indicator: fiscal, by: -2, why: "New notes, new coins and a new name on every price tag." }
+        - { faction: business, by: 2, why: "The Chamber likes a currency that sounds like it means business." }
+        - { faction: grey, by: -4, why: "Pensioners are converting every price back into the old money in their heads." }
+      headline: "{nation} renames its currency the crown"
+      result: For a year every price is printed twice. For ten years pensioners quote the old one.
+
+    - id: own
+      advocate: { name: Kasia Dunmore, role: president of the students' union }
+      speech: "If we are changing it, let us name it after something we actually like."
+      custom: { field: currency, label: "The new currency" }
+      tags: []
+      effects:
+        - { indicator: fiscal, by: -2, why: "A new currency means new notes, new coins and new tills." }
+        - { indicator: legitimacy, by: 1, why: "A name people chose went down better than one the bank chose." }
+        - { faction: grey, by: -3, why: "Pensioners have to learn a new word for money." }
+      headline: "{nation}'s money is now the {currency}"
+      result: The first {currency} note is framed in the central bank. The second is spent within the hour.
+
+- id: leader-title
+  title: What Shall We Call You
+  description: >-
+    The protocol office says the {leader}'s title causes confusion abroad, where it is taken to
+    mean several different things, two of them military. It recommends a change while there is
+    still time to reprint the letterhead.
+  tags: [government]
+  when: { day: { gte: 60 } }
+  priority: 1
+  options:
+    - id: keep
+      advocate: { name: Dame Philippa Wace, role: cabinet secretary }
+      speech: "Keep it. A title is like a coat. It fits better the longer it is worn."
+      tags: []
+      effects:
+        - { faction: mandarins, by: 2, why: "The civil service was spared a new letterhead." }
+        - { minister: foreign, by: -3, why: "The Foreign Minister will go on explaining the title at every summit." }
+      headline: "The {leader} keeps the title"
+      result: The protocol office prints a small card explaining the title, to be handed out at summits.
+
+    - id: first-citizen
+      advocate: { name: Kasia Dunmore, role: president of the students' union }
+      speech: "First Citizen. It says you are one of us, slightly in front."
+      tags: [permissive]
+      effects:
+        - { identity: leaderTitle, to: First Citizen }
+        - { faction: youth, by: 3, why: "The young liked a title without a crown in it." }
+        - { faction: grey, by: -3, why: "Older voters think it sounds like a revolution." }
+      headline: "The head of government is now the First Citizen"
+      result: The First Citizen is introduced at the next summit and asked, by two other leaders, what happened to the second.
+
+    - id: own
+      advocate: { name: "{minister:foreign}", role: speaking in cabinet }
+      speech: "Choose something nobody can misunderstand. Then I can stop explaining it."
+      custom: { field: leaderTitle, label: "The new title" }
+      tags: []
+      effects:
+        - { minister: foreign, by: 4, why: "The Foreign Minister finally has a title that needs no card." }
+        - { faction: mandarins, by: -2, why: "Every letterhead in government has to be reprinted." }
+      headline: "The head of government is now the {leader}"
+      result: The new title is engraved on the door of the office. The engraver charges by the letter.
