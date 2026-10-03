@@ -211,7 +211,28 @@ What it cannot check is anything that needs the pack: whether the factions, poli
 situations named in the save exist. A save carries the id and version of its pack, and whether to
 play one from a different pack or pack version is for the caller to decide.
 
+## Other countries
+
+Five neighbours, defined in `packs/core/neighbours.yaml`. They are not simulated in full: each is a
+name, a leader, what it is short of, what it has to spare, and a **standing** with the nation from
+-100 to 100.
+
+- **Opinions.** Each neighbour notices one or two kinds of decision (option tags), whoever the
+  decision was about. Velsa likes `green` and dislikes `surveillance`; Ardune likes `pro_labour`.
+  A decision that carries one moves standing by 2 (at most 4 either way), with the neighbour's own
+  line in the paper.
+- **Resources.** Energy, food, capital, manufactured goods and workers. The pack has a rule for when
+  the nation is short of each and when it has some to spare (`resources.yaml`), worked out at the
+  start of every day. A dilemma can require `{ resource: energy, is: need }`.
+- **Dilemmas about another country.** A dilemma with `abroad` only comes up when a neighbour fits it
+  (has energy to spare, wants workers, has standing of 20 or more, has or hasn't a given treaty).
+  The engine picks one that fits, and the dilemma's text, effects and later consequences all apply
+  to that one.
+- **Treaties.** Five kinds (`treaties.yaml`). Once signed, a treaty pays out every week until it
+  runs its course or the other side walks out, which it does if standing falls below the treaty's
+  limit (usually -30). A walk-out costs 2 legitimacy.
+
 ## Not built yet
 
-Other nations, treaties, dependencies, regional projects, disputes, the census of comic rankings.
-Disputes are sketched in [disputes.md](disputes.md).
+Regional projects, offices, disputes and the census of comic rankings. Disputes are sketched in
+[disputes.md](disputes.md) and still need testing on paper.

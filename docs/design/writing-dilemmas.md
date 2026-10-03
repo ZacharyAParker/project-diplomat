@@ -195,6 +195,28 @@ label under the nation's name, so it does not have to follow "is a" and should n
 `pnpm simulate 90 --runs 200` prints how often each class is held at the start and at the end,
 and lists any that nobody reached.
 
+## Dilemmas about another country
+
+Add `abroad` to make a dilemma about a neighbour. It says which neighbours fit:
+
+```yaml
+abroad: { supplies: energy, noTreaty: energy-supply }   # has energy to spare, no energy deal yet
+abroad: { wants: workers }                              # is short of workers
+abroad: { standing: { gte: 20 }, noTreaty: trade-agreement }
+abroad: { treaty: energy-supply }                       # already has an energy deal with us
+```
+
+Inside such a dilemma you can use `{neighbour}`, `{neighbour:leader}` and `{neighbour:demonym}`,
+and three more effects:
+
+- `{ standing: 8, why: "..." }` moves relations with that neighbour. The limit is 15.
+- `{ treaty: energy-supply }` signs a treaty with it, optionally `days: 60` for one that runs out.
+- `{ endTreaty: energy-supply }` ends one.
+
+A standing change counts for the no-right-answer rule like anything else. Most of these dilemmas
+are in `abroad.yaml`. Pair the `abroad` selector with a `when` on the nation's own resources so
+the offer makes sense: nobody offers you gas you don't need.
+
 ## What the validator checks
 
 Structure, unknown factions/policies/portfolios/traits, effect limits, the no-right-answer rule,

@@ -1,5 +1,25 @@
 # Changelog
 
+## 0.3.0
+
+Neighbours.
+
+- Five countries round about: Eskerland, Morvaine, Caravel, Velsa and Ardune. Each has a leader,
+  something it is short of, something it has to spare, and a standing with you from hostile to
+  close.
+- They read the papers. Each notices one or two kinds of decision, whoever it was about, and
+  relations move a little when you make one.
+- Thirteen dilemmas about other countries: energy and grain offers when you are short, buyers when
+  you have a surplus, investment when the debt is high, trade talks, state visits, spies, an
+  extradition request, a polluted river, and two small embarrassments.
+- Five kinds of treaty. Once signed they pay out weekly until they run their course, or until the
+  other side walks out because relations have collapsed.
+- The nation page has an "Abroad" section: what you are short of, what you have to spare, and where
+  you stand with each neighbour.
+- Saves from 0.1 and 0.2 load, and pick up the neighbours the next time a day ends.
+
+Still to come: regional projects and offices, and disputes, which need testing on paper first.
+
 ## 0.2.0
 
 The gaps 0.1.0 admitted to, mostly.

@@ -1,6 +1,6 @@
 # Project Diplomat: blueprint
 
-Last updated 2026-10-02. Version 0.2.0 is out: the single-player game, in the browser. "Project Diplomat" is a codename until I pick a real name
+Last updated 2026-10-02. Version 0.3.0 is out: the single-player game, in the browser, with neighbours. "Project Diplomat" is a codename until I pick a real name
 (section 12).
 
 This is the plan. The reading behind it is in `research/`:
