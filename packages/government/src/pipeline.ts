@@ -3,7 +3,7 @@
 // and owns the Archive. Nothing here is mutated in place; each function returns new objects,
 // and fileDocket and fileEvening fold them into a GovernmentState for the caller to save.
 
-import type { Content, Effect, GameState, TimelineEntry } from '@diplomat/engine'
+import { worldLines, type Content, type Effect, type GameState, type TimelineEntry } from '@diplomat/engine'
 import { bound, spend } from './bounds.ts'
 import { brief, mood, petitionBrief } from './briefs.ts'
 import { binding, carried, check, latestReview, nextSteps, standing as standingOf, verdictOf } from './rules.ts'
@@ -579,6 +579,7 @@ export async function runEvening(ctx: Context, todaysDecisions: TaskInput['world
     brief: b,
     decisions: todaysDecisions,
     timeline: state.timeline.filter((e) => e.day === day).map((e) => e.headline),
+    abroad: worldLines(state, ctx.content),
     press: inst.press,
     bounds: DEFAULT_BOUNDS,
   })

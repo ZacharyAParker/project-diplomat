@@ -58,6 +58,7 @@ export class Ai {
         backend: s.backend,
         ...(s.apiKey ? { apiKey: s.apiKey } : {}),
         ...(Object.keys(s.models).length ? { models: s.models } : {}),
+        ...(s.worldTier !== 'standard' ? { tiers: { 'world.nations': s.worldTier } } : {}),
         ...(s.command ? { command: s.command } : {}),
       })
       this.made = this.settings.version

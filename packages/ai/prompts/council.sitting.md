@@ -83,7 +83,7 @@ working directory is the nation's archive folder. You may read your own past rec
 you sit; you cannot and must not write anything. The layout is
 `archive/<series>/<seq>-<slug>.md`, with your working directory as `archive/`. Series:
 `petition`, `hansard`, `court`, `advice`, `papers`, `words`, `almanac`, `bills`, `letters`,
-`questions`, `factbook`, `law`, `lore`, `hearing`, `other`. Each file is front matter (`id`,
+`questions`, `factbook`, `law`, `lore`, `hearing`, `world`, `other`. Each file is front matter (`id`,
 `series`, `title`, `day`, `date`, `issuer`, `kind`, `refs`, `data`) then Markdown; higher
 numbers are newer. A council's sittings are filed under `hansard` when it sits as a house and
 `court` when it rules; read your own recent ones, and `law` and `words` where they bear.

@@ -482,6 +482,35 @@ export function validate<T extends Task>(task: T, input: TaskInput[T], output: u
     case 'bill.sitting':
       value = bills(p, input as TaskInput['bill.sitting'], o)
       break
+    case 'world.nations': {
+      const i = input as TaskInput['world.nations']
+      const seen = new Set<string>()
+      const choices = list(p, o['choices'], 'choices').map((raw, k) => {
+        const r = object(p, raw, `choices[${k}]`)
+        const nation = text(p, r['nation'], `choices[${k}].nation`) ?? ''
+        const n = i.nations.find((x) => x.id === nation)
+        if (!n) p.add(`choices[${k}].nation`, `${nation} is not one of the nations given`)
+        else if (seen.has(nation)) p.add(`choices[${k}].nation`, `${nation} is chosen for twice`)
+        seen.add(nation)
+        const move = text(p, r['move'], `choices[${k}].move`) ?? ''
+        if (n && !n.moves.some((m) => m.id === move)) p.add(`choices[${k}].move`, `${move} is not one of ${nation}'s moves`)
+        const note = text(p, r['note'], `choices[${k}].note`) ?? ''
+        if (note.length > 500) p.add(`choices[${k}].note`, 'is longer than 500 characters')
+        return { nation, move, note }
+      })
+      for (const n of i.nations) if (!seen.has(n.id)) p.add('choices', `${n.id} has no choice`)
+      value = { choices }
+      break
+    }
+    case 'nation.move': {
+      const i = input as TaskInput['nation.move']
+      const move = text(p, o['move'], 'move') ?? ''
+      if (!i.moves.some((m) => m.id === move)) p.add('move', `${move} is not one of the moves given`)
+      const note = text(p, o['note'], 'note') ?? ''
+      if (note.length > 800) p.add('note', 'is longer than 800 characters')
+      value = { move, note }
+      break
+    }
     default:
       p.add('task', `${String(task)} is not a task`)
   }

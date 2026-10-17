@@ -2,7 +2,7 @@
 // prompt per task. The server makes one provider from the player's settings and calls
 // run(task, input); what comes back is unvalidated JSON for validate.ts to check.
 
-import type { Provider, ProviderStatus, Tier } from '@diplomat/government'
+import type { Provider, ProviderStatus, Task, Tier } from '@diplomat/government'
 import { anthropicProvider } from './providers/anthropic.ts'
 import { claudeCliProvider } from './providers/claude-cli.ts'
 import { noneProvider } from './providers/none.ts'
@@ -36,17 +36,20 @@ export interface ProviderSettings {
   backend: Backend
   apiKey?: string
   models?: Partial<Record<Tier, string>>
+  // Tasks moved off their usual tier, from the settings.
+  tiers?: Partial<Record<Task, Tier>>
   command?: string
 }
 
 export function createProvider(settings: ProviderSettings): Provider {
   switch (settings.backend) {
     case 'anthropic':
-      return anthropicProvider({ apiKey: settings.apiKey ?? '', ...(settings.models ? { models: settings.models } : {}) })
+      return anthropicProvider({ apiKey: settings.apiKey ?? '', ...(settings.models ? { models: settings.models } : {}), ...(settings.tiers ? { tiers: settings.tiers } : {}) })
     case 'claude-cli':
       return claudeCliProvider({
         ...(settings.command ? { command: settings.command } : {}),
         ...(settings.models ? { models: settings.models } : {}),
+        ...(settings.tiers ? { tiers: settings.tiers } : {}),
       })
     case 'none':
       return noneProvider(settings.models)

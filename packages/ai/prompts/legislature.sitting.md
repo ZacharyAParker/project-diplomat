@@ -112,7 +112,7 @@ you write; you cannot and must not write anything. The layout is
 `archive/<series>/<seq>-<slug>.md`, with your working directory as `archive/`, so paths are
 `hansard/00012-petition-17-first-sitting.md` and so on. Series: `petition`, `hansard`,
 `court`, `advice`, `papers`, `words`, `almanac`, `bills`, `letters`, `questions`,
-`factbook`, `law`, `lore`, `hearing`, `other`. Each file is front matter (`id`, `series`,
+`factbook`, `law`, `lore`, `hearing`, `world`, `other`. Each file is front matter (`id`, `series`,
 `title`, `day`, `date`, `issuer`, `kind`, `refs`, `data`) then Markdown; higher numbers are
 newer. For a sitting, read your recent `hansard` sittings first (how members spoke and voted,
 what they promised), then anything in `court`, `words` or `law` that bears on the petition.

@@ -132,6 +132,14 @@ export function branchOf(task: string, input: unknown): string | null {
     case 'world.day':
     case 'letters.draft':
       return 'world'
+    // Every nation that does not matter to the player shares one conversation; one that does
+    // keeps its own, and remembers its grudges.
+    case 'world.nations':
+      return 'world-nations'
+    case 'nation.move': {
+      const id = (input as { nation?: { id?: unknown } } | null)?.nation?.id
+      return typeof id === 'string' ? `foreign:${id}` : null
+    }
     default:
       return null
   }

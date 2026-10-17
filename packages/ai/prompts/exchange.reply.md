@@ -69,7 +69,7 @@ working directory is the nation's archive folder. You may read your own past rec
 you answer; you cannot and must not write anything. The layout is
 `archive/<series>/<seq>-<slug>.md`, with your working directory as `archive/`. Series:
 `petition`, `hansard`, `court`, `advice`, `papers`, `words`, `almanac`, `bills`, `letters`,
-`questions`, `factbook`, `law`, `lore`, `hearing`, `other`. Each file is front matter (`id`,
+`questions`, `factbook`, `law`, `lore`, `hearing`, `world`, `other`. Each file is front matter (`id`,
 `series`, `title`, `day`, `date`, `issuer`, `kind`, `refs`, `data`) then Markdown; higher
 numbers are newer. `own.document` is the id of your earlier position: its file is in the
 series named by the id's prefix (`court-00009` is under `court/`, numbered `00009`). Read it

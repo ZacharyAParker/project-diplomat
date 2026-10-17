@@ -181,7 +181,7 @@ You may also have Read, Grep and Glob on the nation's folder, `data/nations/<id>
 - `archive/<series>/<seq>-<slug>.md`: the in-world record, one document per file, front matter
   (`id`, `series`, `title`, `day`, `date`, `issuer`, `kind`, `refs`, `data`) then Markdown.
   Series: `petition`, `hansard`, `court`, `advice`, `papers`, `words`, `almanac`, `bills`,
-  `letters`, `questions`, `factbook`, `law`, `lore`, `hearing`, `other`. Higher numbers are
+  `letters`, `questions`, `factbook`, `law`, `lore`, `hearing`, `world`, `other`. Higher numbers are
   newer.
 - `ooc/`: out of character and never seen by a branch: `log.jsonl` (every cheat),
   `director.json` (your own session) and `sessions.json` (each branch's session id).

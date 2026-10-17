@@ -19,6 +19,8 @@ import {
   extractJson,
   minutes,
   modelFor,
+  tierOf,
+  type TierOverrides,
   resolveModels,
   sleep,
   userMessage,
@@ -36,6 +38,7 @@ const FALLBACK_MODELS = new Set(['claude-opus-5-5', 'claude-sonnet-5-5', 'claude
 export interface AnthropicSettings {
   apiKey: string
   models?: Partial<Record<Tier, string>>
+  tiers?: TierOverrides
   fetch?: typeof fetch
   baseUrl?: string
   // Ask the API to re-run a refused request on its recommended fallback model. On by default.
@@ -68,11 +71,11 @@ export interface BuiltRequest {
 export function buildRequest<T extends Task>(
   task: T,
   input: TaskInput[T],
-  settings: Pick<AnthropicSettings, 'apiKey' | 'models' | 'baseUrl' | 'fallbacks'>,
+  settings: Pick<AnthropicSettings, 'apiKey' | 'models' | 'baseUrl' | 'fallbacks' | 'tiers'>,
 ): BuiltRequest {
   const models = resolveModels(settings.models)
-  const model = modelFor(task, models)
-  const tier = TASK_TIERS[task]
+  const model = modelFor(task, models, settings.tiers)
+  const tier = tierOf(task, settings.tiers)
   const name = toolName(task)
   const { json, instruction } = userMessage(
     task,
@@ -346,7 +349,7 @@ export function anthropicProvider(settings: AnthropicSettings): AnthropicProvide
 
     async run<T extends Task>(task: T, input: TaskInput[T], options: { archivePath?: string; signal?: AbortSignal } = {}) {
       if (!hasKey) throw new AiError('auth', 'No Claude API key is set. Add one in Settings.')
-      const tier = TASK_TIERS[task]
+      const tier = tierOf(task, settings.tiers)
       const limit = settings.timeouts?.[tier] ?? TIMEOUTS[tier]
       const { signal, timedOut } = deadline(limit, options.signal)
       const request = buildRequest(task, input, settings)

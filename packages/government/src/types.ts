@@ -517,6 +517,7 @@ export const SERIES = [
   'law', // the constitution, the charter, statutes in force
   'lore', // history, geography, people, economy, canon
   'hearing',
+  'world', // the world week: what the other nations did, wars, the Assembly of Nations
   'other',
 ] as const
 
@@ -559,6 +560,8 @@ export const TASKS = [
   'letters.draft', // letters to the Founder from the public, and the office's draft replies
   'exchange.reply', // a body answering a remonstrance, reference, address or message
   'bill.sitting', // the legislature's own business: bills, readings, divisions
+  'world.nations', // the world week: every nation that does not matter to the player, in one call
+  'nation.move', // the world week: one nation that matters to the player, on its own session
 ] as const
 
 export type Task = (typeof TASKS)[number]
@@ -578,6 +581,9 @@ export const TASK_TIERS: Record<Task, Tier> = {
   'letters.draft': 'bulk',
   'exchange.reply': 'standard',
   'bill.sitting': 'standard',
+  // Sonnet by default, so fifteen nations keep fifteen voices. Settings can drop it to bulk.
+  'world.nations': 'standard',
+  'nation.move': 'standard',
 }
 
 // What every task is given. Everything a model reads about the nation comes through here,
@@ -702,6 +708,8 @@ export interface TaskInput {
     // What the government actually did today and what moved, as the record shows.
     decisions: { title: string; course: string; result: string; changes: string[] }[]
     timeline: string[]
+    // The world beyond the borders as it stands, in lines (world.ts worldLines).
+    abroad?: string[]
     press: Press[]
     bounds: EffectBounds
   }
@@ -718,6 +726,35 @@ export interface TaskInput {
     barred?: Course[]
   }
   'bill.sitting': { brief: Brief; body: Body; bills: Bill[]; bounds: EffectBounds }
+  'world.nations': {
+    brief: Brief
+    // The state of the world in a few lines: wars, pacts, sanctions, the Assembly.
+    world: string[]
+    nations: (ForeignBrief & { moves: ForeignMove[] })[]
+  }
+  'nation.move': { brief: Brief; world: string[]; nation: ForeignBrief; moves: ForeignMove[] }
+}
+
+// One foreign nation as its player sees it.
+export interface ForeignBrief {
+  id: string
+  name: string
+  leader: string
+  form: string
+  description: string
+  // In words: "ambitious, quick to anger, loyal to friends, tight-fisted".
+  temperament: string
+  // Its strength, wealth, friends, enemies and wars, as world.ts tells it.
+  lines: string[]
+  // What it did and had done to it lately, newest last.
+  memory: string[]
+}
+
+// A move the planner allows, best first. A model may only ever choose one of these.
+export interface ForeignMove {
+  id: string
+  description: string
+  because: string
 }
 
 export interface TaskOutput {
@@ -766,6 +803,8 @@ export interface TaskOutput {
     bills: { number?: number; title: string; moved: string; summary: string; stage: Bill['stage']; division?: { reading: string; aye: number; no: number; abstain: number }; effects?: Effect[] }[]
     hansard: string
   }
+  'world.nations': { choices: { nation: string; move: string; note: string }[] }
+  'nation.move': { move: string; note: string }
 }
 
 // ---------------------------------------------------------------------------------------

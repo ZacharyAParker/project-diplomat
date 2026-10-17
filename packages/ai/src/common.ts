@@ -18,7 +18,10 @@ export function resolveModels(models?: Partial<Record<Tier, string>>): Record<Ti
   return out
 }
 
-export const modelFor = (task: Task, models: Record<Tier, string>): string => models[TASK_TIERS[task]]
+// A task's tier, unless the settings move it: the world's shared session can run on bulk.
+export type TierOverrides = Partial<Record<Task, Tier>>
+export const tierOf = (task: Task, tiers?: TierOverrides): Tier => tiers?.[task] ?? TASK_TIERS[task]
+export const modelFor = (task: Task, models: Record<Tier, string>, tiers?: TierOverrides): string => models[tierOf(task, tiers)]
 
 // Output budget per task. Thinking counts against it too, so it is generous: a reply cut off
 // at the limit is thrown away, which costs more than the unused tokens would have.
@@ -35,6 +38,8 @@ export const MAX_TOKENS: Readonly<Record<Task, number>> = {
   'letters.draft': 12000,
   'exchange.reply': 16000,
   'bill.sitting': 20000,
+  'world.nations': 16000,
+  'nation.move': 8000,
 }
 
 // How long a call may take before it is abandoned, by tier.

@@ -221,6 +221,29 @@ const SCHEMAS: Record<Exclude<Task, 'council.sitting'>, JsonSchema> & { 'council
     },
     ['bills', 'hansard'],
   ),
+  'world.nations': obj(
+    {
+      choices: arr(
+        obj(
+          {
+            nation: str('The nation id as given.'),
+            move: str("One of that nation's move ids, exactly as given."),
+            note: str("One to three sentences in the nation's own voice: what it says, or tells its own people, about the move."),
+          },
+          ['nation', 'move', 'note'],
+        ),
+        'One choice for every nation given, no more and no fewer.',
+      ),
+    },
+    ['choices'],
+  ),
+  'nation.move': obj(
+    {
+      move: str('One of the move ids, exactly as given.'),
+      note: str("A short paragraph in the nation's own voice: the note it sends, or what its leader says."),
+    },
+    ['move', 'note'],
+  ),
 }
 
 export const TASK_SCHEMAS: Readonly<Record<Task, JsonSchema>> = SCHEMAS

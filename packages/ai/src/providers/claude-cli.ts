@@ -29,6 +29,8 @@ import {
   extractJson,
   minutes,
   modelFor,
+  tierOf,
+  type TierOverrides,
   resolveModels,
   userMessage,
 } from '../common.ts'
@@ -40,6 +42,7 @@ export type SpawnFn = (command: string, args: readonly string[], options: SpawnO
 export interface ClaudeCliSettings {
   command?: string
   models?: Partial<Record<Tier, string>>
+  tiers?: TierOverrides
   spawn?: SpawnFn
   // Per tier, in milliseconds. Strategic tasks get ten minutes by default.
   timeouts?: Partial<Record<Tier, number>>
@@ -169,18 +172,18 @@ export interface CliCall {
 export function buildCall<T extends Task>(
   task: T,
   input: TaskInput[T],
-  settings: Pick<ClaudeCliSettings, 'models' | 'jsonSchema' | 'env'> = {},
+  settings: Pick<ClaudeCliSettings, 'models' | 'jsonSchema' | 'env' | 'tiers'> = {},
   options: { archivePath?: string; session?: BranchSession } = {},
 ): CliCall {
   const models = resolveModels(settings.models)
   const archive = archivePathOf(input, options)
-  const tier = TASK_TIERS[task]
+  const tier = tierOf(task, settings.tiers)
   const args = [
     '-p',
     '--output-format',
     'json',
     '--model',
-    modelFor(task, models),
+    modelFor(task, models, settings.tiers),
     '--effort',
     EFFORT[tier],
     '--append-system-prompt',
@@ -410,7 +413,7 @@ export function claudeCliProvider(settings: ClaudeCliSettings = {}): ClaudeCliPr
     // With no archive to read, run in an empty folder the game owns.
     const scratch = call.cwd ? undefined : mkdtempSync(join(tmpdir(), 'diplomat-ai-'))
     try {
-      const timeoutMs = settings.timeouts?.[TASK_TIERS[task]] ?? TIMEOUTS[TASK_TIERS[task]]
+      const timeoutMs = settings.timeouts?.[tierOf(task, settings.tiers)] ?? TIMEOUTS[tierOf(task, settings.tiers)]
       const ran = await runChild(spawn, target, call.args, {
         cwd: call.cwd ?? scratch,
         env: call.env,

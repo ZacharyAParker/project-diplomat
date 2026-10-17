@@ -18,6 +18,9 @@ export interface Settings {
   backend: Backend
   models: Partial<Record<Tier, string>>
   minorsThroughBodies: boolean
+  // The shared session that plays every nation not important to the player each week:
+  // standard (Sonnet) by default, or bulk (Haiku) if a busy world makes it slow or costly.
+  worldTier: WorldTier
   // The Director: the player's out-of-character partner, always on Claude Code.
   director: DirectorSettings
   apiKey?: string
@@ -31,8 +34,11 @@ export interface PublicSettings {
   apiKeySet: boolean
   models: Record<Tier, string>
   minorsThroughBodies: boolean
+  worldTier: WorldTier
   director: DirectorSettings
 }
+
+export type WorldTier = 'standard' | 'bulk'
 
 export interface DirectorSettings {
   enabled: boolean
@@ -41,7 +47,7 @@ export interface DirectorSettings {
 
 export const DEFAULT_DIRECTOR: DirectorSettings = { enabled: true, model: 'claude-opus-5-5' }
 
-const DEFAULTS: Settings = { backend: 'none', models: {}, minorsThroughBodies: false, director: { ...DEFAULT_DIRECTOR } }
+const DEFAULTS: Settings = { backend: 'none', models: {}, minorsThroughBodies: false, worldTier: 'standard', director: { ...DEFAULT_DIRECTOR } }
 
 const isObject = (v: unknown): v is Record<string, unknown> => typeof v === 'object' && v !== null && !Array.isArray(v)
 const MODEL = /^[A-Za-z0-9._:/@[\]-]{1,100}$/
@@ -71,6 +77,7 @@ export class SettingsStore {
         }
       }
       if (typeof raw['minorsThroughBodies'] === 'boolean') out.minorsThroughBodies = raw['minorsThroughBodies']
+      if (raw['worldTier'] === 'standard' || raw['worldTier'] === 'bulk') out.worldTier = raw['worldTier']
       if (isObject(raw['director'])) {
         if (typeof raw['director']['enabled'] === 'boolean') out.director.enabled = raw['director']['enabled']
         if (typeof raw['director']['model'] === 'string' && MODEL.test(raw['director']['model'])) out.director.model = raw['director']['model']
@@ -99,6 +106,7 @@ export class SettingsStore {
       apiKeySet: Boolean(this.value.apiKey),
       models: resolveModels(this.value.models),
       minorsThroughBodies: this.value.minorsThroughBodies,
+      worldTier: this.value.worldTier,
       director: { ...this.value.director },
     }
   }
@@ -116,8 +124,8 @@ export class SettingsStore {
     if (!isObject(change)) throw new HttpError(400, 'Send the settings to change as a JSON object.')
     const next = structuredClone(this.value)
     for (const key of Object.keys(change)) {
-      if (!['backend', 'apiKey', 'models', 'minorsThroughBodies', 'director'].includes(key)) {
-        throw new HttpError(400, `“${key}” is not a setting. The settings are backend, apiKey, models, minorsThroughBodies and director.`)
+      if (!['backend', 'apiKey', 'models', 'minorsThroughBodies', 'worldTier', 'director'].includes(key)) {
+        throw new HttpError(400, `“${key}” is not a setting. The settings are backend, apiKey, models, minorsThroughBodies, worldTier and director.`)
       }
     }
     if (change['backend'] !== undefined) {
@@ -148,6 +156,10 @@ export class SettingsStore {
     if (change['minorsThroughBodies'] !== undefined) {
       if (typeof change['minorsThroughBodies'] !== 'boolean') throw new HttpError(400, 'minorsThroughBodies must be true or false.')
       next.minorsThroughBodies = change['minorsThroughBodies']
+    }
+    if (change['worldTier'] !== undefined) {
+      if (change['worldTier'] !== 'standard' && change['worldTier'] !== 'bulk') throw new HttpError(400, 'worldTier must be standard or bulk.')
+      next.worldTier = change['worldTier']
     }
     if (change['director'] !== undefined) {
       const d = change['director']

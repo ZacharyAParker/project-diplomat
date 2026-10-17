@@ -219,8 +219,22 @@ export function standInWorld<T extends Task>(task: T, input: TaskInput[T], seed:
       return factbook(input as TaskInput['factbook.draft']) as TaskOutput[T]
     case 'founding.institutions':
       return { bodies: [], canon: [], lore: [] } as unknown as TaskOutput[T]
+    case 'world.nations': {
+      const i = input as TaskInput['world.nations']
+      return { choices: i.nations.map((n) => ({ nation: n.id, move: n.moves[0]?.id ?? 'wait', note: plainNote(n.moves[0]) })) } as TaskOutput[T]
+    }
+    case 'nation.move': {
+      const i = input as TaskInput['nation.move']
+      return { move: i.moves[0]?.id ?? 'wait', note: plainNote(i.moves[0]) } as TaskOutput[T]
+    }
     default:
       throw new Error(`no stand-in plays ${String(task)}`)
   }
 }
 
+
+// With no model, a nation's note is the planner's reason, said plainly.
+function plainNote(move: { description: string; because: string } | undefined): string {
+  if (!move) return 'Nothing to report.'
+  return `${move.description}: ${move.because}.`
+}

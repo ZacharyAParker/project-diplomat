@@ -82,10 +82,13 @@ sections first (role, independence, rules, the Founder, tone), then `## Input` a
 | `letters.draft` | bulk | Letters to the Founder and the office's draft replies |
 | `exchange.reply` | standard | A body answering a remonstrance, reference, reply, address or message |
 | `bill.sitting` | standard | The legislature's own business: bills and readings |
+| `world.nations` | standard (Settings can make it bulk) | The world week: every nation that does not matter to the player, in one shared session |
+| `nation.move` | standard | The world week: one nation that matters to the player, on its own session |
 
 ### Prompts kept from 0.5, not used
 
-`dilemma-draft.md`, `dilemma-variant.md`, `npc-move.md` and `review.md` are the 0.5 prompts for
-drafting and rewording dilemmas, NPC nations' moves and a review gate. Nothing loads them in
-0.6; they are kept for the authoring tools and NPC diplomacy that may use them later.
+`dilemma-draft.md`, `dilemma-variant.md` and `review.md` are the 0.5 prompts for drafting and
+rewording dilemmas and a review gate. Nothing loads them; they are kept for the authoring tools
+that may use them later. The 0.5 `npc-move.md` is replaced by `world.nations.md` and
+`nation.move.md` in 0.7.
 `briefing.md` (the 0.5 front page) is superseded by `world.day.md` and has been removed.

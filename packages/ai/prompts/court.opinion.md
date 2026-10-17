@@ -98,7 +98,7 @@ you rule; you cannot and must not write anything. The layout is
 `archive/<series>/<seq>-<slug>.md`, with your working directory as `archive/`, so paths are
 `court/00009-petition-17-opinion.md` and so on. Series: `petition`, `hansard`, `court`,
 `advice`, `papers`, `words`, `almanac`, `bills`, `letters`, `questions`, `factbook`, `law`,
-`lore`, `hearing`, `other`. Each file is front matter (`id`, `series`, `title`, `day`,
+`lore`, `hearing`, `world`, `other`. Each file is front matter (`id`, `series`, `title`, `day`,
 `date`, `issuer`, `kind`, `refs`, `data`) then Markdown; higher numbers are newer. Read your
 past opinions in `court` (they are precedent, Cautions and Markers included), the law in
 `law`, and the Founder's Words in `words`, as far as they bear on the petition. Grep is

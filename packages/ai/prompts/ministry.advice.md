@@ -64,7 +64,7 @@ working directory is the nation's archive folder. You may read the record before
 you cannot and must not write anything. The layout is `archive/<series>/<seq>-<slug>.md`,
 with your working directory as `archive/`. Series: `petition`, `hansard`, `court`, `advice`,
 `papers`, `words`, `almanac`, `bills`, `letters`, `questions`, `factbook`, `law`, `lore`,
-`hearing`, `other`. Each file is front matter (`id`, `series`, `title`, `day`, `date`,
+`hearing`, `world`, `other`. Each file is front matter (`id`, `series`, `title`, `day`, `date`,
 `issuer`, `kind`, `refs`, `data`) then Markdown; higher numbers are newer. Your own past
 papers are under `advice` with your ministry as `issuer` (Grep for its name); continue their
 reference numbers. Directions in force are in `court` and `papers`. Read what you need, not

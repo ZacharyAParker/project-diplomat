@@ -6,7 +6,17 @@
 import { randomBytes } from 'node:crypto'
 import {
   adjust,
+  adviseMatter,
   applyExternal,
+  decideMatter,
+  forbidden,
+  HOME,
+  matterCard,
+  nameOf,
+  openMatters,
+  worldAct,
+  type WorldAction,
+  type WorldChoices,
   availableOptions,
   callUp,
   decide,
@@ -53,6 +63,8 @@ import {
   check,
   wordCost,
   brief,
+  chooseWorld,
+  warVote,
   type ArchiveDocument,
   type Course,
   type Docket,
@@ -566,8 +578,28 @@ export class Game {
         }
       }
     }
+    // The world week: the other nations choose their moves (the AI where it is on, among legal
+    // moves only), then the engine plays them, fights the wars and sits the Assembly.
+    let world: WorldChoices | undefined
+    const weekDay = state.day
+    if (state.world && weekDay % 7 === 0) {
+      try {
+        const ctx = contextFor({ ...n, state, gov }, this.content, this.ai, { onProblem: (l) => problems.push(l) })
+        const b = brief(state, gov, this.content, await ctx.record({ series: 'world', limit: 4 }), ctx.archivePath)
+        world = (await chooseWorld(state, this.content, b, ctx.run)).choices
+      } catch (error) {
+        problems.push(`The other nations could not be asked this week (${(error as Error).message}); each took its likeliest course.`)
+      }
+    }
     const night = state.timeline.length
-    state = endDay(state, this.content)
+    state = endDay(state, this.content, world ? { world } : {})
+    if (state.world && weekDay % 7 === 0) {
+      try {
+        await this.writeWorldWeek({ ...n, state, gov }, weekDay, world)
+      } catch (error) {
+        problems.push(`The week abroad could not be written into the record: ${(error as Error).message}`)
+      }
+    }
     n.history = withDayEnd(n.history, state)
     // The engine may have replaced ministers or held an election overnight: the government's
     // own account of itself follows, and the record says so.
@@ -596,6 +628,116 @@ export class Game {
     n.gov = gov
     n.today = { day: state.day, decisions: [] }
     return { entries: state.timeline.slice(from), problems }
+  }
+
+  // The week abroad in the Archive: what every nation did, what the important ones said, and
+  // the Assembly's sitting if it sat.
+  private async writeWorldWeek(n: Nation, day: number, choices: WorldChoices | undefined) {
+    const w = n.state.world!
+    const name = (id: string) => nameOf(n.state, this.content, id)
+    const date = formatDate(n.gov.institutions.calendar.start, day)
+    const lines = w.log.filter((l) => l.day === day).map((l) => `- ${l.text}`)
+    const notes = w.important
+      .filter((id) => choices?.notes[id])
+      .map((id) => `**${name(id)}** (${this.content.neighbours.find((x) => x.id === id)?.leader ?? ''}): ${choices!.notes[id]}`)
+    const body = [`# Abroad: the week to ${date}`, '', ...(lines.length ? lines : ['A quiet week beyond the borders.']), ...(notes.length ? ['', '## In their own words', '', ...notes.flatMap((x) => [x, ''])] : [])]
+    await this.write(n, { series: 'world', title: `Abroad: the week to ${date}`, day, issuer: 'The Foreign Ministry', kind: 'week', refs: [], body: body.join('\n').trim(), data: { log: w.log.filter((l) => l.day === day), notes: choices?.notes ?? {} } })
+    const sat = w.assembly.past.find((m) => m.day === day && m.votes)
+    if (sat) {
+      const votes = Object.entries(sat.votes!).map(([id, v]) => `| ${id === HOME ? n.state.identity.name : name(id)} | ${v} |`)
+      const ayes = Object.values(sat.votes!).filter((v) => v === 'aye').length
+      const noes = Object.values(sat.votes!).filter((v) => v === 'no').length
+      const title = sat.title.charAt(0).toUpperCase() + sat.title.slice(1)
+      await this.write(n, {
+        series: 'world',
+        title: `The Assembly of Nations: ${title}`,
+        day,
+        issuer: 'The Assembly of Nations',
+        kind: 'sitting',
+        refs: [],
+        body: [`# ${title}`, '', `The motion was ${sat.passed ? 'carried' : 'defeated'}, ${ayes} to ${noes}.`, '', '| Member | Vote |', '|---|---|', ...votes].join('\n'),
+        data: { motion: sat },
+      })
+    }
+  }
+
+  // A foreign matter decided by the executive: one card, no bodies. In found mode the AI
+  // executive takes the Foreign Ministry's advice; the Founder may decide any matter.
+  async decideMatter(id: string, input: unknown) {
+    const v = body(input)
+    const matterId = line(v['matter'], 'The matter', { max: 100 })!
+    const optionId = line(v['option'], 'The option', { max: 100 })!
+    return this.act(id, async (n) => {
+      const matter = openMatters(n.state).find((m) => m.id === matterId)
+      if (!matter) throw new HttpError(409, `${matterId} is not a foreign matter waiting for a decision.`)
+      const card = matterCard(n.state, this.content, matter)
+      if (!card.options.some((o) => o.id === optionId)) throw new HttpError(400, `“${optionId}” is not one of the options on this matter.`)
+      n.state = decideMatter(n.state, this.content, matterId, optionId)
+      const entry = n.state.timeline.at(-1)!
+      this.pushToday(n, { title: card.title, course: card.options.find((o) => o.id === optionId)!.label, result: entry.text ?? entry.headline, changes: entry.changes.map((c) => `${c.target} ${c.by > 0 ? 'up' : 'down'} ${Math.abs(c.by)}: ${c.why}`) })
+      await this.store.save(n)
+      return { entry, entries: [entry], ...this.payload(n) }
+    })
+  }
+
+  // The player acting abroad. A declaration of war goes to the legislature first when the
+  // constitution lets it bind the executive; the division goes into Hansard either way.
+  async worldAction(id: string, input: unknown) {
+    const v = body(input)
+    const action = parseAction(v['action'])
+    return this.act(id, async (n) => {
+      if (!n.state.world) throw new HttpError(409, 'This pack has no world beyond the borders.')
+      const why = forbidden(n.state, this.content, action)
+      if (why) throw new HttpError(409, why)
+      let vote: { carried: boolean; aye: number; no: number; abstain: number; body: string } | undefined
+      if ('war' in action) {
+        const result = warVote(n.gov.institutions, n.state, action.war)
+        if (result) {
+          const target = nameOf(n.state, this.content, action.war)
+          const parties = result.body.parties.map((p) => `| ${p.name} | ${result.division.byParty[p.id]?.aye ?? 0} | ${result.division.byParty[p.id]?.no ?? 0} | ${result.division.byParty[p.id]?.abstain ?? 0} |`)
+          const executive = n.gov.institutions.constitution.rules.executive.title.replace(/^The /, 'the ')
+          await this.write(n, {
+            series: 'hansard',
+            title: `${result.body.name}: a declaration of war against ${target}`,
+            day: n.state.day,
+            issuer: result.body.name,
+            kind: 'division',
+            refs: [],
+            body: [
+              `# A motion for a declaration of war against ${target}`,
+              '',
+              `${executive.charAt(0).toUpperCase() + executive.slice(1)} asked ${result.body.shortName} to declare war on ${target}. ${result.provoked ? 'Members were told the country had been provoked.' : 'Members were told the country had no choice; several asked what had changed.'}`,
+              '',
+              `**${result.carried ? 'Carried' : 'Defeated'}**, ${result.division.aye} to ${result.division.no}, with ${result.division.abstain} abstaining.`,
+              ...(parties.length ? ['', '| Party | Aye | No | Abstain |', '|---|---|---|---|', ...parties] : []),
+            ].join('\n'),
+            data: { division: result.division, carried: result.carried, target: action.war },
+          })
+          vote = { carried: result.carried, aye: result.division.aye, no: result.division.no, abstain: result.division.abstain, body: result.body.name }
+          if (!result.carried) {
+            n.state = applyExternal(n.state, this.content, 'event', `${result.body.name} refuses to declare war on ${target}`, [{ indicator: 'legitimacy', by: -2, why: 'The government asked for a war and was refused.' }], `Defeated ${result.division.aye} to ${result.division.no}.`)
+            await this.store.save(n)
+            return { entry: n.state.timeline.at(-1)!, vote, ...this.payload(n) }
+          }
+        }
+      }
+      n.state = worldAct(n.state, this.content, action)
+      const entry = n.state.timeline.at(-1)!
+      await this.store.save(n)
+      return { entry, ...(vote ? { vote } : {}), ...this.payload(n) }
+    })
+  }
+
+  // Found mode: the AI executive takes the Foreign Ministry's advice on every open matter.
+  private decideMattersByAdvice(n: Nation): TimelineEntry[] {
+    const out: TimelineEntry[] = []
+    for (const matter of openMatters(n.state)) {
+      const advice = adviseMatter(n.state, this.content, matter)
+      if (!advice) continue
+      n.state = decideMatter(n.state, this.content, matter.id, advice.option)
+      out.push(n.state.timeline.at(-1)!)
+    }
+    return out
   }
 
   async endDay(id: string) {
@@ -641,6 +783,7 @@ export class Game {
         if (n.gov.mode !== 'found' && !opts.force) throw new HttpError(409, 'The mode was changed to govern, so the run stopped.')
         const out: TimelineEntry[] = []
         for (const dilemmaId of this.dockets.agendaOf(n)) out.push(...(await this.executiveDecides(n, dilemmaId, problems)))
+        out.push(...this.decideMattersByAdvice(n))
         const items = agendaItems(n.state, this.content)
         if (items.situation) {
           const choice = this.chooseSituation(n.state, items.situation.stage.options)
@@ -1057,4 +1200,28 @@ export class Game {
       return { bill, ...this.payload(n) }
     })
   }
+}
+
+// The one action a request may carry, checked field by field.
+function parseAction(raw: unknown): WorldAction {
+  if (typeof raw !== 'object' || raw === null || Array.isArray(raw)) throw new HttpError(400, 'Send the action as an object: { "pact": id }, { "war": id }, { "peace": warId }, { "assembly": "join" | "leave" } or { "mobilise": true | false }.')
+  const a = raw as Record<string, unknown>
+  const keys = Object.keys(a)
+  if (keys.length !== 1) throw new HttpError(400, 'An action has exactly one field.')
+  const id = (v: unknown) => {
+    if (typeof v !== 'string' || !/^[a-z][a-z0-9_-]{0,60}$/.test(v)) throw new HttpError(400, 'That is not a nation or war id.')
+    return v
+  }
+  if ('pact' in a) return { pact: id(a['pact']) }
+  if ('war' in a) return { war: id(a['war']) }
+  if ('peace' in a) return { peace: id(a['peace']) }
+  if ('assembly' in a) {
+    if (a['assembly'] !== 'join' && a['assembly'] !== 'leave') throw new HttpError(400, 'assembly must be join or leave.')
+    return { assembly: a['assembly'] }
+  }
+  if ('mobilise' in a) {
+    if (typeof a['mobilise'] !== 'boolean') throw new HttpError(400, 'mobilise must be true or false.')
+    return { mobilise: a['mobilise'] }
+  }
+  throw new HttpError(400, `${keys[0]} is not an action.`)
 }

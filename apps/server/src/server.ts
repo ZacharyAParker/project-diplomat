@@ -139,6 +139,8 @@ export function routes(game: Game, ai: Ai, settings: SettingsStore, content: Con
   r.on('GET', '/api/nations/:id/dockets', (req) => ({ json: game.dockets_(id(req)) }))
   r.on('POST', '/api/nations/:id/dockets/:dilemmaId/convene', async (req) => ({ json: await game.convene(id(req), req.params['dilemmaId']!) }))
   r.on('POST', '/api/nations/:id/sandbox', async (req) => ({ json: await game.sandbox(id(req), req.body) }))
+  r.on('POST', '/api/nations/:id/world/matter', async (req) => ({ json: await game.decideMatter(id(req), req.body) }))
+  r.on('POST', '/api/nations/:id/world/act', async (req) => ({ json: await game.worldAction(id(req), req.body) }))
   r.on('PUT', '/api/nations/:id/identity', async (req) => ({ json: await game.identity(id(req), req.body) }))
   r.on('PUT', '/api/nations/:id/mode', async (req) => ({ json: await game.mode(id(req), req.body) }))
 

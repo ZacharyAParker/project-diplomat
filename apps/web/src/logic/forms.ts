@@ -104,6 +104,7 @@ export const SERIES_NAMES: Record<Series, string> = {
   law: 'Law',
   lore: 'Lore',
   hearing: 'Hearings',
+  world: 'Abroad',
   other: 'Other papers',
 }
 

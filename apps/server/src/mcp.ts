@@ -29,7 +29,7 @@ export const TOOL_DEFS: { name: string; description: string; inputSchema: Schema
   {
     name: 'search_archive',
     description: 'Search the in-world record, newest first. Returns document heads.',
-    inputSchema: obj({ nation, q: { type: 'string' }, series: { type: 'string', description: 'petition, hansard, court, advice, papers, words, almanac, bills, letters, questions, factbook, law, lore, hearing or other' }, issuer: { type: 'string' }, from: { type: 'integer' }, to: { type: 'integer' }, limit: { type: 'integer' }, offset: { type: 'integer' } }, ['nation']),
+    inputSchema: obj({ nation, q: { type: 'string' }, series: { type: 'string', description: 'petition, hansard, court, advice, papers, words, almanac, bills, letters, questions, factbook, law, lore, hearing, world or other' }, issuer: { type: 'string' }, from: { type: 'integer' }, to: { type: 'integer' }, limit: { type: 'integer' }, offset: { type: 'integer' } }, ['nation']),
   },
   { name: 'read_document', description: 'One document of the record in full, with what cites it.', inputSchema: obj({ nation, id: { type: 'string', description: 'A document id such as hansard-00012.' } }, ['nation', 'id']) },
   { name: 'read_ooc_log', description: 'The cheats done so far, newest first, with the figures before and after. Out of character: never pass it to a branch.', inputSchema: obj({ nation }, ['nation']) },

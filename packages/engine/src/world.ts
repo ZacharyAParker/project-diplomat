@@ -1305,6 +1305,61 @@ function makePeace(state: GameState, content: Content, war: War, changes: Change
   void content
 }
 
+// The Foreign Ministry's view, from the rules: shown on the card, and what an AI executive
+// takes in found mode. Never a model call.
+export function adviseMatter(state: GameState, content: Content, matter: Matter): { option: string; reason: string } | null {
+  const options = matterOptions(state, content, matter)
+  const take = (does: string, reason: string) => {
+    const o = options.find((x) => x.does === does)
+    return o ? { option: o.id, reason } : null
+  }
+  const w = state.world
+  if (!w) return null
+  const subject = matter.subject
+  const mine = homeStrength(state)
+  const theirs = strengthOf(state, subject)
+  const war = matter.war ? w.wars.find((x) => x.id === matter.war) : undefined
+  switch (matter.kind) {
+    case 'claim':
+      if (mine >= theirs * 1.1) return take('firm', 'We are the stronger, and a concession now invites the next claim.')
+      if (w.assembly.members.includes(HOME)) return take('refer', 'Let the Assembly decide: a ruling we can live with beats a war we might lose.')
+      return take('negotiate', 'Talk, and buy time.')
+    case 'aid':
+      if (state.indicators.fiscal >= 45 && (state.neighbours[subject] ?? 0) >= 0) return take('aid', 'We can afford it, and friends remember who came.')
+      return take('token', 'The budget is tight: send something, and say so warmly.')
+    case 'called': {
+      const enemy = matter.other ? strengthOf(state, matter.other) : 0
+      if (mine + theirs >= enemy * 0.9) return take('join', 'Together we can hold them, and a pact that is not kept is worthless.')
+      return take('arms', 'We cannot win this war, but we can help them fight it.')
+    }
+    case 'attacked':
+      if (mine >= theirs * 0.7) return take('appeal', 'Fight, and make the Assembly take our side.')
+      return take('capitulate', 'We cannot hold them. Every week of war will cost more than the land.')
+    case 'crimes':
+      if ((state.neighbours[subject] ?? 0) < 20) return take('tribunal', 'This should be tried, and they are no friend of ours.')
+      return take('condemn', 'Say it plainly, and leave the door open.')
+    case 'accused':
+      return take('inquiry', 'An inquiry now costs less than a tribunal later.')
+    case 'pact':
+      if ((state.neighbours[subject] ?? 0) >= 50 && !warsOf(state, subject).length) return take('ally', 'A friend worth having, and at peace.')
+      return take('none', 'Their enemies would become ours. Not yet.')
+    case 'terms': {
+      const s = war ? (sideOf(war, HOME) === 'defenders' ? -war.front : war.front) : 0
+      if (s >= 35) return take('none', 'We are winning. Their terms will improve.')
+      return take('peace', 'Take the terms: the war is costing more than it can win.')
+    }
+    case 'victory':
+      if (matter.vars['annexable'] && state.indicators.liberty < 45) return take('annex', 'They stand alone. Take the country, and hold it.')
+      return take('reparations', 'Make them pay, and leave them a country to pay from.')
+    case 'vote': {
+      const motion = w.assembly.motion
+      if (!motion || motion.id !== matter.motion) return take('abstain', 'Nothing to vote on.')
+      const v = voteOf(state, content, HOME, motion)
+      return take(v, v === 'aye' ? 'In our interest, and right.' : v === 'no' ? 'Against our interest and our friends.' : 'Nothing in it for us either way.')
+    }
+  }
+}
+
 // ---------------------------------------------------------------------------------------
 // The player's own moves, from the World page
 // ---------------------------------------------------------------------------------------
