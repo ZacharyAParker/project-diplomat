@@ -747,3 +747,34 @@ export interface TaskOutput {
     hansard: string
   }
 }
+
+// ---------------------------------------------------------------------------------------
+// The save file and the AI provider
+// ---------------------------------------------------------------------------------------
+
+// data/nations/<id>/save.json. state is the engine's own serialize() text.
+export interface SaveFile2 {
+  format: 2
+  id: string
+  createdAt: string
+  updatedAt: string
+  state: string
+  history: { day: number; indicators: Record<IndicatorId, number>; support: number; factions: Record<string, number> }[]
+  government: GovernmentState
+}
+
+export interface ProviderStatus {
+  backend: 'none' | 'anthropic' | 'claude-cli'
+  ok: boolean
+  // Plain words: "Claude API key ending 4f2a", "claude 2.3.1, signed in", "AI is off".
+  detail: string
+  models: Record<Tier, string>
+}
+
+// Implemented by packages/ai. Returns the model's parsed JSON, unvalidated: the caller
+// validates it. Throws (with a message a player can act on) when the provider cannot be
+// reached, the reply is not JSON, or it is refused.
+export interface Provider {
+  status(): Promise<ProviderStatus>
+  run<T extends Task>(task: T, input: TaskInput[T], options?: { archivePath?: string; signal?: AbortSignal }): Promise<unknown>
+}
