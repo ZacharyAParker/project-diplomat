@@ -15,7 +15,7 @@ found the country and watch it run itself
 
 and the full trailer if you want it. 52 seconds, no sound
 
-[![the trailer: real lines from the Assembly and the High Court, a petition going through the bodies, the eight forms, the director and the archive](docs/media/trailer-poster.webp)](docs/media/trailer.mp4)
+https://github.com/user-attachments/assets/50e1edd0-5ac4-43d6-b831-5d36b32519c4
 
 ![the desk: a petition after parliament, the supreme court and two ministries have sat on it, with the division by party and the morning paper next to it](docs/screenshots/desk.webp)
 
