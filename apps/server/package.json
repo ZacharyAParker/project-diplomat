@@ -1,0 +1,12 @@
+{
+  "name": "@diplomat/server",
+  "version": "0.6.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@diplomat/engine": "workspace:*",
+    "@diplomat/content": "workspace:*",
+    "@diplomat/government": "workspace:*",
+    "@diplomat/ai": "workspace:*"
+  }
+}

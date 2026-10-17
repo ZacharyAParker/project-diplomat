@@ -339,6 +339,10 @@ export const ENTRY_KINDS = [
   'budget',
   'treaty',
   'sandbox',
+  // From the government above the engine: an event in the world, a law, a Founder's Word.
+  'event',
+  'law',
+  'word',
 ] as const
 
 export type EntryKind = (typeof ENTRY_KINDS)[number]

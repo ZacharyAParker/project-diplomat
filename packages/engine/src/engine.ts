@@ -331,6 +331,40 @@ export function decide(
   return state
 }
 
+// Sets a dilemma aside without taking any of its courses. Nothing moves. It counts as
+// answered, so it rests like any other before it can come round again.
+export function dismiss(input: GameState, content: Content, dilemmaId: string, why?: string): GameState {
+  const state = structuredClone(input)
+  if (!agendaIds(state).includes(dilemmaId)) throw new Error(`${dilemmaId} is not on today's agenda`)
+  const dilemma = findDilemma(content, dilemmaId)
+  record(state, content, 'decision', `${dilemma.title}: dismissed`, [], why, state.agenda.bound[dilemmaId])
+  state.answered[dilemmaId] = state.day
+  if (state.agenda.major === dilemmaId) state.agenda.major = null
+  state.agenda.minors = state.agenda.minors.filter((id) => id !== dilemmaId)
+  return state
+}
+
+// A change that came from above the engine: an event in the world, a law the legislature
+// passed, a Founder's Word. Only indicator, faction, minister, policy and flag effects are
+// taken; the caller has already bounded them. Recorded on the timeline with every reason.
+export function applyExternal(
+  input: GameState,
+  content: Content,
+  kind: 'event' | 'law' | 'word',
+  headline: string,
+  effects: readonly Effect[],
+  text?: string,
+): GameState {
+  const state = structuredClone(input)
+  const allowed = effects.filter(
+    (e) => 'indicator' in e || 'faction' in e || 'minister' in e || 'policy' in e || ('flag' in e && !('identity' in e)),
+  )
+  const changes: Change[] = []
+  apply(state, allowed, changes)
+  record(state, content, kind, headline, changes, text)
+  return state
+}
+
 export function decideSituation(input: GameState, content: Content, optionId: string): GameState {
   const state = structuredClone(input)
   const option = stageOption(state, content, optionId)
