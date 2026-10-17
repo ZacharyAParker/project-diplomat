@@ -21,6 +21,9 @@ export class Dockets {
   private queues = new Map<string, Promise<void>>()
   private live = new Map<string, Map<string, string[]>>()
   private generations = new Map<string, number>()
+  // One per nation and generation: cancel aborts it, so model calls in flight stop at once
+  // instead of holding the queue until they finish.
+  private aborts = new Map<string, AbortController>()
   log: (line: string) => void = () => {}
   // Called when a docket is ready: in found mode the executive decides it at once.
   onReady: ((id: string, dilemma: string) => Promise<void>) | null = null
@@ -40,6 +43,17 @@ export class Dockets {
   cancel(id: string) {
     this.generations.set(id, this.generation(id) + 1)
     this.live.delete(id)
+    this.aborts.get(id)?.abort()
+    this.aborts.delete(id)
+  }
+
+  private signalFor(id: string): AbortSignal {
+    let controller = this.aborts.get(id)
+    if (!controller) {
+      controller = new AbortController()
+      this.aborts.set(id, controller)
+    }
+    return controller.signal
   }
 
   // Majors always go through the bodies; minors when the rules or the settings say so.
@@ -149,6 +163,7 @@ export class Dockets {
         progress(line)
       },
       cancelled: () => gen !== this.generation(id),
+      signal: this.signalFor(id),
     })
     const result = await runDocket(ctx, started)
     let filed = false

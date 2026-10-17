@@ -13,6 +13,8 @@ export interface ContextOptions {
   progress?: (line: string) => void
   onProblem?: (line: string) => void
   cancelled?: () => boolean
+  // Aborted when the work is set aside, so a model call in flight is stopped, not waited for.
+  signal?: AbortSignal
   // Minors go through every body whatever the constitution says (the global setting). The
   // pipeline is given a copy of the rules that says so; the constitution is not changed.
   minorsThroughBodies?: boolean
@@ -38,6 +40,7 @@ export function contextFor(n: Nation, content: Content, ai: Ai, opts: ContextOpt
     ...(archivePath ? { archivePath } : {}),
     ...(opts.onProblem ? { onProblem: opts.onProblem } : opts.progress ? { onProblem: opts.progress } : {}),
     ...(opts.cancelled ? { cancelled: opts.cancelled } : {}),
+    ...(opts.signal ? { signal: opts.signal } : {}),
     sessions: { store: Sessions.of(n.dir), branch: branchOf, term: termOf(state), day: state.day },
   })
   return {
