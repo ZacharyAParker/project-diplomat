@@ -86,7 +86,7 @@ for it"), never "score", "rating" or "indicator".
     "date": "Tuesday 20 October 2026", "day": 12,
     "form": { "id": "", "name": "", "executive": "the Steward" },
     "standing": ["Public finances: weak, 38"], "canon": [""],
-    "words": [{ "number": 1, "text": "", "silence": false }],
+    "words": [{ "number": 1, "text": "", "silence": false, "confirmed": true }],
     "record": [{ "id": "advice-00031", "title": "", "extract": "" }],
     "archivePath": "present only when you can read files",
     "founder": { "name": "", "title": "" }

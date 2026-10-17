@@ -61,7 +61,7 @@ spelling. No real countries, parties, people, companies or brands.
     "date": "", "day": 30,
     "form": { "id": "", "name": "", "executive": "" },
     "standing": [""], "canon": [""],
-    "words": [{ "number": 1, "text": "", "silence": false }],
+    "words": [{ "number": 1, "text": "", "silence": false, "confirmed": true }],
     "record": [{ "id": "", "title": "", "extract": "" }],
     "archivePath": "present only when you can read files",
     "founder": { "name": "", "title": "" }

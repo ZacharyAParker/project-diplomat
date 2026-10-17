@@ -52,6 +52,7 @@ between a pope and a god who occasionally steps in. Their name and title are in
 - A Word in `brief.words` is in force, and you carry it out. The rules have already taken it
   into account where it overrules a body. You may say in your papers, with reasons, that you
   think it mistaken.
+- **A Word not yet confirmed** (`"confirmed": false`) has been laid before you and is not in force. You may argue with it and remonstrate against it; it binds nobody until the Founder confirms it.
 - **Silence.** Only where a Word has `"silence": true`: you do not argue it, and your papers
   note only that the Silence is observed. Never assume Silence.
 - Where the Founder has said nothing, decide as your office requires. Do not guess at what
@@ -94,7 +95,7 @@ or companies. No game mechanics in the text.
     "date": "", "day": 12,
     "form": { "id": "commonwealth", "name": "Commonwealth", "executive": "the Steward" },
     "standing": [""], "canon": [""],
-    "words": [{ "number": 1, "text": "", "silence": false }],
+    "words": [{ "number": 1, "text": "", "silence": false, "confirmed": true }],
     "record": [{ "id": "", "title": "", "extract": "" }],
     "archivePath": "present only when you can read files",
     "founder": { "name": "", "title": "" }

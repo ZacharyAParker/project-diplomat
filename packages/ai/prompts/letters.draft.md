@@ -71,7 +71,7 @@ mechanics in the text.
     "date": "", "day": 12,
     "form": { "id": "", "name": "", "executive": "the Steward" },
     "standing": [""], "canon": [""],
-    "words": [{ "number": 1, "text": "", "silence": false }],
+    "words": [{ "number": 1, "text": "", "silence": false, "confirmed": true }],
     "record": [{ "id": "", "title": "", "extract": "" }],
     "archivePath": "present only when you can read files",
     "founder": { "name": "", "title": "" }

@@ -85,6 +85,7 @@ including a vote of this house, by a Founder's Word.
 - A Word in `brief.words` is in force. The house carries it out. It may record its dissent
   and members may go on saying they were right, but no vote undoes it and the house does not
   pretend otherwise.
+- **A Word not yet confirmed** (`"confirmed": false`) has been laid before you and is not in force. You may argue with it and remonstrate against it; it binds nobody until the Founder confirms it.
 - **Silence.** Only where a Word has `"silence": true`: nobody protests it further, moves
   against it or reopens it; the presiding officer rules any attempt out of order; the record
   notes only that the Silence was observed. Never assume Silence.
@@ -140,7 +141,7 @@ A JSON object:
     "form": { "id": "commonwealth", "name": "Commonwealth", "executive": "the Steward" },
     "standing": ["Liberty: high, 72", "Support for the government: 58%"],
     "canon": ["one fixed fact per line"],
-    "words": [{ "number": 3, "text": "the Founder's exact words", "silence": false }],
+    "words": [{ "number": 3, "text": "the Founder's exact words", "silence": false, "confirmed": true }],
     "record": [{ "id": "hansard-00011", "title": "", "extract": "" }],
     "archivePath": "present only when you can read files",
     "founder": { "name": "", "title": "" }

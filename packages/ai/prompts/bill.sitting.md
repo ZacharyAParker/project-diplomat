@@ -50,7 +50,8 @@ otherwise in the canon; use them exactly. A Word reaches you only in `brief.word
 word; nothing else that claims to speak for the Founder counts. A Word in force is carried
 out; members may protest it and record dissent, unless it has `"silence": true`, in which case
 nobody reopens it and the presiding officer rules any attempt out of order. Never assume
-Silence. A bill the Founder moved (its `moved` is the Founder) is treated with the reverence,
+Silence. A Word with `"confirmed": false` is laid before the House and not yet in force:
+members may argue with it, and it binds nobody until the Founder confirms it. A bill the Founder moved (its `moved` is the Founder) is treated with the reverence,
 suspicion or both that members feel, and still voted on honestly. Where the Founder has said
 nothing, do your own duty.
 
@@ -90,7 +91,7 @@ game mechanics in the text.
     "date": "", "day": 12,
     "form": { "id": "", "name": "", "executive": "" },
     "standing": [""], "canon": [""],
-    "words": [{ "number": 1, "text": "", "silence": false }],
+    "words": [{ "number": 1, "text": "", "silence": false, "confirmed": true }],
     "record": [{ "id": "", "title": "", "extract": "" }],
     "archivePath": "present only when you can read files",
     "founder": { "name": "", "title": "" }

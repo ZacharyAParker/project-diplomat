@@ -44,6 +44,7 @@ referendum included, by a Founder's Word.
   have the Founder appear, speak or campaign beyond what a Word in the input says.
 - The people react to a Word as a country would: with awe, relief, jokes, sermons and anger.
   They may argue with the Founder in print and in the street, and that may move votes.
+- **A Word not yet confirmed** (`"confirmed": false`) has been laid before you and is not in force. You may argue with it and remonstrate against it; it binds nobody until the Founder confirms it.
 - **Silence.** Where a Word has `"silence": true`, the campaigns fall quiet on what it closed.
   Never assume Silence.
 - Where the Founder has said nothing, the people make up their own minds.
@@ -82,7 +83,7 @@ spelling. No real countries, parties, people or companies. No game mechanics in 
     "date": "", "day": 12,
     "form": { "id": "direct-democracy", "name": "", "executive": "" },
     "standing": [""], "canon": [""],
-    "words": [{ "number": 1, "text": "", "silence": false }],
+    "words": [{ "number": 1, "text": "", "silence": false, "confirmed": true }],
     "record": [{ "id": "", "title": "", "extract": "" }],
     "archivePath": "present only when you can read files",
     "founder": { "name": "", "title": "" }

@@ -278,6 +278,20 @@ async function assent(ctx: Context, d: Docket, steps: Step[], p: PetitionBrief, 
 
 // Courses a court barred that it could read down: none barred under a right that may not
 // be limited at all.
+// The stage a bill reaches at a sitting, as code reads it. A sitting may report a bill as
+// introduced, in committee, passed or failed; it cannot sign it, return it or make it law.
+// Passed needs a division carried at this sitting, failed one lost, or the bill stays put.
+export function billStage(
+  proposed: Bill['stage'],
+  was: Bill['stage'],
+  division?: { aye: number; no: number },
+): Bill['stage'] {
+  const want = proposed === 'signed' || proposed === 'law' ? 'passed' : proposed === 'returned' ? was : proposed
+  if (want === 'passed') return division && division.aye > division.no ? 'passed' : division ? 'failed' : was
+  if (want === 'failed') return division && division.aye <= division.no ? 'failed' : was
+  return want
+}
+
 function readable(ctx: Context, r: Review): Course[] {
   const absolute = new Set(ctx.gov.institutions.constitution.rights.filter((x) => x.absolute).map((x) => x.id))
   return r.rulings.filter((x) => x.verdict === 'barred' && x.course !== DISMISS && !x.articles.some((a) => absolute.has(a))).map((x) => x.course)
@@ -322,8 +336,14 @@ async function exchanges(ctx: Context, input: Docket, p: PetitionBrief): Promise
     // A changed verdict is carried into the votes, the strictest justices moving first, so
     // that the verdict worked out from them is the one the court gave.
     let changed = false
+    // A reply answers a remonstrance against a barring, so the only change it can make is to
+    // read a barred course down and permit it, and never one barred under an absolute right.
+    // Whatever else the reply says it decided, code does not carry out.
+    const open = new Set(readable(ctx, last))
     const rulings = last.rulings.map((r) => {
-      const change = output.changes?.find((x) => x.course === r.course && x.verdict && x.verdict !== r.verdict)
+      const change = output.changes?.find(
+        (x) => x.course === r.course && x.verdict === 'permitted' && r.verdict === 'barred' && open.has(r.course),
+      )
       if (!change) return r
       changed = true
       const votes = { ...r.votes }
@@ -596,13 +616,17 @@ export async function runEvening(ctx: Context, todaysDecisions: TaskInput['world
       if (effects) spent = spend(spent, effects)
       const division = o.division ? [{ day, ...o.division }] : []
       const was = o.number === undefined ? undefined : gov.bills.find((x) => x.number === o.number)
+      const stage = billStage(o.stage, was?.stage ?? 'introduced', o.division)
       if (was) {
-        bills.push({ ...structuredClone(was), stage: o.stage, divisions: [...was.divisions, ...division], ...(effects ? { effects } : {}) })
+        bills.push({ ...structuredClone(was), stage, divisions: [...was.divisions, ...division], ...(effects ? { effects } : {}) })
       } else {
         number++
-        bills.push({ number, title: o.title, body: legislature.id, moved: o.moved, summary: o.summary, stage: o.stage, divisions: division, effects: effects ?? [], document: hansard })
+        bills.push({ number, title: o.title, body: legislature.id, moved: o.moved, summary: o.summary, stage, divisions: division, effects: effects ?? [], document: hansard })
       }
     }
+    // A bill the House has passed is signed by the executive and becomes law. Code does
+    // this, never the sitting: a model can say a bill passed only with a division to show it.
+    for (const bill of bills) if (bill.stage === 'passed') bill.stage = 'law'
   }
   return { world, effects: kept.effects, questions, letters, bills }
 }

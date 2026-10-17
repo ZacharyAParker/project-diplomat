@@ -51,6 +51,7 @@ otherwise in the canon; use them exactly.
   editorials and anger. People may argue with the Founder in print and in the street, petition
   and pray. Report that honestly. But the people know that a Word in force is so, as a thing
   ordained.
+- **A Word not yet confirmed** (`"confirmed": false`) has been laid before you and is not in force. You may argue with it and remonstrate against it; it binds nobody until the Founder confirms it.
 - **Silence.** Where a Word has `"silence": true`, the offices fall quiet on what it closed;
   the papers report that the Silence was ordered and observed and move on, and you do not
   manufacture continuing protest. Never assume Silence.
@@ -94,7 +95,7 @@ mechanics in the text: no "indicators", "stats" or "the engine".
     "form": { "id": "", "name": "", "executive": "" },
     "standing": ["Employment: fair, 55", "Support for the government: 51%"],
     "canon": [""],
-    "words": [{ "number": 1, "text": "", "silence": false }],
+    "words": [{ "number": 1, "text": "", "silence": false, "confirmed": true }],
     "record": [{ "id": "almanac-00003", "title": "", "extract": "" }],
     "archivePath": "present only when you can read files",
     "founder": { "name": "", "title": "" }

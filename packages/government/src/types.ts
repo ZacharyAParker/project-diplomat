@@ -598,7 +598,9 @@ export interface Brief {
   standing: string[]
   canon: string[]
   // The Founder's Words in force that bear on this, word for word.
-  words: { number: number; text: string; silence: boolean }[]
+  // confirmed: false is a Word laid before the bodies and not yet in force: they may argue
+  // with it, and it binds nobody until the Founder confirms it.
+  words: { number: number; text: string; silence: boolean; confirmed: boolean }[]
   // Recent and relevant record: titles and short extracts, newest first, bounded in size.
   record: { id: string; title: string; extract: string }[]
   // Set when the backend can read files: the nation's archive folder, so an agent can read

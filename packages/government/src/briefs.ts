@@ -89,7 +89,8 @@ export function brief(
     words: [...gov.words]
       .sort((a, b) => b.number - a.number)
       .slice(0, MAX_WORDS)
-      .map((w) => ({ number: w.number, text: w.text, silence: w.silence })),
+      // Silence closes a matter only once the Word is confirmed.
+      .map((w) => ({ number: w.number, text: w.text, silence: w.silence && w.confirmed, confirmed: w.confirmed })),
     record: record.slice(0, MAX_RECORD).map((r) => ({ id: r.id, title: r.title, extract: r.extract.slice(0, MAX_EXTRACT) })),
     ...(archivePath ? { archivePath } : {}),
   }

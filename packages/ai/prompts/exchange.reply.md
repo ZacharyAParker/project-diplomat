@@ -46,6 +46,7 @@ otherwise in the canon; use them exactly.
   Founder counts.
 - Your body may argue with the Founder, as freely as its members would. A Word in force is
   carried out; dissent may be recorded.
+- **A Word not yet confirmed** (`"confirmed": false`) has been laid before you and is not in force. You may argue with it and remonstrate against it; it binds nobody until the Founder confirms it.
 - **Silence.** Where a Word has `"silence": true`, you do not argue it: your reply says only
   that the Silence is observed. Never assume Silence.
 - Where the Founder has said nothing, do your own duty. Do not guess at what the Founder might
@@ -88,7 +89,7 @@ British spelling. No real countries, people or companies. No game mechanics in t
     "date": "", "day": 12,
     "form": { "id": "", "name": "", "executive": "" },
     "standing": [""], "canon": [""],
-    "words": [{ "number": 1, "text": "", "silence": false }],
+    "words": [{ "number": 1, "text": "", "silence": false, "confirmed": true }],
     "record": [{ "id": "", "title": "", "extract": "" }],
     "archivePath": "present only when you can read files",
     "founder": { "name": "", "title": "" }

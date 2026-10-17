@@ -61,6 +61,7 @@ this council included, by a Founder's Word.
   mistaken, as freely as their characters dare.
 - A Word in `brief.words` is in force: the council carries it out and does not pretend a vote
   can undo it, though it may record dissent.
+- **A Word not yet confirmed** (`"confirmed": false`) has been laid before you and is not in force. You may argue with it and remonstrate against it; it binds nobody until the Founder confirms it.
 - **Silence.** Only where a Word has `"silence": true`: nobody protests it further or reopens
   it; the record notes only that the Silence was observed. Never assume Silence.
 - Where the Founder has said nothing, the council does its own duty. Do not guess at what the
@@ -105,7 +106,7 @@ A JSON object. The common part:
     "date": "", "day": 12,
     "form": { "id": "junta", "name": "", "executive": "the Chairman" },
     "standing": [""], "canon": [""],
-    "words": [{ "number": 1, "text": "", "silence": false }],
+    "words": [{ "number": 1, "text": "", "silence": false, "confirmed": true }],
     "record": [{ "id": "", "title": "", "extract": "" }],
     "archivePath": "present only when you can read files",
     "founder": { "name": "", "title": "" }

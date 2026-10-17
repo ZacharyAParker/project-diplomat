@@ -108,3 +108,39 @@ test('the founding documents round-trip through the Archive format', () => {
     })
   }
 })
+
+// Found in review: a court's reply could carry out any verdict a model gave it, lifting a bar
+// set under an absolute right, or barring a course nobody remonstrated about.
+test('a reply can only read a barred course down, and never one barred under an absolute right', async () => {
+  const state = withDilemma(nation(1), 'phone-records')
+  const gov = government('commonwealth', state)
+  const absolute = new Set(gov.institutions.constitution.rights.filter((r) => r.absolute).map((r) => r.id))
+  const mem = memory(state, gov, 1)
+  const plain = mem.ctx.run
+  mem.ctx.run = (async (task: Task, input: never) => {
+    const result = await plain(task, input)
+    if (task === 'legislature.sitting') {
+      const out = result.output as TaskOutput['legislature.sitting']
+      const kind = (input as TaskInput['legislature.sitting']).kind
+      if (kind === 'first') out.ladder = ['statute', ...out.ladder.filter((c) => c !== 'statute')]
+      if (kind === 'reconciliation') out.remonstrance = 'The House asks the Court to think again.'
+    }
+    if (task === 'exchange.reply') {
+      // The reply turns every verdict over.
+      const i = input as TaskInput['exchange.reply']
+      const out = result.output as TaskOutput['exchange.reply']
+      out.changes = i.petition!.options.map((o) => ({ course: o.course, verdict: 'barred' as const }))
+      out.changes.push({ course: 'statute', verdict: 'permitted' })
+    }
+    return result
+  }) as typeof mem.ctx.run
+  const ready = await runDocket(mem.ctx, openDocket(mem.ctx, 'phone-records'))
+  const first = ready.reviews[0]!
+  for (const review of ready.reviews.slice(1)) {
+    for (const r of review.rulings) {
+      const was = first.rulings.find((x) => x.course === r.course)!
+      if (was.verdict === 'permitted') assert.equal(r.verdict, 'permitted', `${r.course} was not barred by the reply`)
+      if (was.verdict === 'barred' && was.articles.some((a) => absolute.has(a))) assert.equal(r.verdict, 'barred', `${r.course} stays barred`)
+    }
+  }
+})
