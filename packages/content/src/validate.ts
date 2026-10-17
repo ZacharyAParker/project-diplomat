@@ -1,6 +1,8 @@
 import {
   INDICATORS,
   LOWER_IS_BETTER,
+  MATTER_ACTIONS,
+  MATTER_KINDS,
   START_INDICATORS,
   type Condition,
   type Content,
@@ -20,6 +22,8 @@ export const FOUNDING_RANGE = { min: 25, max: 75 }
 const MACROS = /\{([a-z]+)(?::([a-z_]+))?\}/g
 const PLAIN_MACROS = new Set(['nation', 'capital', 'currency', 'demonym', 'leader', 'animal', 'motto', 'faith'])
 const NEIGHBOUR_MACROS = new Set([undefined, 'demonym', 'leader'])
+// What a foreign matter's text may also use, filled in by the engine when the matter is raised.
+const MATTER_MACROS = new Set(['other', 'region', 'motion', 'ally', 'need', 'strength_word', 'weeks', 'terms', 'front', 'annexable'])
 const BUILT_IN_FLAGS = new Set(['government_fell', 'election_lost'])
 
 // Checks the things a schema can't: references, bounds, and the house rules.
@@ -59,8 +63,13 @@ export function validate(content: Content): Problem[] {
     }
   }
 
+  // True while checking a foreign matter's text, where {subject} and the rest mean something.
+  let matter = false
+
   function checkText(where: string, value: string) {
     for (const [whole, key, arg] of value.matchAll(MACROS)) {
+      if (matter && key === 'subject' && NEIGHBOUR_MACROS.has(arg)) continue
+      if (matter && key && !arg && MATTER_MACROS.has(key)) continue
       if (key === 'minister' && arg && portfolios.has(arg)) continue
       if (key && !arg && PLAIN_MACROS.has(key)) continue
       if (key === 'neighbour' && NEIGHBOUR_MACROS.has(arg)) {
@@ -217,6 +226,7 @@ export function validate(content: Content): Problem[] {
         (want.wants === undefined || n.needs.includes(want.wants)),
     )
     if (fits.length === 0) say(where, 'no neighbour in the pack fits this dilemma')
+    else if (want.near && !fits.some((n) => n.near)) say(where, 'no neighbour on the border fits this dilemma')
   }
 
   for (const n of content.neighbours) {
@@ -229,6 +239,52 @@ export function validate(content: Content): Problem[] {
     for (const r of [...n.needs, ...n.surpluses]) if (!resources.has(r)) say(where, `unknown resource ${r}`)
     const both = n.needs.filter((r) => n.surpluses.includes(r))
     if (both.length) say(where, `cannot both need and have to spare ${both.join(', ')}`)
+    for (const b of n.borders) {
+      const other = content.neighbours.find((o) => o.id === b)
+      if (b === n.id) say(where, 'cannot border itself')
+      else if (!other) say(where, `borders ${b}, which is not a nation in the pack`)
+      else if (!other.borders.includes(n.id)) say(where, `borders ${b}, but ${b} does not list ${n.id} back`)
+    }
+  }
+
+  // The world: the borderlands, and one card for every kind of foreign matter.
+  if (content.neighbours.length && content.world.matters.length) {
+    const kinds = new Set(content.world.matters.map((m) => m.kind))
+    for (const kind of MATTER_KINDS) if (!kinds.has(kind)) say('world', `no foreign matter of kind ${kind}`)
+    const borderlands = new Set<string>()
+    for (const b of content.world.borderlands) {
+      if (borderlands.has(b)) say('world/borderlands', `${b} is listed twice`)
+      borderlands.add(b)
+    }
+    const seen = new Set<string>()
+    abroad = true
+    matter = true
+    for (const m of content.world.matters) {
+      const where = `world/${m.kind}`
+      if (seen.has(m.kind)) say(where, 'two foreign matters of the same kind')
+      seen.add(m.kind)
+      checkText(where, m.title)
+      checkText(where, m.description)
+      const ids = new Set<string>()
+      for (const o of m.options) {
+        const at = `${where}/${o.id}`
+        if (ids.has(o.id)) say(where, `duplicate option id ${o.id}`)
+        ids.add(o.id)
+        if (!MATTER_ACTIONS[m.kind].includes(o.does)) {
+          say(at, `does ${o.does}, which a ${m.kind} matter cannot; it may ${MATTER_ACTIONS[m.kind].join(', ')}`)
+        }
+        for (const e of o.effects) {
+          if (!('indicator' in e || 'faction' in e || 'standing' in e || 'flag' in e)) {
+            say(at, 'a foreign matter may only move indicators, factions and standing, or set a flag')
+          }
+        }
+        checkEffects(at, o.effects)
+        for (const value of [o.label, o.result, o.headline]) checkText(at, value)
+      }
+      if (m.options.filter((o) => o.lapse).length !== 1) say(where, 'exactly one option must be marked lapse')
+    }
+    abroad = false
+    matter = false
   }
 
   for (const r of content.resources) {

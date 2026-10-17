@@ -465,7 +465,7 @@
     {neighbour:demonym} side of the border.
   tags: [foreign, environment]
   when: { day: { gte: 25 } }
-  abroad: { standing: { gte: -50 } }
+  abroad: { standing: { gte: -50 }, near: true }
   options:
     - id: protest
       advocate: { name: Dr Wren Calloway, role: ecologist }

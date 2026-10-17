@@ -184,6 +184,8 @@ export interface AbroadSelector {
   // The neighbour already has, or has not got, this treaty with the nation.
   treaty?: string
   noTreaty?: string
+  // Only a nation that borders the player's (a border river, fans crossing on foot).
+  near?: boolean
 }
 
 export interface NeighbourDef {
@@ -201,6 +203,69 @@ export interface NeighbourDef {
   // What the papers report when this neighbour notices one of those tags.
   pleased: string
   displeased: string
+  // Whether it borders the player's nation. The five in neighbours.yaml do; the rest don't.
+  near: boolean
+  // The other nations it borders, for claims and wars between them.
+  borders: string[]
+  // What drives its moves in the world week, each 0 to 100.
+  temperament: Temperament
+  // Its army and its economy as the world begins, 0 to 100.
+  strength: number
+  wealth: number
+  // What kind of state it is, in a few words, for the papers.
+  form: string
+}
+
+export interface Temperament {
+  ambition: number
+  aggression: number
+  loyalty: number
+  charity: number
+}
+
+// What a foreign matter's option does in the world, beyond its effects. Which of these a
+// matter may use depends on its kind (MATTER_ACTIONS).
+export const MATTER_KINDS = ['claim', 'aid', 'called', 'attacked', 'crimes', 'accused', 'pact', 'terms', 'victory', 'vote'] as const
+export type MatterKind = (typeof MATTER_KINDS)[number]
+
+export const MATTER_ACTIONS: Record<MatterKind, readonly string[]> = {
+  claim: ['negotiate', 'refer', 'firm', 'cede'],
+  aid: ['aid', 'token', 'none'],
+  called: ['join', 'arms', 'abandon'],
+  attacked: ['fight', 'appeal', 'capitulate'],
+  crimes: ['condemn', 'tribunal', 'none'],
+  accused: ['inquiry', 'deny'],
+  pact: ['ally', 'none'],
+  terms: ['peace', 'none'],
+  victory: ['reparations', 'annex', 'peace'],
+  vote: ['aye', 'no', 'abstain'],
+}
+
+export interface MatterOptionDef {
+  id: string
+  label: string
+  does: string
+  // On the player's nation. A standing effect is with the matter's subject.
+  effects: Effect[]
+  // Standing with the other party, if the matter has one.
+  other?: number
+  result: string
+  headline: string
+  // What happens if nobody decides within a week. One option per matter.
+  lapse?: boolean
+}
+
+export interface MatterDef {
+  kind: MatterKind
+  title: string
+  description: string
+  options: MatterOptionDef[]
+}
+
+export interface WorldContent {
+  // Names for the land nations quarrel over.
+  borderlands: string[]
+  matters: MatterDef[]
 }
 
 export interface ResourceDef {
@@ -277,9 +342,11 @@ export interface Content {
   situations: Situation[]
   founding: { questions: FoundingQuestion[] }
   classes: ClassDef[]
+  // Every other nation in the world: the five neighbours first, then the rest.
   neighbours: NeighbourDef[]
   resources: ResourceDef[]
   treaties: TreatyDef[]
+  world: WorldContent
 }
 
 export const IDENTITY_FIELDS = [
@@ -338,6 +405,8 @@ export const ENTRY_KINDS = [
   'situation',
   'budget',
   'treaty',
+  // The world week: wars, pacts, the Assembly of Nations, foreign matters decided.
+  'world',
   'sandbox',
   // From the government above the engine: an event in the world, a law, a Founder's Word.
   'event',
@@ -410,4 +479,108 @@ export interface NationState {
   // The day of the next election, when it is not simply the next multiple of the term
   // (an imported nation keeps its own calendar). Moves on by the term after each one.
   electionDay?: number
+  // Everything beyond the borders that changes: the other nations, wars, pacts, the Assembly
+  // of Nations, matters for the player. Made on the first day there is a world to make.
+  world?: WorldState
+}
+
+export const HOME = 'home'
+
+export interface WorldNation {
+  id: string
+  // False once annexed. ruler is who holds it then.
+  free: boolean
+  ruler?: string
+  // The day it was annexed, if it was.
+  annexed?: number
+  strength: number
+  wealth: number
+  stability: number
+  // With every other foreign nation, -100 to 100. With the player it is state.neighbours.
+  relations: Record<string, number>
+  // The last few things it did or had done to it, in its own words where the AI wrote them.
+  memory: { day: number; text: string }[]
+}
+
+export interface War {
+  id: string
+  since: number
+  attackers: string[]
+  defenders: string[]
+  cause: 'claim' | 'conquest' | 'punitive'
+  region?: string
+  // -100 to 100. Positive means the attackers are winning.
+  front: number
+  weeks: number
+  weariness: { attackers: number; defenders: number }
+  crimes: { day: number; by: string; text: string }[]
+  ended?: { day: number; outcome: 'ceasefire' | 'attackers' | 'defenders' | 'terms' | 'annexed' }
+}
+
+export interface Pact {
+  id: string
+  members: string[]
+  since: number
+}
+
+export interface Claim {
+  id: string
+  by: string
+  against: string
+  region: string
+  since: number
+  // Waiting for the Assembly's arbitration.
+  referred?: boolean
+  settled?: { day: number; to: string; how: string }
+}
+
+export type MotionKind = 'ceasefire' | 'sanctions' | 'tribunal' | 'arbitration' | 'aid' | 'routine'
+
+export interface Motion {
+  id: string
+  kind: MotionKind
+  title: string
+  target?: string
+  war?: string
+  claim?: string
+  day: number
+  votes?: Record<string, 'aye' | 'no' | 'abstain'>
+  passed?: boolean
+}
+
+export interface Matter {
+  id: string
+  kind: MatterKind
+  day: number
+  expires: number
+  subject: string
+  other?: string
+  region?: string
+  war?: string
+  claim?: string
+  motion?: string
+  // Extra words for the card: what the nation needs, the terms offered, the state of the front.
+  vars: Record<string, string>
+  decided?: { day: number; option: string }
+}
+
+export interface WorldState {
+  nations: Record<string, WorldNation>
+  wars: War[]
+  pacts: Pact[]
+  claims: Claim[]
+  assembly: {
+    members: string[]
+    next: number
+    motion: Motion | null
+    past: Motion[]
+    sanctions: { target: string; until: number }[]
+  }
+  matters: Matter[]
+  home: { mobilised: boolean; lost: number; reparations: { to: string; until: number; by: number }[] }
+  // Nations that matter to the player this week: each plays on its own session.
+  important: string[]
+  // What happened, week by week, for the World page and the AI's memory of the world.
+  log: { day: number; text: string; nations: string[] }[]
+  seq: number
 }

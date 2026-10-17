@@ -1,5 +1,7 @@
-# The countries round about. Each notices one or two kinds of decision, whoever they were
-# about, and says so in its own way.
+# The countries round about: the five that border the player's nation. Each notices one or two
+# kinds of decision, whoever they were about, and says so in its own way. The fifteen further
+# off are in nations.yaml. temperament, strength and wealth drive what each does in the world
+# week (docs/design/world.md); borders are the other nations it shares a border with.
 
 - id: eskerland
   name: Eskerland
@@ -13,6 +15,11 @@
   surpluses: [energy, manufactures]
   likes: [hawkish]
   dislikes: [green]
+  form: one-party state
+  borders: [morvaine, ytterholm, kessmark]
+  temperament: { ambition: 60, aggression: 55, loyalty: 50, charity: 25 }
+  strength: 62
+  wealth: 55
   pleased: Premier Brask calls it the first sensible thing {nation} has done in years.
   displeased: Eskerland's state radio devotes an evening to {nation}'s "windmill economics".
 
@@ -28,6 +35,11 @@
   surpluses: [food]
   likes: [paternalist]
   dislikes: [permissive]
+  form: crowned republic
+  borders: [eskerland, cassel-mor, duvalle]
+  temperament: { ambition: 30, aggression: 25, loyalty: 70, charity: 60 }
+  strength: 45
+  wealth: 58
   pleased: Morvaine's bishops mention {nation} approvingly in Sunday's sermons.
   displeased: Morvaine's papers describe {nation} as having "lost its way", on the front page, under a photograph of a nightclub.
 
@@ -43,6 +55,11 @@
   surpluses: [capital]
   likes: [free_trade]
   dislikes: [redistribution]
+  form: island commonwealth
+  borders: [ostravel, lunes, duvalle]
+  temperament: { ambition: 45, aggression: 10, loyalty: 35, charity: 20 }
+  strength: 25
+  wealth: 80
   pleased: Caravel's banks issue a note praising {nation}'s "maturity".
   displeased: Several Caravel banks quietly raise the rate they charge {nation}'s firms.
 
@@ -58,6 +75,11 @@
   surpluses: [energy]
   likes: [green]
   dislikes: [surveillance, polluting]
+  form: republic
+  borders: [ardune, pellucia, amaranth]
+  temperament: { ambition: 25, aggression: 15, loyalty: 65, charity: 80 }
+  strength: 40
+  wealth: 62
   pleased: President Arnesen sends a congratulatory note, printed on recycled paper, twice.
   displeased: Velsa's foreign ministry expresses "disappointment", which in Velsa is considered shouting.
 
@@ -73,5 +95,10 @@
   surpluses: [manufactures, workers]
   likes: [pro_labour]
   dislikes: [anti_labour]
+  form: federal republic
+  borders: [velsa, gorsk, brennholt]
+  temperament: { ambition: 70, aggression: 45, loyalty: 55, charity: 35 }
+  strength: 70
+  wealth: 60
   pleased: Ardune's unions send {nation}'s unions a telegram of solidarity, and Chancellor Doln does not object.
   displeased: Chancellor Doln warns that "what is done to workers in {nation} will be remembered in Ardune".

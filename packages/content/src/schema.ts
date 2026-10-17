@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { IDENTITY_FIELDS, INDICATORS, type Condition } from '@diplomat/engine'
+import { IDENTITY_FIELDS, INDICATORS, MATTER_KINDS, type Condition } from '@diplomat/engine'
 
 const id = z.string().regex(/^[a-z][a-z0-9_-]*$/, 'ids are lowercase with dashes or underscores')
 const text = z.string().trim().min(1)
@@ -92,6 +92,7 @@ export const dilemma = z.strictObject({
       standing: z.strictObject(bounds).optional(),
       treaty: id.optional(),
       noTreaty: id.optional(),
+      near: z.boolean().optional(),
     })
     .optional(),
   author: z.string().optional(),
@@ -179,6 +180,19 @@ export const neighbour = z.strictObject({
   dislikes: z.array(id).default([]),
   pleased: text,
   displeased: text,
+  near: z.boolean().default(true),
+  borders: z.array(id).default([]),
+  temperament: z
+    .strictObject({
+      ambition: z.number().min(0).max(100),
+      aggression: z.number().min(0).max(100),
+      loyalty: z.number().min(0).max(100),
+      charity: z.number().min(0).max(100),
+    })
+    .default({ ambition: 50, aggression: 30, loyalty: 50, charity: 50 }),
+  strength: z.number().min(0).max(100).default(50),
+  wealth: z.number().min(0).max(100).default(50),
+  form: text.default('republic'),
 })
 
 export const resource = z.strictObject({ id, name: text, need: condition, surplus: condition })
@@ -190,6 +204,24 @@ export const treaty = z.strictObject({
   headline: text,
   weekly: z.array(effect).min(1),
   breaksBelow: z.number().min(-100).max(0).default(-30),
+})
+
+const matterOption = z.strictObject({
+  id,
+  label: text,
+  does: id,
+  effects: z.array(effect),
+  other: z.number().min(-50).max(50).optional(),
+  result: text,
+  headline: text,
+  lapse: z.boolean().optional(),
+})
+
+export const world = z.strictObject({
+  borderlands: z.array(text).min(8),
+  matters: z.array(
+    z.strictObject({ kind: z.enum(MATTER_KINDS), title: text, description: text, options: z.array(matterOption).min(2).max(4) }),
+  ),
 })
 
 export const oneOrMany = <T extends z.ZodType>(item: T) => z.union([z.array(item), item.transform((one) => [one])])

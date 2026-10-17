@@ -1,6 +1,7 @@
 import { holds, compare } from './conditions.ts'
 import { pick, pickWeighted, rngFor } from './rng.ts'
 import { SAVE_VERSION } from './save.ts'
+import { ensureWorld, worldWeek, type WorldChoices } from './world.ts'
 import {
   type Change,
   type Content,
@@ -391,9 +392,13 @@ export function decideSituation(input: GameState, content: Content, optionId: st
   return state
 }
 
-export function endDay(input: GameState, content: Content): GameState {
+// world: what the AI chose for the other nations this week, if the world turns tonight.
+// Without it each nation takes its top-scored move.
+export function endDay(input: GameState, content: Content, opts: { world?: WorldChoices } = {}): GameState {
   const state = structuredClone(input)
 
+  // The world goes first, so the moves are judged on the state they were planned on.
+  if (state.day % 7 === 0) worldWeek(state, content, opts.world)
   if (state.day % 7 === 0) settleBudget(state, content)
   if (state.day % 7 === 0) settleTreaties(state, content)
   runPending(state, content)
@@ -770,6 +775,8 @@ export function candidates(dilemma: Dilemma, state: NationState, content: Conten
   return content.neighbours
     .filter(
       (n) =>
+        (state.world?.nations[n.id]?.free ?? true) &&
+        (want.near === undefined || n.near === want.near) &&
         (want.supplies === undefined || n.surpluses.includes(want.supplies)) &&
         (want.wants === undefined || n.needs.includes(want.wants)) &&
         (want.standing === undefined || compare(standingWith(state, content, n.id), want.standing)) &&
@@ -793,12 +800,14 @@ function assess(state: GameState, content: Content) {
   state.resources = Object.fromEntries(
     content.resources.map((r) => [r.id, holds(r.need, state) ? 'need' : holds(r.surplus, state) ? 'surplus' : 'even']),
   )
+  ensureWorld(state, content)
 }
 
 // Every neighbour reads the papers. An option carrying a tag a neighbour cares about moves
 // standing with that neighbour, whatever the decision was about.
 function opinions(state: GameState, content: Content, option: Option, changes: Change[]) {
   for (const n of content.neighbours) {
+    if (state.world?.nations[n.id]?.free === false) continue
     const liked = option.tags.filter((tag) => n.likes.includes(tag)).length
     const disliked = option.tags.filter((tag) => n.dislikes.includes(tag)).length
     const by = Math.max(-OPINION_CAP, Math.min(OPINION_CAP, (liked - disliked) * OPINION_STEP))
@@ -935,3 +944,6 @@ export function startCrisis(input: GameState, content: Content, situationId: str
   if (!opts.quiet) record(state, content, 'sandbox', `Crisis started in the sandbox: ${situation.title}`, [], situation.description)
   return state
 }
+
+// For the world (world.ts), which moves the same numbers and writes to the same timeline.
+export { apply as applyEffects, record as recordEntry }

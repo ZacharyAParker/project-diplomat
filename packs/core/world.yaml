@@ -1,0 +1,334 @@
+# The world beyond the borders: the names of the borderlands nations quarrel over, and the
+# foreign matters that come to the player's desk from the world week. See docs/design/world.md.
+#
+# A matter is a light decision: no sitting, no court, one card. Each option names what it does
+# (one of the actions the engine knows for that kind of matter), its effects on the player's
+# nation (standing is with the subject, the nation the matter is about), how it changes standing
+# with the other party if there is one, and what the papers say. The option marked lapse is what
+# happens if nobody decides within a week.
+#
+# Text may use {nation}, {subject}, {subject:demonym}, {subject:leader}, {other}, {region},
+# {motion}, {ally} and the usual {capital}, {leader} and the rest.
+
+borderlands:
+  - the Weir Valley
+  - the Saltmarsh
+  - Hollin Moor
+  - the Three Fords
+  - the Gannet Isles
+  - the Brackwater
+  - the Ashen Ridge
+  - the Lantern Coast
+  - Tolland Heath
+  - the Upper Seln
+  - Corrow Forest
+  - the Tithe Lands
+  - the Dunmere Gap
+  - Kell Point
+  - the Marrows
+  - Fennick Downs
+
+matters:
+  - kind: claim
+    title: '{subject} claims {region}'
+    description: >-
+      {subject:leader} says {region}, on {nation}'s side of the border since anyone can remember,
+      was taken from {subject} by a surveyor's error two hundred years ago, and wants it back. The
+      papers in {subject} have printed old maps. Nobody in {region} has been asked.
+    options:
+      - id: negotiate
+        label: Talk it through
+        does: negotiate
+        effects:
+          - { standing: 5, why: '{nation} agreed to talk about {region}.' }
+        result: Officials from both sides meet in a border town and agree to meet again.
+        headline: '{nation} opens talks with {subject} over {region}'
+        lapse: true
+      - id: refer
+        label: Put it to the Assembly of Nations
+        does: refer
+        effects:
+          - { standing: -3, why: '{subject} wanted it settled between neighbours.' }
+        result: The claim goes to the Assembly's next sitting for arbitration, and both sides promise to abide by it.
+        headline: '{nation} refers the {region} claim to the Assembly of Nations'
+      - id: firm
+        label: Not an inch
+        does: firm
+        effects:
+          - { standing: -10, why: '{nation} refused even to discuss {region}.' }
+          - { indicator: legitimacy, by: 2, why: 'Standing firm on the border plays well at home.' }
+        result: The {leader} visits {region} and is photographed with a fence post.
+        headline: '{nation} rejects {subject}''s claim to {region}'
+      - id: cede
+        label: Give it up
+        does: cede
+        effects:
+          - { standing: 15, why: '{nation} handed over {region} without a quarrel.' }
+          - { indicator: legitimacy, by: -5, why: 'Giving up land without a fight is not forgiven quickly.' }
+          - { indicator: capacity, by: -2, why: '{region} had farms, roads and taxpayers.' }
+        result: The border is redrawn. The people of {region} find out from the radio.
+        headline: '{nation} cedes {region} to {subject}'
+
+  - kind: aid
+    title: '{subject} asks for help'
+    description: >-
+      {subject:leader} has written to every capital. {subject} is in trouble: {need}. The
+      Assembly's humanitarian fund is empty again, and {subject} is asking its friends directly.
+    options:
+      - id: send
+        label: Send real help
+        does: aid
+        effects:
+          - { indicator: fiscal, by: -3, why: 'Aid to {subject} is paid for out of this year''s budget.' }
+          - { standing: 12, why: '{nation} came through when it counted.' }
+        result: Convoys and field hospitals leave from {capital}. {subject} does not forget it.
+        headline: '{nation} sends aid to {subject}'
+      - id: token
+        label: Send something
+        does: token
+        effects:
+          - { indicator: fiscal, by: -1, why: 'A modest grant to {subject}.' }
+          - { standing: 4, why: '{nation} sent something, which is more than some.' }
+        result: A cheque and a statement of solidarity. The statement is longer.
+        headline: '{nation} pledges a modest sum to {subject}'
+      - id: refuse
+        label: Not this time
+        does: none
+        effects:
+          - { standing: -6, why: '{nation} said no when {subject} asked.' }
+        result: '{nation}''s foreign ministry says it is "following events closely".'
+        headline: '{nation} declines {subject}''s appeal'
+        lapse: true
+
+  - kind: called
+    title: '{subject}, {nation}''s ally, is attacked'
+    description: >-
+      {other} has invaded {subject}. Under the pact between them, {subject} expects {nation} to
+      come to its defence, and {subject:leader} has said so in public, which makes it harder to
+      say no in private.
+    options:
+      - id: join
+        label: Honour the pact and go to war
+        does: join
+        effects:
+          - { standing: 15, why: '{nation} kept its word.' }
+          - { indicator: legitimacy, by: 2, why: 'A promise kept, at a price.' }
+        other: -40
+        result: '{nation} declares war on {other}. The pact holds.'
+        headline: '{nation} goes to war beside {subject}'
+      - id: arms
+        label: Send arms, not soldiers
+        does: arms
+        effects:
+          - { indicator: fiscal, by: -2, why: 'Weapons for {subject}, on the budget.' }
+          - { standing: 4, why: 'Help, if not the help {subject} asked for.' }
+        other: -15
+        result: Crates leave {capital} by night. Everyone knows what is in them.
+        headline: '{nation} arms {subject} against {other}'
+      - id: stay
+        label: Stay out of it
+        does: abandon
+        effects:
+          - { standing: -15, why: '{nation} left {subject} to fight alone.' }
+          - { indicator: legitimacy, by: -3, why: 'A broken pact is a broken promise.' }
+        other: 5
+        result: The pact with {subject} is over. Other allies take note.
+        headline: '{nation} stays out of {subject}''s war'
+        lapse: true
+
+  - kind: attacked
+    title: '{subject} invades {nation}'
+    description: >-
+      {subject}'s army has crossed into {region}. {subject:leader} calls it "a limited operation to
+      restore historic justice". The {leader} must answer, tonight.
+    options:
+      - id: fight
+        label: Fight
+        does: fight
+        effects:
+          - { indicator: legitimacy, by: 4, why: 'The country rallies when it is attacked.' }
+        result: '{nation} mobilises. The war with {subject} has begun.'
+        headline: '{nation} fights back against {subject}'
+        lapse: true
+      - id: appeal
+        label: Fight, and call on the Assembly of Nations
+        does: appeal
+        effects:
+          - { indicator: legitimacy, by: 3, why: 'The country rallies when it is attacked.' }
+        result: '{nation} mobilises and asks the Assembly to call for a ceasefire at its next sitting.'
+        headline: '{nation} fights back and appeals to the Assembly'
+      - id: terms
+        label: Seek terms at once
+        does: capitulate
+        effects:
+          - { indicator: legitimacy, by: -8, why: 'The government gave in without a fight.' }
+          - { indicator: capacity, by: -3, why: '{region} is lost.' }
+        result: '{region} is handed to {subject}. The war is over before it began, and so may be the government.'
+        headline: '{nation} gives up {region} to end the invasion'
+
+  - kind: crimes
+    title: 'Reports of atrocities in {subject}''s war'
+    description: >-
+      Journalists and the Assembly's observers report that {subject}'s forces have committed
+      atrocities against civilians in the war with {other}. {subject} denies everything and has
+      expelled the observers.
+    options:
+      - id: condemn
+        label: Condemn it
+        does: condemn
+        effects:
+          - { standing: -10, why: '{nation} condemned {subject}''s conduct of the war.' }
+          - { indicator: legitimacy, by: 1, why: 'Saying the right thing, out loud.' }
+        other: 4
+        result: '{nation}''s foreign minister condemns the atrocities in terms {subject} will not forget.'
+        headline: '{nation} condemns {subject}''s atrocities'
+      - id: tribunal
+        label: Call for a tribunal
+        does: tribunal
+        effects:
+          - { standing: -15, why: '{nation} wants {subject}''s commanders tried.' }
+          - { indicator: legitimacy, by: 2, why: 'Standing up for the laws of war.' }
+        other: 6
+        result: '{nation} asks the Assembly of Nations to try those responsible.'
+        headline: '{nation} demands a war crimes tribunal for {subject}'
+      - id: silent
+        label: Say nothing
+        does: none
+        effects:
+          - { indicator: legitimacy, by: -1, why: 'Silence is noticed too.' }
+        result: '{nation}''s foreign ministry has no comment.'
+        headline: '{nation} keeps quiet on {subject}''s war'
+        lapse: true
+
+  - kind: accused
+    title: '{nation}''s forces are accused of war crimes'
+    description: >-
+      {subject} and several newspapers accuse {nation}'s forces of atrocities in the war. Some of
+      it is propaganda. Some of it is photographed.
+    options:
+      - id: inquiry
+        label: Open an independent inquiry
+        does: inquiry
+        effects:
+          - { indicator: legitimacy, by: -2, why: 'An inquiry admits there is something to look into.' }
+          - { indicator: liberty, by: 1, why: 'The inquiry sits in public.' }
+        result: An inquiry under a judge from Saint Ivo begins. Some officers are suspended.
+        headline: '{nation} opens an inquiry into the conduct of its forces'
+      - id: martial
+        label: Court-martial the worst of it, quietly
+        does: inquiry
+        effects:
+          - { indicator: legitimacy, by: -1, why: 'Justice, but not in public.' }
+          - { indicator: liberty, by: -1, why: 'Military courts, closed doors.' }
+        result: Three officers are court-martialled behind closed doors.
+        headline: '{nation} court-martials officers in secret'
+      - id: deny
+        label: Deny it
+        does: deny
+        effects:
+          - { indicator: legitimacy, by: 1, why: 'For now, the denial holds.' }
+          - { standing: -10, why: '{nation} denied what everyone had seen.' }
+        result: '{nation}''s government calls the reports "fabrications by an enemy at war".'
+        headline: '{nation} denies its forces committed atrocities'
+        lapse: true
+
+  - kind: pact
+    title: '{subject} proposes an alliance'
+    description: >-
+      {subject:leader} proposes a defensive pact: if either is attacked, the other comes to its
+      aid. {subject} is {strength_word}, and its friends and enemies would become {nation}'s.
+    options:
+      - id: accept
+        label: Sign the pact
+        does: ally
+        effects:
+          - { standing: 15, why: 'A pact, signed.' }
+        result: The pact is signed in {capital}. Every enemy {subject} has is now watching {nation} too.
+        headline: '{nation} signs a defensive pact with {subject}'
+      - id: decline
+        label: Decline, politely
+        does: none
+        effects:
+          - { standing: -5, why: '{nation} turned down the pact.' }
+        result: '{nation} thanks {subject} for the offer and prefers its freedom of action.'
+        headline: '{nation} declines a pact with {subject}'
+        lapse: true
+
+  - kind: terms
+    title: '{subject} offers terms'
+    description: >-
+      After {weeks} weeks of war, {subject} offers to stop. Its terms: {terms}. The front is
+      {front}. The war is costing {nation} every week it goes on.
+    options:
+      - id: accept
+        label: Accept the terms
+        does: peace
+        effects:
+          - { standing: 10, why: 'The war is over.' }
+        result: The guns stop along the border. The terms are signed in Saint Ivo.
+        headline: '{nation} makes peace with {subject}'
+      - id: fight
+        label: Fight on
+        does: none
+        effects:
+          - { standing: -5, why: '{nation} refused to make peace.' }
+        result: The war with {subject} goes on.
+        headline: '{nation} rejects {subject}''s terms'
+        lapse: true
+
+  - kind: victory
+    title: '{subject} is beaten'
+    description: >-
+      {subject}'s army has collapsed and {subject:leader} has asked what {nation} wants. The
+      {leader} may ask for a great deal.{annexable}
+    options:
+      - id: reparations
+        label: Make them pay
+        does: reparations
+        effects:
+          - { standing: -10, why: '{nation} took reparations.' }
+        result: '{subject} will pay {nation} reparations for two months.'
+        headline: '{nation} imposes reparations on {subject}'
+        lapse: true
+      - id: annex
+        label: Annex {subject}
+        does: annex
+        effects:
+          - { indicator: legitimacy, by: -3, why: 'Ruling a conquered people is not what most of the country wanted.' }
+          - { indicator: liberty, by: -2, why: 'Occupation needs curfews.' }
+        result: '{subject} ceases to be a nation. {nation} governs it now, and must hold it.'
+        headline: '{nation} annexes {subject}'
+      - id: generous
+        label: A generous peace
+        does: peace
+        effects:
+          - { standing: 15, why: '{nation} could have taken more.' }
+          - { indicator: legitimacy, by: 1, why: 'Magnanimity in victory reads well, abroad.' }
+        result: '{nation} asks for nothing but peace, and the Assembly applauds.'
+        headline: '{nation} offers {subject} a generous peace'
+
+  - kind: vote
+    title: 'The Assembly of Nations: {motion}'
+    description: >-
+      The Assembly of Nations sits in a week, and the motion before it is {motion}. {nation}'s
+      delegation needs instructions.
+    options:
+      - id: aye
+        label: Vote for it
+        does: aye
+        effects: []
+        result: '{nation} will vote aye.'
+        headline: '{nation} will vote for {motion}'
+      - id: no
+        label: Vote against it
+        does: no
+        effects: []
+        result: '{nation} will vote no.'
+        headline: '{nation} will vote against {motion}'
+      - id: abstain
+        label: Abstain
+        does: abstain
+        effects: []
+        result: '{nation} will abstain.'
+        headline: '{nation} will abstain on {motion}'
+        lapse: true

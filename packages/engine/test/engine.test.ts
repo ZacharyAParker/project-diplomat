@@ -40,6 +40,9 @@ import {
   type Situation,
 } from '../src/index.ts'
 
+// The world fields a neighbour carries, at their defaults.
+const NEAR = { near: true, borders: [], temperament: { ambition: 50, aggression: 30, loyalty: 50, charity: 50 }, strength: 50, wealth: 50, form: 'republic' }
+
 const identity: Identity = {
   name: 'Testland',
   capital: 'Test City',
@@ -72,6 +75,7 @@ function pack(extra: Partial<Content> = {}): Content {
     pack: { id: 'test', name: 'Test Pack', version: '1.2.3' },
     founding: { questions: [] },
     neighbours: [],
+    world: { borderlands: [], matters: [] },
     resources: [],
     treaties: [],
     classes: [],
@@ -799,7 +803,7 @@ test('anything that is not a save of a supported version is refused', () => {
   assert.throws(() => deserialize('[1, 2, 3]'), /no version number/)
   assert.throws(() => deserialize('null'), /no version number/)
   assert.throws(() => deserialize('{"day": 1}'), /no version number/)
-  assert.throws(() => deserialize(save({ version: 3 })), /this save is version 3, and only version 2 can be read/)
+  assert.throws(() => deserialize(save({ version: 4 })), /this save is version 4, and only version 3 can be read/)
   assert.throws(() => deserialize(save({ version: '1' })), /no version number/)
   assert.throws(() => deserialize(save({ indicators: { fiscal: 50 } })), /indicators is missing or malformed/)
   assert.throws(() => deserialize(save({ timeline: 'long' })), /timeline is missing or malformed/)
@@ -975,6 +979,7 @@ function abroadPack(extra: Partial<Content> = {}): Content {
         dislikes: ['hawkish'],
         pleased: '{neighbour} approves.',
         displeased: '{neighbour} disapproves.',
+        ...NEAR,
       },
       {
         id: 'west',
@@ -989,6 +994,7 @@ function abroadPack(extra: Partial<Content> = {}): Content {
         dislikes: [],
         pleased: 'Pleased.',
         displeased: 'Displeased.',
+        ...NEAR,
       },
     ],
     resources: [
@@ -1113,7 +1119,7 @@ test('a version 1 save loads with nobody abroad, and the next day fills the neig
   delete old.agenda.bound
   old.version = 1
   const loaded = deserialize(JSON.stringify(old))
-  assert.equal(loaded.version, 2)
+  assert.equal(loaded.version, 3)
   assert.deepEqual(loaded.neighbours, {})
   const next = endDay(loaded, content)
   assert.deepEqual(next.neighbours, { east: 10, west: -5 })

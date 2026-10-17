@@ -73,9 +73,14 @@ export function loadPack(dir: string): Loaded {
     names: cabinet?.names ?? { given: [], family: [] },
     dilemmas: readAll('dilemmas', schema.dilemma),
     situations: readAll('situations', schema.situation),
-    neighbours: readIfThere(join(dir, 'neighbours.yaml'), schema.neighbour.array()) ?? [],
+    // The five that border the player's nation, then the rest of the world.
+    neighbours: [
+      ...(readIfThere(join(dir, 'neighbours.yaml'), schema.neighbour.array()) ?? []),
+      ...(readIfThere(join(dir, 'nations.yaml'), schema.neighbour.array()) ?? []),
+    ],
     resources: readIfThere(join(dir, 'resources.yaml'), schema.resource.array()) ?? [],
     treaties: readIfThere(join(dir, 'treaties.yaml'), schema.treaty.array()) ?? [],
+    world: readIfThere(join(dir, 'world.yaml'), schema.world) ?? { borderlands: [], matters: [] },
   }
   return { content, problems }
 }

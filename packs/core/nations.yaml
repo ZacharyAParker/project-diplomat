@@ -1,0 +1,318 @@
+# The nations further off: none of them borders the player's nation, but all of them sit in the
+# Assembly of Nations, trade, quarrel, fall on hard times and, now and then, go to war. Same
+# fields as neighbours.yaml. See docs/design/world.md for what temperament, strength and wealth do.
+
+- id: ytterholm
+  name: Ytterholm
+  demonym: Ytterholmer
+  leader: Lawspeaker Sigrun Hald
+  description: >-
+    Fjords, cod and a parliament that meets outdoors in June and indoors the rest of the year,
+    resentfully. Ytterholm wants nothing from anyone and says so at every conference it attends.
+  near: false
+  standing: 0
+  needs: [manufactures]
+  surpluses: [food]
+  likes: [green]
+  dislikes: [hawkish]
+  form: republic
+  borders: [eskerland, kessmark]
+  temperament: { ambition: 15, aggression: 20, loyalty: 45, charity: 40 }
+  strength: 35
+  wealth: 50
+  pleased: Ytterholm's Lawspeaker observes that {nation} "has, for once, left the sea alone".
+  displeased: Ytterholm cancels a herring delegation to {nation}, which nobody knew was coming.
+
+- id: kessmark
+  name: Kessmark
+  demonym: Kessmarker
+  leader: General Ottokar Vey
+  description: >-
+    A junta with an excellent marching band and a long list of borders it considers provisional.
+    Its generals describe every year as "the year of consolidation".
+  near: false
+  standing: -10
+  needs: [food, capital]
+  surpluses: [workers]
+  likes: [hawkish, surveillance]
+  dislikes: [privacy, dovish]
+  form: junta
+  borders: [eskerland, ytterholm, vrana]
+  temperament: { ambition: 80, aggression: 80, loyalty: 30, charity: 10 }
+  strength: 66
+  wealth: 32
+  pleased: General Vey's spokesman calls {nation} "a serious country, at last".
+  displeased: Kessmark's state television runs a documentary about {nation}'s "softness", with a choir.
+
+- id: vrana
+  name: Vrana
+  demonym: Vranish
+  leader: First Secretary Ilya Mrak
+  description: >-
+    One party, one newspaper and four hundred statues, three of them of the same man. Vrana exports
+    tractors and opinions about everyone else's tractors.
+  near: false
+  standing: -15
+  needs: [capital]
+  surpluses: [manufactures, energy]
+  likes: [surveillance, anti_labour]
+  dislikes: [privacy, permissive]
+  form: one-party state
+  borders: [kessmark, gorsk, tarvos]
+  temperament: { ambition: 70, aggression: 60, loyalty: 60, charity: 15 }
+  strength: 60
+  wealth: 40
+  pleased: The Vranish party paper praises {nation}'s "discipline" in an editorial nobody signed.
+  displeased: First Secretary Mrak describes {nation} as "a newspaper with a flag".
+
+- id: gorsk
+  name: Gorsk
+  demonym: Gorskan
+  leader: Colonel Dragan Pell
+  description: >-
+    The poorest country on the continent and the best armed, a combination its neighbours find
+    restful only on paper. Gorsk's colonels promise elections every spring.
+  near: false
+  standing: -20
+  needs: [food, energy, capital]
+  surpluses: [workers]
+  likes: [hawkish]
+  dislikes: [redistribution]
+  form: junta
+  borders: [vrana, ardune, brennholt]
+  temperament: { ambition: 75, aggression: 85, loyalty: 25, charity: 5 }
+  strength: 58
+  wealth: 18
+  pleased: Colonel Pell sends {nation}'s defence minister a ceremonial sword, which customs is still examining.
+  displeased: Gorsk's radio announces that {nation} "has been noted". It does not say by whom.
+
+- id: brennholt
+  name: Brennholt
+  demonym: Brennholter
+  leader: Federal Chancellor Anke Moll
+  description: >-
+    Coal, rail and nine federal states that agree on nothing but timetables. Brennholt is rich,
+    careful and the only country in the Assembly that reads the annexes.
+  near: false
+  standing: 10
+  needs: [energy, food]
+  surpluses: [manufactures, capital]
+  likes: [growth, free_trade]
+  dislikes: [austerity]
+  form: federal republic
+  borders: [ardune, gorsk, tarvos, qasrin]
+  temperament: { ambition: 50, aggression: 25, loyalty: 70, charity: 45 }
+  strength: 64
+  wealth: 76
+  pleased: Chancellor Moll calls {nation}'s decision "proportionate", the highest praise in Brennholt.
+  displeased: Brennholt's finance ministry publishes a forty-page note on {nation}. Page one is "regret".
+
+- id: tarvos
+  name: Tarvos
+  demonym: Tarvosi
+  leader: The High Synod, by its Speaker Bartholomew Cree
+  description: >-
+    A theocracy of monasteries, salt mines and very long sermons. Tarvos believes it has a
+    mission to the continent and has never quite said what it is.
+  near: false
+  standing: -5
+  needs: [food]
+  surpluses: [energy]
+  likes: [paternalist]
+  dislikes: [permissive, lenient]
+  form: theocracy
+  borders: [vrana, brennholt, qasrin]
+  temperament: { ambition: 65, aggression: 50, loyalty: 55, charity: 50 }
+  strength: 50
+  wealth: 45
+  pleased: The Synod adds {nation} to the list of nations prayed for, on the hopeful side.
+  displeased: The Synod adds {nation} to the list of nations prayed for, on the other side.
+
+- id: qasrin
+  name: Qasrin
+  demonym: Qasrini
+  leader: Sultan Idris al-Maqam
+  description: >-
+    Desert, oil and a sovereign fund that owns a little of everything, including, it is rumoured,
+    several of the other members of the Assembly. Qasrin is polite to everyone and in debt to no one.
+  near: false
+  standing: 5
+  needs: [food, workers]
+  surpluses: [energy, capital]
+  likes: [free_trade, growth]
+  dislikes: [green]
+  form: monarchy
+  borders: [tarvos, brennholt, saint-ivo]
+  temperament: { ambition: 55, aggression: 30, loyalty: 50, charity: 55 }
+  strength: 48
+  wealth: 85
+  pleased: Qasrin's sovereign fund buys a modest stake in something {nation} owns.
+  displeased: Qasrin's sovereign fund sells a modest stake in something {nation} owns, loudly.
+
+- id: saint-ivo
+  name: Saint Ivo
+  demonym: Ivonian
+  leader: Prince-Bishop Clement IX
+  description: >-
+    A principality the size of a large parish, home to the Assembly's archives, three hospitals
+    and most of the continent's charities. Saint Ivo has no army and a very good choir.
+  near: false
+  standing: 20
+  needs: [food, energy]
+  surpluses: [capital]
+  likes: [spending, dovish]
+  dislikes: [hawkish]
+  form: principality
+  borders: [qasrin, pellucia]
+  temperament: { ambition: 5, aggression: 0, loyalty: 60, charity: 95 }
+  strength: 8
+  wealth: 55
+  pleased: The Prince-Bishop mentions {nation} in his Sunday blessing, by name, which is rare.
+  displeased: Saint Ivo's charities issue a joint statement of concern about {nation}, in four languages.
+
+- id: pellucia
+  name: Pellucia
+  demonym: Pellucian
+  leader: Speaker Mireille Aubade
+  description: >-
+    A lake republic of glassworks and committees. Pellucia's government has fifteen ministers and
+    no prime minister, and is proud that it has never been in a hurry.
+  near: false
+  standing: 10
+  needs: [manufactures]
+  surpluses: [workers]
+  likes: [privacy, spending]
+  dislikes: [surveillance]
+  form: council republic
+  borders: [velsa, saint-ivo, amaranth]
+  temperament: { ambition: 20, aggression: 10, loyalty: 60, charity: 70 }
+  strength: 30
+  wealth: 60
+  pleased: Pellucia's council votes, after three sittings, to welcome {nation}'s decision.
+  displeased: Pellucia's council refers {nation}'s decision to a committee, which in Pellucia is a rebuke.
+
+- id: amaranth
+  name: Amaranth
+  demonym: Amaranthine
+  leader: First Minister Tobias Wren
+  description: >-
+    A small, earnest commonwealth that founded three peace societies and the Assembly's
+    humanitarian fund, and still asks everyone to pay their dues.
+  near: false
+  standing: 15
+  needs: [energy, capital]
+  surpluses: [food]
+  likes: [dovish, redistribution]
+  dislikes: [hawkish, austerity]
+  form: commonwealth
+  borders: [velsa, pellucia]
+  temperament: { ambition: 15, aggression: 5, loyalty: 75, charity: 90 }
+  strength: 22
+  wealth: 48
+  pleased: First Minister Wren writes {nation} a long letter of thanks, and publishes it.
+  displeased: Amaranth's peace societies hold a candlelit vigil outside {nation}'s embassy.
+
+- id: duvalle
+  name: Duvalle
+  demonym: Duvallois
+  leader: President Laurent Ferrand
+  description: >-
+    Old money, new bridges and a presidency that changes hands every five years with great
+    ceremony and no change of policy. Duvalle lends to half the continent.
+  near: false
+  standing: 5
+  needs: [energy]
+  surpluses: [capital, manufactures]
+  likes: [free_trade, growth]
+  dislikes: [pro_labour]
+  form: presidential republic
+  borders: [morvaine, caravel, cassel-mor, ostravel]
+  temperament: { ambition: 55, aggression: 30, loyalty: 50, charity: 35 }
+  strength: 55
+  wealth: 78
+  pleased: Duvalle's president toasts {nation} at a state dinner, in passing, between courses.
+  displeased: Duvalle's banks raise the price of {nation}'s bonds by a quarter of a point.
+
+- id: cassel-mor
+  name: Cassel-Mor
+  demonym: Casselan
+  leader: Queen Ysolde II
+  description: >-
+    A kingdom of castles, cattle and a royal family older than most of the continent's borders.
+    Cassel-Mor has lost every war it has fought and is the proudest country in the Assembly.
+  near: false
+  standing: 0
+  needs: [manufactures, capital]
+  surpluses: [food]
+  likes: [paternalist]
+  dislikes: [permissive]
+  form: monarchy
+  borders: [morvaine, duvalle]
+  temperament: { ambition: 40, aggression: 40, loyalty: 65, charity: 30 }
+  strength: 38
+  wealth: 42
+  pleased: Queen Ysolde's household lets it be known that Her Majesty was "pleased" by {nation}.
+  displeased: Cassel-Mor's court circular omits {nation} from the list of the Queen's birthday greetings.
+
+- id: ostravel
+  name: Ostravel
+  demonym: Ostravelian
+  leader: Doge Pietro Malvasi
+  description: >-
+    A merchant republic of canals and counting-houses whose Doge is elected for life by a council
+    of shipowners. Ostravel will trade with anyone, and has.
+  near: false
+  standing: 5
+  needs: [food, workers]
+  surpluses: [capital, manufactures]
+  likes: [free_trade, growth]
+  dislikes: [redistribution]
+  form: merchant republic
+  borders: [caravel, duvalle, skerrin]
+  temperament: { ambition: 60, aggression: 20, loyalty: 40, charity: 25 }
+  strength: 42
+  wealth: 72
+  pleased: Ostravel's shipowners drink to {nation} at the Exchange, which counts as a treaty there.
+  displeased: Ostravel's insurers add {nation} to the list of "interesting" ports.
+
+- id: skerrin
+  name: Skerrin
+  demonym: Skerrish
+  leader: Chief Fisherman Rowan Tully
+  description: >-
+    Forty islands, four hundred boats and one long-running argument with Ostravel about where the
+    cod live. Skerrin is governed by a council of skippers that meets on whichever boat is in.
+  near: false
+  standing: 5
+  needs: [manufactures, energy]
+  surpluses: [food]
+  likes: [green]
+  dislikes: [polluting]
+  form: island council
+  borders: [ostravel, lunes]
+  temperament: { ambition: 35, aggression: 35, loyalty: 55, charity: 40 }
+  strength: 28
+  wealth: 35
+  pleased: The skippers' council sends {nation} a crate of smoked fish and a note that says "fair".
+  displeased: Skerrin's skippers vote to stop calling at {nation}'s harbours "until further notice".
+
+- id: lunes
+  name: Lunes
+  demonym: Lunesian
+  leader: Princess Regent Céleste
+  description: >-
+    An island principality of casinos, lighthouses and very discreet hospitals. Lunes takes no
+    side in anything and is everyone's second-favourite holiday.
+  near: false
+  standing: 15
+  needs: [food, workers]
+  surpluses: [capital]
+  likes: [permissive, privacy]
+  dislikes: [surveillance]
+  form: principality
+  borders: [caravel, skerrin]
+  temperament: { ambition: 10, aggression: 5, loyalty: 30, charity: 50 }
+  strength: 12
+  wealth: 70
+  pleased: The Princess Regent names a new rose after {nation}. It is pale and does well in shade.
+  displeased: Lunes quietly moves {nation} down the list for the summer regatta.

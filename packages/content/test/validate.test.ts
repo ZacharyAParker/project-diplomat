@@ -16,6 +16,9 @@ import {
 } from '@diplomat/engine'
 import { FOUNDING_RANGE, checkPack, loadPack, validate } from '../src/index.ts'
 
+// The world fields a neighbour carries, at their defaults.
+const NEAR = { near: true, borders: [], temperament: { ambition: 50, aggression: 30, loyalty: 50, charity: 50 }, strength: 50, wealth: 50, form: 'republic' }
+
 function option(id: string, extra: Partial<Option> = {}): Option {
   return {
     id,
@@ -38,6 +41,7 @@ function pack(options: Option[], extra: Partial<Dilemma> = {}): Content {
     pack: { id: 'test', name: 'Test Pack', version: '0.0.1' },
     founding: { questions: [] },
     neighbours: [],
+    world: { borderlands: [], matters: [] },
     resources: [],
     treaties: [],
     classes: [{ id: 'plain', name: 'Plain', description: 'Plain.' }],
@@ -442,6 +446,7 @@ const abroadParts: Pick<Content, 'neighbours' | 'resources' | 'treaties'> = {
       dislikes: [],
       pleased: '{neighbour} is pleased.',
       displeased: '{neighbour} is not.',
+      ...NEAR,
     },
   ],
   resources: [{ id: 'energy', name: 'Energy', need: { day: { gte: 99 } }, surplus: { day: { gte: 999 } } }],

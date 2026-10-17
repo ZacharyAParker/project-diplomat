@@ -1,7 +1,7 @@
 import type { GameState } from './engine.ts'
-import { ENTRY_KINDS, IDENTITY_FIELDS, INDICATORS } from './types.ts'
+import { ENTRY_KINDS, IDENTITY_FIELDS, INDICATORS, MATTER_KINDS } from './types.ts'
 
-export const SAVE_VERSION = 2
+export const SAVE_VERSION = 3
 
 type Check = (value: unknown) => boolean
 
@@ -68,6 +68,96 @@ const isChange = shaped({
   why: isString,
 })
 
+const isText: Check = (value) => isString(value) && (value as string).length <= 2000
+const isSide = listOf(isString)
+const isVote = oneOf(['aye', 'no', 'abstain'])
+const isMotion = shaped({
+  id: isString,
+  kind: oneOf(['ceasefire', 'sanctions', 'tribunal', 'arbitration', 'aid', 'routine']),
+  title: isText,
+  target: optional(isString),
+  war: optional(isString),
+  claim: optional(isString),
+  day: isDay,
+  votes: optional(mapOf(isVote)),
+  passed: optional(isBoolean),
+})
+
+// The world beyond the borders (world.ts), checked as closely as the rest.
+const isWorld = shaped({
+  nations: mapOf(
+    shaped({
+      id: isString,
+      free: isBoolean,
+      ruler: optional(isString),
+      annexed: optional(isDay),
+      strength: isScore,
+      wealth: isScore,
+      stability: isScore,
+      relations: mapOf(isStanding),
+      memory: listOf(shaped({ day: isDay, text: isText })),
+    }),
+  ),
+  wars: listOf(
+    shaped({
+      id: isString,
+      since: isDay,
+      attackers: isSide,
+      defenders: isSide,
+      cause: oneOf(['claim', 'conquest', 'punitive']),
+      region: optional(isString),
+      front: isStanding,
+      weeks: isCount,
+      weariness: shaped({ attackers: isScore, defenders: isScore }),
+      crimes: listOf(shaped({ day: isDay, by: isString, text: isText })),
+      ended: optional(shaped({ day: isDay, outcome: oneOf(['ceasefire', 'attackers', 'defenders', 'terms', 'annexed']) })),
+    }),
+  ),
+  pacts: listOf(shaped({ id: isString, members: isSide, since: isDay })),
+  claims: listOf(
+    shaped({
+      id: isString,
+      by: isString,
+      against: isString,
+      region: isString,
+      since: isDay,
+      referred: optional(isBoolean),
+      settled: optional(shaped({ day: isDay, to: isString, how: isString })),
+    }),
+  ),
+  assembly: shaped({
+    members: isSide,
+    next: isDay,
+    motion: (value) => value === null || isMotion(value),
+    past: listOf(isMotion),
+    sanctions: listOf(shaped({ target: isString, until: isDay })),
+  }),
+  matters: listOf(
+    shaped({
+      id: isString,
+      kind: oneOf(MATTER_KINDS),
+      day: isDay,
+      expires: isDay,
+      subject: isString,
+      other: optional(isString),
+      region: optional(isString),
+      war: optional(isString),
+      claim: optional(isString),
+      motion: optional(isString),
+      vars: mapOf(isText),
+      decided: optional(shaped({ day: isDay, option: isString })),
+    }),
+  ),
+  home: shaped({
+    mobilised: isBoolean,
+    lost: isCount,
+    reparations: listOf(shaped({ to: isString, until: isDay, by: isNumber })),
+  }),
+  important: listOf(isString),
+  log: listOf(shaped({ day: isDay, text: isText, nations: isSide })),
+  seq: isCount,
+})
+
 const SHAPE: Record<string, Check> = {
   pack: shaped({ id: isString, version: isString }),
   seed: isNumber,
@@ -128,6 +218,7 @@ const SHAPE: Record<string, Check> = {
   sandbox: optional(isBoolean),
   term: optional(isCount),
   electionDay: optional(isDay),
+  world: optional(isWorld),
   agenda: shaped({
     major: (value) => value === null || isString(value),
     minors: listOf(isString),
@@ -138,13 +229,17 @@ const SHAPE: Record<string, Check> = {
 
 // Version 1 saves predate other countries. They load with nobody abroad yet; the engine
 // fills in each neighbour at its starting standing the next time a day ends.
+// Version 2 saves predate the world: they load with none, and the engine makes it the next
+// time the day turns.
 function upgrade(raw: Record<string, unknown>) {
-  if (raw['version'] !== 1) return
-  raw['neighbours'] = {}
-  raw['treaties'] = []
-  raw['resources'] = {}
-  if (isObject(raw['agenda'])) raw['agenda']['bound'] = {}
-  raw['version'] = 2
+  if (raw['version'] === 1) {
+    raw['neighbours'] = {}
+    raw['treaties'] = []
+    raw['resources'] = {}
+    if (isObject(raw['agenda'])) raw['agenda']['bound'] = {}
+    raw['version'] = 2
+  }
+  if (raw['version'] === 2) raw['version'] = 3
 }
 
 export function serialize(state: GameState): string {
