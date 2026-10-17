@@ -16,8 +16,7 @@ import type {
   ServerStatus,
   WordRequest,
 } from '../api.ts'
-import { isActive } from '../logic/forms.ts'
-import { anyActive, withDockets } from '../logic/docket.ts'
+import { anyActive, stillWorking, withDockets } from '../logic/docket.ts'
 import { findLegacy, forgetLegacy, type LegacySave } from '../logic/legacy.ts'
 import {
   MAX_IMPORT,
@@ -344,7 +343,7 @@ export function createGameStore(api: Api, content: Content, options: StoreOption
       // has changed the nation: the executive decided it in found mode.
       const finished =
         dockets.some((d) => d.status === 'decided' && before[d.dilemma]?.status !== 'decided') ||
-        Object.values(before).some((d) => isActive(d.status) && !dockets.some((x) => x.dilemma === d.dilemma))
+        Object.values(before).some((d) => stillWorking(government, d.status) && !dockets.some((x) => x.dilemma === d.dilemma))
       set({ government: withDockets(government, dockets) })
       if (finished) await reload()
       return anyActive(model.government)

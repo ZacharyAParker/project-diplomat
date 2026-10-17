@@ -179,7 +179,13 @@ export class Dockets {
         const left = Object.values(n.gov.dockets)
           .filter((d) => UNFINISHED.includes(d.status) && d.day === n.state.day)
           .map((d) => d.dilemma)
-        if (left.length) this.start(id, left)
+        // A nation that arrived by import, or was last saved before its morning was
+        // convened, has petitions on the desk that no body has seen. Convene them now.
+        const fresh = this.openFor(n)
+        const send = () => this.start(id, [...left, ...fresh])
+        if (fresh.length) {
+          this.store.save(n).then(send, (error: unknown) => this.log(`resume ${id}: ${(error as Error).message}`))
+        } else if (left.length) send()
       } catch (error) {
         this.log(`resume ${id}: ${(error as Error).message}`)
       }

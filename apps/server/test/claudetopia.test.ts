@@ -42,7 +42,8 @@ test('the imported Claudetopia loads, sits on its agenda and ends a day', { skip
   const doc = (await h.get(`/api/nations/claudetopia/archive/${search.documents[0].id}`)).json
   assert.ok(doc.document.body.length > 0)
 
-  // Its current agenda goes to the bodies, played by the stand-ins.
+  // Its current agenda went to the bodies when the server started, though nobody had
+  // convened them: it arrived by import. Convening again keeps the petition's number.
   const major = state.agenda.major!
   assert.ok(major)
   const govern = await h.put('/api/nations/claudetopia/mode', { mode: 'govern' })
@@ -52,7 +53,8 @@ test('the imported Claudetopia loads, sits on its agenda and ends a day', { skip
   const dockets = await settle(h, 'claudetopia', 400)
   const docket = dockets.find((d) => d.dilemma === major)
   assert.equal(docket.status, 'ready', docket.error)
-  assert.equal(docket.number, got.json.government.petitions + 1)
+  assert.equal(docket.number, got.json.government.petitions)
+  assert.ok(got.json.government.dockets[major], 'the morning was convened on start')
   assert.ok(docket.sittings.length >= 1 && docket.reviews.length >= 1)
   assert.ok(docket.standing.explanation)
 

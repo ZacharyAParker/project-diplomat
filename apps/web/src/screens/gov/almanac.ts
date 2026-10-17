@@ -19,7 +19,8 @@ export function readAlmanac(data: unknown): AlmanacData {
   const press = Array.isArray(d['press'])
     ? d['press'].flatMap((p) => {
         if (!isObject(p)) return []
-        const outlet = text(p['outlet'])
+        // An imported almanac names the outlet as its paper.
+        const outlet = text(p['outlet']) ?? text(p['paper'])
         const headline = text(p['headline'])
         return outlet && headline ? [{ outlet, headline, text: text(p['text']) ?? '' }] : []
       })

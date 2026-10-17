@@ -2296,3 +2296,38 @@ html {
     border-top: 1px solid #000000;
   }
 }
+
+/* The country's own papers, beside the morning paper on the desk. */
+.press {
+  margin-top: var(--space-4);
+  padding: var(--space-4);
+  background: var(--sheet);
+  border: var(--hair) solid var(--rule-soft);
+  border-top: 3px solid var(--rule);
+  border-radius: var(--round);
+}
+
+.press__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.125rem;
+}
+
+.press__list {
+  margin: var(--space-3) 0;
+  padding: 0;
+  list-style: none;
+}
+
+.press__item + .press__item {
+  margin-top: var(--space-3);
+  padding-top: var(--space-3);
+  border-top: var(--hair) solid var(--rule-soft);
+}
+
+.press__headline {
+  margin: var(--space-1) 0;
+  font-family: var(--font-display);
+  font-weight: bold;
+  overflow-wrap: anywhere;
+}

@@ -294,7 +294,9 @@ export class Game {
     const n = await this.store.create({ ...parts, id }, documents)
     const notice = id === parts.id ? undefined : `A nation “${parts.id}” was already here, so this one was stored as “${id}”.`
     const left = Object.values(n.gov.dockets).filter((d) => ['waiting', 'sitting', 'reconciling', 'exchanging'].includes(d.status) && d.day === n.state.day)
-    this.dockets.start(id, left.map((d) => d.dilemma))
+    const fresh = this.dockets.openFor(n)
+    if (fresh.length) await this.store.save(n)
+    this.dockets.start(id, [...left.map((d) => d.dilemma), ...fresh])
     return { id, name: n.state.identity.name, ...(notice ? { notice } : {}), ...this.payload(n) }
   }
 

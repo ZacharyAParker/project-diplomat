@@ -2,6 +2,7 @@ import type {
   Body,
   Course,
   Docket,
+  DocketStatus,
   GovernmentState,
   Review,
   Ruling,
@@ -219,8 +220,15 @@ export function openDockets(government: GovernmentState | null): Docket[] {
     .sort((a, b) => a.number - b.number)
 }
 
+// Whether the server still has work to do on a docket, so the screen should keep asking:
+// a docket queued for the bodies, one they are sitting on, and in found mode one that is
+// ready, because the executive is about to decide it.
+export function stillWorking(government: GovernmentState | null, status: DocketStatus): boolean {
+  return isActive(status) || status === 'waiting' || (government?.mode === 'found' && status === 'ready')
+}
+
 export function anyActive(government: GovernmentState | null): boolean {
-  return Object.values(government?.dockets ?? {}).some((d) => isActive(d.status))
+  return Object.values(government?.dockets ?? {}).some((d) => stillWorking(government, d.status))
 }
 
 // The polled dockets laid over the ones the nation came with.

@@ -29,6 +29,7 @@ import {
 import { AgendaCard, ForecastNotes, LeftCard } from './desk/AgendaCard.tsx'
 import { DocketView } from './desk/Docket.tsx'
 import { FrontPage } from './desk/FrontPage.tsx'
+import { Press } from './desk/Press.tsx'
 import { Overnight } from './desk/Night.tsx'
 
 // What the night produced, held until the player has read it. The election or the fall,
@@ -279,6 +280,7 @@ function Day({ current, onEnd, ending: closing, endError, pollError, onReport }:
             )
           }
         />
+        <Press current={current} />
       </div>
 
       <section className="desk__box" aria-labelledby="box-title">
