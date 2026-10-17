@@ -126,6 +126,8 @@ const SHAPE: Record<string, Check> = {
   treaties: listOf(shaped({ kind: isString, with: isString, since: isDay, until: optional(isDay) })),
   resources: mapOf(isBalance),
   sandbox: optional(isBoolean),
+  term: optional(isCount),
+  electionDay: optional(isDay),
   agenda: shaped({
     major: (value) => value === null || isString(value),
     minors: listOf(isString),

@@ -219,8 +219,21 @@ export function dayComplete(state: GameState): boolean {
   return state.agenda.major === null && state.agenda.minors.length === 0 && !state.agenda.situation
 }
 
-export function daysUntilElection(state: NationState): number {
-  return (TERM_DAYS - (state.day % TERM_DAYS)) % TERM_DAYS
+export function electionTerm(state: NationState): number {
+  return state.term ?? TERM_DAYS
+}
+
+// The day of the next election, today included, or null for a nation that holds none.
+export function nextElection(state: NationState): number | null {
+  const term = electionTerm(state)
+  if (term <= 0) return null
+  if (state.electionDay !== undefined) return state.electionDay
+  return Math.ceil(state.day / term) * term
+}
+
+export function daysUntilElection(state: NationState): number | null {
+  const next = nextElection(state)
+  return next === null ? null : next - state.day
 }
 
 export function classify(state: NationState, content: Content): NationClass {
@@ -385,7 +398,9 @@ export function endDay(input: GameState, content: Content): GameState {
   updateTraits(state, content)
   checkCabinet(state, content)
   const fell = checkGovernment(state, content)
-  if (!fell && state.day % TERM_DAYS === 0) holdElection(state, content)
+  const polling = nextElection(state) === state.day
+  if (!fell && polling) holdElection(state, content)
+  if (polling && state.electionDay !== undefined) state.electionDay += electionTerm(state)
 
   state.day += 1
   assess(state, content)
@@ -707,7 +722,7 @@ function newName(state: GameState, content: Content, purpose: string): string {
   return `${pick(rng, content.names.given)} ${pick(rng, content.names.family)}`
 }
 
-function buildAgenda(state: GameState, content: Content): Agenda {
+export function buildAgenda(state: GameState, content: Content): Agenda {
   const eligible = content.dilemmas.filter(
     (d) =>
       isDue(d, state) &&

@@ -404,4 +404,10 @@ export interface NationState {
   resources: Record<string, ResourceBalance>
   // Set for good the first time the sandbox changes anything, so a doctored nation says so.
   sandbox?: boolean
+  // Days between elections. Absent means TERM_DAYS; 0 means the nation holds none (a junta,
+  // an absolute monarchy). Set by the government above the engine.
+  term?: number
+  // The day of the next election, when it is not simply the next multiple of the term
+  // (an imported nation keeps its own calendar). Moves on by the term after each one.
+  electionDay?: number
 }

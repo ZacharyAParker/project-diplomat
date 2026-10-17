@@ -17,3 +17,6 @@ Thumbs.db
 .idea/
 
 apps/web/src/generated/
+
+# Nations written by the server and by imports
+data/

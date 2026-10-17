@@ -12,6 +12,8 @@ import {
   classify,
   dayComplete,
   daysUntilElection,
+  dismiss,
+  applyExternal,
   isDue,
   decide,
   decideSituation,
@@ -655,6 +657,49 @@ test('the days until the election count down through a term and start again', ()
   state = skip(state, content, TERM_DAYS)
   assert.equal(state.day, TERM_DAYS + 1)
   assert.equal(daysUntilElection(state), TERM_DAYS - 1)
+})
+
+test('a nation with a term of 0 holds no elections', () => {
+  const content = pack()
+  let state: GameState = { ...newNation(content, identity, 1), term: 0 }
+  assert.equal(daysUntilElection(state), null)
+  state = skip(state, content, TERM_DAYS * 2)
+  assert.ok(!state.timeline.some((e) => e.kind === 'election'))
+})
+
+test('a nation with its own election day holds it then, and again a term later', () => {
+  const content = pack()
+  let state: GameState = { ...newNation(content, identity, 1), term: 10, electionDay: 4 }
+  assert.equal(daysUntilElection(state), 3)
+  state = skip(state, content, 15)
+  const polls = state.timeline.filter((e) => e.kind === 'election').map((e) => e.day)
+  assert.deepEqual(polls, [4, 14])
+  assert.equal(state.electionDay, 24)
+  assert.doesNotThrow(() => deserialize(serialize(state)))
+})
+
+test('dismissing a dilemma moves nothing and takes it off the desk', () => {
+  const content = electionPack(0)
+  const state = newNation(content, identity, 1)
+  const after = dismiss(state, content, 'only')
+  assert.equal(after.agenda.major, null)
+  assert.deepEqual(after.indicators, state.indicators)
+  assert.equal(after.answered['only'], 1)
+  assert.match(after.timeline.at(-1)!.headline, /dismissed/)
+})
+
+test('an outside change is applied and recorded with its reasons, and nothing else gets in', () => {
+  const content = pack()
+  const state = newNation(content, identity, 1)
+  const after = applyExternal(state, content, 'event', 'A storm', [
+    { indicator: 'health', by: -2, why: 'The storm.' },
+    { identity: 'capital', to: 'Elsewhere' },
+  ])
+  assert.equal(after.indicators.health, state.indicators.health - 2)
+  assert.equal(after.identity.capital, state.identity.capital)
+  const entry = after.timeline.at(-1)!
+  assert.equal(entry.kind, 'event')
+  assert.equal(entry.changes[0]!.why, 'The storm.')
 })
 
 test('a government with support of 50 or more is re-elected', () => {
