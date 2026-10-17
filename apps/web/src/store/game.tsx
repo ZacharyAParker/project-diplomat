@@ -12,9 +12,10 @@ import {
   type GameState,
   type NationClass,
 } from '@diplomat/engine'
-import { createContext, useContext, useMemo, useSyncExternalStore, type ReactNode } from 'react'
-import type { Snapshot, Summary } from '../logic/saves.ts'
-import type { GameStore, Problem } from './gameStore.ts'
+import type { CensusFigure, GovernmentState, Mode } from '@diplomat/government'
+import { createContext, useContext, useEffect, useMemo, useSyncExternalStore, type ReactNode } from 'react'
+import type { Snapshot } from '../logic/saves.ts'
+import type { GameModel, GameStore } from './gameStore.ts'
 
 // The open nation with everything a screen is likely to ask the engine about it,
 // worked out once per change and not once per component.
@@ -24,53 +25,46 @@ export interface Current {
   history: Snapshot[]
   nationClass: NationClass
   support: number
-  electionIn: number
+  // Null for a nation that holds no elections.
+  electionIn: number | null
   agenda: AgendaItems
   dayComplete: boolean
+  // The government above the engine, as the server last sent it. Null only for a server
+  // that sent none, which the screens treat as a nation with no bodies.
+  government: GovernmentState | null
+  census: CensusFigure[]
+  mode: Mode
   forecastDecision(dilemmaId: string, optionId: string): Forecast
   forecastSituation(optionId: string): Forecast
 }
 
-type Actions = Pick<
-  GameStore,
-  | 'open'
-  | 'close'
-  | 'found'
-  | 'decide'
-  | 'decideSituation'
-  | 'endDay'
-  | 'adjust'
-  | 'callUp'
-  | 'startCrisis'
-  | 'skipDays'
-  | 'setIdentity'
-  | 'remove'
-  | 'exportSave'
-  | 'importSave'
-  | 'dismissNotice'
->
+type Actions = Omit<GameStore, 'get' | 'subscribe' | 'content'>
 
-export interface Game extends Actions {
+export interface Game extends Actions, Omit<GameModel, 'nation' | 'government' | 'census'> {
   content: Content
-  nations: Summary[]
   current: Current | null
-  notice: string | null
-  problem: Problem | null
-  saveError: string | null
 }
 
 const GameContext = createContext<GameStore | null>(null)
 
 export function GameProvider({ store, children }: { store: GameStore; children: ReactNode }) {
+  useEffect(() => {
+    void store.start()
+  }, [store])
   return <GameContext.Provider value={store}>{children}</GameContext.Provider>
 }
 
-export function useGame(): Game {
+export function useStore(): GameStore {
   const store = useContext(GameContext)
   if (!store) throw new Error('useGame needs a GameProvider above it')
+  return store
+}
+
+export function useGame(): Game {
+  const store = useStore()
   const model = useSyncExternalStore(store.subscribe, store.get)
   const { content } = store
-  const { nation } = model
+  const { nation, government, census } = model
 
   const current = useMemo<Current | null>(() => {
     if (!nation) return null
@@ -84,35 +78,17 @@ export function useGame(): Game {
       electionIn: daysUntilElection(state),
       agenda: agendaItems(state, content),
       dayComplete: dayComplete(state),
+      government,
+      census,
+      mode: government?.mode ?? 'govern',
       forecastDecision: (dilemmaId, optionId) => forecastDecision(state, content, dilemmaId, optionId),
       forecastSituation: (optionId) => forecastSituation(state, content, optionId),
     }
-  }, [nation, content])
+  }, [nation, government, census, content])
 
-  return useMemo(
-    () => ({
-      content,
-      nations: model.nations,
-      current,
-      notice: model.notice,
-      problem: model.problem,
-      saveError: model.saveError,
-      open: store.open,
-      close: store.close,
-      found: store.found,
-      decide: store.decide,
-      decideSituation: store.decideSituation,
-      endDay: store.endDay,
-      adjust: store.adjust,
-      callUp: store.callUp,
-      startCrisis: store.startCrisis,
-      skipDays: store.skipDays,
-      setIdentity: store.setIdentity,
-      remove: store.remove,
-      exportSave: store.exportSave,
-      importSave: store.importSave,
-      dismissNotice: store.dismissNotice,
-    }),
-    [store, content, model, current],
-  )
+  return useMemo(() => {
+    const { nation: _n, government: _g, census: _c, ...rest } = model
+    const { get: _get, subscribe: _sub, content: _content, ...actions } = store
+    return { ...actions, ...rest, content, current }
+  }, [store, content, model, current])
 }

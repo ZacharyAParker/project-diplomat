@@ -197,8 +197,11 @@ export function dayLabel(day: number): string {
   return `Day ${day}`
 }
 
-export function electionLabel(daysLeft: number): string {
+// Null is a nation that holds no elections.
+export function electionLabel(daysLeft: number | null): string {
+  if (daysLeft === null) return 'No elections are held'
   if (daysLeft <= 0) return 'Election tonight'
   if (daysLeft === 1) return 'Election tomorrow'
-  return `Election in ${daysLeft} days`
+  if (daysLeft >= 730) return `Next election in about ${Math.round(daysLeft / 365)} years`
+  return `Election in ${daysLeft.toLocaleString('en-GB')} days`
 }

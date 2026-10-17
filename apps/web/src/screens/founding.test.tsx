@@ -1,30 +1,12 @@
-import { classify } from '@diplomat/engine'
-import { cleanup, render, screen, within } from '@testing-library/react'
+import { classify, newNation } from '@diplomat/engine'
+import { cleanup, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
-import { App } from '../App.tsx'
-import { memoryStore, nationKey, openNation, type KeyValue } from '../logic/saves.ts'
-import { GameProvider } from '../store/game.tsx'
-import { createGameStore, type GameStore } from '../store/gameStore.ts'
-import { SettingsProvider } from '../store/settings.tsx'
-import { content, firstAnswers, identity } from '../test/fixtures.ts'
-import { Announcer } from '../ui/index.ts'
-
-function mount(kv: KeyValue = memoryStore()): { kv: KeyValue; store: GameStore } {
-  const store = createGameStore(kv, content)
-  render(
-    <SettingsProvider kv={kv}>
-      <GameProvider store={store}>
-        <Announcer>
-          <App />
-        </Announcer>
-      </GameProvider>
-    </SettingsProvider>,
-  )
-  return { kv, store }
-}
-
-const heading = (name: string | RegExp) => screen.findByRole('heading', { level: 1, name })
+import { FORMS, MODES } from '../logic/forms.ts'
+import { encode, memoryStore, nationKey, newNationSave } from '../logic/saves.ts'
+import { FakeServer } from '../test/fakeServer.ts'
+import { content, firstAnswers, founded, identity } from '../test/fixtures.ts'
+import { heading, mount } from '../test/mount.tsx'
 
 beforeEach(() => {
   window.location.hash = ''
@@ -41,28 +23,37 @@ describe('a first visit', () => {
     expect(screen.getByRole('link', { name: 'Found a nation' })).toBeDefined()
     expect(screen.queryByRole('list', { name: /nations/i })).toBeNull()
     expect(screen.getByText(/Not affiliated with NationStates or Max Barry/)).toBeDefined()
+    expect(screen.getByRole('link', { name: 'AI off' })).toBeDefined()
   })
 
-  it('says so when nothing can be stored', async () => {
-    const store = createGameStore(memoryStore(), content)
-    render(
-      <SettingsProvider kv={memoryStore()}>
-        <GameProvider store={store}>
-          <App persistent={false} />
-        </GameProvider>
-      </SettingsProvider>,
-    )
-    expect(await screen.findByRole('alert')).toHaveProperty(
-      'textContent',
-      expect.stringMatching(/Nothing will be kept/),
-    )
+  it('says so when the server is not answering, and tries again when asked', async () => {
+    const user = userEvent.setup()
+    const fake = new FakeServer()
+    fake.down = true
+    mount(fake)
+    expect(await heading('The server is not answering')).toBeDefined()
+    expect(screen.getByRole('alert').textContent).toMatch(/pnpm start/)
+    expect(screen.getByRole('link', { name: 'AI: the server is not answering' })).toBeDefined()
+    fake.down = false
+    await user.click(screen.getByRole('button', { name: 'Try again' }))
+    expect(await heading('Run a country')).toBeDefined()
   })
 })
 
+async function throughTheQuestions(user: ReturnType<typeof userEvent.setup>) {
+  const { questions } = content.founding
+  for (const [i] of questions.entries()) {
+    await user.click(screen.getAllByRole('radio')[0]!)
+    await user.click(
+      screen.getByRole('button', { name: i === questions.length - 1 ? 'Next: the government' : 'Next question' }),
+    )
+  }
+}
+
 describe('founding a nation', () => {
-  it('goes from the pitch to the first morning and on to the desk, saving the nation', async () => {
+  it('goes from the pitch to the first morning and on to the desk, founding it on the server', async () => {
     const user = userEvent.setup()
-    const { kv, store } = mount()
+    const { fake, store } = mount()
 
     await user.click(await screen.findByRole('link', { name: 'Found a nation' }))
     const naming = await heading('Name the nation')
@@ -102,7 +93,9 @@ describe('founding a nation', () => {
     await heading('Its character')
 
     const { questions } = content.founding
-    await user.click(screen.getByRole('button', { name: questions.length > 1 ? 'Next question' : /^Found / }))
+    await user.click(
+      screen.getByRole('button', { name: questions.length > 1 ? 'Next question' : 'Next: the government' }),
+    )
     expect(screen.getByRole('alert').textContent).toMatch(/Pick an answer first/)
 
     for (const [i, question] of questions.entries()) {
@@ -117,19 +110,58 @@ describe('founding a nation', () => {
         expect((screen.getAllByRole('radio')[0] as HTMLInputElement).checked).toBe(true)
       }
       const last = i === questions.length - 1
-      await user.click(screen.getByRole('button', { name: last ? 'Found <b>Testland</b>' : 'Next question' }))
+      await user.click(screen.getByRole('button', { name: last ? 'Next: the government' : 'Next question' }))
     }
+
+    // The form of government: the eight templates, each with a line.
+    await heading('Its government')
+    expect(window.location.hash).toBe('#/found/form')
+    expect(screen.getAllByRole('radio')).toHaveLength(FORMS.length)
+    expect(FORMS.map((f) => f.id)).not.toContain('custom')
+    for (const form of FORMS) expect(screen.getByText(form.line)).toBeDefined()
+    expect((screen.getByRole('radio', { name: /^Commonwealth/ }) as HTMLInputElement).checked).toBe(true)
+    await user.click(screen.getByRole('radio', { name: /^Presidential republic/ }))
+    await user.click(screen.getByRole('link', { name: 'Next: your part in it' }))
+
+    // The mode, each explained in a sentence.
+    await heading('Your part in it')
+    expect(screen.getByText(/the office of the President/)).toBeDefined()
+    for (const mode of MODES) expect(screen.getByText(mode.line)).toBeDefined()
+    await user.click(screen.getByRole('radio', { name: /^Found/ }))
+    await user.click(screen.getByRole('link', { name: 'Back' }))
+    await heading('Its government')
+    expect((screen.getByRole('radio', { name: /^Presidential republic/ }) as HTMLInputElement).checked).toBe(true)
+    await user.click(screen.getByRole('link', { name: 'Next: your part in it' }))
+    await heading('Your part in it')
+    expect((screen.getByRole('radio', { name: /^Found/ }) as HTMLInputElement).checked).toBe(true)
+    await user.click(screen.getByRole('link', { name: 'Next: the Founder' }))
+
+    // The Founder, "the Founder" unless changed.
+    await heading('The Founder')
+    const founderName = screen.getByLabelText("The Founder's name") as HTMLInputElement
+    expect(founderName.value).toBe('the Founder')
+    expect((screen.getByLabelText('Title') as HTMLInputElement).value).toBe('Founder')
+    await user.clear(founderName)
+    await user.click(screen.getByRole('button', { name: 'Found <b>Testland</b>' }))
+    expect(screen.getByText(/The Founder needs a name/)).toBeDefined()
+    expect(fake.calls.some((c) => c.name === 'found')).toBe(false)
+    await user.type(founderName, 'Aegis')
+    await user.click(screen.getByRole('button', { name: 'Found <b>Testland</b>' }))
 
     expect(document.activeElement).toBe(await heading('The first morning'))
     const nation = store.get().nation!
     expect(window.location.hash).toBe(`#/n/${nation.id}/morning`)
-    expect(nation.state.identity.name).toBe('<b>Testland</b>')
+    expect(fake.calls.find((c) => c.name === 'found')!.args[0]).toMatchObject({
+      identity: { name: '<b>Testland</b>' },
+      form: 'presidential',
+      mode: 'found',
+      founder: { name: 'Aegis', title: 'Founder' },
+    })
     expect(nation.state.identity.flag.layout).toBe('cross')
     expect(nation.state.identity.flag.colours[1]).toBe('#d9a521')
     expect(document.querySelector('b')).toBeNull()
-
-    const stored = openNation(kv, nation.id, content)
-    expect(stored.ok && stored.nation).toEqual(nation)
+    expect(fake.held(nation.id).state).toEqual(nation.state)
+    expect(store.get().government!.mode).toBe('found')
 
     const nationClass = classify(nation.state, content)
     expect(screen.getByRole('heading', { level: 2, name: nationClass.name })).toBeDefined()
@@ -145,8 +177,31 @@ describe('founding a nation', () => {
     expect(screen.getByText('Day 1')).toBeDefined()
   })
 
+  it('shows the server’s refusal at the last step and keeps everything entered', async () => {
+    const user = userEvent.setup()
+    const fake = new FakeServer()
+    mount(fake)
+    await user.click(await screen.findByRole('link', { name: 'Found a nation' }))
+    await heading('Name the nation')
+    await user.click(screen.getByRole('button', { name: 'Suggest everything' }))
+    await user.click(screen.getByRole('button', { name: 'Next: the flag' }))
+    await user.click(await screen.findByRole('link', { name: 'Next: its character' }))
+    await heading('Its character')
+    await throughTheQuestions(user)
+    await user.click(await screen.findByRole('link', { name: 'Next: your part in it' }))
+    await user.click(await screen.findByRole('link', { name: 'Next: the Founder' }))
+    await heading('The Founder')
+    fake.found = async () => {
+      throw new Error('The data folder is full. Free some space and try again.')
+    }
+    await user.click(screen.getByRole('button', { name: /^Found / }))
+    expect((await screen.findByRole('alert')).textContent).toMatch(/data folder is full/)
+    expect(window.location.hash).toBe('#/found/founder')
+    expect((screen.getByLabelText("The Founder's name") as HTMLInputElement).value).toBe('the Founder')
+  })
+
   it('sends a visitor who skips ahead back to the first step', async () => {
-    window.location.hash = '#/found/questions'
+    window.location.hash = '#/found/founder'
     mount()
     expect(await heading('Name the nation')).toBeDefined()
     expect(window.location.hash).toBe('#/found')
@@ -154,14 +209,10 @@ describe('founding a nation', () => {
 })
 
 describe('coming back', () => {
-  function seeded(): KeyValue {
-    const kv = memoryStore()
-    createGameStore(kv, content, {
-      id: () => 'home-test',
-      seed: () => 3,
-      now: () => '2030-01-01T00:00:00.000Z',
-    }).found(identity, firstAnswers())
-    return kv
+  function seeded(): FakeServer {
+    const fake = new FakeServer()
+    fake.hold(newNation(content, identity, 3, firstAnswers()), { id: 'home-test' })
+    return fake
   }
 
   it('lists the nations with open, found another and import', async () => {
@@ -174,58 +225,73 @@ describe('coming back', () => {
     expect(screen.getByRole('button', { name: 'Import a save' })).toBeDefined()
   })
 
-  it('opens a nation straight from its address', async () => {
+  it('opens a nation straight from its address, with the Government group in the menu', async () => {
     window.location.hash = '#/n/home-test/desk'
     mount(seeded())
     expect(await heading('Issues')).toBeDefined()
     expect(screen.getByRole('link', { name: 'All nations' })).toBeDefined()
+    const group = screen.getByRole('navigation', { name: 'Government' })
+    for (const name of ['Today', 'Library', 'In force', 'The Assembly', 'The Court', 'Executive', 'Country']) {
+      expect(within(group).getByRole('link', { name })).toBeDefined()
+    }
+    expect(within(group).getByRole('link', { name: /^Founder’s page/ }).textContent).toMatch(/waiting for you/)
   })
 
   it('imports a save file from the home screen', async () => {
     const user = userEvent.setup()
-    const text = seeded().getItem(nationKey('home-test'))!
-    mount()
+    const text = encode(newNationSave(founded(), 'from-file', '2030-01-01T00:00:00.000Z'))
+    const { fake } = mount()
     await heading('Run a country')
-    await user.upload(
-      screen.getByTestId('file-input'),
-      new File([text], 'vesland.json', { type: 'application/json' }),
-    )
+    await user.upload(screen.getByTestId('file-input'), new File([text], 'vesland.json', { type: 'application/json' }))
     expect(await heading('Your nations')).toBeDefined()
     expect(screen.getByText('Imported Vesland.')).toBeDefined()
+    expect(fake.kept.has('from-file')).toBe(true)
   })
 
   it('explains a file that is not a save', async () => {
     const user = userEvent.setup()
     mount()
     await heading('Run a country')
-    await user.upload(
-      screen.getByTestId('file-input'),
-      new File(['hello'], 'notes.json', { type: 'application/json' }),
-    )
+    await user.upload(screen.getByTestId('file-input'), new File(['hello'], 'notes.json', { type: 'application/json' }))
     expect((await screen.findByRole('alert')).textContent).toMatch(/not imported.*not valid JSON/)
   })
 
-  it('shows what is wrong with a corrupt save, offers the raw text, and removes it only when asked', async () => {
+  it('offers to move the saves 0.5 left in this browser, and removes them once moved', async () => {
     const user = userEvent.setup()
-    const kv = seeded()
-    kv.setItem(nationKey('broken'), '{"format":1,')
+    const kv = memoryStore({
+      [nationKey('old')]: encode(newNationSave(founded(), 'old', '2030-01-01T00:00:00.000Z')),
+    })
+    const { fake } = mount(new FakeServer(), kv)
+    await heading('Run a country')
+    expect(screen.getByText('Nations from an earlier version')).toBeDefined()
+    expect(screen.getByText(/saved by version 0\.5/).textContent).toMatch(/Vesland/)
+    await user.click(screen.getByRole('button', { name: 'Move it to the server' }))
+    expect(await heading('Your nations')).toBeDefined()
+    expect(await screen.findByText('Moved Vesland.')).toBeDefined()
+    expect(kv.getItem(nationKey('old'))).toBeNull()
+    expect(fake.kept.has('old')).toBe(true)
+  })
+
+  it('shows what is wrong with a nation that will not open, and removes it only when asked', async () => {
+    const user = userEvent.setup()
+    const fake = seeded()
+    fake.hold({ ...founded(), pack: { id: 'homebrew', version: '1' } }, { id: 'broken', noDockets: true })
     window.location.hash = '#/n/broken/desk'
-    mount(kv)
+    mount(fake)
 
     expect(await heading('This nation cannot be opened')).toBeDefined()
-    expect(screen.getByRole('alert').textContent).toMatch(/not valid JSON/)
-    expect(screen.getByRole('button', { name: 'Export the raw save' })).toBeDefined()
-    expect(kv.getItem(nationKey('broken'))).toBe('{"format":1,')
+    expect(screen.getByRole('alert').textContent).toMatch(/homebrew/)
+    expect(await screen.findByRole('button', { name: 'Export the raw save' })).toBeDefined()
 
     await user.click(screen.getByRole('button', { name: 'Remove it' }))
     await user.click(screen.getByRole('button', { name: 'Keep it' }))
-    expect(kv.getItem(nationKey('broken'))).toBe('{"format":1,')
+    expect(fake.kept.has('broken')).toBe(true)
 
     await user.click(screen.getByRole('button', { name: 'Remove it' }))
     await user.click(screen.getByRole('button', { name: 'Remove it for good' }))
     expect(await heading('Your nations')).toBeDefined()
-    expect(kv.getItem(nationKey('broken'))).toBeNull()
-    expect(kv.getItem(nationKey('home-test'))).not.toBeNull()
+    await waitFor(() => expect(fake.kept.has('broken')).toBe(false))
+    expect(fake.kept.has('home-test')).toBe(true)
   })
 
   it('has a page for a wrong address', async () => {
@@ -240,9 +306,7 @@ describe('the kit', () => {
     window.location.hash = '#/kit'
     mount()
     expect(await heading('The kit')).toBeDefined()
-    expect(
-      document.querySelectorAll('[data-theme="light"], [data-theme="dark"]').length,
-    ).toBeGreaterThanOrEqual(2)
+    expect(document.querySelectorAll('[data-theme="light"], [data-theme="dark"]').length).toBeGreaterThanOrEqual(2)
     expect(screen.getAllByRole('meter').length).toBeGreaterThan(4)
   })
 })

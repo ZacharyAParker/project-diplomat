@@ -4,7 +4,6 @@ import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { agendaCards } from '../logic/desk.ts'
 import { paperName } from '../logic/frontpage.ts'
-import { openNation } from '../logic/saves.ts'
 import { content, founded, identity, played } from '../test/fixtures.ts'
 import { heading, holding, mount } from '../test/mount.tsx'
 
@@ -25,10 +24,17 @@ async function endTheDay(user: ReturnType<typeof userEvent.setup>) {
   if (anyway) await user.click(anyway)
 }
 
+async function throughTheGovernment(user: ReturnType<typeof userEvent.setup>) {
+  await user.click(await screen.findByRole('link', { name: 'Next: your part in it' }))
+  await user.click(await screen.findByRole('link', { name: 'Next: the Founder' }))
+  await heading('The Founder')
+  await user.click(screen.getByRole('button', { name: /^Found / }))
+}
+
 describe('a day at the desk, from the founding', () => {
   it('founds a nation, decides the dilemma, ends the day and reads about it in the morning', async () => {
     const user = userEvent.setup()
-    const { kv, store } = mount()
+    const { fake, store } = mount()
 
     await user.click(await screen.findByRole('link', { name: 'Found a nation' }))
     await heading('Name the nation')
@@ -40,8 +46,9 @@ describe('a day at the desk, from the founding', () => {
     for (const [i] of content.founding.questions.entries()) {
       await user.click(screen.getAllByRole('radio')[0]!)
       const last = i === content.founding.questions.length - 1
-      await user.click(screen.getByRole('button', { name: last ? /^Found / : 'Next question' }))
+      await user.click(screen.getByRole('button', { name: last ? 'Next: the government' : 'Next question' }))
     }
+    await throughTheGovernment(user)
     await heading('The first morning')
     await user.click(screen.getByRole('link', { name: 'To work' }))
     await heading('Issues')
@@ -69,6 +76,7 @@ describe('a day at the desk, from the founding', () => {
     const option = card.options[0]!
     await user.click(within(sheet).getByRole('button', { name: `Accept position 1: ${option.name}` }))
 
+    await within(box()).findByText(`1 of ${cards.length} decided.`)
     const decided = store.get().nation!.state
     const entry = decided.timeline.at(-1)!
     expect(entry.kind).toBe('decision')
@@ -90,8 +98,8 @@ describe('a day at the desk, from the founding', () => {
     const night = store.get().nation!
     expect(night.state.day).toBe(2)
     expect(night.history.map((s) => s.day)).toEqual([0, 1])
-    const stored = openNation(kv, night.id, content)
-    expect(stored.ok && stored.nation).toEqual(night)
+    expect(fake.held(night.id).state).toEqual(night.state)
+    expect(fake.held(night.id).history).toEqual(night.history)
 
     await user.click(screen.getByRole('button', { name: 'To the morning paper' }))
     expect(document.activeElement).toBe(await heading('Issues'))

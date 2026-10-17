@@ -6,6 +6,7 @@ import './styles/world.css'
 
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
+import { createHttpApi } from './api.ts'
 import { App } from './App.tsx'
 import { pack } from './pack.ts'
 import { browserStore } from './store/browser.ts'
@@ -14,15 +15,16 @@ import { createGameStore } from './store/gameStore.ts'
 import { SettingsProvider } from './store/settings.tsx'
 import { Announcer } from './ui/index.ts'
 
-const { kv, persistent } = browserStore()
-const store = createGameStore(kv, pack)
+// The browser keeps only the theme and any saves left by 0.5. The nations are the server's.
+const { kv } = browserStore()
+const store = createGameStore(createHttpApi(), pack, { kv })
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <SettingsProvider kv={kv}>
       <GameProvider store={store}>
         <Announcer>
-          <App persistent={persistent} />
+          <App />
         </Announcer>
       </GameProvider>
     </SettingsProvider>

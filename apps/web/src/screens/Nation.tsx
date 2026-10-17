@@ -19,6 +19,7 @@ import {
 import { pills, summary } from '../logic/summary.ts'
 import { useGame, type Current } from '../store/game.tsx'
 import { Bar, Flag, Meter, Screen, Sheet, Spark, Tag } from '../ui/index.ts'
+import { Census, Factbooks, FormAndMode } from './NationGovernment.tsx'
 
 // The move since yesterday morning, in the same words as any other change.
 function Since({ change, content }: { change: Change | null; content: Content }) {
@@ -330,6 +331,16 @@ export function Nation({ current }: { current: Current }) {
                 : 'Nothing is known to be on its way.'}
             </p>
           </Sheet>
+        </div>
+      </div>
+
+      <div className="nation__layout">
+        <div className="nation__main">
+          <Census figures={current.census} />
+          <Factbooks current={current} />
+        </div>
+        <div className="nation__side">
+          <FormAndMode current={current} />
         </div>
       </div>
 

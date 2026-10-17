@@ -115,26 +115,41 @@ function Tools({ onLock }: { onLock(): void }) {
     )
   }, [content.dilemmas, filter])
 
-  function exportAll() {
-    const saves = nations.flatMap((n) => {
-      const file = game.exportSave(n.id)
-      return file ? [{ id: n.id, save: file.text }] : []
-    })
-    download('project-diplomat-all-saves.json', JSON.stringify({ saves }, null, 1))
-    announce(`${saves.length} saves exported.`)
+  const [problem, setProblem] = useState<string | null>(null)
+
+  async function exportAll() {
+    try {
+      const saves: { id: string; save: string }[] = []
+      for (const n of nations) saves.push({ id: n.id, save: (await game.exportSave(n.id)).text })
+      download('project-diplomat-all-saves.json', JSON.stringify({ saves }, null, 1))
+      announce(`${saves.length} saves exported.`)
+      setProblem(null)
+    } catch (error) {
+      setProblem(error instanceof Error ? error.message : 'The saves could not be exported.')
+    }
   }
 
-  function deleteAll() {
-    for (const n of nations) game.remove(n.id)
-    setConfirm('')
-    announce('Every nation in this browser has been deleted.')
+  async function deleteAll() {
+    try {
+      for (const n of nations) await game.remove(n.id)
+      setConfirm('')
+      setProblem(null)
+      announce('Every nation on the server has been deleted.')
+    } catch (error) {
+      setProblem(error instanceof Error ? error.message : 'Not every nation could be deleted.')
+    }
   }
 
   if (changing) return <SetPassword onSet={() => setChanging(false)} />
 
   return (
     <>
-      <Sheet title="Nations in this browser">
+      {problem && (
+        <Notice tone="problem" title="Not done">
+          <p>{problem}</p>
+        </Notice>
+      )}
+      <Sheet title="Nations on the server">
         {nations.length === 0 ? (
           <p className="soft">None.</p>
         ) : (
@@ -160,21 +175,25 @@ function Tools({ onLock }: { onLock(): void }) {
           </table>
         )}
         <div className="row">
-          <Button onClick={exportAll} disabled={nations.length === 0}>
+          <Button onClick={() => void exportAll()} disabled={nations.length === 0}>
             Export every save
           </Button>
         </div>
       </Sheet>
 
       <Sheet title="Delete everything">
-        <p>Removes every nation from this browser. Export them first if you want them back.</p>
+        <p>Removes every nation from the server. Export them first if you want them back.</p>
         <TextField
           label='Type "delete everything" to confirm'
           value={confirm}
           onChange={setConfirm}
           autoComplete="off"
         />
-        <Button look="danger" onClick={deleteAll} disabled={confirm.trim().toLowerCase() !== 'delete everything'}>
+        <Button
+          look="danger"
+          onClick={() => void deleteAll()}
+          disabled={confirm.trim().toLowerCase() !== 'delete everything'}
+        >
           Delete every nation
         </Button>
       </Sheet>
@@ -246,7 +265,7 @@ export function Admin() {
       ) : (
         <>
           <Notice title="Admin only">
-            <p>This page manages every nation in this browser. It needs the admin password.</p>
+            <p>This page manages every nation on the server. It needs the admin password.</p>
           </Notice>
           <Unlock onUnlock={() => setOpen(true)} />
         </>

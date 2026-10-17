@@ -1,6 +1,8 @@
 import { newNation, render } from '@diplomat/engine'
 import { useEffect, useMemo, useRef, useState, type FormEvent, type ReactNode } from 'react'
+import type { FormId, Mode } from '@diplomat/government'
 import { DEFAULT_FLAG, type FlagSpec } from '../logic/flags.ts'
+import { DEFAULT_FOUNDER, FORMS, MODES } from '../logic/forms.ts'
 import {
   EMPTY_TEXT,
   FIELDS,
@@ -15,6 +17,7 @@ import type { FoundStep } from '../logic/router.ts'
 import type { Rng } from '../logic/rng.ts'
 import { useGame } from '../store/game.tsx'
 import { go } from '../store/route.ts'
+import { useAction } from '../store/useAction.ts'
 import {
   Button,
   ChoiceList,
@@ -22,8 +25,10 @@ import {
   FlagEditor,
   IdentityFields,
   LinkTo,
+  Notice,
   Screen,
   Steps,
+  TextField,
   useAnnounce,
 } from '../ui/index.ts'
 
@@ -34,9 +39,20 @@ export interface Draft {
   flag: FlagSpec
   answers: Record<string, string>
   question: number
+  form: Exclude<FormId, 'custom'>
+  mode: Mode
+  founder: { name: string; title: string }
 }
 
-export const EMPTY_DRAFT: Draft = { text: EMPTY_TEXT, flag: DEFAULT_FLAG, answers: {}, question: 0 }
+export const EMPTY_DRAFT: Draft = {
+  text: EMPTY_TEXT,
+  flag: DEFAULT_FLAG,
+  answers: {},
+  question: 0,
+  form: 'commonwealth',
+  mode: 'govern',
+  founder: DEFAULT_FOUNDER,
+}
 
 export interface FoundingProps {
   step: FoundStep
@@ -45,8 +61,8 @@ export interface FoundingProps {
   rng?: Rng
 }
 
-const STEP_NAMES = ['Name', 'Flag', 'Character'] as const
-const STEP_INDEX: Record<FoundStep, number> = { identity: 0, flag: 1, questions: 2 }
+const STEP_NAMES = ['Name', 'Flag', 'Character', 'Government', 'Mode', 'Founder'] as const
+const STEP_INDEX: Record<FoundStep, number> = { identity: 0, flag: 1, questions: 2, form: 3, mode: 4, founder: 5 }
 
 export function Founding({ step, draft, onDraft, rng }: FoundingProps) {
   const ready = identityIsValid(draft.text)
@@ -63,6 +79,9 @@ export function Founding({ step, draft, onDraft, rng }: FoundingProps) {
   if (step === 'identity')
     return <IdentityStep draft={draft} onDraft={onDraft} progress={progress} rng={rng} />
   if (step === 'flag') return <FlagStep draft={draft} onDraft={onDraft} progress={progress} rng={rng} />
+  if (step === 'form') return <FormStep draft={draft} onDraft={onDraft} progress={progress} />
+  if (step === 'mode') return <ModeStep draft={draft} onDraft={onDraft} progress={progress} />
+  if (step === 'founder') return <FounderStep draft={draft} onDraft={onDraft} progress={progress} />
   return <QuestionStep draft={draft} onDraft={onDraft} progress={progress} />
 }
 
@@ -158,7 +177,6 @@ function FlagStep({ draft, onDraft, progress, rng }: StepProps) {
 
 function QuestionStep({ draft, onDraft, progress }: StepProps) {
   const game = useGame()
-  const announce = useAnnounce()
   const { questions } = game.content.founding
   const [missing, setMissing] = useState(false)
   const prompt = useRef<HTMLHeadingElement>(null)
@@ -183,16 +201,9 @@ function QuestionStep({ draft, onDraft, progress }: StepProps) {
     onDraft({ ...draft, question: index })
   }
 
-  function found() {
-    const id = game.found(identity, draft.answers)
-    onDraft(EMPTY_DRAFT)
-    announce(`${identity.name} is founded.`)
-    go({ name: 'nation', id, page: 'morning' }, 'replace')
-  }
-
   function next() {
     if (question && answer === null) return setMissing(true)
-    if (last) found()
+    if (last) go({ name: 'found', step: 'form' })
     else turnTo(at + 1)
   }
 
@@ -253,11 +264,158 @@ function QuestionStep({ draft, onDraft, progress }: StepProps) {
               Back
             </Button>
           )}
-          <Button look={last ? 'accent' : 'primary'} onClick={next}>
-            {last ? `Found ${identity.name}` : 'Next question'}
+          <Button look="primary" onClick={next}>
+            {last ? 'Next: the government' : 'Next question'}
           </Button>
         </div>
       </div>
+    </Screen>
+  )
+}
+
+function FormStep({ draft, onDraft, progress }: StepProps) {
+  const name = draft.text.name.trim()
+  return (
+    <Screen
+      title="Its government"
+      kicker="Founding"
+      intro={<p>Who argues, who may say no, and who decides. It can be changed later, though not easily.</p>}
+      className="founding"
+    >
+      {progress}
+      <div className="stack measure">
+        <ChoiceList
+          legend={`The form of government of ${name}`}
+          legendHidden
+          options={FORMS.map((form) => ({ value: form.id, label: form.name, detail: form.line }))}
+          value={draft.form}
+          onChange={(form) => onDraft({ ...draft, form })}
+        />
+        <div className="founding__actions">
+          <LinkTo to={{ name: 'found', step: 'questions' }} look="quiet">
+            Back
+          </LinkTo>
+          <LinkTo to={{ name: 'found', step: 'mode' }} look="primary">
+            Next: your part in it
+          </LinkTo>
+        </div>
+      </div>
+    </Screen>
+  )
+}
+
+function ModeStep({ draft, onDraft, progress }: StepProps) {
+  const executive = FORMS.find((f) => f.id === draft.form)?.executive ?? 'The executive'
+  return (
+    <Screen
+      title="Your part in it"
+      kicker="Founding"
+      intro={
+        <p>
+          You are the Founder either way, above every branch. The question is whether you also hold the office of{' '}
+          {executive.replace(/^The /, 'the ')}.
+        </p>
+      }
+      className="founding"
+    >
+      {progress}
+      <div className="stack measure">
+        <ChoiceList
+          legend="How you play"
+          legendHidden
+          options={MODES.map((mode) => ({ value: mode.id, label: mode.name, detail: mode.line }))}
+          value={draft.mode}
+          onChange={(mode) => onDraft({ ...draft, mode })}
+        />
+        <p className="small soft">You can switch between the two at any time, on the nation page.</p>
+        <div className="founding__actions">
+          <LinkTo to={{ name: 'found', step: 'form' }} look="quiet">
+            Back
+          </LinkTo>
+          <LinkTo to={{ name: 'found', step: 'founder' }} look="primary">
+            Next: the Founder
+          </LinkTo>
+        </div>
+      </div>
+    </Screen>
+  )
+}
+
+const FOUNDER_MAX = 40
+
+function lineProblem(text: string, empty: string): string | null {
+  if (!text) return empty
+  return [...text].length > FOUNDER_MAX ? `Keep it to ${FOUNDER_MAX} characters.` : null
+}
+
+function FounderStep({ draft, onDraft, progress }: StepProps) {
+  const game = useGame()
+  const announce = useAnnounce()
+  const action = useAction()
+  const [tried, setTried] = useState(false)
+  const identity = useMemo(() => buildIdentity(draft.text, draft.flag), [draft.text, draft.flag])
+  const name = draft.founder.name.trim()
+  const title = draft.founder.title.trim()
+  const nameProblem = lineProblem(name, 'The Founder needs a name, even if it is only "the Founder".')
+  const titleProblem = lineProblem(title, 'A title, please. "Founder" will do.')
+
+  async function found(event: FormEvent) {
+    event.preventDefault()
+    setTried(true)
+    if (nameProblem || titleProblem) return
+    const id = await action.run('found', () =>
+      game.found({ identity, answers: draft.answers, form: draft.form, mode: draft.mode, founder: { name, title } }),
+    )
+    if (id === undefined) return
+    onDraft(EMPTY_DRAFT)
+    announce(`${identity.name} is founded.`)
+    go({ name: 'nation', id, page: 'morning' }, 'replace')
+  }
+
+  return (
+    <Screen
+      title="The Founder"
+      kicker="Founding"
+      intro={<p>That is you. The bodies will address you by this, and so will the letters.</p>}
+      className="founding"
+    >
+      {progress}
+      <form className="stack measure" onSubmit={(event) => void found(event)} noValidate>
+        <TextField
+          label="The Founder's name"
+          value={draft.founder.name}
+          maxLength={FOUNDER_MAX + 10}
+          onChange={(value) => onDraft({ ...draft, founder: { ...draft.founder, name: value } })}
+          hint='Leave it as "the Founder" to stay anonymous.'
+          error={tried ? nameProblem : null}
+        />
+        <TextField
+          label="Title"
+          value={draft.founder.title}
+          maxLength={FOUNDER_MAX + 10}
+          onChange={(value) => onDraft({ ...draft, founder: { ...draft.founder, title: value } })}
+          error={tried ? titleProblem : null}
+        />
+        <div className="founding__summary">
+          <Flag flag={draft.flag} width="2.5rem" />
+          <span className="small soft">
+            {identity.name}, capital {identity.capital}
+          </span>
+        </div>
+        {action.error && (
+          <Notice tone="problem" title="Not founded">
+            <p>{action.error}</p>
+          </Notice>
+        )}
+        <div className="founding__actions">
+          <LinkTo to={{ name: 'found', step: 'mode' }} look="quiet">
+            Back
+          </LinkTo>
+          <Button type="submit" look="accent" disabled={action.busy !== null} aria-busy={action.busy !== null}>
+            {action.busy ? `Founding ${identity.name}` : `Found ${identity.name}`}
+          </Button>
+        </div>
+      </form>
     </Screen>
   )
 }

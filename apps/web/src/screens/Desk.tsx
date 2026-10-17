@@ -1,5 +1,5 @@
 import type { TimelineEntry } from '@diplomat/engine'
-import { useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { dayLabel } from '../logic/changes.ts'
 import {
   agendaCards,
@@ -10,9 +10,12 @@ import {
   type Card,
   type ForecastView,
 } from '../logic/desk.ts'
+import { anyActive, executiveTitle } from '../logic/docket.ts'
 import { composeFrontPage, editionEntries } from '../logic/frontpage.ts'
 import { VERDICT_TITLES, nightMoment, termReport, verdictOf } from '../logic/term.ts'
-import { useGame, type Current } from '../store/game.tsx'
+import { useGame, useStore, type Current } from '../store/game.tsx'
+import type { DecideExtra } from '../store/gameStore.ts'
+import { useAction } from '../store/useAction.ts'
 import {
   Button,
   Dialog,
@@ -24,6 +27,7 @@ import {
   useAnnounce,
 } from '../ui/index.ts'
 import { AgendaCard, ForecastNotes, LeftCard } from './desk/AgendaCard.tsx'
+import { DocketView } from './desk/Docket.tsx'
 import { FrontPage } from './desk/FrontPage.tsx'
 import { Overnight } from './desk/Night.tsx'
 
@@ -36,6 +40,37 @@ interface Night {
   showing: 'moment' | 'rest'
 }
 
+// While any docket is being worked on, ask after it every so often, and stop asking as soon
+// as none is, or the desk is left.
+function useDocketPolling(current: Current): string | null {
+  const store = useStore()
+  const active = anyActive(current.government)
+  const [problem, setProblem] = useState<string | null>(null)
+  useEffect(() => {
+    if (!active) return
+    let stopped = false
+    let asking = false
+    const timer = window.setInterval(() => {
+      if (stopped || asking) return
+      asking = true
+      store
+        .pollDockets()
+        .then(
+          () => setProblem(null),
+          (error: unknown) => setProblem(error instanceof Error ? error.message : 'The bodies could not be asked.'),
+        )
+        .finally(() => {
+          asking = false
+        })
+    }, store.pollMs)
+    return () => {
+      stopped = true
+      window.clearInterval(timer)
+    }
+  }, [active, store, current.id])
+  return problem
+}
+
 export function Desk({ current }: { current: Current }) {
   const game = useGame()
   const announce = useAnnounce()
@@ -44,13 +79,16 @@ export function Desk({ current }: { current: Current }) {
   const [night, setNight] = useState<Night | null>(null)
   // A past term report, opened from the front page.
   const [reading, setReading] = useState<TimelineEntry | null>(null)
+  const ending = useAction()
+  const polling = useDocketPolling(current)
 
-  function endDay() {
+  async function close(how: 'end' | 'day' | 'week') {
     const day = state.day
-    const entries = game.endDay()
+    const entries = await ending.run(how, () => (how === 'end' ? game.endDay() : game.run(how === 'week' ? 7 : 1)))
+    if (!entries) return
     const moment = nightMoment(entries)
     setNight({ day, entries, moment, showing: moment ? 'moment' : 'rest' })
-    announce(`${dayLabel(day)} is over.`)
+    announce(how === 'week' ? 'A week has passed.' : `${dayLabel(day)} is over.`)
   }
 
   if (night?.showing === 'moment' && night.moment) {
@@ -121,7 +159,15 @@ export function Desk({ current }: { current: Current }) {
       focusKey={`day ${state.day}`}
       className="desk"
     >
-      <Day key={state.day} current={current} onEnd={endDay} onReport={setReading} />
+      <Day
+        key={state.day}
+        current={current}
+        onEnd={(how) => void close(how)}
+        ending={ending.busy}
+        endError={ending.error}
+        pollError={polling}
+        onReport={setReading}
+      />
     </Screen>
   )
 }
@@ -136,12 +182,17 @@ interface Done {
 
 interface DayProps {
   current: Current
-  onEnd(): void
+  onEnd(how: 'end' | 'day' | 'week'): void
+  // Which way of ending the day is on its way, if any.
+  ending: string | null
+  endError: string | null
+  pollError: string | null
   onReport(entry: TimelineEntry): void
 }
 
-function Day({ current, onEnd, onReport }: DayProps) {
+function Day({ current, onEnd, ending: closing, endError, pollError, onReport }: DayProps) {
   const game = useGame()
+  const store = useStore()
   const announce = useAnnounce()
   const { content } = game
   const { state } = current
@@ -160,22 +211,42 @@ function Day({ current, onEnd, onReport }: DayProps) {
   const [left, setLeft] = useState<readonly string[]>([])
   const [asking, setAsking] = useState(false)
   const [refused, setRefused] = useState<string | null>(null)
+  const [deciding, setDeciding] = useState<string | null>(null)
+  const found = current.mode === 'found'
+  const dockets = current.government?.dockets ?? {}
+  // In found mode the executive decides on its own: what it has decided today is shown with
+  // its docket, so the player can read how it got there.
+  const decidedToday = Object.values(dockets).filter((d) => d.status === 'decided' && d.day === state.day)
 
   const placed = Object.values(done).map((d) => d.index)
   const earlier = decided.filter((d) => !placed.includes(d.index))
   const total = slots.length + earlier.length
   const undecided = cards.filter((card) => !left.includes(card.key))
 
-  function decide(card: Card, optionId: string, view: ForecastView, text?: string) {
-    const index = state.timeline.length
+  async function decide(card: Card, course: string, view: ForecastView | null, extra: DecideExtra) {
+    if (deciding) return
+    setDeciding(card.key)
     try {
       const entry =
-        card.dilemmaId === null ? game.decideSituation(optionId) : game.decide(card.dilemmaId, optionId, text)
+        card.dilemmaId === null ? await game.decideSituation(course) : await game.decide(card.dilemmaId, course, extra)
+      // Where the entry landed in the timeline the server sent back.
+      const timeline = store.get().nation?.state.timeline ?? []
+      const wanted = JSON.stringify(entry)
+      let index = timeline.length - 1
+      for (let i = timeline.length - 1; i >= 0; i--) {
+        if (JSON.stringify(timeline[i]) === wanted) {
+          index = i
+          break
+        }
+      }
       setRefused(null)
-      setDone((old) => ({ ...old, [card.key]: { index, title: card.title, view } }))
+      const empty: ForecastView = { changes: [], policies: [], warnings: [], later: false, promise: null, nothing: true }
+      setDone((old) => ({ ...old, [card.key]: { index, title: card.title, view: view ?? empty } }))
       announce(`Decided. ${entry.headline}`)
     } catch (error) {
-      setRefused(error instanceof Error ? error.message : 'the engine refused')
+      setRefused(error instanceof Error ? error.message : 'the server refused')
+    } finally {
+      setDeciding(null)
     }
   }
 
@@ -231,11 +302,33 @@ function Day({ current, onEnd, onReport }: DayProps) {
         )}
         {refused && (
           <Notice tone="problem" title="That was not done">
-            <p>The game refused the decision ({refused}). Nothing has changed.</p>
+            <p>The decision was refused: {refused} Nothing has changed.</p>
+          </Notice>
+        )}
+        {pollError && (
+          <Notice tone="problem" title="The bodies could not be asked">
+            <p>{pollError} The desk keeps trying.</p>
           </Notice>
         )}
 
         <div className="desk__cards">
+          {decidedToday.map((docket) => {
+            const dilemma = content.dilemmas.find((d) => d.id === docket.dilemma)
+            return (
+              <article key={docket.dilemma} className="issue issue--decided">
+                <header className="issue__head">
+                  <h3 className="issue__title">{dilemma?.title ?? `Petition #${docket.number}`}</h3>
+                  <p className="issue__meta">Decided by {executiveTitle(current.government).replace(/^The /, 'the ')}</p>
+                </header>
+                <DocketView
+                  docket={docket}
+                  nation={current.id}
+                  government={current.government}
+                  options={dilemma?.options ?? []}
+                />
+              </article>
+            )
+          })}
           {earlier.map(({ index, entry }) => (
             <EntrySheet
               key={index}
@@ -279,19 +372,55 @@ function Day({ current, onEnd, onReport }: DayProps) {
                 card={card}
                 current={current}
                 content={content}
-                onDecide={(optionId, view, text) => decide(card, optionId, view, text)}
+                docket={card.dilemmaId ? dockets[card.dilemmaId] : null}
+                busy={deciding === key}
+                onDecide={(course, view, extra) => void decide(card, course, view, extra)}
+                onConvene={card.dilemmaId ? () => game.convene(card.dilemmaId!) : undefined}
                 onLeave={() => setLeft([...left, key])}
               />
             )
           })}
         </div>
 
-        <Sheet title="End the day" className="desk__close">
-          <p>{closingLine(total, cards.length, current.electionIn)}</p>
-          <Button look="accent" wide onClick={() => (undecided.length > 0 ? setAsking(true) : onEnd())}>
-            End the day
-          </Button>
-        </Sheet>
+        {found ? (
+          <Sheet title="Run the nation" className="desk__close">
+            <p>
+              {executiveTitle(current.government)} decides each petition as the rules allow, and the day ends. You can
+              still step in on any of them by Word first.
+            </p>
+            {endError && (
+              <Notice tone="problem" title="The day did not end">
+                <p>{endError}</p>
+              </Notice>
+            )}
+            <div className="row">
+              <Button look="accent" disabled={closing !== null} aria-busy={closing === 'day'} onClick={() => onEnd('day')}>
+                {closing === 'day' ? 'Running the day' : 'Run the day'}
+              </Button>
+              <Button disabled={closing !== null} aria-busy={closing === 'week'} onClick={() => onEnd('week')}>
+                {closing === 'week' ? 'Running the week' : 'Run a week'}
+              </Button>
+            </div>
+          </Sheet>
+        ) : (
+          <Sheet title="End the day" className="desk__close">
+            <p>{closingLine(total, cards.length, current.electionIn)}</p>
+            {endError && (
+              <Notice tone="problem" title="The day did not end">
+                <p>{endError}</p>
+              </Notice>
+            )}
+            <Button
+              look="accent"
+              wide
+              disabled={closing !== null}
+              aria-busy={closing !== null}
+              onClick={() => (undecided.length > 0 ? setAsking(true) : onEnd('end'))}
+            >
+              End the day
+            </Button>
+          </Sheet>
+        )}
       </section>
 
       <Dialog
@@ -303,7 +432,13 @@ function Day({ current, onEnd, onReport }: DayProps) {
             <Button look="secondary" onClick={() => setAsking(false)}>
               Back to the desk
             </Button>
-            <Button look="primary" onClick={onEnd}>
+            <Button
+              look="primary"
+              onClick={() => {
+                setAsking(false)
+                onEnd('end')
+              }}
+            >
               End the day anyway
             </Button>
           </>

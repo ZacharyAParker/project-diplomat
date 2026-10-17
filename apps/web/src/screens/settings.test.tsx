@@ -1,12 +1,12 @@
-import { cleanup, screen, within } from '@testing-library/react'
+import { endDay } from '@diplomat/engine'
+import { cleanup, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { memoryStore, nationKey } from '../logic/saves.ts'
 import { SETTINGS_KEY } from '../logic/settings.ts'
 import { download } from '../store/browser.ts'
-import { createGameStore } from '../store/gameStore.ts'
-import { content, firstAnswers, identity } from '../test/fixtures.ts'
-import { fixedSources, heading, mount } from '../test/mount.tsx'
+import { FakeServer } from '../test/fakeServer.ts'
+import { content, founded, identity } from '../test/fixtures.ts'
+import { heading, mount } from '../test/mount.tsx'
 
 vi.mock('../store/browser.ts', async (original) => ({
   ...(await original<typeof import('../store/browser.ts')>()),
@@ -23,75 +23,58 @@ afterEach(() => {
 
 // A nation a few days old, open on its settings page.
 async function settled() {
-  const kv = memoryStore()
-  const earlier = createGameStore(kv, content, fixedSources())
-  const id = earlier.found(identity, firstAnswers())
-  earlier.endDay()
-  earlier.endDay()
+  const fake = new FakeServer()
+  const id = fake.hold(endDay(endDay(founded(), content), content), { id: 'vesland' })
   window.location.hash = `#/n/${id}/settings`
-  const mounted = mount(kv)
+  const mounted = mount(fake)
   await heading('Settings')
   return { ...mounted, id }
 }
 
 describe('export, delete and import', () => {
-  it('takes a nation out as a file, deletes it by name, and brings back the same nation', async () => {
+  it('takes a nation out as a file from the server, and deletes it by name', async () => {
     const user = userEvent.setup()
-    const { kv, store, id } = await settled()
-    const before = store.get().nation!
+    const { fake, store, id } = await settled()
 
     await user.click(screen.getByRole('button', { name: 'Export Vesland' }))
-    expect(download).toHaveBeenCalledTimes(1)
+    await waitFor(() => expect(download).toHaveBeenCalledTimes(1))
     const [filename, text] = vi.mocked(download).mock.calls[0]!
     expect(filename).toBe('vesland-day-3.json')
-    expect(kv.getItem(nationKey(id))).toBe(text)
+    expect(JSON.parse(text).id).toBe(id)
 
     await user.click(screen.getByRole('button', { name: 'Delete this nation' }))
     const dialog = screen.getByRole('heading', { name: 'Delete Vesland?' }).closest('dialog')!
     await user.click(within(dialog).getByRole('button', { name: 'Delete for good' }))
     expect(within(dialog).getByText('That is not its name.')).toBeDefined()
-    expect(kv.getItem(nationKey(id))).not.toBeNull()
+    expect(fake.kept.has(id)).toBe(true)
 
     await user.type(within(dialog).getByLabelText("Type the nation's name to confirm"), 'Veslan')
     await user.click(within(dialog).getByRole('button', { name: 'Delete for good' }))
-    expect(kv.getItem(nationKey(id))).not.toBeNull()
+    expect(fake.kept.has(id)).toBe(true)
 
     await user.type(within(dialog).getByLabelText("Type the nation's name to confirm"), 'd')
     await user.click(within(dialog).getByRole('button', { name: 'Delete for good' }))
     await heading('Run a country')
-    expect(kv.getItem(nationKey(id))).toBeNull()
+    expect(fake.kept.has(id)).toBe(false)
     expect(store.get().nation).toBeNull()
     expect(store.get().nations).toEqual([])
-
-    await user.upload(
-      screen.getByTestId('file-input'),
-      new File([text], filename, { type: 'application/json' }),
-    )
-    await heading('Your nations')
-    expect(screen.getByText('Imported Vesland.')).toBeDefined()
-    await user.click(screen.getByRole('link', { name: 'Open Vesland' }))
-    await heading('Issues')
-    expect(store.get().nation).toEqual(before)
-    expect(screen.getByText('Day 3')).toBeDefined()
   })
 
   it('backs out of deleting without touching anything', async () => {
     const user = userEvent.setup()
-    const { kv, id } = await settled()
+    const { fake, id } = await settled()
     await user.click(screen.getByRole('button', { name: 'Delete this nation' }))
     await user.click(screen.getByRole('button', { name: 'Keep it' }))
     expect(screen.queryByRole('heading', { name: 'Delete Vesland?' })).toBeNull()
-    expect(kv.getItem(nationKey(id))).not.toBeNull()
+    expect(fake.kept.has(id)).toBe(true)
   })
 
   it('imports beside the nation that is open and offers a way to it', async () => {
     const user = userEvent.setup()
-    const { kv, store, id } = await settled()
-    const text = kv.getItem(nationKey(id))!
-    await user.upload(
-      screen.getByTestId('file-input'),
-      new File([text], 'copy.json', { type: 'application/json' }),
-    )
+    const { fake, store, id } = await settled()
+    const text = await fake.exportNation(id)
+    const save = JSON.stringify({ ...JSON.parse(text), format: 1 })
+    await user.upload(screen.getByTestId('file-input'), new File([save], 'copy.json', { type: 'application/json' }))
     expect(await screen.findByText('Imported Vesland.')).toBeDefined()
     expect(store.get().nations).toHaveLength(2)
     const other = store.get().nations.find((n) => n.id !== id)!
@@ -101,10 +84,7 @@ describe('export, delete and import', () => {
   it('explains a file that is not a save', async () => {
     const user = userEvent.setup()
     const { store } = await settled()
-    await user.upload(
-      screen.getByTestId('file-input'),
-      new File(['{}'], 'x.json', { type: 'application/json' }),
-    )
+    await user.upload(screen.getByTestId('file-input'), new File(['{}'], 'x.json', { type: 'application/json' }))
     expect((await screen.findByRole('alert')).textContent).toMatch(/not imported.*no format number/)
     expect(store.get().nations).toHaveLength(1)
   })
@@ -113,11 +93,11 @@ describe('export, delete and import', () => {
 describe('identity', () => {
   it('renames the nation and changes its flag, and refuses a blank name', async () => {
     const user = userEvent.setup()
-    const { store } = await settled()
+    const { fake, store, id } = await settled()
     const timeline = store.get().nation!.state.timeline
 
     await user.click(screen.getByRole('button', { name: 'Save name and flag' }))
-    expect(screen.getByText('Nothing has been changed.')).toBeDefined()
+    expect(screen.getAllByText('Nothing has been changed.').length).toBeGreaterThan(0)
 
     const name = screen.getByLabelText('Name of the nation')
     await user.clear(name)
@@ -128,15 +108,63 @@ describe('identity', () => {
     await user.type(name, 'New Vesland')
     await user.click(screen.getByRole('radio', { name: 'Disc' }))
     await user.click(screen.getByRole('button', { name: 'Save name and flag' }))
-    expect(screen.getAllByText('Saved. The papers have been told.')[0]).toBeDefined()
+    expect((await screen.findAllByText('Saved. The papers have been told.'))[0]).toBeDefined()
 
     const saved = store.get().nation!.state
     expect(saved.identity.name).toBe('New Vesland')
     expect(saved.identity.flag.layout).toBe('disc')
     expect(saved.identity.capital).toBe(identity.capital)
     expect(saved.timeline).toEqual(timeline)
+    expect(fake.held(id).state.identity.name).toBe('New Vesland')
     expect(screen.getByRole('link', { name: 'New Vesland' })).toBeDefined()
     expect(screen.getByRole('button', { name: 'Export New Vesland' })).toBeDefined()
+  })
+
+  it('says why the server refused, and keeps the change on screen', async () => {
+    const user = userEvent.setup()
+    const { fake } = await settled()
+    fake.identity = async () => {
+      throw new Error('That name is taken by a neighbour. Pick another.')
+    }
+    await user.type(screen.getByLabelText('Name of the nation'), 'ia')
+    await user.click(screen.getByRole('button', { name: 'Save name and flag' }))
+    expect((await screen.findByRole('alert')).textContent).toMatch(/taken by a neighbour/)
+    expect((screen.getByLabelText('Name of the nation') as HTMLInputElement).value).toBe('Veslandia')
+  })
+})
+
+describe('the AI', () => {
+  it('chooses a back end, takes a key it never shows again, sets the models and tests it', async () => {
+    const user = userEvent.setup()
+    const { fake } = await settled()
+    const sheet = (await screen.findByRole('heading', { name: 'The AI' })).closest('section')!
+    expect(within(sheet).getByText('Off')).toBeDefined()
+    expect(screen.getByRole('link', { name: 'AI off' })).toBeDefined()
+
+    await user.click(await within(sheet).findByRole('radio', { name: /^A Claude API key/ }))
+    const key = within(sheet).getByLabelText('Claude API key') as HTMLInputElement
+    expect(key.type).toBe('password')
+    expect(within(sheet).getByText(/No key is set yet/)).toBeDefined()
+    await user.type(key, 'sk-ant-secret')
+    const strategic = within(sheet).getByLabelText('Model for the great bodies') as HTMLInputElement
+    expect(strategic.value).toBe('claude-opus-5-5')
+    await user.clear(strategic)
+    await user.type(strategic, 'claude-sonnet-5-5')
+    await user.click(within(sheet).getByRole('button', { name: 'Save the AI settings' }))
+
+    expect(await within(sheet).findByText('Saved.')).toBeDefined()
+    expect(fake.calls.find((c) => c.name === 'saveSettings')!.args[0]).toMatchObject({
+      backend: 'anthropic',
+      apiKey: 'sk-ant-secret',
+      models: { strategic: 'claude-sonnet-5-5' },
+    })
+    expect((within(sheet).getByLabelText('Claude API key') as HTMLInputElement).value).toBe('')
+    expect(within(sheet).getByText(/A key is set\. It is never shown again/)).toBeDefined()
+    expect(document.body.textContent).not.toContain('sk-ant-secret')
+    expect(await screen.findByRole('link', { name: 'AI on: Claude API key ending 4f2a' })).toBeDefined()
+
+    await user.click(within(sheet).getByRole('button', { name: 'Test it' }))
+    expect(await within(sheet).findByText('The test passed')).toBeDefined()
   })
 })
 

@@ -3,6 +3,7 @@ import { download } from '../store/browser.ts'
 import { useGame } from '../store/game.tsx'
 import type { Problem } from '../store/gameStore.ts'
 import { go } from '../store/route.ts'
+import { useAction } from '../store/useAction.ts'
 import { Button, Dialog, LinkTo, Notice, Screen } from '../ui/index.ts'
 
 export function Lost() {
@@ -20,21 +21,26 @@ export function Lost() {
   )
 }
 
-// A save that will not open is never thrown away for the player. They are told what is
-// wrong with it, can take the raw text away as a file, and remove it only by asking.
+// A nation that will not open is never thrown away for the player. They are told what is
+// wrong with it, can ask the server for it as a file, and remove it only by asking.
 export function Unreadable({ problem }: { problem: Problem }) {
   const game = useGame()
+  const action = useAction()
   const [asking, setAsking] = useState(false)
-  const stored = problem.raw !== ''
+  const stored = game.nations.some((n) => n.id === problem.id)
 
-  function exportRaw() {
-    const file = game.exportSave(problem.id)
+  async function exportRaw() {
+    const file = await action.run('export', () => game.exportSave(problem.id))
     if (file) download(file.filename, file.text)
   }
 
-  function remove() {
-    game.remove(problem.id)
-    go({ name: 'home' })
+  async function remove() {
+    const done = await action.run('remove', async () => {
+      await game.remove(problem.id)
+      return true
+    })
+    setAsking(false)
+    if (done) go({ name: 'home' })
   }
 
   return (
@@ -45,16 +51,21 @@ export function Unreadable({ problem }: { problem: Problem }) {
         </Notice>
         {stored && (
           <p>
-            Nothing has been changed or deleted. The save is still stored in this browser exactly as it was
-            found, and you can take a copy of it away.
+            Nothing has been changed or deleted. The save is still kept on the server exactly as it was found,
+            and you can take a copy of it away.
           </p>
+        )}
+        {action.error && (
+          <Notice tone="problem" title="Not done">
+            <p>{action.error}</p>
+          </Notice>
         )}
         <div className="row">
           <LinkTo to={{ name: 'home' }} look="primary">
             Back to the nations
           </LinkTo>
           {stored && (
-            <Button look="secondary" onClick={exportRaw}>
+            <Button look="secondary" onClick={() => void exportRaw()} disabled={action.busy !== null}>
               Export the raw save
             </Button>
           )}
@@ -74,7 +85,7 @@ export function Unreadable({ problem }: { problem: Problem }) {
             <Button look="secondary" onClick={() => setAsking(false)}>
               Keep it
             </Button>
-            <Button look="danger" onClick={remove}>
+            <Button look="danger" onClick={() => void remove()} disabled={action.busy !== null}>
               Remove it for good
             </Button>
           </>

@@ -68,6 +68,40 @@
   --buff: #efeee3;
   --flag-edge: rgb(20 20 20 / 0.45);
   --pill-label: #f1f0e6;
+
+  /* The government website: a public record office, midnight navy and lantern gold. The
+     brand values never change between editions; the jobs below them do. */
+  --gov-navy: #0a1a33;
+  --gov-navy-2: #10264a;
+  --gov-navy-3: #1a3766;
+  --gov-gold: #f0b43c;
+  --gov-gold-soft: #f7dc9c;
+  --gov-on-navy: #ffffff;
+  --gov-on-navy-soft: #c9d2e3;
+  --gov-paper: #f6f3ea;
+  --gov-sheet: #fffdf8;
+  --gov-tint: #efeadb;
+  --gov-ink: #131d30;
+  --gov-ink-soft: #44506a;
+  --gov-head: #0a1a33;
+  --gov-rule: #d8d1bd;
+  --gov-rule-strong: #0a1a33;
+  --gov-link: #254b85;
+  --gov-accent: #86590a;
+  --gov-thead: #0a1a33;
+  --gov-thead-ink: #ffffff;
+  --gov-none: #bdb49a;
+  --gov-field: #ffffff;
+  /* The Founder's page is midnight in both editions. */
+  --founder-ground: #071226;
+  --founder-panel: #0a1a33;
+  --founder-ink: #e7ebf4;
+  --founder-soft: #aab6cd;
+  --founder-head: #ffffff;
+  --founder-rule: #26385c;
+  --founder-draft: #a9c1ea;
+  --founder-field: #fbf8ee;
+  --founder-field-ink: #131d30;
 }
 
 [data-theme='dark'] {
@@ -91,6 +125,24 @@
   --buff: #2a2b24;
   --flag-edge: rgb(231 229 218 / 0.45);
   --pill-label: #2a2b24;
+
+  /* The record office after hours: warm charcoal and bone, pale-blue links. */
+  --gov-paper: #181714;
+  --gov-sheet: #1f1e1b;
+  --gov-tint: #292825;
+  --gov-ink: #dcd8cc;
+  --gov-ink-soft: #aba695;
+  --gov-head: #f2eee1;
+  --gov-rule: #403d35;
+  --gov-rule-strong: #8d8672;
+  --gov-link: #9fbdf2;
+  --gov-accent: #e6b952;
+  --gov-thead: #22345a;
+  --gov-thead-ink: #eef1f7;
+  --gov-none: #5a574d;
+  --gov-field: #121210;
+  --founder-field: #040c1c;
+  --founder-field-ink: #f3ecd6;
 }
 
 @media (prefers-reduced-motion: reduce) {

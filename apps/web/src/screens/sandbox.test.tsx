@@ -1,5 +1,5 @@
 import { callUp } from '@diplomat/engine'
-import { cleanup, screen, within } from '@testing-library/react'
+import { cleanup, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { content, founded } from '../test/fixtures.ts'
@@ -48,7 +48,7 @@ describe('naming the nation\'s animal', () => {
   it('asks for a name before accepting, then makes it part of the nation', async () => {
     const user = userEvent.setup()
     window.location.hash = '#/n/kept/desk'
-    const { store } = mount(holding(callUp(founded(), content, 'national-animal')))
+    const { store } = mount(holding(callUp(founded(), content, 'national-animal'), { noDockets: true }))
     await heading('Issues')
 
     const issue = screen.getByRole('heading', { level: 3, name: 'A Beast for the Coat of Arms' }).closest('article')!
@@ -59,7 +59,7 @@ describe('naming the nation\'s animal', () => {
 
     await user.type(within(issue).getByRole('textbox', { name: 'The national animal' }), 'Lesser spotted owl')
     await user.click(own)
-    expect(store.get().nation!.state.identity.animal).toBe('Lesser spotted owl')
+    await waitFor(() => expect(store.get().nation!.state.identity.animal).toBe('Lesser spotted owl'))
   })
 })
 

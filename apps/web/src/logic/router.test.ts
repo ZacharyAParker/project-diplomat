@@ -9,7 +9,21 @@ describe('routes', () => {
     { name: 'found', step: 'identity' },
     { name: 'found', step: 'flag' },
     { name: 'found', step: 'questions' },
+    { name: 'found', step: 'form' },
+    { name: 'found', step: 'mode' },
+    { name: 'found', step: 'founder' },
     { name: 'kit' },
+    { name: 'ai' },
+    { name: 'gov', id: 'abc123', page: 'today' },
+    { name: 'gov', id: 'abc123', page: 'in-force' },
+    { name: 'gov', id: 'abc123', page: 'executive' },
+    { name: 'gov', id: 'abc123', page: 'country' },
+    { name: 'gov', id: 'abc123', page: 'founder' },
+    { name: 'gov', id: 'abc123', page: 'library', query: {} },
+    { name: 'gov', id: 'abc123', page: 'library', query: { q: 'fish & chips?', series: 'hansard', issuer: 'The Assembly', from: 3, to: 12, page: 2 } },
+    { name: 'gov', id: 'abc123', page: 'doc', doc: 'hansard-00012' },
+    { name: 'gov', id: 'abc123', page: 'body', body: 'assembly' },
+    { name: 'gov', id: 'odd id/with?bits#', page: 'body', body: 'a/b?c' },
     { name: 'nation', id: 'abc123', page: 'desk' },
     { name: 'nation', id: 'abc123', page: 'morning' },
     { name: 'nation', id: 'abc123', page: 'record' },
@@ -28,6 +42,24 @@ describe('routes', () => {
     expect(parseRoute('#/n/abc')).toEqual({ name: 'nation', id: 'abc', page: 'desk' })
   })
 
+  it('opens the government website at Today, and writes its addresses plainly', () => {
+    expect(parseRoute('#/n/abc/gov')).toEqual({ name: 'gov', id: 'abc', page: 'today' })
+    expect(routeHref({ name: 'gov', id: 'abc', page: 'today' })).toBe('#/n/abc/gov')
+    expect(routeHref({ name: 'gov', id: 'abc', page: 'doc', doc: 'court-00001' })).toBe('#/n/abc/gov/doc/court-00001')
+    expect(routeHref({ name: 'gov', id: 'abc', page: 'library', query: { series: 'law', page: 1 } })).toBe(
+      '#/n/abc/gov/library?series=law',
+    )
+  })
+
+  it('keeps only the library filters it understands', () => {
+    expect(parseRoute('#/n/abc/gov/library?q=x&page=0&from=soon&colour=red&to=4')).toEqual({
+      name: 'gov',
+      id: 'abc',
+      page: 'library',
+      query: { q: 'x', to: 4 },
+    })
+  })
+
   it('is lost anywhere else', () => {
     for (const hash of [
       '#/nowhere',
@@ -37,6 +69,16 @@ describe('routes', () => {
       '#/n/abc/budget',
       '#/n/%E0%A4%A/desk',
       '#/kit/x',
+      '#/found/government',
+      '#/n/abc/desk?x=1',
+      '#/n/abc/gov/nowhere',
+      '#/n/abc/gov/doc',
+      '#/n/abc/gov/doc/a/b',
+      '#/n/abc/gov/body',
+      '#/n/abc/gov/today/more',
+      '#/n/abc/gov/founder?x=1',
+      '#/n/abc/gov/doc/%E0%A4%A',
+      '#/ai/x',
     ]) {
       expect(parseRoute(hash), hash).toEqual({ name: 'lost' })
     }

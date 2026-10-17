@@ -35,6 +35,9 @@ importers:
       '@diplomat/engine':
         specifier: workspace:*
         version: link:../../packages/engine
+      '@diplomat/government':
+        specifier: workspace:*
+        version: link:../../packages/government
       react:
         specifier: ^19.0.0
         version: 19.3.0

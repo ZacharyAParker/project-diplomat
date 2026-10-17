@@ -84,13 +84,19 @@ export function Sandbox({ current }: { current: Current }) {
     [state, content],
   )
 
-  function run(what: string, act: () => void) {
+  const [busy, setBusy] = useState(false)
+
+  async function run(what: string, act: () => Promise<void>) {
+    if (busy) return
+    setBusy(true)
     try {
-      act()
+      await act()
       setProblem(null)
       announce(what)
     } catch (error) {
-      setProblem(error instanceof Error ? error.message : 'the game refused')
+      setProblem(error instanceof Error ? error.message : 'the server refused')
+    } finally {
+      setBusy(false)
     }
   }
 
@@ -106,7 +112,7 @@ export function Sandbox({ current }: { current: Current }) {
       }
     }
     if (changes.length === 0) return setProblem('Nothing has been changed yet.')
-    run(`${changes.length} figures changed.`, () => game.adjust(changes))
+    void run(`${changes.length} figures changed.`, () => game.adjust(changes))
     setDrafts({})
   }
 
@@ -119,7 +125,7 @@ export function Sandbox({ current }: { current: Current }) {
       else if (Number.isFinite(Number(raw))) changes.push({ policy: id, to: Number(raw) })
     }
     if (changes.length === 0) return setProblem('No law has been changed yet.')
-    run(`${changes.length} laws changed.`, () => game.adjust(changes))
+    void run(`${changes.length} laws changed.`, () => game.adjust(changes))
     setPolicyDrafts({})
   }
 
@@ -146,15 +152,20 @@ export function Sandbox({ current }: { current: Current }) {
       <Sheet title="Time">
         <p className="soft small">Each skipped day is ended with nothing decided, exactly as if you had walked away.</p>
         <div className="row">
-          <Button onClick={() => run('One day skipped.', () => game.skipDays(1))}>Skip a day</Button>
-          <Button onClick={() => run('A week skipped.', () => game.skipDays(7))}>Skip a week</Button>
-          <Button
-            onClick={() =>
-              run('Skipped past the election.', () => game.skipDays(current.electionIn + 1))
-            }
-          >
-            Skip past the election ({current.electionIn + 1} days)
+          <Button disabled={busy} onClick={() => void run('One day skipped.', () => game.skipDays(1))}>
+            Skip a day
           </Button>
+          <Button disabled={busy} onClick={() => void run('A week skipped.', () => game.skipDays(7))}>
+            Skip a week
+          </Button>
+          {current.electionIn !== null && current.electionIn < 90 && (
+            <Button
+              disabled={busy}
+              onClick={() => void run('Skipped past the election.', () => game.skipDays((current.electionIn ?? 0) + 1))}
+            >
+              Skip past the election ({current.electionIn + 1} days)
+            </Button>
+          )}
         </div>
       </Sheet>
 
@@ -177,7 +188,7 @@ export function Sandbox({ current }: { current: Current }) {
             </fieldset>
           ))}
         </div>
-        <Button look="primary" onClick={applyFigures}>
+        <Button look="primary" onClick={applyFigures} disabled={busy}>
           Apply the figures
         </Button>
       </Sheet>
@@ -213,7 +224,7 @@ export function Sandbox({ current }: { current: Current }) {
             )
           })}
         </ul>
-        <Button look="primary" onClick={applyPolicies}>
+        <Button look="primary" onClick={applyPolicies} disabled={busy}>
           Apply the laws
         </Button>
       </Sheet>
@@ -236,7 +247,9 @@ export function Sandbox({ current }: { current: Current }) {
               </option>
             ))}
           </select>
-          <Button onClick={() => run('Issue put on the desk.', () => game.callUp(dilemma))}>Call it up</Button>
+          <Button disabled={busy} onClick={() => void run('Issue put on the desk.', () => game.callUp(dilemma))}>
+            Call it up
+          </Button>
         </div>
       </Sheet>
 
@@ -258,7 +271,9 @@ export function Sandbox({ current }: { current: Current }) {
               </option>
             ))}
           </select>
-          <Button onClick={() => run('Crisis started.', () => game.startCrisis(crisis))}>Start it</Button>
+          <Button disabled={busy} onClick={() => void run('Crisis started.', () => game.startCrisis(crisis))}>
+            Start it
+          </Button>
         </div>
       </Sheet>
     </Screen>

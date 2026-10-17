@@ -7,6 +7,8 @@ import { download } from '../store/browser.ts'
 import { useGame, type Current } from '../store/game.tsx'
 import { go } from '../store/route.ts'
 import { useSettings } from '../store/settings.tsx'
+import { useAction } from '../store/useAction.ts'
+import { AiSettingsSheet } from './Ai.tsx'
 import {
   Button,
   Dialog,
@@ -39,6 +41,7 @@ export function Settings({ current }: { current: Current }) {
   const [deleting, setDeleting] = useState(false)
   const [typed, setTyped] = useState('')
   const [wrong, setWrong] = useState(false)
+  const action = useAction()
 
   const errors = checkIdentity(text)
   const problems = Object.keys(errors).length
@@ -50,25 +53,28 @@ export function Settings({ current }: { current: Current }) {
     announce(message)
   }
 
-  function save(event: FormEvent) {
+  async function save(event: FormEvent) {
     event.preventDefault()
     if (problems > 0)
       return say(problems === 1 ? 'One line needs another look.' : `${problems} lines need another look.`)
     if (!changed) return say('Nothing has been changed.')
-    game.setIdentity(next)
-    say('Saved. The papers have been told.')
+    const done = await action.run('identity', async () => {
+      await game.setIdentity(next)
+      return true
+    })
+    if (done) say('Saved. The papers have been told.')
   }
 
-  function exportSave() {
-    const file = game.exportSave(current.id)
-    if (!file) return say('There was nothing to export.')
+  async function exportSave() {
+    const file = await action.run('export', () => game.exportSave(current.id))
+    if (!file) return
     download(file.filename, file.text)
     say(`Exported as ${file.filename}.`)
   }
 
-  function importText(file: string | Error) {
+  async function importText(file: string | Error) {
     if (file instanceof Error) return setImported({ ok: false, text: file.message })
-    const result = game.importSave(file)
+    const result = await game.importSave(file)
     if (!result.ok) return setImported({ ok: false, text: result.problem })
     setImported({ ok: true, id: result.id, text: `Imported ${result.name}. ${result.notice ?? ''}`.trim() })
   }
@@ -79,9 +85,13 @@ export function Settings({ current }: { current: Current }) {
     setWrong(false)
   }
 
-  function remove() {
+  async function remove() {
     if (!sameName(typed, saved.name)) return setWrong(true)
-    game.remove(current.id)
+    const done = await action.run('remove', async () => {
+      await game.remove(current.id)
+      return true
+    })
+    if (!done) return closeDelete()
     announce(`${saved.name} has been deleted.`)
     go({ name: 'home' })
   }
@@ -89,7 +99,7 @@ export function Settings({ current }: { current: Current }) {
   return (
     <Screen title="Settings" kicker={saved.name} className="settings">
       <div className="settings__sheets">
-        <form onSubmit={save} noValidate className="settings__identity">
+        <form onSubmit={(event) => void save(event)} noValidate className="settings__identity">
           <Sheet kicker="Identity" title="Names and titles">
             <p className="small soft measure">
               A new name appears from tomorrow's paper. Old headlines keep the name they were printed with.
@@ -115,7 +125,7 @@ export function Settings({ current }: { current: Current }) {
             />
           </Sheet>
           <div className="settings__save">
-            <Button type="submit" look="primary">
+            <Button type="submit" look="primary" disabled={action.busy !== null} aria-busy={action.busy === 'identity'}>
               Save name and flag
             </Button>
             <p className="small soft">
@@ -124,6 +134,14 @@ export function Settings({ current }: { current: Current }) {
             </p>
           </div>
         </form>
+
+        {action.error && (
+          <Notice tone="problem" title="Not done">
+            <p>{action.error}</p>
+          </Notice>
+        )}
+
+        <AiSettingsSheet />
 
         <Sheet kicker="This browser" title="Edition">
           <div className="stack">
@@ -151,12 +169,14 @@ export function Settings({ current }: { current: Current }) {
         <Sheet kicker="Safekeeping" title="Export and import">
           <div className="stack measure">
             <p>
-              The nation is saved in this browser after every decision. A browser can lose things, so take a
-              copy now and then. The file holds the whole nation and its record.
+              The server keeps the nation and its whole archive after every decision. Take a copy now and then all
+              the same. The file holds the nation, its government and every document.
             </p>
             <div className="row">
-              <Button onClick={exportSave}>Export {saved.name}</Button>
-              <FileButton look="secondary" onText={importText}>
+              <Button onClick={() => void exportSave()} disabled={action.busy !== null}>
+                Export {saved.name}
+              </Button>
+              <FileButton look="secondary" onText={(file) => void importText(file)}>
                 Import a save
               </FileButton>
             </div>
@@ -200,13 +220,14 @@ export function Settings({ current }: { current: Current }) {
           </dl>
           <p>Not affiliated with NationStates or Max Barry.</p>
           <p className="small soft">
-            Nothing leaves this browser. There is no account, no server and nothing is counted.
+            The game runs on this computer. There is no account and nothing is counted. Nothing leaves it unless
+            the AI is switched on, and then only what the bodies are asked.
           </p>
         </Sheet>
 
         <Sheet kicker="The end" title={`Delete ${saved.name}`}>
           <div className="stack measure">
-            <p>This removes the nation and its whole record from this browser. It cannot be undone.</p>
+            <p>This removes the nation and its whole record from the server. It cannot be undone here.</p>
             <p>
               <Button look="danger" onClick={() => setDeleting(true)}>
                 Delete this nation
@@ -225,7 +246,7 @@ export function Settings({ current }: { current: Current }) {
             <Button look="secondary" onClick={closeDelete}>
               Keep it
             </Button>
-            <Button look="danger" onClick={remove}>
+            <Button look="danger" onClick={() => void remove()} disabled={action.busy !== null}>
               Delete for good
             </Button>
           </>

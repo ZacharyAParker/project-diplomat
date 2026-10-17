@@ -159,7 +159,7 @@ export function boxNotice(state: GameState, content: Content): BoxNotice | null 
 
 // What the foot of the desk says before the day is ended. Total is everything the day
 // started with, open is what has not been decided.
-export function closingLine(total: number, open: number, electionIn: number): string {
+export function closingLine(total: number, open: number, electionIn: number | null): string {
   const vote = electionIn === 0 ? ' The country votes tonight.' : ''
   if (total === 0) return `There is nothing to decide today.${vote}`
   if (open === 0) return `Everything in the box has been dealt with.${vote}`
