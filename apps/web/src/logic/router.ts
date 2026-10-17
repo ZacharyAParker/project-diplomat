@@ -1,7 +1,7 @@
 export const FOUND_STEPS = ['identity', 'flag', 'questions', 'form', 'mode', 'founder'] as const
 export type FoundStep = (typeof FOUND_STEPS)[number]
 
-export const NATION_PAGES = ['morning', 'desk', 'nation', 'record', 'settings', 'sandbox'] as const
+export const NATION_PAGES = ['morning', 'desk', 'nation', 'record', 'settings', 'sandbox', 'director', 'ooc'] as const
 export type NationPage = (typeof NATION_PAGES)[number]
 
 // The government website's pages that need nothing more than their name.

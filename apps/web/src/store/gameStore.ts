@@ -7,6 +7,8 @@ import type {
   ArchivePage,
   ArchiveQuery,
   Changed,
+  DirectorState,
+  OocEntry,
   DocumentPage,
   FactbookWrite,
   FoundRequest,
@@ -49,6 +51,12 @@ export interface GameModel {
   statusError: string | null
   // Saves from 0.5 still in this browser's storage.
   legacy: LegacySave[]
+  // The open nation's Director, once asked for, and why it could not be asked.
+  director: DirectorState | null
+  directorError: string | null
+  // Cheats a Director turn produced, by the id of the last message before them, so the
+  // transcript can say so. A cheat is never invisible to the Founder.
+  cheats: Record<string, OocEntry[]>
 }
 
 export type ImportResult = { ok: true; id: string; name: string; notice?: string } | { ok: false; problem: string }
@@ -68,6 +76,8 @@ export interface GameStore {
   content: Content
   // How often the desk asks after dockets that are sitting.
   pollMs: number
+  // How often the Director is asked after while it is answering.
+  directorPollMs: number
   get(): GameModel
   subscribe(listener: () => void): () => void
 
@@ -119,12 +129,23 @@ export interface GameStore {
   aiSettings(): Promise<AiSettings>
   saveAiSettings(change: AiSettingsChange): Promise<AiSettings>
   testAi(): Promise<ProviderStatus>
+
+  // The Director, for the open nation. pollDirector() is true while it is still answering;
+  // when a turn ends the nation is fetched again, since the Director may have changed anything.
+  loadDirector(): Promise<void>
+  pollDirector(): Promise<boolean>
+  tellDirector(text: string): Promise<void>
+  stopDirector(): Promise<void>
+  resetDirector(): Promise<void>
+  oocLog(): Promise<OocEntry[]>
+  undoCheat(n: number): Promise<void>
 }
 
 export interface StoreOptions {
   // The browser's storage, looked at only for saves left there by 0.5.
   kv?: KeyValue
   pollMs?: number
+  directorPollMs?: number
 }
 
 const messageOf = (error: unknown, fallback: string) => (error instanceof Error ? error.message : fallback)
@@ -147,6 +168,9 @@ export function createGameStore(api: Api, content: Content, options: StoreOption
     status: null,
     statusError: null,
     legacy: findLegacy(kv),
+    director: null,
+    directorError: null,
+    cheats: {},
   }
   const listeners = new Set<() => void>()
   const opening = new Map<string, Promise<boolean>>()
@@ -200,6 +224,53 @@ export function createGameStore(api: Api, content: Content, options: StoreOption
     return timeline[Math.min(before, timeline.length - 1)]!
   }
 
+  // Asks after the open nation's Director. A reply for a nation no longer open is dropped.
+  async function askDirector(): Promise<DirectorState | null> {
+    const id = playing().id
+    try {
+      const state = await api.director(id)
+      if (model.nation?.id !== id) return null
+      set({ director: state, directorError: null })
+      return state
+    } catch (error) {
+      if (model.nation?.id === id) set({ directorError: messageOf(error, 'The Director could not be asked.') })
+      throw error
+    }
+  }
+
+  // The highest cheat number already known, so a turn's new ones can be told apart.
+  let seen: { id: string; n: number } | null = null
+
+  async function knownCheats() {
+    const id = playing().id
+    try {
+      const log = await api.ooc(id)
+      seen = { id, n: Math.max(0, ...log.map((e) => e.n)) }
+    } catch {
+      // The transcript works without it; only the cheat notices wait.
+    }
+  }
+
+  // A Director turn has ended: the Director may have changed anything, so the nation is
+  // fetched again, and any cheat it made is set beside the transcript.
+  async function turnEnded() {
+    await reload()
+    const id = playing().id
+    let log: OocEntry[]
+    try {
+      log = await api.ooc(id)
+    } catch {
+      return
+    }
+    const before = seen?.id === id ? seen.n : 0
+    const fresh = log.filter((e) => e.n > before && e.undoes === undefined).sort((a, b) => a.n - b.n)
+    seen = { id, n: Math.max(before, ...log.map((e) => e.n)) }
+    const last = model.director?.messages.at(-1)?.id
+    if (fresh.length && last && model.nation?.id === id) {
+      set({ cheats: { ...model.cheats, [last]: [...(model.cheats[last] ?? []), ...fresh] } })
+    }
+  }
+
   async function reload() {
     const nation = model.nation
     if (!nation) return
@@ -211,13 +282,19 @@ export function createGameStore(api: Api, content: Content, options: StoreOption
     return false
   }
 
+  // The nation most recently asked for. A reply for any other is stale: the player has moved
+  // on, and installing it would show one nation under another's address.
+  let wanted: string | null = null
+
   async function open(id: string): Promise<boolean> {
+    wanted = id
     if (model.nation?.id === id) return true
     const already = opening.get(id)
     if (already) return already
     const attempt = (async () => {
       try {
         const reply = await api.nation(id)
+        if (wanted !== id) return false
         const opened = read(reply.nation)
         if (!opened.ok) return fail(id, opened.problem)
         opened.nation.id = id
@@ -225,12 +302,16 @@ export function createGameStore(api: Api, content: Content, options: StoreOption
           nation: opened.nation,
           government: reply.government ?? null,
           census: reply.census ?? [],
+          director: null,
+          directorError: null,
+          cheats: {},
           notice: opened.notice ?? null,
           problem: null,
           nations: summaryFor(opened.nation),
         })
         return true
       } catch (error) {
+        if (wanted !== id) return false
         return fail(id, messageOf(error, 'The nation could not be opened.'))
       } finally {
         opening.delete(id)
@@ -272,6 +353,7 @@ export function createGameStore(api: Api, content: Content, options: StoreOption
   return {
     content,
     pollMs: options.pollMs ?? 2000,
+    directorPollMs: options.directorPollMs ?? 1500,
     get: () => model,
 
     subscribe(listener) {
@@ -288,7 +370,8 @@ export function createGameStore(api: Api, content: Content, options: StoreOption
     reload,
 
     close() {
-      set({ nation: null, government: null, census: [], notice: null, problem: null })
+      wanted = null
+      set({ nation: null, government: null, census: [], notice: null, problem: null, director: null, directorError: null, cheats: {} })
     },
 
     async found(request) {
@@ -408,6 +491,43 @@ export function createGameStore(api: Api, content: Content, options: StoreOption
 
     dismissNotice() {
       set({ notice: null })
+    },
+
+    loadDirector: async () => {
+      await askDirector()
+      await knownCheats()
+    },
+    async pollDirector() {
+      const before = model.director?.busy === true
+      const state = await askDirector()
+      if (before && state && !state.busy) await turnEnded()
+      return state?.busy === true
+    },
+    async tellDirector(text) {
+      const id = playing().id
+      await api.tellDirector(id, text)
+      // Busy at once, with the Founder's words showing, until the first poll says otherwise.
+      const now = model.director
+      if (now && model.nation?.id === id) {
+        const said = { id: `sent-${now.messages.length}`, role: 'founder' as const, text, at: new Date().toISOString() }
+        set({ director: { ...now, busy: true, messages: [...now.messages, said] } })
+      }
+      await askDirector()
+      if (model.director && !model.director.busy) await turnEnded()
+    },
+    async stopDirector() {
+      await api.stopDirector(playing().id)
+      await askDirector()
+      await turnEnded()
+    },
+    async resetDirector() {
+      await api.resetDirector(playing().id)
+      await askDirector()
+    },
+    oocLog: () => api.ooc(playing().id),
+    async undoCheat(number) {
+      await act((id) => api.undoCheat(id, number))
+      await knownCheats()
     },
 
     aiSettings: () => api.settings(),

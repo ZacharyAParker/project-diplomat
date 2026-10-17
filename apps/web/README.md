@@ -124,6 +124,7 @@ server's export of it, and removes it only when asked.
 #/n/<id>/gov/doc/<document id>
 #/n/<id>/gov/in-force, /executive, /country, /founder
 #/n/<id>/gov/body/<body id>
+#/n/<id>/director      the Director, out of character; /ooc is its log
 #/ai                  the AI settings, outside a nation
 #/kit                 the component kit
 ```
@@ -183,6 +184,29 @@ and the Founder's page in midnight and gold in both editions. Its colours are th
   change, No reply and Mark read; the Words given, to confirm; and a form to give a Word, with what it
   overrules and Silence).
 
+### The Director
+
+The Director is the player's out-of-character partner: a Claude Code session the server runs for each
+nation. It has a menu group of its own, "Out of character", set apart from the in-world Government group and
+drawn in the plain working face. `#/n/<id>/director` is the conversation in full; the "Talk to the Director"
+button in the nation's header opens the same conversation in a drawer, a panel at the side on a wide screen
+and a sheet along the bottom of a phone. The page makes room for the drawer, so it never sits over the desk's
+Accept buttons, and it stays open as the player moves between the nation's pages.
+
+The transcript prints the Founder's words as text, the Director's as Markdown through the safe renderer, and
+its activity ("Used cheat_set_figures") small and soft. Enter sends and Shift and Enter starts a new line.
+While it answers the store asks after it every 1.5 s (`directorPollMs`), shows the reply as it grows, offers
+Stop, and stops asking when the turn ends or the conversation is closed. When a turn ends the nation is fetched
+again, since the Director may have changed anything, and the OOC log is read: any cheat the turn made is set
+in the transcript as "Cheat logged: …", so a cheat is never invisible. "New session" asks first; the
+transcript is kept. When Claude Code cannot be run the panel says why and points at Settings, under The AI,
+where the Director has its own switch and model.
+
+`#/n/<id>/ooc` is the OOC log: every change made by hand, newest first, with the day, the Founder's words that
+asked for it, what changed from and to, and whether it has been undone. A cheat not yet undone has an Undo
+button, which asks first. A sandboxed nation's mark, in the header and on the home list, reads "Sandboxed (see
+the OOC log)" and goes there.
+
 ### Documents
 
 Documents and factbooks are Markdown, and are drawn by `ui/Markdown.tsx` from the tree `logic/markdown.ts`
@@ -212,6 +236,11 @@ on these shapes (the server should send them):
 - `GET /api/settings` → `{ backend, apiKeySet, models, minorsThroughBodies }`; `POST /api/settings/test` →
   a `ProviderStatus`, or `{ status }`.
 - `POST /api/nations/import` → `{ id, name?, notice? }`. `GET …/export` is read as text and downloaded.
+- The Director: `GET …/director` → `{ messages, busy, session, available, detail }`; `POST …/director`
+  `{ text }` (any 2xx is taken as accepted; a 409 while busy is shown as the server words it);
+  `POST …/director/stop`; `POST …/director/reset`; `GET …/ooc` → `{ log: OocEntry[] }` newest first;
+  `POST …/ooc/:n/undo` → `{ nation, government, census }`, or the bare nation payload.
+- Settings carry `director: { enabled, model }` both ways (`claude-opus-5-5` when the server sends none).
 
 ## Design rules
 

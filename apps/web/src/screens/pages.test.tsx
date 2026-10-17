@@ -115,7 +115,7 @@ describe('the record', () => {
     await user.click(screen.getByRole('radio', { name: 'Treasury' }))
     const budget = recordDays(state.timeline, 'treasury')
     expect(dates()).toEqual(budget.slice(0, 20).map((d) => `Day ${d.day}`))
-    expect(screen.getAllByRole('button', { expanded: false })).toHaveLength(
+    expect(within(screen.getByRole('main')).getAllByRole('button', { expanded: false })).toHaveLength(
       budget.slice(0, 20).reduce((sum, d) => sum + d.entries.length, 0),
     )
   })

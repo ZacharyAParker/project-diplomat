@@ -51,12 +51,22 @@ export interface ServerStatus {
 
 export type Backend = ProviderStatus['backend']
 
+// The Director always runs on Claude Code, whatever plays the bodies. Its own switch and model.
+export interface DirectorSettings {
+  enabled: boolean
+  model: string
+}
+
+export const DEFAULT_DIRECTOR: DirectorSettings = { enabled: true, model: 'claude-opus-5-5' }
+
 export interface AiSettings {
   backend: Backend
   // The key itself never comes back. Only whether one is stored.
   apiKeySet: boolean
   models: Record<Tier, string>
   minorsThroughBodies: boolean
+  // Absent from a server that predates the Director.
+  director?: DirectorSettings
 }
 
 export interface AiSettingsChange {
@@ -64,6 +74,45 @@ export interface AiSettingsChange {
   apiKey?: string
   models?: Partial<Record<Tier, string>>
   minorsThroughBodies?: boolean
+  director?: DirectorSettings
+}
+
+// The Director: an out-of-character Claude Code session per nation. See "The Director (0.6.1)"
+// in docs/design/government.md.
+export interface DirectorMessage {
+  id: string
+  // activity: "Used set_figures", "Convened Petition #1728"
+  role: 'founder' | 'director' | 'activity'
+  // Markdown for the director; grows while it streams.
+  text: string
+  at: string
+  streaming?: boolean
+}
+
+export interface DirectorState {
+  messages: DirectorMessage[]
+  busy: boolean
+  session: { id?: string; startedAt?: string }
+  // False when Claude Code cannot be run; detail says why.
+  available: boolean
+  detail: string
+}
+
+// One cheat, as the OOC log keeps it. Never part of the in-world record.
+export interface OocEntry {
+  // Its number in the log, which is how it is undone.
+  n: number
+  at: string
+  day: number
+  action: string
+  detail: string
+  // The Founder's words that asked for it, quoted.
+  request: string
+  changes?: { target: string; from: unknown; to: unknown }[]
+  // Set once it has been undone.
+  undone?: boolean
+  // Set on an undo: the number of the cheat it reversed.
+  undoes?: number
 }
 
 export interface FoundRequest {
@@ -168,6 +217,13 @@ export interface Api {
     id: string,
     request: { title: string; category: Factbook['category']; notes: string },
   ): Promise<{ title: string; body: string }>
+
+  director(id: string): Promise<DirectorState>
+  tellDirector(id: string, text: string): Promise<void>
+  stopDirector(id: string): Promise<void>
+  resetDirector(id: string): Promise<void>
+  ooc(id: string): Promise<OocEntry[]>
+  undoCheat(id: string, n: number): Promise<Changed>
 }
 
 export type Fetch = (input: string, init?: RequestInit) => Promise<Response>
@@ -302,6 +358,23 @@ export function createHttpApi(fetcher: Fetch = (input, init) => fetch(input, ini
     writeFactbook: async (id, factbook) => (await post(`${n(id)}/factbooks`, factbook)) as Changed,
     editFactbook: async (id, fid, factbook) =>
       (await put(`${n(id)}/factbooks/${encodeURIComponent(fid)}`, factbook)) as Changed,
+    director: async (id) => (await get(`${n(id)}/director`)) as DirectorState,
+    tellDirector: async (id, text) => void (await post(`${n(id)}/director`, { text })),
+    stopDirector: async (id) => void (await post(`${n(id)}/director/stop`)),
+    resetDirector: async (id) => void (await post(`${n(id)}/director/reset`)),
+    ooc: async (id) => {
+      const body = await get(`${n(id)}/ooc`)
+      const log = isObject(body) ? body['log'] : body
+      return (Array.isArray(log) ? log : []) as OocEntry[]
+    },
+
+    undoCheat: async (id, number) => {
+      const body = await post(`${n(id)}/ooc/${number}/undo`)
+      // The nation payload, either as { nation, government } or bare.
+      if (isObject(body) && typeof body['state'] === 'string') return { nation: body as unknown as NationPayload }
+      return (isObject(body) ? body : {}) as Changed
+    },
+
     draftFactbook: async (id, request) =>
       (await post(`${n(id)}/factbooks/draft`, request)) as { title: string; body: string },
   }

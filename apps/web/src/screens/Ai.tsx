@@ -1,6 +1,6 @@
 import type { ProviderStatus, Tier } from '@diplomat/government'
 import { useEffect, useId, useState, type FormEvent } from 'react'
-import type { AiSettings, Backend } from '../api.ts'
+import { DEFAULT_DIRECTOR, type AiSettings, type Backend } from '../api.ts'
 import { useGame } from '../store/game.tsx'
 import { useAction } from '../store/useAction.ts'
 import { Button, ChoiceList, Notice, Screen, Sheet, TextField, useAnnounce } from '../ui/index.ts'
@@ -49,6 +49,8 @@ export function AiSettingsSheet() {
   const [key, setKey] = useState('')
   const [models, setModels] = useState<Record<Tier, string>>({ bulk: '', standard: '', strategic: '' })
   const [minors, setMinors] = useState(false)
+  const [director, setDirector] = useState(DEFAULT_DIRECTOR)
+  const directorId = useId()
   const [tested, setTested] = useState<ProviderStatus | null>(null)
   const [said, setSaid] = useState<string | null>(null)
   const minorsId = useId()
@@ -62,6 +64,7 @@ export function AiSettingsSheet() {
       setBackend(settings.backend)
       setModels(settings.models)
       setMinors(settings.minorsThroughBodies)
+      setDirector(settings.director ?? DEFAULT_DIRECTOR)
     })
   }, [aiSettings, run])
 
@@ -73,6 +76,7 @@ export function AiSettingsSheet() {
         backend,
         models,
         minorsThroughBodies: minors,
+        director: { enabled: director.enabled, model: director.model.trim() || DEFAULT_DIRECTOR.model },
         ...(key.trim() ? { apiKey: key.trim() } : {}),
       }),
     )
@@ -152,6 +156,29 @@ export function AiSettingsSheet() {
                 <span className="small soft"> Slower and dearer, and the record is fuller. New nations start with this.</span>
               </span>
             </label>
+            <fieldset className="ai__director stack">
+              <legend className="label">The Director</legend>
+              <p className="small soft">
+                Your partner out of character. It always runs on your own Claude Code, whatever plays the bodies.
+              </p>
+              <label className="check" htmlFor={directorId}>
+                <input
+                  id={directorId}
+                  type="checkbox"
+                  checked={director.enabled}
+                  onChange={(event) => setDirector({ ...director, enabled: event.target.checked })}
+                />
+                <span>Switch the Director on</span>
+              </label>
+              {director.enabled && (
+                <TextField
+                  label="The Director's model"
+                  value={director.model}
+                  hint={`Left empty, ${DEFAULT_DIRECTOR.model}.`}
+                  onChange={(model) => setDirector({ ...director, model })}
+                />
+              )}
+            </fieldset>
             <div className="row">
               <Button type="submit" look="primary" disabled={saving.busy !== null} aria-busy={saving.busy === 'save'}>
                 {saving.busy === 'save' ? 'Saving' : 'Save the AI settings'}

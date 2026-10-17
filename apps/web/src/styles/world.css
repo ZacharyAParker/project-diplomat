@@ -2337,3 +2337,181 @@ html {
   font-weight: bold;
   overflow-wrap: anywhere;
 }
+
+/* ---------------------------------------------------------------------------------------
+   0.6.1: the Director. Out of character, so plain: the working face, the ordinary sheet,
+   none of the government's navy and gold.
+   --------------------------------------------------------------------------------------- */
+
+a.sandbox-mark {
+  text-decoration: none;
+}
+
+a.sandbox-mark:hover {
+  text-decoration: underline;
+}
+
+.side__ooc {
+  margin-top: var(--space-4);
+  padding-top: var(--space-3);
+  border-top: var(--hair) dashed var(--side-edge);
+}
+
+.side__ooc .side__heading,
+.side__ooc .side__link {
+  font-family: var(--font-ui);
+}
+
+.masthead__tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  margin-left: auto;
+}
+
+.masthead--bare .masthead__tools {
+  justify-content: flex-end;
+  padding: var(--space-2) var(--gutter);
+}
+
+.director,
+.director-drawer {
+  font-family: var(--font-ui);
+}
+
+.director__tabs {
+  margin-bottom: var(--space-4);
+}
+
+.director__transcript {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.director__msg {
+  padding: var(--space-3) 0;
+  border-top: var(--hair) solid var(--rule-soft);
+}
+
+.director__msg--founder .director__said {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  margin: var(--space-1) 0 0;
+}
+
+.director__msg--director {
+  padding-left: var(--space-3);
+  border-left: var(--heavy) solid var(--rule);
+}
+
+.director__who {
+  margin: 0;
+}
+
+.director__reply {
+  font-family: var(--font-text);
+  overflow-wrap: anywhere;
+}
+
+.director__activity {
+  padding: var(--space-1) 0 var(--space-1) var(--space-3);
+  font-family: var(--font-ui);
+}
+
+.director__state:empty {
+  display: none;
+}
+
+.director__form {
+  margin-top: var(--space-4);
+}
+
+.ooc {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-ui);
+}
+
+.ooc__entry {
+  padding: var(--space-3) 0;
+  border-top: var(--hair) solid var(--rule-soft);
+}
+
+.ooc__head {
+  margin: 0;
+}
+
+.ooc__changes {
+  margin: var(--space-1) 0 0;
+  font-variant-numeric: tabular-nums;
+}
+
+/* The drawer: a panel at the side on a wide screen, a sheet along the bottom of a phone. The
+   page makes room for it, so it never sits over the Accept buttons. */
+.director-drawer {
+  position: fixed;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  background: var(--paper);
+  color: var(--ink);
+  border-left: var(--hair) solid var(--rule);
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: min(26rem, 40vw);
+  box-shadow: 0 0 1.5rem var(--wash);
+}
+
+.director-drawer__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border-bottom: var(--hair) solid var(--rule);
+  background: var(--sheet);
+}
+
+.director-drawer__title {
+  margin: 0;
+  font-family: var(--font-ui);
+  font-size: var(--size-h3);
+}
+
+.director-drawer__body {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--space-3) var(--space-4) var(--space-4);
+}
+
+.shell--drawer .shell__page {
+  margin-right: min(26rem, 40vw);
+}
+
+@media (max-width: 48rem) {
+  .director-drawer {
+    top: auto;
+    left: 0;
+    width: auto;
+    height: 55vh;
+    border-left: 0;
+    border-top: var(--heavy) solid var(--rule);
+  }
+
+  .shell--drawer .shell__page {
+    margin-right: 0;
+    padding-bottom: 55vh;
+  }
+}
+
+@media print {
+  .director-drawer,
+  .masthead__tools {
+    display: none !important;
+  }
+}

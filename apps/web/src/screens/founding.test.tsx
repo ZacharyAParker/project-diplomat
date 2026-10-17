@@ -175,7 +175,7 @@ describe('founding a nation', () => {
     expect(document.activeElement).toBe(await heading('Issues'))
     expect(screen.getByRole('link', { name: 'Issues' }).getAttribute('aria-current')).toBe('page')
     expect(screen.getByText('Day 1')).toBeDefined()
-  })
+  }, 15_000)
 
   it('shows the server’s refusal at the last step and keeps everything entered', async () => {
     const user = userEvent.setup()

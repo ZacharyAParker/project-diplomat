@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { DirectorDrawer, DirectorScreen } from './screens/Director.tsx'
 import { version } from '../package.json'
 import type { GovRoute, NationPage } from './logic/router.ts'
 import { Admin } from './screens/Admin.tsx'
@@ -43,6 +44,8 @@ function NationPages({ current, page }: { current: Current; page: NationPage }) 
   if (page === 'nation') return <Nation current={current} />
   if (page === 'record') return <TheRecord current={current} />
   if (page === 'sandbox') return <Sandbox current={current} />
+  if (page === 'director') return <DirectorScreen current={current} tab="talk" />
+  if (page === 'ooc') return <DirectorScreen current={current} tab="ooc" />
   return <Settings current={current} />
 }
 
@@ -66,6 +69,8 @@ function NationRoute({ address }: { address: NationAddress }) {
   const ai = useAiLine()
   const { open, current, problem } = game
   const { id } = address
+  // The Director's drawer stays open as the player moves between the nation's pages.
+  const [talking, setTalking] = useState(false)
 
   useEffect(() => {
     void open(id)
@@ -100,12 +105,28 @@ function NationRoute({ address }: { address: NationAddress }) {
   const gov = address.gov
   const govKey = gov ? (gov.page === 'body' ? `body:${gov.body}` : gov.page) : undefined
   const page = address.page
+  // On the Director's own screen the drawer would only repeat it.
+  const ownScreen = page === 'director' || page === 'ooc'
+  const tools = ownScreen ? undefined : (
+    <Button
+      size="small"
+      look={talking ? 'primary' : 'secondary'}
+      className="director-toggle"
+      aria-expanded={talking}
+      aria-controls="director-drawer"
+      onClick={() => setTalking(!talking)}
+    >
+      {talking ? 'Close the Director' : 'Talk to the Director'}
+    </Button>
+  )
   return (
     <Shell
       nation={nation}
       page={page === 'morning' ? undefined : page}
       gov={govKey}
       ai={ai}
+      tools={tools}
+      drawer={talking && !ownScreen ? <DirectorDrawer current={current} onClose={() => setTalking(false)} /> : undefined}
       colophon={<Colophon />}
     >
       {game.notice && (

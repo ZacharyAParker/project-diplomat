@@ -20,7 +20,7 @@ describe('the sandbox', () => {
     const { store } = mount(holding(founded()))
     await heading('Sandbox')
     expect(screen.getByText('Before you touch anything')).toBeDefined()
-    expect(screen.queryByText('Sandbox', { selector: '.sandbox-mark' })).toBeNull()
+    expect(screen.queryByText('Sandboxed (see the OOC log)', { selector: '.sandbox-mark' })).toBeNull()
 
     await user.type(screen.getByRole('spinbutton', { name: 'Debt' }), '88')
     await user.click(screen.getByRole('button', { name: 'Apply the figures' }))
@@ -30,7 +30,7 @@ describe('the sandbox', () => {
     expect(state.sandbox).toBe(true)
     expect(state.timeline.at(-1)!.kind).toBe('sandbox')
     expect(screen.getByText('This nation is sandboxed')).toBeDefined()
-    expect(screen.getByText('Sandbox', { selector: '.sandbox-mark' })).toBeDefined()
+    expect(screen.getByText('Sandboxed (see the OOC log)', { selector: '.sandbox-mark' })).toBeDefined()
   })
 
   it('skips days without marking the nation', async () => {

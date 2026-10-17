@@ -38,7 +38,7 @@ import type {
   NationPayload,
   ServerStatus,
 } from '../api.ts'
-import { UNREACHABLE } from '../api.ts'
+import { DEFAULT_DIRECTOR, UNREACHABLE, type DirectorMessage, type DirectorState, type OocEntry } from '../api.ts'
 import { DISMISS, dismissOpen } from '../logic/docket.ts'
 import { FORMS } from '../logic/forms.ts'
 import { decode, newNationSave, summarise, withDayEnd, type Snapshot, type Summary } from '../logic/saves.ts'
@@ -253,6 +253,7 @@ export class FakeServer implements Api {
     apiKeySet: false,
     models: { bulk: 'claude-haiku-5-5', standard: 'claude-sonnet-5-5', strategic: 'claude-opus-5-5' },
     minorsThroughBodies: false,
+    director: { ...DEFAULT_DIRECTOR },
   }
   private ids = 0
   private ticks = 0
@@ -893,6 +894,139 @@ export class FakeServer implements Api {
   async draftFactbook(id: string, request: Parameters<Api['draftFactbook']>[1]) {
     this.log('draftFactbook', id, request)
     return { title: request.title || 'A short history', body: `## ${request.title || 'A short history'}\n\nIt began, as these things do, with a meeting.` }
+  }
+
+  // ---------------------------------------------------------------- the Director
+
+  // A scripted Director. Each turn streams its reply over three polls: the first half of the
+  // reply, then an activity line and a quiet cheat (debt set to 88, written to the OOC log
+  // only), then the rest of the reply, when the turn ends.
+  directorAvailable = true
+  directorDetail = 'Claude Code 2.3.1, signed in'
+  directorReply = 'Done. I have set **debt** to 88, quietly.\n\n- The Assembly will not notice.\n- The OOC log will.'
+  readonly directors = new Map<string, { state: DirectorState; steps: (() => void)[] }>()
+  readonly oocLogs = new Map<string, OocEntry[]>()
+  private messageIds = 0
+
+  private directorOf(id: string) {
+    this.held(id)
+    let director = this.directors.get(id)
+    if (!director) {
+      director = { state: { messages: [], busy: false, session: { id: 'session-1', startedAt: '2030-01-01T00:00:00.000Z' }, available: true, detail: '' }, steps: [] }
+      this.directors.set(id, director)
+    }
+    director.state.available = this.directorAvailable
+    director.state.detail = this.directorAvailable ? this.directorDetail : 'Claude Code is not installed on this computer, or is not signed in.'
+    return director
+  }
+
+  private say(role: DirectorMessage['role'], text: string, streaming = false): DirectorMessage {
+    return { id: `m${++this.messageIds}`, role, text, at: this.time(), ...(streaming ? { streaming } : {}) }
+  }
+
+  async director(id: string): Promise<DirectorState> {
+    this.log('director', id)
+    const director = this.directorOf(id)
+    const step = director.steps.shift()
+    if (step) step()
+    return json(director.state)
+  }
+
+  async tellDirector(id: string, text: string) {
+    this.log('tellDirector', id, text)
+    const director = this.directorOf(id)
+    if (!director.state.available) throw new Error(director.state.detail)
+    if (director.state.busy) throw new Error('The Director is still answering. Wait, or stop it.')
+    const held = this.held(id)
+    const { messages } = director.state
+    messages.push(this.say('founder', text))
+    director.state.busy = true
+    const reply = this.directorReply
+    const half = Math.ceil(reply.length / 2)
+    let answer: DirectorMessage | undefined
+    director.steps = [
+      () => {
+        answer = this.say('director', reply.slice(0, half), true)
+        messages.push(answer)
+      },
+      () => {
+        messages.push(this.say('activity', 'Used cheat_set_figures'))
+        const before = held.state.indicators.debt
+        held.state = { ...held.state, indicators: { ...held.state.indicators, debt: 88 }, sandbox: true }
+        this.logCheat(id, {
+          day: held.state.day,
+          action: 'set_figures',
+          detail: 'Debt set to 88.',
+          request: text,
+          changes: [{ target: 'debt', from: before, to: 88 }],
+        })
+      },
+      () => {
+        if (answer) {
+          answer.text = reply
+          delete answer.streaming
+        }
+        director.state.busy = false
+      },
+    ]
+  }
+
+  async stopDirector(id: string) {
+    this.log('stopDirector', id)
+    const director = this.directorOf(id)
+    if (!director.state.busy) return
+    director.steps = []
+    for (const message of director.state.messages) delete message.streaming
+    director.state.messages.push(this.say('activity', 'Stopped by the Founder'))
+    director.state.busy = false
+  }
+
+  async resetDirector(id: string) {
+    this.log('resetDirector', id)
+    const director = this.directorOf(id)
+    if (director.state.busy) throw new Error('The Director is still answering. Stop it first.')
+    const number = Number(director.state.session.id?.split('-')[1] ?? 0) + 1
+    director.state.session = { id: `session-${number}`, startedAt: this.time() }
+    director.state.messages.push(this.say('activity', 'A new session started'))
+  }
+
+  async ooc(id: string): Promise<OocEntry[]> {
+    this.log('ooc', id)
+    this.held(id)
+    return json(this.oocLogs.get(id) ?? [])
+  }
+
+  // Adds a cheat to the front of the log, numbered after the highest so far.
+  logCheat(id: string, entry: Omit<OocEntry, 'n' | 'at'>): OocEntry {
+    const log = this.oocLogs.get(id) ?? []
+    const full = { n: Math.max(0, ...log.map((e) => e.n)) + 1, at: this.time(), ...entry }
+    log.unshift(full)
+    this.oocLogs.set(id, log)
+    return full
+  }
+
+  async undoCheat(id: string, number: number) {
+    this.log('undoCheat', id, number)
+    const held = this.held(id)
+    const entry = (this.oocLogs.get(id) ?? []).find((e) => e.n === number)
+    if (!entry) throw new Error(`There is no cheat No. ${number} in the OOC log.`)
+    if (entry.undone) throw new Error(`Cheat No. ${number} has already been undone.`)
+    for (const change of entry.changes ?? []) {
+      if (change.target in held.state.indicators && typeof change.from === 'number') {
+        held.state = { ...held.state, indicators: { ...held.state.indicators, [change.target]: change.from } }
+      }
+    }
+    entry.undone = true
+    this.logCheat(id, {
+      day: held.state.day,
+      action: 'undo_cheat',
+      detail: `Cheat No. ${number} undone.`,
+      request: 'Undo, from the OOC log.',
+      undoes: number,
+      changes: (entry.changes ?? []).map((c) => ({ target: c.target, from: c.to, to: c.from })),
+    })
+    held.updatedAt = this.time()
+    return this.changed(held)
   }
 }
 

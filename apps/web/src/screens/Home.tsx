@@ -5,7 +5,7 @@ import type { Summary } from '../logic/saves.ts'
 import { useGame } from '../store/game.tsx'
 import type { MoveResult } from '../store/gameStore.ts'
 import { useAction } from '../store/useAction.ts'
-import { Button, FileButton, Flag, LinkTo, Notice, Screen, TextLink } from '../ui/index.ts'
+import { Button, FileButton, Flag, LinkTo, Notice, SandboxMark, Screen, TextLink } from '../ui/index.ts'
 
 type Imported = { ok: true; text: string } | { ok: false; text: string } | null
 
@@ -31,7 +31,7 @@ function NationRow({ nation }: { nation: Summary }) {
       <div className="nations__text">
         <p className="nations__name">
           <TextLink to={to}>{nation.name}</TextLink>
-          {nation.sandbox && <span className="sandbox-mark">Sandbox</span>}
+          {nation.sandbox && <SandboxMark id={nation.id} />}
         </p>
         <p className="label soft">
           {nation.className}

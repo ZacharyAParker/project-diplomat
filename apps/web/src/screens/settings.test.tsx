@@ -168,6 +168,28 @@ describe('the AI', () => {
   })
 })
 
+describe('the Director’s settings', () => {
+  it('switches the Director and sets its model, sent as director: { enabled, model }', async () => {
+    const user = userEvent.setup()
+    const { fake } = await settled()
+    const sheet = (await screen.findByRole('heading', { name: 'The AI' })).closest('section')!
+    const group = await within(sheet).findByRole('group', { name: 'The Director' })
+    const model = within(group).getByLabelText("The Director's model") as HTMLInputElement
+    expect(model.value).toBe('claude-opus-5-5')
+    await user.clear(model)
+    await user.type(model, 'claude-sonnet-5-5')
+    await user.click(within(sheet).getByRole('button', { name: 'Save the AI settings' }))
+    await within(sheet).findByText('Saved.')
+    expect(fake.calls.find((c) => c.name === 'saveSettings')!.args[0]).toMatchObject({
+      director: { enabled: true, model: 'claude-sonnet-5-5' },
+    })
+    await user.click(within(group).getByRole('checkbox', { name: 'Switch the Director on' }))
+    expect(within(group).queryByLabelText("The Director's model")).toBeNull()
+    await user.click(within(sheet).getByRole('button', { name: 'Save the AI settings' }))
+    await waitFor(() => expect(fake.aiSettingsHeld.director).toEqual({ enabled: false, model: 'claude-sonnet-5-5' }))
+  })
+})
+
 describe('edition', () => {
   it('switches theme and motion at once and remembers them', async () => {
     const user = userEvent.setup()

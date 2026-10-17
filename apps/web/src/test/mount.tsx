@@ -19,7 +19,7 @@ export interface Mounted {
 // The whole app over an in-memory server and a plain map for the browser's storage. The
 // desk polls every 20 ms instead of every two seconds, so a test can watch a docket sit.
 export function mount(fake: FakeServer = new FakeServer(), kv: KeyValue = memoryStore()): Mounted {
-  const store = createGameStore(fake, content, { kv, pollMs: 20 })
+  const store = createGameStore(fake, content, { kv, pollMs: 20, directorPollMs: 20 })
   render(
     <SettingsProvider kv={kv}>
       <GameProvider store={store}>

@@ -253,6 +253,54 @@ describe('opening and the server', () => {
     expect(store.get().notice).toBeNull()
   })
 
+  it('shows the nation asked for last when two openings answer out of order', async () => {
+    const fake = new FakeServer()
+    fake.hold(founded(), { id: 'a' })
+    fake.hold({ ...founded(), identity: { ...identity, name: 'Zembry' } }, { id: 'b' })
+    const store = createGameStore(fake, content)
+    const releases: Record<string, () => void> = {}
+    const fetch = fake.nation.bind(fake)
+    fake.nation = async (id) => {
+      await new Promise<void>((resolve) => (releases[id] = resolve))
+      return fetch(id)
+    }
+    const a = store.open('a')
+    const b = store.open('b')
+    releases['b']!()
+    expect(await b).toBe(true)
+    releases['a']!()
+    expect(await a).toBe(false)
+    expect(store.get().nation!.id).toBe('b')
+    expect(stateOf(store).identity.name).toBe('Zembry')
+    expect(store.get().problem).toBeNull()
+
+    // And back again: asking for a while b is open opens a.
+    const again = store.open('a')
+    releases['a']!()
+    expect(await again).toBe(true)
+    expect(store.get().nation!.id).toBe('a')
+  })
+
+  it('drops a failure for a nation no longer asked for', async () => {
+    const fake = new FakeServer()
+    fake.hold(founded(), { id: 'b' })
+    const store = createGameStore(fake, content)
+    const releases: Record<string, () => void> = {}
+    const fetch = fake.nation.bind(fake)
+    fake.nation = async (id) => {
+      await new Promise<void>((resolve) => (releases[id] = resolve))
+      return fetch(id)
+    }
+    const missing = store.open('nobody')
+    const b = store.open('b')
+    releases['b']!()
+    await b
+    releases['nobody']!()
+    expect(await missing).toBe(false)
+    expect(store.get().nation!.id).toBe('b')
+    expect(store.get().problem).toBeNull()
+  })
+
   it('drops a reply for a nation that is no longer open', async () => {
     const { fake, store, id } = await start()
     await store.found(request('Zembry'))

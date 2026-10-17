@@ -39,6 +39,43 @@ export interface MastheadProps {
   // Which page of the government website is showing: "today", "library", "body:assembly".
   gov?: string
   ai?: AiLine | null
+  // Controls set into the nation's header: the Director's drawer toggle.
+  tools?: ReactNode
+}
+
+// The mark a sandboxed nation wears wherever it is shown. It goes to the OOC log, which says
+// what was changed by hand and when.
+export function SandboxMark({ id }: { id: string }) {
+  return (
+    <a className="sandbox-mark" href={routeHref({ name: 'nation', id, page: 'ooc' })}>
+      Sandboxed (see the OOC log)
+    </a>
+  )
+}
+
+// Out of character: the Director and its log. Set apart from the Government group, which is
+// in-world, and drawn in the plain working face.
+function OocMenu({ nation, page, gov }: { nation: MastheadNation; page?: NationPage; gov?: string }) {
+  const here = (p: NationPage) => (p === page && !gov ? 'page' : undefined)
+  return (
+    <nav className="side__nav side__ooc" aria-labelledby="side-ooc">
+      <p id="side-ooc" className="side__heading">
+        Out of character
+      </p>
+      <ul>
+        <li>
+          <a className="side__link" href={routeHref({ name: 'nation', id: nation.id, page: 'director' })} aria-current={here('director')}>
+            <span>Director</span>
+          </a>
+        </li>
+        <li>
+          <a className="side__link" href={routeHref({ name: 'nation', id: nation.id, page: 'ooc' })} aria-current={here('ooc')}>
+            <span>OOC log</span>
+          </a>
+        </li>
+      </ul>
+    </nav>
+  )
 }
 
 const PAGES: readonly { page: NationPage; label: string; icon: IconName }[] = [
@@ -176,6 +213,7 @@ function Side({ nation, page, gov, ai }: MastheadProps) {
         </nav>
       )}
       {nation && <GovernmentMenu nation={nation} gov={gov} />}
+      {nation && <OocMenu nation={nation} page={page} gov={gov} />}
       <AiStatus ai={ai} />
       {nation?.latest && nation.latest.length > 0 && (
         <section className="side__latest" aria-labelledby="side-latest">
@@ -198,22 +236,21 @@ function Side({ nation, page, gov, ai }: MastheadProps) {
 
 // The nation's strip across the top: its landscape, its flag, its name, and the four figures
 // a player checks every morning.
-export function Masthead({ nation, page, gov }: MastheadProps) {
+export function Masthead({ nation, page, gov, tools }: MastheadProps) {
   if (!nation) return null
-  // The government website has its own official masthead.
-  if (gov) {
-    return (
-      <header className="masthead masthead--bare">
-        <Banner id={nation.id} flag={nation.identity.flag} />
-      </header>
-    )
-  }
   const { identity } = nation
-  // The nation page sets out the flag and the name at full size itself.
-  if (page === 'nation') {
+  // The government website has its own official masthead, and the nation page sets out the
+  // flag and the name at full size itself.
+  if (gov || page === 'nation') {
     return (
       <header className="masthead masthead--bare">
         <Banner id={nation.id} flag={identity.flag} />
+        {(tools || nation.sandbox) && (
+          <div className="masthead__tools">
+            {nation.sandbox && <SandboxMark id={nation.id} />}
+            {tools}
+          </div>
+        )}
       </header>
     )
   }
@@ -230,9 +267,10 @@ export function Masthead({ nation, page, gov }: MastheadProps) {
           </a>
           <p className="masthead__class">
             {nation.className}
-            {nation.sandbox && <span className="sandbox-mark">Sandbox</span>}
+            {nation.sandbox && <SandboxMark id={nation.id} />}
           </p>
         </div>
+        {tools && <div className="masthead__tools">{tools}</div>}
       </div>
       <ul className="masthead__dateline" aria-label="The state of the nation">
         <li>{dayLabel(nation.day)}</li>
@@ -247,22 +285,26 @@ export interface ShellProps extends MastheadProps {
   // Printed at the foot of every page.
   colophon: ReactNode
   children: ReactNode
+  // A panel beside the page (a bottom sheet on a phone), with room made for it so it
+  // never covers what is under it.
+  drawer?: ReactNode
 }
 
-export function Shell({ nation, page, gov, ai, colophon, children }: ShellProps) {
+export function Shell({ nation, page, gov, ai, tools, drawer, colophon, children }: ShellProps) {
   return (
-    <div className={nation ? 'shell shell--nation' : 'shell'}>
+    <div className={['shell', nation && 'shell--nation', drawer && 'shell--drawer'].filter(Boolean).join(' ')}>
       <a className="skip" href="#main" onClick={skipToMain}>
         Skip to the page
       </a>
       <Side nation={nation} page={page} gov={gov} ai={ai} />
       <div className="shell__page">
-        <Masthead nation={nation} page={page} gov={gov} />
+        <Masthead nation={nation} page={page} gov={gov} tools={tools} />
         <main id="main" className="shell__main" tabIndex={-1}>
           {children}
         </main>
         <footer className="colophon small soft">{colophon}</footer>
       </div>
+      {drawer}
     </div>
   )
 }
