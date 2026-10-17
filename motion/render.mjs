@@ -1,4 +1,4 @@
-// renders the trailer to docs/media/trailer.mp4 and the short loop the README opens with to
+// writes the score, then renders the trailer to docs/media/trailer.mp4 and the short loop the README opens with to
 // docs/media/demo.gif. run with `pnpm render` from this folder, then commit the outputs.
 // needs ffmpeg on PATH for the gif
 import {execFileSync} from 'node:child_process';
@@ -10,7 +10,9 @@ const OUT = '../docs/media';
 const run = (cmd, args, shell = false) => execFileSync(cmd, args, {stdio: 'inherit', shell});
 
 mkdirSync(OUT, {recursive: true});
-run('npx', ['remotion', 'render', 'src/index.ts', 'Trailer', `${OUT}/trailer.mp4`, '--codec=h264', '--crf=20', '--muted', '--color-space=bt709'], process.platform === 'win32');
+run('node', ['music.mjs']);
+// crf 22 keeps the trailer under the 10MB GitHub takes for a video in a README
+run('npx', ['remotion', 'render', 'src/index.ts', 'Trailer', `${OUT}/trailer.mp4`, '--codec=h264', '--crf=22', '--audio-codec=aac', '--audio-bitrate=192k', '--color-space=bt709'], process.platform === 'win32');
 
 // the loop: the end of the cold open, the desk, the forms and the director, cut together
 const CUTS = [

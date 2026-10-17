@@ -1,8 +1,8 @@
-import {AbsoluteFill, interpolate, Sequence, useCurrentFrame} from 'remotion';
+import {AbsoluteFill, Html5Audio, interpolate, Sequence, staticFile, useCurrentFrame} from 'remotion';
 import {fadeIn, Headline, Scene, Scroll, Shot, Tag, Typed} from './parts';
 import {c, MONO, SERIF} from './theme';
 
-// scene lengths in frames, at 30 a second
+// scene lengths in frames, at 30 a second. music.mjs has the same ones, change both together
 const S = {cold: 290, title: 120, desk: 240, forms: 230, world: 160, director: 220, archive: 140, end: 170};
 export const TRAILER_FRAMES = Object.values(S).reduce((a, b) => a + b, 0);
 
@@ -218,6 +218,8 @@ export const Trailer = () => {
   };
   return (
     <AbsoluteFill style={{background: c.ground}}>
+      {/* the score from music.mjs, timed to these same scene lengths */}
+      <Html5Audio src={staticFile('music.wav')} />
       {seq(S.cold, <ColdOpen />)}
       {seq(S.title, <Title />)}
       {seq(S.desk, <Desk />)}

@@ -13,9 +13,9 @@ found the country and watch it run itself
 
 ![a quick loop: the cold open, a petition going through parliament and the court, the eight forms of government, the director and the archive](docs/media/demo.gif)
 
-and the full trailer if you want it. 52 seconds, no sound
+and the full trailer if you want it. 52 seconds, sound on
 
-https://github.com/user-attachments/assets/50e1edd0-5ac4-43d6-b831-5d36b32519c4
+https://github.com/user-attachments/assets/6f4a2c8d-0c76-4958-b395-e0a5ea763289
 
 ![the desk: a petition after parliament, the supreme court and two ministries have sat on it, with the division by party and the morning paper next to it](docs/screenshots/desk.webp)
 
@@ -149,7 +149,8 @@ pnpm test
 pnpm typecheck
 ```
 
-the trailer and the loop up top are made with [Remotion](https://www.remotion.dev) in `motion/`.
+the trailer and the loop up top are made with [Remotion](https://www.remotion.dev) in `motion/`, music
+included. the music gets synthesised from scratch in `motion/music.mjs` so there's nothing to license.
 run `pnpm install --ignore-workspace` in there, then `pnpm render`
 
 ## where things are

@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "studio": "remotion studio",
+    "music": "node music.mjs",
     "render": "node render.mjs"
   },
   "dependencies": {
