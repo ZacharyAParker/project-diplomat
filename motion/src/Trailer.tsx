@@ -1,4 +1,6 @@
 import {AbsoluteFill, Html5Audio, interpolate, Sequence, staticFile, useCurrentFrame} from 'remotion';
+// the game's own version, so the end card matches whatever release the trailer is rendered for
+import {version} from '../../package.json';
 import grid from './grid.json';
 import {fadeIn, Headline, Scene, Scroll, Shot, Tag, Typed} from './parts';
 import {c, MONO, SERIF} from './theme';
@@ -200,7 +202,7 @@ const End = () => {
           pick a side. live with it.
         </div>
         <div style={{display: 'flex', gap: 20, alignItems: 'center', marginTop: 40, opacity: fadeIn(f, 32, 18)}}>
-          <span style={{fontFamily: MONO, fontSize: 24, color: c.ground, background: c.gold, padding: '3px 12px', borderRadius: 4}}>v0.6.1</span>
+          <span style={{fontFamily: MONO, fontSize: 24, color: c.ground, background: c.gold, padding: '3px 12px', borderRadius: 4}}>v{version}</span>
           <span style={{fontFamily: MONO, fontSize: 26, color: c.paper2}}>github.com/ZacharyAParker/project-diplomat</span>
         </div>
       </AbsoluteFill>
