@@ -1,5 +1,42 @@
 # Changelog
 
+## 0.6.0
+
+The game gets a government, and Claudetopia comes home.
+
+Claudetopia was a NationStates nation whose government was played by Claude agents: an Assembly
+that argued and voted, a High Court that could bar what the Charter forbade, eleven ministries, the
+weather, the people and their newspapers, all kept in a State Archive with its own website. This
+version makes all of that part of the game, for any nation, with the engine owning the numbers
+instead of NationStates.
+
+- Forms of government. A government is bodies (a legislature with parties and members, a court of
+  justices, a council, the people, the ministries) and rules saying who recommends, who may bar an
+  option, when a vote binds and who decides. Eight forms to found with; a nation can change its form
+  by amendment.
+- Petitions. Each issue goes before the bodies before you decide it. The desk shows the debate's
+  ladder, the division by party, each ruling and its split, the ministries' advice and, in words,
+  what the rules leave you free to do. Barred options are barred; a binding vote must be taken; a
+  veto needs written reasons.
+- Two modes. Govern: you hold the executive. Found: an AI executive does, and you read the record
+  and step in.
+- The Founder. Above every branch, you. A Founder's Word overrules anything, word for word in the
+  record; the bodies may argue back, and Silence closes a matter. Questions and letters from the
+  country come to the Founder's page.
+- The world's day: weather, events, the press, opinion, matters arising, and small effects on the
+  figures within fixed bounds.
+- The Archive and the government website: every document, searchable, with what cites what.
+- A census in the old style, worked out from the indicators.
+- Factbooks, written by you or drafted by the AI.
+- Elections only where the form holds them, on the nation's own calendar.
+- The AI layer is real: a Claude API key, or your own installed Claude Code. With it off,
+  rules-based stand-ins play every body. Model output is checked: divisions must add up, rulings
+  must cover every option, and the counts that decide anything are worked out again by code.
+- A local server now runs the game and keeps nations on disk in `data/`. Saves from 0.5 in the
+  browser are offered for moving across.
+- The Claudetopia import.
+
+
 ## 0.5.0
 
 - Issues that settle who the nation is: a national animal, a motto, an official faith, a new
