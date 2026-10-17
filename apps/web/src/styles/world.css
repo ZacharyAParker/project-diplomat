@@ -1388,6 +1388,10 @@ html {
 .field__area {
   min-height: calc(var(--tap) * 2);
   resize: vertical;
+  /* A writing box stands alone, not in a field row, so it carries its own edge. */
+  border: var(--hair) solid var(--rule);
+  border-bottom: 2px solid var(--ink);
+  background: var(--sheet);
   font-family: var(--font-text);
   line-height: 1.5;
   width: 100%;
@@ -1495,6 +1499,8 @@ html {
 
 .debate__veto {
   max-width: var(--measure);
+  margin-left: auto;
+  text-align: left;
 }
 
 .debate__dismissal {

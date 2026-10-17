@@ -303,7 +303,9 @@ function seatMembers(rng: Rng, spec: Spec, parties: Party[], next: () => string)
 }
 
 function ministry(p: Material['portfolios'][number], name: (area: string) => string, rng: Rng): Body {
-  const area = areaOf(p.title)
+  // "Foreign Minister" names an adjective, not an area: the ministry is of Foreign Affairs.
+  const raw = areaOf(p.title)
+  const area = /^Foreign$/.test(raw) ? 'Foreign Affairs' : raw
   const of = /^(Interior|Treasury|Environment|Exchequer|Economy)$/.test(area) ? `the ${area}` : area
   return {
     id: `ministry-${p.id}`,
