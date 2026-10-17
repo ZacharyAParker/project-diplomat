@@ -65,7 +65,7 @@ import {
   wordCost,
   brief,
   chooseWorld,
-  warVote,
+  warSitting,
   type ArchiveDocument,
   type Course,
   type Docket,
@@ -693,31 +693,14 @@ export class Game {
       if (why) throw new HttpError(409, why)
       let vote: { carried: boolean; aye: number; no: number; abstain: number; body: string } | undefined
       if ('war' in action) {
-        const result = warVote(n.gov.institutions, n.state, action.war)
+        // The members sit on it first, when the constitution gives them the vote.
+        const ctx = contextFor(n, this.content, this.ai)
+        const result = await warSitting(ctx, action.war)
         if (result) {
           const target = nameOf(n.state, this.content, action.war)
-          const parties = result.body.parties.map((p) => `| ${p.name} | ${result.division.byParty[p.id]?.aye ?? 0} | ${result.division.byParty[p.id]?.no ?? 0} | ${result.division.byParty[p.id]?.abstain ?? 0} |`)
-          const executive = n.gov.institutions.constitution.rules.executive.title.replace(/^The /, 'the ')
-          await this.write(n, {
-            series: 'hansard',
-            title: `${result.body.name}: a declaration of war against ${target}`,
-            day: n.state.day,
-            issuer: result.body.name,
-            kind: 'division',
-            refs: [],
-            body: [
-              `# A motion for a declaration of war against ${target}`,
-              '',
-              `${executive.charAt(0).toUpperCase() + executive.slice(1)} asked ${result.body.shortName} to declare war on ${target}. ${result.provoked ? 'Members were told the country had been provoked.' : 'Members were told the country had no choice; several asked what had changed.'}`,
-              '',
-              `**${result.carried ? 'Carried' : 'Defeated'}**, ${result.division.aye} to ${result.division.no}, with ${result.division.abstain} abstaining.`,
-              ...(parties.length ? ['', '| Party | Aye | No | Abstain |', '|---|---|---|---|', ...parties] : []),
-            ].join('\n'),
-            data: { division: result.division, carried: result.carried, target: action.war },
-          })
           vote = { carried: result.carried, aye: result.division.aye, no: result.division.no, abstain: result.division.abstain, body: result.body.name }
           if (!result.carried) {
-            n.state = applyExternal(n.state, this.content, 'event', `${result.body.name} refuses to declare war on ${target}`, [{ indicator: 'legitimacy', by: -2, why: 'The government asked for a war and was refused.' }], `Defeated ${result.division.aye} to ${result.division.no}.`)
+            n.state = applyExternal(n.state, this.content, 'event', `${result.body.name} refuses to declare war on ${target}`, [{ indicator: 'legitimacy', by: -2, why: 'The government asked for a war and was refused.' }], `Refused, ${result.division.aye} to ${result.division.no}.`)
             await this.store.save(n)
             return { entry: n.state.timeline.at(-1)!, vote, ...this.payload(n) }
           }

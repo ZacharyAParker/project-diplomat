@@ -121,11 +121,11 @@ function sitLegislature(input: TaskInput['legislature.sitting'], seed: number): 
   const chair = speakerOf(body)
   const heading = input.kind === 'first' ? 'sitting' : input.kind === 'reconciliation' ? 'reconciliation sitting' : 'sitting on the exchange'
   const lines = [
-    `## ${body.name}: Petition #${p.number}, ${p.title}: ${heading}`,
+    `## ${body.name}: ${p.number ? `Petition #${p.number}, ` : ''}${p.title}: ${heading}`,
     '',
     `*${input.brief.date}. ${chair ? `${chair.name} in the chair` : 'The House in session'}. ${body.size} members.*`,
     '',
-    `The petition is read: ${p.description}`,
+    `${p.number ? 'The petition is read' : 'The motion is read'}: ${p.description}`,
     '',
   ]
   if (input.review) lines.push(`The opinion of the court is read. ${input.review.summary}`, '')
@@ -295,7 +295,7 @@ function referendum(input: TaskInput['electorate.referendum'], seed: number): Ta
   const turnout = Math.round((0.38 + rng() * 0.4) * 1000) / 1000
   const winner = courses[shares.indexOf(Math.max(...shares))]!
   const campaign = [
-    `## The referendum on Petition #${p.number}: ${p.title}`,
+    `## The referendum on ${p.number ? `Petition #${p.number}: ` : ''}${p.title}`,
     '',
     `Turnout was ${Math.round(turnout * 100)} per cent. ${label(p, winner)} led from the first count.`,
     '',

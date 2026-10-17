@@ -5,7 +5,7 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import { HOME, openMatters } from '@diplomat/engine'
-import { validate, standIn, worldCalls, warVote, brief, type Provider, type TaskInput } from '@diplomat/government'
+import { validate, standIn, worldCalls, warStep, warMotion, brief, type Provider, type TaskInput } from '@diplomat/government'
 import { branchOf } from '../src/ooc.ts'
 import { loadContent } from '../src/server.ts'
 import { harness, IDENTITY } from './helpers.ts'
@@ -101,23 +101,40 @@ test('a foreign matter is decided over HTTP, and refused when it is not waiting'
   }
 })
 
-test('a declaration of war goes to the Assembly first in a commonwealth, and its division is in Hansard', async () => {
+test('a declaration of war is sat on by the Assembly first in a commonwealth: a debate, a division, and Hansard', async () => {
   const h = await harness()
   try {
     const { id } = (await found(h)).json
     const n = h.running.game.store.open(id)
-    // A provoked war against a hostile neighbour, with the government popular: it carries.
+    // Provoked by a hostile neighbour: the members (here the stand-in) take the country's side.
     n.state = { ...n.state, neighbours: { ...n.state.neighbours, eskerland: -80 } }
-    const vote = warVote(n.gov.institutions, n.state, 'eskerland')
-    assert.ok(vote, 'the commonwealth Assembly votes on war')
+    assert.ok(warStep(n.gov.institutions), 'the commonwealth Assembly votes on war')
+    const motion = warMotion(n.state, loadContent(), n.gov.institutions, 'eskerland')
+    assert.equal(motion.options[0]!.course, '1')
     const r = await h.post(`/api/nations/${id}/world/act`, { action: { war: 'eskerland' } })
     assert.equal(r.status, 200)
-    assert.equal(typeof r.json.vote.carried, 'boolean')
+    assert.equal(r.json.vote.carried, true, 'a provoked war carries')
     const hansard = h.running.game.store.open(id).archive.search({ series: 'hansard', q: 'declaration of war' })
     assert.equal(hansard.total, 1)
-    const state = h.running.game.store.open(id).state
-    if (r.json.vote.carried) assert.ok(state.world!.wars.some((w) => w.attackers.includes(HOME) && w.defenders.includes('eskerland')))
-    else assert.ok(!state.world!.wars.some((w) => w.attackers.includes(HOME)))
+    assert.ok(h.running.game.store.open(id).state.world!.wars.some((w) => w.attackers.includes(HOME) && w.defenders.includes('eskerland')))
+  } finally {
+    await h.close()
+  }
+})
+
+test('an unprovoked war is refused by the members, and costs the government', async () => {
+  const h = await harness()
+  try {
+    const { id } = (await found(h)).json
+    const n = h.running.game.store.open(id)
+    n.state = { ...n.state, neighbours: { ...n.state.neighbours, velsa: 40 } }
+    const legitimacy = n.state.indicators.legitimacy
+    const r = await h.post(`/api/nations/${id}/world/act`, { action: { war: 'velsa' } })
+    assert.equal(r.status, 200)
+    assert.equal(r.json.vote.carried, false)
+    const s = h.running.game.store.open(id).state
+    assert.ok(!s.world!.wars.some((w) => w.attackers.includes(HOME)))
+    assert.ok(s.indicators.legitimacy < legitimacy)
   } finally {
     await h.close()
   }
@@ -128,7 +145,7 @@ test('an absolute monarch declares war alone', async () => {
   try {
     const { id } = (await found(h, { form: 'absolute-monarchy' })).json
     const n = h.running.game.store.open(id)
-    assert.equal(warVote(n.gov.institutions, n.state, 'eskerland'), null)
+    assert.equal(warStep(n.gov.institutions), null)
   } finally {
     await h.close()
   }
