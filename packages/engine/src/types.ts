@@ -503,6 +503,19 @@ export interface NationState {
   // Everything beyond the borders that changes: the other nations, wars, pacts, the Assembly
   // of Nations, matters for the player. Made on the first day there is a world to make.
   world?: WorldState
+  // A world made for this nation alone (generate.ts): its continent, its neighbours and its
+  // map. Absent, the nation lives on the pack's own continent.
+  generated?: GeneratedWorld
+}
+
+export interface GeneratedWorld {
+  // The continent's name, for the map.
+  name: string
+  seed: number
+  nations: NeighbourDef[]
+  map: WorldMapDef
+  // The places nations quarrel over, in this world's own names.
+  borderlands: string[]
 }
 
 export const HOME = 'home'

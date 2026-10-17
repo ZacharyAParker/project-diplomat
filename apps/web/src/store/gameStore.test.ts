@@ -35,7 +35,7 @@ describe('founding', () => {
     const { fake, store, id } = await start()
     expect(id).toBe('nation-1')
     expect(fake.calls.find((c) => c.name === 'found')!.args[0]).toMatchObject({ form: 'commonwealth', mode: 'govern' })
-    expect(serialize(stateOf(store))).toBe(serialize(newNation(content, identity, 7, firstAnswers())))
+    expect(serialize(stateOf(store))).toBe(serialize(newNation(content, identity, 7, firstAnswers(), { world: 'new' })))
     expect(store.get().government!.institutions.constitution.form).toBe('commonwealth')
     expect(store.get().census.length).toBeGreaterThan(0)
     expect(store.get().nations.map((s) => s.id)).toEqual([id])

@@ -75,7 +75,10 @@ real name
 
 **the world**
 
-- 20 other nations. 5 on your border, 15 further off, each with its own leader, temper, army and
+- every new nation gets its own world. a fresh continent drawn like an atlas, and 20 other nations
+  generated with it: names, capitals, leaders, governments, economies and grudges. or pick the
+  classic continent if you want the same one every game
+- 4 to 6 of them on your border, the rest further off, each with its own leader, temper, army and
   economy. once a week they all make a move: court each other, sign pacts, claim land, send aid,
   go to war
 - they remember. a nation that matters to you (an ally, an enemy, anyone at war with you or

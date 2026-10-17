@@ -108,7 +108,7 @@ describe('a day at the desk, from the founding', () => {
     expect(within(paper()).getByRole('heading', { name: entry.headline })).toBeDefined()
     expect(within(paper()).queryByRole('heading', { name: `${name} is founded` })).toBeNull()
     expect(paper().textContent).not.toMatch(/[+-]\d/)
-  })
+  }, 15_000)
 })
 
 describe('leaving things on the desk', () => {

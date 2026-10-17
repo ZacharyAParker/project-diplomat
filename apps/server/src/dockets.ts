@@ -4,7 +4,7 @@
 // Progress lines are kept in memory and written to the docket as the bodies report; the
 // finished docket is filed when the last of them has sat.
 
-import type { Content } from '@diplomat/engine'
+import { ownContent, type Content } from '@diplomat/engine'
 import { fileDocket, openDocket, runDocket, type Context, type Docket } from '@diplomat/government'
 import type { Ai } from './ai.ts'
 import { contextFor } from './context.ts'
@@ -84,7 +84,7 @@ export class Dockets {
   }
 
   open(n: Nation, dilemmaId: string, number?: number): Docket {
-    const docket = openDocket({ state: n.state, gov: n.gov, content: this.content } as Context, dilemmaId)
+    const docket = openDocket({ state: n.state, gov: n.gov, content: ownContent(n.state, this.content) } as Context, dilemmaId)
     return number === undefined ? docket : { ...docket, number }
   }
 
@@ -155,7 +155,7 @@ export class Dockets {
         })
         .catch((error: unknown) => this.log(`progress ${id}/${dilemma}: ${(error as Error).message}`))
     }
-    const ctx = contextFor(n, this.content, this.ai, {
+    const ctx = contextFor(n, ownContent(n.state, this.content), this.ai, {
       minorsThroughBodies: this.settings.get().minorsThroughBodies,
       progress,
       onProblem: (line) => {

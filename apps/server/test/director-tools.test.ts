@@ -12,7 +12,7 @@ let id: string
 before(async () => {
   h = await harness()
   token = readFileSync(join(h.data, 'director-token'), 'utf8').trim()
-  const r = await h.post('/api/nations', { identity: IDENTITY, answers: {}, form: 'commonwealth', mode: 'govern', founder: { name: 'Aegis', title: 'Founder' } })
+  const r = await h.post('/api/nations', { identity: IDENTITY, answers: {}, form: 'commonwealth', mode: 'govern', founder: { name: 'Aegis', title: 'Founder' }, world: 'classic' })
   id = r.json.id
   await settle(h, id)
 })

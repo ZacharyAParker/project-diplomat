@@ -42,6 +42,7 @@ import {
   type Identity,
   type IdentityField,
   type TimelineEntry,
+  ownContent,
 } from '@diplomat/engine'
 import {
   amend,
@@ -214,11 +215,16 @@ export class Game {
     this.content = content
   }
 
+  // The pack as this nation sees it: its own continent and neighbours, if it has them.
+  own(state: GameState): Content {
+    return ownContent(state, this.content)
+  }
+
   payload(n: Nation): Payload {
     return {
       nation: { id: n.id, createdAt: n.createdAt, updatedAt: n.updatedAt, state: serialize(n.state), history: n.history },
       government: n.gov,
-      census: census(n.state, n.gov.censusBase, this.content),
+      census: census(n.state, n.gov.censusBase, this.own(n.state)),
     }
   }
 
@@ -243,7 +249,7 @@ export class Game {
   }
 
   async write(n: Nation, doc: Omit<ArchiveDocument, 'id' | 'date'>): Promise<string> {
-    return contextFor(n, this.content, this.ai).write(doc)
+    return contextFor(n, this.own(n.state), this.ai).write(doc)
   }
 
   founderName(n: Nation) {
@@ -266,10 +272,12 @@ export class Game {
     if (mode !== 'govern' && mode !== 'found') throw new HttpError(400, 'The mode must be govern or found.')
     const f = isObject(v['founder']) ? v['founder'] : {}
     const founder = { name: line(f['name'], 'The Founder’s name', { max: 60, min: 2 })!, title: line(f['title'], 'The Founder’s title', { max: 40, optional: true }) ?? 'Founder' }
+    const world = v['world'] ?? 'new'
+    if (world !== 'new' && world !== 'classic') throw new HttpError(400, 'The world must be new or classic.')
     const s = seed()
-    const state = engine(() => newNation(this.content, identity, s, answers as Record<string, string>))
+    const state = engine(() => newNation(this.content, identity, s, answers as Record<string, string>, { world }))
     if (form === 'absolute-monarchy' || form === 'junta') state.term = 0
-    const gov = engine(() => newGovernment(form, mode, state, this.content, { founder, calendarStart: todayIso(), seed: s, answers: answers as Record<string, string> }))
+    const gov = engine(() => newGovernment(form, mode, state, this.own(state), { founder, calendarStart: todayIso(), seed: s, answers: answers as Record<string, string> }))
     const id = this.store.freshId(identity.name)
     const now = new Date().toISOString()
     // Made whole under the nation's lock, documents and first dockets included, before
@@ -337,7 +345,7 @@ export class Game {
       throw new HttpError(422, (error as Error).message)
     }
     const history = Array.isArray(file['history']) ? (file['history'] as Nation['history']) : []
-    const gov = newGovernment('commonwealth', 'govern', state, this.content, {
+    const gov = newGovernment('commonwealth', 'govern', state, this.own(state), {
       founder: { name: 'The Founder', title: 'Founder' },
       calendarStart: startFor(state.day),
       seed: state.seed,
@@ -396,7 +404,7 @@ export class Game {
   }
 
   courses(n: Nation, dilemmaId: string, number: number): Course[] {
-    return petitionBrief(n.state, this.content, dilemmaId, number).options.map((o) => o.course)
+    return petitionBrief(n.state, this.own(n.state), dilemmaId, number).options.map((o) => o.course)
   }
 
   standingOf(n: Nation, docket: Docket): Standing {
@@ -427,13 +435,13 @@ export class Game {
   ): Promise<TimelineEntry[]> {
     const pre = n.state
     const dilemma = this.content.dilemmas.find((d) => d.id === docket.dilemma)!
-    let next = engine(() => (course === DISMISS ? dismiss(pre, this.content, docket.dilemma, opts.reasons) : decide(pre, this.content, docket.dilemma, course, opts.text)))
+    let next = engine(() => (course === DISMISS ? dismiss(pre, this.own(pre), docket.dilemma, opts.reasons) : decide(pre, this.own(pre), docket.dilemma, course, opts.text)))
     const entry = next.timeline.at(-1)!
     const entries = [entry]
     if (opts.word) {
       const effects = bound(wordCost(standing, course), DEFAULT_BOUNDS).effects
       if (effects.length) {
-        next = applyExternal(next, this.content, 'word', `The Founder’s Word on ${render(dilemma.title, pre, this.content, pre.agenda.bound[dilemma.id])}`, effects, opts.word)
+        next = applyExternal(next, this.own(next), 'word', `The Founder’s Word on ${render(dilemma.title, pre, this.own(pre), pre.agenda.bound[dilemma.id])}`, effects, opts.word)
         entries.push(next.timeline.at(-1)!)
       }
     }
@@ -445,12 +453,12 @@ export class Game {
     })
     // The petition document is written from the morning's state, so its context is made
     // before the decision is enacted.
-    const ctx = contextFor(n, this.content, this.ai)
+    const ctx = contextFor(n, this.own(n.state), this.ai)
     // The decision is saved first, and only then written into the record: a crash between
     // the two leaves a decided petition missing its document, never a document for a
     // petition that was not decided.
     const decided: Docket = { ...docket, standing, status: 'decided', decision }
-    const summary = decisionSummary(decided, entry, { state: pre, content: this.content })
+    const summary = decisionSummary(decided, entry, { state: pre, content: this.own(pre) })
     n.gov = fileDocket(n.gov, decided)
     n.state = next
     this.pushToday(n, summary)
@@ -526,16 +534,16 @@ export class Game {
     const v = body(input)
     const optionId = line(v['optionId'], 'The option (optionId)', { max: 100 })!
     return this.act(id, async (n) => {
-      const items = agendaItems(n.state, this.content)
+      const items = agendaItems(n.state, this.own(n.state))
       if (!items.situation) throw new HttpError(409, 'No crisis is waiting on a decision today.')
       const pre = n.state
-      const next = engine(() => decideSituation(pre, this.content, optionId))
+      const next = engine(() => decideSituation(pre, this.own(pre), optionId))
       const entry = next.timeline.at(-1)!
       const option = items.situation.stage.options.find((o) => o.id === optionId)
       n.state = next
       this.pushToday(n, {
         title: `${items.situation.situation.title}: ${items.situation.stage.title}`,
-        course: option ? render(option.speech, pre, this.content) : optionId,
+        course: option ? render(option.speech, pre, this.own(pre)) : optionId,
         result: entry.text ?? entry.headline,
         changes: entry.changes.map((c) => `${c.target} ${c.by > 0 ? 'up' : 'down'} ${Math.abs(c.by)}: ${c.why}`),
       })
@@ -555,17 +563,17 @@ export class Game {
     // worldDays, not lastWorldDay: the Claudetopia import sets lastWorldDay to a day whose
     // almanac was never written.
     if (!gov.worldDays.includes(state.day)) {
-      const ctx = contextFor(n, this.content, this.ai, { onProblem: (l) => problems.push(l) })
+      const ctx = contextFor(n, this.own(n.state), this.ai, { onProblem: (l) => problems.push(l) })
       const decisions = n.today.day === state.day ? n.today.decisions : []
       const evening = await runEvening(ctx, decisions)
       const before = gov.bills
       gov = fileEvening(gov, evening)
       if (evening.effects.length) {
-        state = applyExternal(state, this.content, 'event', evening.world.events[0]?.headline ?? 'The day’s events', evening.effects, evening.world.reaction || undefined)
+        state = applyExternal(state, this.own(state), 'event', evening.world.events[0]?.headline ?? 'The day’s events', evening.effects, evening.world.reaction || undefined)
       }
       for (const bill of evening.bills) {
         if (bill.stage !== 'law' || before.find((b) => b.number === bill.number)?.stage === 'law') continue
-        if (bill.effects.length) state = applyExternal(state, this.content, 'law', `${bill.title} becomes law`, bill.effects, bill.summary)
+        if (bill.effects.length) state = applyExternal(state, this.own(state), 'law', `${bill.title} becomes law`, bill.effects, bill.summary)
         if (bill.amendment) {
           gov = { ...gov, institutions: amend(gov.institutions, bill.amendment, state.day) }
           // A new constitution: every branch starts a fresh session and reads it afresh.
@@ -589,15 +597,15 @@ export class Game {
     const weekDay = state.day
     if (state.world && weekDay % 7 === 0) {
       try {
-        const ctx = contextFor({ ...n, state, gov }, this.content, this.ai, { onProblem: (l) => problems.push(l) })
-        const b = brief(state, gov, this.content, await ctx.record({ series: 'world', limit: 4 }), ctx.archivePath)
-        world = (await chooseWorld(state, this.content, b, ctx.run)).choices
+        const ctx = contextFor({ ...n, state, gov }, this.own(state), this.ai, { onProblem: (l) => problems.push(l) })
+        const b = brief(state, gov, this.own(state), await ctx.record({ series: 'world', limit: 4 }), ctx.archivePath)
+        world = (await chooseWorld(state, this.own(state), b, ctx.run)).choices
       } catch (error) {
         problems.push(`The other nations could not be asked this week (${(error as Error).message}); each took its likeliest course.`)
       }
     }
     const night = state.timeline.length
-    state = endDay(state, this.content, world ? { world } : {})
+    state = endDay(state, this.own(state), world ? { world } : {})
     if (state.world && weekDay % 7 === 0) {
       try {
         await this.writeWorldWeek({ ...n, state, gov }, weekDay, world)
@@ -639,12 +647,12 @@ export class Game {
   // the Assembly's sitting if it sat.
   private async writeWorldWeek(n: Nation, day: number, choices: WorldChoices | undefined) {
     const w = n.state.world!
-    const name = (id: string) => nameOf(n.state, this.content, id)
+    const name = (id: string) => nameOf(n.state, this.own(n.state), id)
     const date = formatDate(n.gov.institutions.calendar.start, day)
     const lines = w.log.filter((l) => l.day === day).map((l) => `- ${l.text}`)
     const notes = w.important
       .filter((id) => choices?.notes[id])
-      .map((id) => `**${name(id)}** (${this.content.neighbours.find((x) => x.id === id)?.leader ?? ''}): ${choices!.notes[id]}`)
+      .map((id) => `**${name(id)}** (${this.own(n.state).neighbours.find((x) => x.id === id)?.leader ?? ''}): ${choices!.notes[id]}`)
     const body = [`# Abroad: the week to ${date}`, '', ...(lines.length ? lines : ['A quiet week beyond the borders.']), ...(notes.length ? ['', '## In their own words', '', ...notes.flatMap((x) => [x, ''])] : [])]
     await this.write(n, { series: 'world', title: `Abroad: the week to ${date}`, day, issuer: 'The Foreign Ministry', kind: 'week', refs: [], body: body.join('\n').trim(), data: { log: w.log.filter((l) => l.day === day), notes: choices?.notes ?? {} } })
     const sat = w.assembly.past.find((m) => m.day === day && m.votes)
@@ -675,9 +683,9 @@ export class Game {
     return this.act(id, async (n) => {
       const matter = openMatters(n.state).find((m) => m.id === matterId)
       if (!matter) throw new HttpError(409, `${matterId} is not a foreign matter waiting for a decision.`)
-      const card = matterCard(n.state, this.content, matter)
+      const card = matterCard(n.state, this.own(n.state), matter)
       if (!card.options.some((o) => o.id === optionId)) throw new HttpError(400, `“${optionId}” is not one of the options on this matter.`)
-      n.state = decideMatter(n.state, this.content, matterId, optionId)
+      n.state = decideMatter(n.state, this.own(n.state), matterId, optionId)
       const entry = n.state.timeline.at(-1)!
       this.pushToday(n, { title: card.title, course: card.options.find((o) => o.id === optionId)!.label, result: entry.text ?? entry.headline, changes: entry.changes.map((c) => `${c.target} ${c.by > 0 ? 'up' : 'down'} ${Math.abs(c.by)}: ${c.why}`) })
       await this.store.save(n)
@@ -692,24 +700,24 @@ export class Game {
     const action = parseAction(v['action'])
     return this.act(id, async (n) => {
       if (!n.state.world) throw new HttpError(409, 'This pack has no world beyond the borders.')
-      const why = forbidden(n.state, this.content, action)
+      const why = forbidden(n.state, this.own(n.state), action)
       if (why) throw new HttpError(409, why)
       let vote: { carried: boolean; aye: number; no: number; abstain: number; body: string } | undefined
       if ('war' in action) {
         // The members sit on it first, when the constitution gives them the vote.
-        const ctx = contextFor(n, this.content, this.ai)
+        const ctx = contextFor(n, this.own(n.state), this.ai)
         const result = await warSitting(ctx, action.war)
         if (result) {
-          const target = nameOf(n.state, this.content, action.war)
+          const target = nameOf(n.state, this.own(n.state), action.war)
           vote = { carried: result.carried, aye: result.division.aye, no: result.division.no, abstain: result.division.abstain, body: result.body.name }
           if (!result.carried) {
-            n.state = applyExternal(n.state, this.content, 'event', `${result.body.name} refuses to declare war on ${target}`, [{ indicator: 'legitimacy', by: -2, why: 'The government asked for a war and was refused.' }], `Refused, ${result.division.aye} to ${result.division.no}.`)
+            n.state = applyExternal(n.state, this.own(n.state), 'event', `${result.body.name} refuses to declare war on ${target}`, [{ indicator: 'legitimacy', by: -2, why: 'The government asked for a war and was refused.' }], `Refused, ${result.division.aye} to ${result.division.no}.`)
             await this.store.save(n)
             return { entry: n.state.timeline.at(-1)!, vote, ...this.payload(n) }
           }
         }
       }
-      n.state = worldAct(n.state, this.content, action)
+      n.state = worldAct(n.state, this.own(n.state), action)
       const entry = n.state.timeline.at(-1)!
       await this.store.save(n)
       return { entry, ...(vote ? { vote } : {}), ...this.payload(n) }
@@ -720,9 +728,9 @@ export class Game {
   private decideMattersByAdvice(n: Nation): TimelineEntry[] {
     const out: TimelineEntry[] = []
     for (const matter of openMatters(n.state)) {
-      const advice = adviseMatter(n.state, this.content, matter)
+      const advice = adviseMatter(n.state, this.own(n.state), matter)
       if (!advice) continue
-      n.state = decideMatter(n.state, this.content, matter.id, advice.option)
+      n.state = decideMatter(n.state, this.own(n.state), matter.id, advice.option)
       out.push(n.state.timeline.at(-1)!)
     }
     return out
@@ -772,11 +780,11 @@ export class Game {
         const out: TimelineEntry[] = []
         for (const dilemmaId of this.dockets.agendaOf(n)) out.push(...(await this.executiveDecides(n, dilemmaId, problems)))
         out.push(...this.decideMattersByAdvice(n))
-        const items = agendaItems(n.state, this.content)
+        const items = agendaItems(n.state, this.own(n.state))
         if (items.situation) {
           const choice = this.chooseSituation(n.state, items.situation.stage.options)
           const pre = n.state
-          n.state = decideSituation(pre, this.content, choice)
+          n.state = decideSituation(pre, this.own(pre), choice)
           const entry = n.state.timeline.at(-1)!
           out.push(entry)
           this.pushToday(n, { title: items.situation.situation.title, course: choice, result: entry.text ?? entry.headline, changes: entry.changes.map((c) => `${c.target} ${c.by > 0 ? 'up' : 'down'} ${Math.abs(c.by)}`) })
@@ -820,7 +828,7 @@ export class Game {
       },
     }
     const filed = n.gov.dockets[dilemmaId]!
-    const ctx = contextFor(n, this.content, this.ai, { onProblem: (l) => problems.push(l) })
+    const ctx = contextFor(n, this.own(n.state), this.ai, { onProblem: (l) => problems.push(l) })
     const decision = await runExecutive(ctx, { ...filed, standing })
     const dilemma = this.content.dilemmas.find((d) => d.id === dilemmaId)!
     const option = dilemma.options.find((o) => o.id === decision.course)
@@ -854,7 +862,7 @@ export class Game {
   private chooseSituation(state: GameState, options: { id: string }[]): string {
     let best = { id: '', score: -Infinity }
     for (const o of availableOptions(options as never, state)) {
-      const f = forecastSituation(state, this.content, o.id)
+      const f = forecastSituation(state, this.own(state), o.id)
       const score = [...f.changes, ...f.penalties]
         .filter((c) => c.kind === 'indicator')
         .reduce((t, c) => t + c.by * (INDICATOR_INFO[c.target as keyof typeof INDICATOR_INFO]?.lowerIsBetter ? -1 : 1), 0)
@@ -901,23 +909,23 @@ export class Game {
           if ('indicator' in a && !INDICATORS.includes(a['indicator'] as never)) throw new HttpError(400, `There is no indicator “${String(a['indicator'])}”.`)
           if ('to' in a && typeof a['to'] !== 'number' && typeof a['to'] !== 'boolean') throw new HttpError(400, 'Each change needs a value to set it to.')
         }
-        const next = engine(() => adjust(n.state, this.content, v['adjust'] as Adjustment[]))
+        const next = engine(() => adjust(n.state, this.own(n.state), v['adjust'] as Adjustment[]))
         engine(() => deserialize(serialize(next)))
         n.state = next
       } else if (v['callUp'] !== undefined) {
         const dilemma = line(v['callUp'], 'The dilemma to call up', { max: 100 })!
-        n.state = engine(() => callUp(n.state, this.content, dilemma))
+        n.state = engine(() => callUp(n.state, this.own(n.state), dilemma))
         if (n.gov.dockets[dilemma]?.status === 'decided') {
           const { [dilemma]: _gone, ...rest } = n.gov.dockets
           n.gov = { ...n.gov, dockets: rest }
         }
       } else if (v['crisis'] !== undefined) {
         const situation = line(v['crisis'], 'The crisis to start', { max: 100 })!
-        n.state = engine(() => startCrisis(n.state, this.content, situation))
+        n.state = engine(() => startCrisis(n.state, this.own(n.state), situation))
       } else if (v['world'] !== undefined) {
         if (!isObject(v['world'])) throw new HttpError(400, 'world must be one change to the world.')
         const cheat = readWorldCheat(v['world'] as Record<string, unknown>)
-        n.state = engine(() => worldCheat(n.state, this.content, cheat))
+        n.state = engine(() => worldCheat(n.state, this.own(n.state), cheat))
       } else {
         const days = v['skip']
         if (!Number.isSafeInteger(days) || (days as number) < 1 || (days as number) > 60) throw new HttpError(400, 'skip must be a whole number of days from 1 to 60.')
@@ -925,7 +933,7 @@ export class Game {
         const from = n.state.timeline.length
         for (let i = 0; i < (days as number); i++) {
           const weekDay = n.state.day
-          n.state = endDay(n.state, this.content)
+          n.state = endDay(n.state, this.own(n.state))
           n.history = withDayEnd(n.history, n.state)
           // Skipped weeks are played by the rules alone, but the world still writes them down.
           if (n.state.world && weekDay % 7 === 0) await this.writeWorldWeek(n, weekDay, undefined)
@@ -1161,8 +1169,8 @@ export class Game {
     const notes = prose(v['notes'], 'The notes', 10_000, true) ?? ''
     const n = this.store.open(id)
     const problems: string[] = []
-    const ctx = contextFor(n, this.content, this.ai, { onProblem: (l) => problems.push(l) })
-    const b = brief(n.state, n.gov, this.content, await ctx.record({ series: 'factbook', limit: 6 }), ctx.archivePath)
+    const ctx = contextFor(n, this.own(n.state), this.ai, { onProblem: (l) => problems.push(l) })
+    const b = brief(n.state, n.gov, this.own(n.state), await ctx.record({ series: 'factbook', limit: 6 }), ctx.archivePath)
     const { output, ai } = await ctx.run('factbook.draft', { brief: b, category, title, notes })
     return { title: output.title, body: output.body, ai, ...(problems.length ? { problems } : {}) }
   }

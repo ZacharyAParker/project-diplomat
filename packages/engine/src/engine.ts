@@ -1,4 +1,6 @@
 import { holds, compare } from './conditions.ts'
+import { generateWorld } from './generate.ts'
+import { ownContent } from './own.ts'
 import { pick, pickWeighted, rngFor } from './rng.ts'
 import { SAVE_VERSION } from './save.ts'
 import { ensureWorld, worldWeek, type WorldChoices } from './world.ts'
@@ -95,11 +97,15 @@ const clamp = (n: number) => Math.round(Math.min(100, Math.max(0, n)) * 10) / 10
 const clampStanding = (n: number) => Math.round(Math.min(100, Math.max(-100, n)) * 10) / 10
 
 export function newNation(
-  content: Content,
+  base: Content,
   identity: Identity,
   seed: number,
   answers: Record<string, string> = {},
+  opts: { world?: 'new' | 'classic' } = {},
 ): GameState {
+  // A new world of its own, unless the classic continent was asked for.
+  const generated = opts.world === 'new' ? generateWorld(base, seed) : undefined
+  const content = generated ? ownContent({ generated } as GameState, base) : base
   const state: GameState = {
     version: SAVE_VERSION,
     pack: { id: content.pack.id, version: content.pack.version },
@@ -123,6 +129,7 @@ export function newNation(
     treaties: [],
     resources: {},
     agenda: { major: null, minors: [], situation: false, bound: {} },
+    ...(generated ? { generated } : {}),
   }
   appointCabinet(state, content)
   found(state, content, answers)

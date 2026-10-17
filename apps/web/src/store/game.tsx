@@ -5,6 +5,7 @@ import {
   daysUntilElection,
   forecastDecision,
   forecastSituation,
+  ownContent,
   support,
   type AgendaItems,
   type Content,
@@ -63,8 +64,9 @@ export function useStore(): GameStore {
 export function useGame(): Game {
   const store = useStore()
   const model = useSyncExternalStore(store.subscribe, store.get)
-  const { content } = store
   const { nation, government, census } = model
+  // The pack as the open nation sees it: its own continent and neighbours, if it has them.
+  const content = useMemo(() => (nation ? ownContent(nation.state, store.content) : store.content), [nation, store.content])
 
   const current = useMemo<Current | null>(() => {
     if (!nation) return null

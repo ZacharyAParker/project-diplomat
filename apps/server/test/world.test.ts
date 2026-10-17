@@ -11,7 +11,7 @@ import { loadContent } from '../src/server.ts'
 import { harness, IDENTITY } from './helpers.ts'
 
 const found = (h: Awaited<ReturnType<typeof harness>>, body: object = {}) =>
-  h.post('/api/nations', { identity: IDENTITY, answers: {}, form: 'commonwealth', mode: 'govern', founder: { name: 'Aegis', title: 'Founder' }, ...body })
+  h.post('/api/nations', { identity: IDENTITY, answers: {}, form: 'commonwealth', mode: 'govern', founder: { name: 'Aegis', title: 'Founder' }, world: 'classic', ...body })
 
 async function toWeekEnd(h: Awaited<ReturnType<typeof harness>>, id: string) {
   while (h.running.game.store.open(id).state.day % 7 !== 0) await h.post(`/api/nations/${id}/sandbox`, { skip: 1 })
@@ -163,6 +163,27 @@ test('a motion is put down over HTTP with its wording cleaned, and a bad one is 
     assert.equal((await h.post(`/api/nations/${id}/world/act`, { action: { propose: { body: 'council', kind: 'force', target: 'gorsk' } } })).status, 409, 'not on the Council')
     assert.equal((await h.post(`/api/nations/${id}/world/act`, { action: { propose: { body: 'assembly', kind: 'aid', target: 'velsa', text: 'x'.repeat(700) } } })).status, 400)
     assert.equal((await h.post(`/api/nations/${id}/world/act`, { action: { council: 'stand' } })).status, 200)
+  } finally {
+    await h.close()
+  }
+})
+
+test('a nation founded without asking gets a world of its own, kept through a reload, and plays a week in it', async () => {
+  const h = await harness()
+  try {
+    const made = await h.post('/api/nations', { identity: IDENTITY, answers: {}, form: 'commonwealth', mode: 'govern', founder: { name: 'Aegis', title: 'Founder' } })
+    assert.equal(made.status, 201)
+    const n = h.running.game.store.open(made.json.id)
+    const g = n.state.generated!
+    assert.ok(g, 'a generated world')
+    assert.ok(!g.nations.some((x) => x.id === 'eskerland'), 'not the classic continent')
+    assert.deepEqual(Object.keys(n.state.world!.nations).sort(), g.nations.map((x) => x.id).sort())
+    await toWeekEnd(h, made.json.id)
+    const r = await h.post(`/api/nations/${made.json.id}/sandbox`, { skip: 1 })
+    assert.equal(r.status, 200)
+    assert.deepEqual(h.running.game.store.open(made.json.id).state.generated, g)
+    const bad = await h.post('/api/nations', { identity: { ...IDENTITY, name: 'Elsewhere' }, answers: {}, form: 'commonwealth', mode: 'govern', founder: { name: 'Aegis', title: 'Founder' }, world: 'mars' })
+    assert.equal(bad.status, 400)
   } finally {
     await h.close()
   }

@@ -116,7 +116,8 @@ export const PROPOSAL_NEEDS: Record<MotionKind, 'nation' | 'war' | 'claim' | 'na
   force: 'nation',
 }
 
-const clamp = (n: number, lo = 0, hi = 100) => Math.round(Math.min(hi, Math.max(lo, n)) * 10) / 10
+// Rounded to a tenth, and never minus zero, which a save would write back as plain zero.
+const clamp = (n: number, lo = 0, hi = 100) => Math.round(Math.min(hi, Math.max(lo, n)) * 10) / 10 || 0
 const clampStanding = (n: number) => clamp(n, -100, 100)
 
 // ---------------------------------------------------------------------------------------

@@ -218,6 +218,31 @@ border, dashed borders, mountain ranges, every capital, a compass rose and a sca
 shades each nation by how it stands with the player. Fronts of every war are marked in red,
 allies starred, annexed nations hatched. Picking a nation opens its row below.
 
+## A world of its own
+
+A nation founded since 0.8 gets a continent of its own, unless the classic one is asked for at the
+founding (`world: 'classic'`). `packages/engine/src/generate.ts` makes it from the nation's seed:
+
+- **The map.** The player's country goes near the middle with five nations round it; fifteen
+  more are scattered wherever there is room, and a few inland seas, gulfs and lakes are dropped in
+  away from the player. The same warped-grid drawing as the classic map turns the points into
+  coasts and borders. A draw is kept only if the player's country is a decent size with four to six
+  neighbours, and every other nation has land and at least one border; otherwise it tries again.
+- **The nations.** Regions of the continent share a way of naming things (Nordic, Romance,
+  Slavic, Gaelic, Levantine, Germanic, Hellenic roots), and no two nations' names start the same
+  way. Each gets a capital, a leader whose title fits its government, a government that colours
+  its temperament and what it likes, an economy (what it has to spare and what it lacks), strength
+  and wealth, and the lines its papers print when it is pleased or displeased with the player.
+- **The rules.** Who borders whom is read off the map, so the map and the rules agree by
+  construction. Every dilemma about another country is checked to have a country on the border
+  it can be about, and one is adjusted if not. The borderlands nations quarrel over get this
+  world's names too.
+
+The generated world is kept in the save (`state.generated`), and everything that reads the other
+nations goes through `ownContent(state, content)` (`packages/engine/src/own.ts`): the server, the
+Director, the AI briefs and the web app all see the nation's own continent. Nations made before
+0.8, Claudetopia among them, keep the classic continent.
+
 ## Declaring war, and changing the world by hand
 
 When the constitution gives a legislature (or the people, or a council) a vote that binds, a

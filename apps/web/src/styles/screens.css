@@ -1007,12 +1007,23 @@ h3:focus:not(:focus-visible) {
   fill: var(--map-ink);
 }
 
+.world-map__scale .world-map__plate {
+  fill: var(--map-halo);
+  stroke: var(--map-border);
+  stroke-width: 0.6;
+}
+
 .world-map__legend {
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-2) var(--space-4);
   margin-top: var(--space-2);
   color: var(--ink-soft);
+}
+
+.world-map__continent {
+  font-style: italic;
+  color: var(--ink);
 }
 
 .world-map__key {

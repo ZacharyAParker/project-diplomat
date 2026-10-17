@@ -34,6 +34,7 @@ import {
   type Content,
   type Effect,
   type TimelineEntry,
+  ownContent,
 } from '@diplomat/engine'
 import {
   amend,
@@ -342,8 +343,8 @@ export class DirectorTools {
   // ---------------------------------------------------------------------------------------
 
   private agenda(n: Nation) {
-    const items = agendaItems(n.state, this.content)
-    const say = (t: string, d?: string) => render(t, n.state, this.content, d ? n.state.agenda.bound[d] : undefined)
+    const items = agendaItems(n.state, ownContent(n.state, this.content))
+    const say = (t: string, d?: string) => render(t, n.state, ownContent(n.state, this.content), d ? n.state.agenda.bound[d] : undefined)
     return {
       major: items.major ? { id: items.major.id, title: say(items.major.title, items.major.id) } : null,
       minors: items.minors.map((d) => ({ id: d.id, title: say(d.title, d.id) })),
@@ -360,7 +361,7 @@ export class DirectorTools {
       identity: s.identity,
       day: s.day,
       date: formatDate(n.gov.institutions.calendar.start, s.day),
-      class: classify(s, this.content).name,
+      class: classify(s, ownContent(s, this.content)).name,
       form: c.form,
       stateName: c.stateName,
       mode: n.gov.mode,
@@ -370,9 +371,9 @@ export class DirectorTools {
       support: Math.round(support(s) * 10) / 10,
       indicators: Object.fromEntries(INDICATORS.map((i) => [i, { name: INDICATOR_INFO[i].name, value: s.indicators[i] }])),
       factions: this.content.factions.map((f) => ({ id: f.id, name: f.name, approval: s.factions[f.id]?.approval, clout: s.factions[f.id]?.clout })),
-      neighbours: this.content.neighbours.map((x) => ({ id: x.id, name: x.name, standing: s.neighbours[x.id] })),
+      neighbours: ownContent(s, this.content).neighbours.map((x) => ({ id: x.id, name: x.name, standing: s.neighbours[x.id] })),
       nextElection: nextElection(s),
-      census: census(s, n.gov.censusBase, this.content),
+      census: census(s, n.gov.censusBase, ownContent(s, this.content)),
       censusBase: n.gov.censusBase,
       agenda: this.agenda(n),
       dockets: Object.values(n.gov.dockets).map((d) => ({ dilemma: d.dilemma, number: d.number, status: d.status, standing: d.standing?.explanation ?? null, decision: d.decision?.course ?? null })),
@@ -393,12 +394,12 @@ export class DirectorTools {
     const w = s.world
     if (!w) return { world: null, note: 'This pack has no world beyond the borders.' }
     return {
-      lines: worldLines(s, this.content),
+      lines: worldLines(s, ownContent(s, this.content)),
       homeStrength: homeStrength(s),
       mobilised: w.home.mobilised,
       borderlandsLost: w.home.lost,
       important: w.important,
-      nations: this.content.neighbours.map((d) => {
+      nations: ownContent(s, this.content).neighbours.map((d) => {
         const x = w.nations[d.id]
         return { id: d.id, name: d.name, near: d.near, free: x?.free ?? true, ruler: x?.ruler ?? null, standing: s.neighbours[d.id], strength: x?.strength, wealth: x?.wealth, stability: x?.stability, temperament: d.temperament, memory: x?.memory ?? [] }
       }),
@@ -407,7 +408,7 @@ export class DirectorTools {
       claims: w.claims.filter((c) => !c.settled),
       assembly: { members: w.assembly.members, next: w.assembly.next, motion: w.assembly.motion, queue: w.assembly.queue, recent: w.assembly.past.slice(-4), sanctions: w.assembly.sanctions },
       council: { ...w.council, past: w.council.past.slice(-4) },
-      matters: openMatters(s).map((m) => ({ ...matterCard(s, this.content, m), advice: adviseMatter(s, this.content, m) })),
+      matters: openMatters(s).map((m) => ({ ...matterCard(s, ownContent(s, this.content), m), advice: adviseMatter(s, ownContent(s, this.content), m) })),
       recent: w.log.slice(-15),
     }
   }
@@ -417,7 +418,7 @@ export class DirectorTools {
       dockets: this.game.dockets.view(n).map((d) => {
         let options: unknown[] = []
         try {
-          options = petitionBrief(n.state, this.content, d.dilemma, d.number).options.map((o) => ({ course: o.course, number: o.number, advocate: o.advocate, speech: o.speech, forecast: o.forecast }))
+          options = petitionBrief(n.state, ownContent(n.state, this.content), d.dilemma, d.number).options.map((o) => ({ course: o.course, number: o.number, advocate: o.advocate, speech: o.speech, forecast: o.forecast }))
         } catch {
           options = []
         }
@@ -431,14 +432,14 @@ export class DirectorTools {
     const onDesk = new Set([n.state.agenda.major, ...n.state.agenda.minors])
     const list = this.content.dilemmas
       .filter((d) => terms.every((t) => `${d.id} ${d.title} ${d.tags.join(' ')}`.toLowerCase().includes(t)))
-      .map((d) => ({ id: d.id, title: render(d.title, n.state, this.content), kind: d.kind, tags: d.tags, onDesk: onDesk.has(d.id), lastAnswered: n.state.answered[d.id] ?? null }))
+      .map((d) => ({ id: d.id, title: render(d.title, n.state, ownContent(n.state, this.content)), kind: d.kind, tags: d.tags, onDesk: onDesk.has(d.id), lastAnswered: n.state.answered[d.id] ?? null }))
     return { total: list.length, dilemmas: list.slice(0, 80) }
   }
 
   private forecast(n: Nation, dilemmaId: string) {
     const d = this.content.dilemmas.find((x) => x.id === dilemmaId)
     if (!d) throw new HttpError(404, `There is no dilemma “${dilemmaId}” in the pack. Try list_dilemmas.`)
-    const p = petitionBrief(n.state, this.content, dilemmaId, n.gov.dockets[dilemmaId]?.number ?? 0)
+    const p = petitionBrief(n.state, ownContent(n.state, this.content), dilemmaId, n.gov.dockets[dilemmaId]?.number ?? 0)
     return {
       dilemma: dilemmaId,
       title: p.title,
@@ -502,7 +503,7 @@ export class DirectorTools {
   }
 
   private plan(n: Nation, tool: string, args: Record<string, unknown>): Plan {
-    const c = this.content
+    const c = ownContent(n.state, this.content)
     switch (tool) {
       case 'cheat_set_figures': {
         const adjustments: Adjustment[] = []

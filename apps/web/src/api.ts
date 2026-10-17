@@ -126,6 +126,8 @@ export interface FoundRequest {
   answers: Record<string, string>
   form: FormId
   mode: Mode
+  // A continent of its own, or the classic one. New unless asked.
+  world?: 'new' | 'classic'
   founder: { name: string; title: string }
 }
 

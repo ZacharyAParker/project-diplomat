@@ -48,6 +48,7 @@ import { DISMISS, dismissOpen } from '../logic/docket.ts'
 import { FORMS } from '../logic/forms.ts'
 import { decode, newNationSave, summarise, withDayEnd, type Snapshot, type Summary } from '../logic/saves.ts'
 import { content } from './fixtures.ts'
+import { ownContent } from '@diplomat/engine'
 
 // An in-memory stand-in for apps/server, built on the engine, for the web app's tests. It
 // keeps nations, a simple government for each (an Assembly, a Court and the ministries),
@@ -378,7 +379,7 @@ export class FakeServer implements Api {
     for (const [key, docket] of Object.entries(gov.dockets)) {
       if (docket.status === 'decided' && docket.day < held.state.day) delete gov.dockets[key]
     }
-    const agenda = agendaItems(held.state, content)
+    const agenda = agendaItems(held.state, ownContent(held.state, content))
     // Every dilemma on the agenda has a docket. Minors that do not go through the bodies go
     // to the Court alone.
     const dilemmas = [agenda.major, ...agenda.minors]
@@ -502,8 +503,8 @@ export class FakeServer implements Api {
     const { dilemmaId, course } = request
     held.state =
       course === DISMISS
-        ? dismiss(held.state, content, dilemmaId, reasons)
-        : decide(held.state, content, dilemmaId, course, request.text)
+        ? dismiss(held.state, ownContent(held.state, content), dilemmaId, reasons)
+        : decide(held.state, ownContent(held.state, content), dilemmaId, course, request.text)
     const docket = held.government.dockets[dilemmaId]
     if (request.word) {
       const number = held.government.words.length + 1
@@ -567,7 +568,7 @@ export class FakeServer implements Api {
 
   private endOneDay(held: Held) {
     const before = held.state
-    held.state = endDay(before, content)
+    held.state = endDay(before, ownContent(before, content))
     held.history = withDayEnd(held.history, held.state)
     held.government.worldDays.push(before.day)
     held.government.lastWorldDay = before.day
@@ -625,7 +626,7 @@ export class FakeServer implements Api {
   async found(request: FoundRequest): Promise<{ id: string }> {
     this.log('found', request)
     const id = this.freshId()
-    const state = newNation(content, request.identity, this.seed, request.answers)
+    const state = newNation(content, request.identity, this.seed, request.answers, { world: request.world ?? 'new' })
     const now = this.time()
     const held: Held = {
       ...newNationSave(state, id, now),
@@ -697,7 +698,7 @@ export class FakeServer implements Api {
   async situation(id: string, optionId: string) {
     this.log('situation', id, optionId)
     const held = this.held(id)
-    held.state = decideSituation(held.state, content, optionId)
+    held.state = decideSituation(held.state, ownContent(held.state, content), optionId)
     held.updatedAt = this.time()
     return { ...this.changed(held), entry: json(held.state.timeline.at(-1)!) }
   }
@@ -774,7 +775,7 @@ export class FakeServer implements Api {
   async decideMatter(id: string, matter: string, option: string) {
     this.log('decideMatter', id, { matter, option })
     const held = this.held(id)
-    held.state = decideWorldMatter(held.state, content, matter, option)
+    held.state = decideWorldMatter(held.state, ownContent(held.state, content), matter, option)
     held.updatedAt = this.time()
     return { ...this.changed(held), entry: held.state.timeline.at(-1)! }
   }
@@ -782,9 +783,9 @@ export class FakeServer implements Api {
   async worldAct(id: string, action: WorldAction) {
     this.log('worldAct', id, action)
     const held = this.held(id)
-    const why = forbidden(held.state, content, action)
+    const why = forbidden(held.state, ownContent(held.state, content), action)
     if (why) throw new Error(why)
-    held.state = worldAct(held.state, content, action)
+    held.state = worldAct(held.state, ownContent(held.state, content), action)
     held.updatedAt = this.time()
     return { ...this.changed(held), entry: held.state.timeline.at(-1)! }
   }
@@ -792,12 +793,12 @@ export class FakeServer implements Api {
   async sandbox(id: string, request: Parameters<Api['sandbox']>[1]) {
     this.log('sandbox', id, request)
     const held = this.held(id)
-    if ('adjust' in request) held.state = adjust(held.state, content, request.adjust)
+    if ('adjust' in request) held.state = adjust(held.state, ownContent(held.state, content), request.adjust)
     else if ('callUp' in request) {
-      held.state = callUp(held.state, content, request.callUp)
+      held.state = callUp(held.state, ownContent(held.state, content), request.callUp)
       this.openDockets(held)
-    } else if ('crisis' in request) held.state = startCrisis(held.state, content, request.crisis)
-    else if ('world' in request) held.state = worldCheat(held.state, content, request.world)
+    } else if ('crisis' in request) held.state = startCrisis(held.state, ownContent(held.state, content), request.crisis)
+    else if ('world' in request) held.state = worldCheat(held.state, ownContent(held.state, content), request.world)
     else for (let i = 0; i < request.skip; i++) this.endOneDay(held)
     held.updatedAt = this.time()
     return this.changed(held)

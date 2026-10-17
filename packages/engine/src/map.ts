@@ -316,19 +316,29 @@ function draw(def: WorldMapDef): MapData {
     const coastal = c.next.some((j) => j >= 0 && owner[j]!.sea)
     if (ridge > 0.9 && high > 0.05 && !coastal) mountains.push([fmt(x), fmt(y)])
   })
+  // A few ranges, not a continent of peaks: thinned to keep each glyph clear of the next.
+  const peaks: Point[] = []
+  for (const p of mountains) if (peaks.length < 70 && peaks.every((q) => Math.hypot(q[0] - p[0], q[1] - p[1]) > 17)) peaks.push(p)
+  mountains.length = 0
+  mountains.push(...peaks)
 
   return { width: def.width, height: def.height, regions, neighbours, borders, coast: lineD(chain(coastSegs)), mountains, capitals }
 }
 
 const drawn = new WeakMap<WorldMapDef, MapData>()
+const byKey = new Map<string, MapData>()
 
-// The pack's map, drawn once per pack.
+// The pack's map, or a nation's own: drawn once, and again only if it changes. A world read
+// back from a save is a new object with the same points, so it is looked up by them too.
 export function worldMap(content: Content): MapData | null {
   const def = content.world.map
   if (!def) return null
   let d = drawn.get(def)
   if (!d) {
-    d = draw(def)
+    const key = JSON.stringify(def)
+    d = byKey.get(key) ?? draw(def)
+    byKey.set(key, d)
+    if (byKey.size > 24) byKey.delete(byKey.keys().next().value!)
     drawn.set(def, d)
   }
   return d

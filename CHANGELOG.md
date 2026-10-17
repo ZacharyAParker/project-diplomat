@@ -1,5 +1,19 @@
 # Changelog
 
+## Unreleased
+
+A world of its own for every new nation.
+
+- Founding a nation draws a new continent for it: a map with its own coasts, seas and mountains,
+  and twenty neighbours with their own names, capitals, leaders, governments, economies,
+  temperaments and grudges. The same nation always gets the same world.
+- Who borders whom is read off the map. Every kind of dilemma about another country still has a
+  country to be about.
+- The classic continent is still there: choose it at the founding. Nations founded before this,
+  Claudetopia among them, keep it.
+- The map names the continent, keeps country names clear of capitals, and thins out its
+  mountain ranges.
+
 ## 0.7.1
 
 The map, drawn like an atlas.

@@ -87,6 +87,48 @@ const isMotion = shaped({
   vetoed: optional(listOf(isString)),
 })
 
+// A world made for this nation alone (generate.ts): its nations and its map.
+const isPoint: Check = (value) => Array.isArray(value) && value.length === 2 && value.every(isNumber)
+const isTemperament = shaped({ ambition: isScore, aggression: isScore, loyalty: isScore, charity: isScore })
+const isGenerated = shaped({
+  name: isString,
+  seed: isNumber,
+  borderlands: listOf(isString),
+  nations: listOf(
+    shaped({
+      id: isString,
+      name: isString,
+      capital: optional(isString),
+      demonym: isString,
+      leader: isString,
+      description: isString,
+      standing: isStanding,
+      needs: listOf(isString),
+      surpluses: listOf(isString),
+      likes: listOf(isString),
+      dislikes: listOf(isString),
+      pleased: isString,
+      displeased: isString,
+      near: isBoolean,
+      borders: listOf(isString),
+      temperament: isTemperament,
+      strength: isScore,
+      wealth: isScore,
+      form: isString,
+    }),
+  ),
+  map: shaped({
+    width: isNumber,
+    height: isNumber,
+    spacing: optional(isNumber),
+    seed: optional(isNumber),
+    warp: optional(isNumber),
+    margin: optional(isNumber),
+    sites: mapOf(isPoint),
+    sea: listOf(isPoint),
+  }),
+})
+
 // The world beyond the borders (world.ts), checked as closely as the rest.
 const isWorld = shaped({
   nations: mapOf(
@@ -238,6 +280,7 @@ const SHAPE: Record<string, Check> = {
   term: optional(isCount),
   electionDay: optional(isDay),
   world: optional(isWorld),
+  generated: optional(isGenerated),
   agenda: shaped({
     major: (value) => value === null || isString(value),
     minors: listOf(isString),

@@ -59,11 +59,17 @@ export function WorldMap({ state, content, onPick }: { state: GameState; content
     }
   }
   const size = (r: MapRegion) => Math.max(10, Math.min(19, Math.sqrt(r.area) / 9))
-  // A country's name sits at its middle, unless its capital is there: then just above the capital.
+  // A country's name sits at its middle, unless its capital and the capital's name would be
+  // underneath it: then just above the capital.
   const namePlace = (r: MapRegion): [number, number] => {
     const cap = map.capitals[r.id]
-    if (cap && Math.hypot(cap[0] - r.centre[0], cap[1] - (r.centre[1] - 10)) < 34) return [cap[0] + 4, cap[1] - 20]
-    return [r.centre[0], r.centre[1] - 10]
+    const at: [number, number] = [r.centre[0], r.centre[1] - 10]
+    if (!cap) return at
+    const half = (name(r.id).length * size(r) * 1.05) / 2
+    const city = (capital(r.id)?.length ?? 0) * 6 + 10
+    const across = cap[0] + city > at[0] - half && cap[0] - 6 < at[0] + half
+    if (across && Math.abs(cap[1] - at[1]) < 22) return [cap[0] + 4, cap[1] - 20]
+    return at
   }
   const scale = 100
   // Mountains keep clear of the names and capitals, as an engraver would leave them.
@@ -84,7 +90,7 @@ export function WorldMap({ state, content, onPick }: { state: GameState; content
           onChange={setView}
         />
       </div>
-      <svg viewBox={`0 0 ${map.width} ${map.height}`} role="group" aria-label={`A map of the world: ${state.identity.name} and twenty other nations`}>
+      <svg viewBox={`0 0 ${map.width} ${map.height}`} role="group" aria-label={`A map of ${state.generated ? `the continent of ${state.generated.name}` : 'the world'}: ${state.identity.name} and ${land.length - 1} other nations`}>
         <defs>
           <linearGradient id="map-deep" x1="0" y1="0" x2="0" y2="1">
             <stop offset="0" stopColor="var(--map-sea)" />
@@ -180,6 +186,7 @@ export function WorldMap({ state, content, onPick }: { state: GameState; content
           <text y="-35">N</text>
         </g>
         <g className="world-map__scale" transform="translate(30,30)" aria-hidden="true">
+          <rect x="-12" y="-14" width={scale + 52} height="40" rx="3" className="world-map__plate" />
           <path d={`M0,0H${scale}M0,-5V5M${scale / 2},-4V4M${scale},-5V5`} />
           <rect x="0" y="-2" width={scale / 2} height="4" />
           <text x="0" y="17">0</text>
@@ -187,6 +194,7 @@ export function WorldMap({ state, content, onPick }: { state: GameState; content
         </g>
       </svg>
       <figcaption className="world-map__legend small">
+        {state.generated && <span className="world-map__continent">The continent of {state.generated.name}</span>}
         <span>★ In a pact with you</span>
         <span>
           <i className="world-map__key world-map__key--front" /> A front

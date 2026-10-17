@@ -41,6 +41,7 @@ export interface Draft {
   question: number
   form: Exclude<FormId, 'custom'>
   mode: Mode
+  world: 'new' | 'classic'
   founder: { name: string; title: string }
 }
 
@@ -51,6 +52,7 @@ export const EMPTY_DRAFT: Draft = {
   question: 0,
   form: 'commonwealth',
   mode: 'govern',
+  world: 'new',
   founder: DEFAULT_FOUNDER,
 }
 
@@ -328,6 +330,15 @@ function ModeStep({ draft, onDraft, progress }: StepProps) {
           onChange={(mode) => onDraft({ ...draft, mode })}
         />
         <p className="small soft">You can switch between the two at any time, on the nation page.</p>
+        <ChoiceList<Draft['world']>
+          legend="The world around it"
+          options={[
+            { value: 'new', label: 'A new world', detail: 'A continent drawn for this nation alone, with twenty neighbours of its own: their names, leaders, governments and grudges.' },
+            { value: 'classic', label: 'The classic continent', detail: 'Eskerland, Morvaine, Ardune and the rest: the same twenty nations every game.' },
+          ]}
+          value={draft.world ?? 'new'}
+          onChange={(world) => onDraft({ ...draft, world })}
+        />
         <div className="founding__actions">
           <LinkTo to={{ name: 'found', step: 'form' }} look="quiet">
             Back
@@ -364,7 +375,7 @@ function FounderStep({ draft, onDraft, progress }: StepProps) {
     setTried(true)
     if (nameProblem || titleProblem) return
     const id = await action.run('found', () =>
-      game.found({ identity, answers: draft.answers, form: draft.form, mode: draft.mode, founder: { name, title } }),
+      game.found({ identity, answers: draft.answers, form: draft.form, mode: draft.mode, world: draft.world ?? 'new', founder: { name, title } }),
     )
     if (id === undefined) return
     onDraft(EMPTY_DRAFT)
