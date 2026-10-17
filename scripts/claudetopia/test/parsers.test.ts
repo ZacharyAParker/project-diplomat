@@ -204,6 +204,24 @@ test('court: the table of votes, in both of its forms', () => {
   assert.equal(rb.rows[0]!.reconciled, true)
 })
 
+// Found in review: "7–0 (direction 1: 6–1)" was read as 6–1 on the whole, because the
+// dissent column names who dissented on one direction only.
+test('court: a split within a split is read whole, not from the dissent column', () => {
+  const table = `## Table of votes
+
+| Question | Result | Majority | Dissenting |
+|---|---|---|---|
+| Directions to the Steward | 7–0 (direction 1: 6–1) | Wickwright, Halcyon, Thrift, Reckoning, Glasswright, Marigold | Chandler (direction 1 only) |
+| A mixed one | 5–2 (part 2: 4–3) | Wickwright, Halcyon, Thrift, Reckoning, Glasswright | Chandler, Marigold |
+`
+  const r = parseVotes(table, SURNAMES)
+  assert.deepEqual(r.rows[0]!.split, [7, 0])
+  assert.equal(Object.values(r.rows[0]!.votes).filter((v) => v === 'majority').length, 7)
+  assert.equal(r.rows[0]!.votes['Chandler'], 'majority')
+  assert.deepEqual(r.rows[1]!.votes, {})
+  assert.equal(r.problems.length, 1)
+})
+
 test('petitions: number, options, the Assembly, the Court and the decision', () => {
   const text = `# Petition #17 — Corporations Demand Political Say
 

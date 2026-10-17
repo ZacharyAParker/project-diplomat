@@ -369,6 +369,18 @@ export function parseVotes(body: string, surnames: string[]): { rows: ParsedVote
     const question = questionCols.map(cell).filter(Boolean).join(', option ').replace(/^(P-\d+), option /, '$1, option ')
     const result = resultCols.map(cell).filter(Boolean).join('; ')
     const split = /(\d+)\s*[–-]\s*(\d+)/.exec(result)
+    // "7–0 (direction 1: 6–1)": the columns name who dissented on a part, not on the whole.
+    // Read whole, a unanimous count is unanimous; anything else is left to the text.
+    const compound = (result.match(/\d+\s*[–-]\s*\d+/g) ?? []).length > 1
+    if (compound && split) {
+      const unanimous = Number(split[2]) === 0
+      const votes: ParsedVoteRow['votes'] = {}
+      const whole: VoteMark = rest ?? (groups.some((g) => g.mark === 'majority') ? 'majority' : /barred/i.test(result) ? 'bar' : /permitted/i.test(result) ? 'permit' : 'for')
+      if (unanimous) for (const s of surnames) votes[s] = whole
+      else problems.push(`“${question.slice(0, 70)}”: the result ${result} has a split within a split; the votes are kept as text only`)
+      rows.push({ question, result, split: [Number(split[1]), Number(split[2])], votes, reconciled: unanimous ? true : null })
+      continue
+    }
     const plain = !!split || /^\d+$/.test(result)
     const votes: ParsedVoteRow['votes'] = {}
     const everyone = (text: string) => /^All\b/.test(text) || /\bsame (six|five|four|seven)\b/i.test(text)
