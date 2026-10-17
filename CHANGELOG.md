@@ -1,5 +1,26 @@
 # Changelog
 
+## 0.6.1
+
+The Director, and a round of fixes from outside reviews.
+
+- The Director. A Claude Code session for each nation that stands outside the fiction: it runs the
+  bodies for you, tells you plainly what it thinks they will do and what it thinks of your plans,
+  and does the sandbox when you ask. Talk to it from the Director page in the game, or from a
+  terminal with `claude` in the repo, where the same tools load over MCP.
+- Cheats through the Director go in an out-of-character log, not the record. Each one quotes what
+  you asked for, marks the nation as sandboxed, and can be undone from the log.
+- Each body keeps its own Claude Code session, so the Assembly and the Court remember their own
+  earlier sittings. A session starts fresh after an election, an amendment, a cheat or a dozen
+  sittings, and the record always wins over what a body remembers.
+- The bodies are sealed into their own Archive: they can read it and nothing outside it.
+- Fixes from reviews of the code by Codex, Gemini and Meta's Muse Spark: bills pass only on a
+  division and become law by code, the world's day can no longer change laws, an election reseats
+  the legislature, a Word of the Founder is only in force once confirmed, a reply from the Court
+  can only lift a bar it could have lifted, and found mode can't be decided without a Word.
+- Setting work aside (a cheat, an undo, a new session) now stops the model calls already running
+  for it, instead of leaving the petition waiting on them.
+
 ## 0.6.0
 
 The game gets a government, and Claudetopia comes home.
