@@ -20,6 +20,10 @@ The Director, and a round of fixes.
   be decided without a Word.
 - Setting work aside (a cheat, an undo, a new session) now stops the model calls already running
   for it, instead of leaving the petition waiting on them.
+- Legal papers: terms of use, a privacy policy, a notice on what the AI is, the license scope, a
+  copyright notice and third-party notices, linked from the About sheet in Settings. The core
+  pack is now licensed CC BY-SA 4.0; the code stays MIT. The security policy describes the local
+  server and the AI, and vulnerabilities can be reported privately on GitHub.
 
 ## 0.6.0
 

@@ -26,6 +26,18 @@ import {
 
 const THEME_NAMES: Record<Theme, string> = { system: 'Follow the system', light: 'Day', dark: 'Night' }
 
+// The legal papers live in the repository, so the About sheet links there rather than copying them
+const REPO = 'https://github.com/ZacharyAParker/project-diplomat'
+const LEGAL = [
+  ['TERMS.md', 'Terms'],
+  ['PRIVACY.md', 'Privacy'],
+  ['NOTICE.md', 'Notice'],
+  ['LICENSE-SCOPE.md', 'Licences'],
+  ['COPYRIGHT.md', 'Copyright'],
+  ['THIRD-PARTY-NOTICES.md', 'Third-party notices'],
+  ['SECURITY.md', 'Security'],
+] as const
+
 type Imported = { ok: true; id: string; text: string } | { ok: false; text: string } | null
 
 export function Settings({ current }: { current: Current }) {
@@ -215,14 +227,23 @@ export function Settings({ current }: { current: Current }) {
             </div>
             <div>
               <dt className="label soft">Licence</dt>
-              <dd>MIT</dd>
+              <dd>MIT for the code, CC BY-SA 4.0 for the core pack</dd>
             </div>
           </dl>
           <p>Not affiliated with NationStates or Max Barry.</p>
           <p className="small soft">
             The game runs on this computer. There is no account and nothing is counted. Nothing leaves it unless
-            the AI is switched on, and then only what the bodies are asked.
+            the AI or the Director is switched on, and then it goes to Anthropic, as the privacy policy says.
           </p>
+          <ul className="legal small" aria-label="Legal">
+            {LEGAL.map(([file, label]) => (
+              <li key={file}>
+                <a href={`${REPO}/blob/main/${file}`} target="_blank" rel="noreferrer noopener">
+                  {label}
+                </a>
+              </li>
+            ))}
+          </ul>
         </Sheet>
 
         <Sheet kicker="The end" title={`Delete ${saved.name}`}>

@@ -38,7 +38,7 @@ Decisions I've made:
 | Content | Community-written and AI-assisted, both |
 | AI | Players can use a Claude or ChatGPT plan they already pay for, within each provider's terms. Model picked per task |
 | Platform | Web-based: it runs on your machine and opens in the browser |
-| Licence | Open source, MIT |
+| Licence | Open source: MIT for the code, CC BY-SA 4.0 for the core pack ([LICENSE-SCOPE.md](../LICENSE-SCOPE.md)) |
 | Goal | A hobby that could grow. Costs near zero |
 
 ---

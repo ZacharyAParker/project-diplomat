@@ -3,7 +3,7 @@
   "version": "0.6.1",
   "private": true,
   "type": "module",
-  "license": "MIT",
+  "license": "SEE LICENSE IN LICENSE-SCOPE.md",
   "engines": { "node": ">=24" },
   "packageManager": "pnpm@9.15.9",
   "scripts": {

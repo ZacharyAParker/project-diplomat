@@ -558,6 +558,13 @@ h3:focus:not(:focus-visible) {
   overflow-wrap: anywhere;
 }
 
+/* the terms, privacy and the rest, in a line under the About sheet */
+.legal {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-4);
+}
+
 .nation__layout {
   display: grid;
   grid-template-columns: minmax(0, 1fr);

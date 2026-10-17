@@ -215,7 +215,19 @@ describe('about', () => {
     const about = screen.getByRole('heading', { name: 'Project Diplomat' }).closest('section')!
     expect(within(about).getByText(/^Version \d+\.\d+\.\d+$/)).toBeDefined()
     expect(within(about).getByText(`${content.pack.name}, version ${content.pack.version}`)).toBeDefined()
-    expect(within(about).getByText('MIT')).toBeDefined()
+    expect(within(about).getByText('MIT for the code, CC BY-SA 4.0 for the core pack')).toBeDefined()
     expect(within(about).getByText('Not affiliated with NationStates or Max Barry.')).toBeDefined()
+  })
+
+  it('links the terms, the privacy policy and the other papers, each in a new tab', async () => {
+    await settled()
+    const legal = screen.getByRole('list', { name: 'Legal' })
+    const links = within(legal).getAllByRole('link')
+    expect(links.map((a) => a.textContent)).toEqual(['Terms', 'Privacy', 'Notice', 'Licences', 'Copyright', 'Third-party notices', 'Security'])
+    expect(links[0]!.getAttribute('href')).toBe('https://github.com/ZacharyAParker/project-diplomat/blob/main/TERMS.md')
+    for (const a of links) {
+      expect(a.getAttribute('target')).toBe('_blank')
+      expect(a.getAttribute('rel')).toBe('noreferrer noopener')
+    }
   })
 })

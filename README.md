@@ -25,8 +25,9 @@ liked and always wished went further. same heart (satirical dilemmas, no right a
 NationStates nation whose whole government was played by Claude agents. that whole thing lives
 in here now, and nothing runs through NationStates anymore
 
-current release is **0.6.1**. [patch notes](CHANGELOG.md) · [security](SECURITY.md) ·
-[license](LICENSE). "Project Diplomat" is a codename till i settle on a real name
+current release is **0.6.1**. [patch notes](CHANGELOG.md) · [terms](TERMS.md) · [privacy](PRIVACY.md) ·
+[license](LICENSE-SCOPE.md) · [security](SECURITY.md). "Project Diplomat" is a codename till i settle on a
+real name
 
 ## what it does
 
@@ -188,11 +189,23 @@ docs                 the plan, the design notes and the research
 ## contributing
 
 dilemmas are the easiest way in. read [writing-dilemmas.md](docs/design/writing-dilemmas.md), add
-a file under `packs/core/dilemmas/` and run `pnpm validate`. if you've played NationStates and
-have opinions about what a successor should do, open an issue
+a file under `packs/core/dilemmas/` and run `pnpm validate`. what you add to the pack is CC BY-SA 4.0
+like the rest of it, and please nothing copied from NationStates. if you've played NationStates
+and have opinions about what a successor should do, open an issue
 
-## license
+## legal
 
-MIT. see [LICENSE](LICENSE)
+the code and the technical docs are MIT. the core pack (the dilemmas and everything else in
+`packs/core`) is CC BY-SA 4.0, so you can remix it and share it as long as you credit it and keep
+the same license. Claudetopia, the trailer, the music and the screenshots are mine and not under
+either. it comes with no warranty, and what you send to the AI is between you and Anthropic
 
-not affiliated with NationStates or Max Barry
+- [terms](TERMS.md): the no warranty and liability stuff, and what's on you when the AI is on
+- [privacy](PRIVACY.md): what stays on your computer and what goes to Anthropic when
+  you switch the AI on
+- [notice](NOTICE.md): what the AI is, and why what it writes is fiction
+- [license scope](LICENSE-SCOPE.md): which license covers what, and how contributions are licensed
+- [copyright](COPYRIGHT.md) and [third-party notices](THIRD-PARTY-NOTICES.md)
+- [security](SECURITY.md): what's protected, what isn't, and how to report something privately
+
+not affiliated with NationStates, Max Barry or Anthropic
