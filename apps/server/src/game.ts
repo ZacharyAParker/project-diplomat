@@ -932,8 +932,11 @@ export class Game {
         this.dockets.cancel(id)
         const from = n.state.timeline.length
         for (let i = 0; i < (days as number); i++) {
+          const weekDay = n.state.day
           n.state = endDay(n.state, this.content)
           n.history = withDayEnd(n.history, n.state)
+          // Skipped weeks are played by the rules alone, but the world still writes them down.
+          if (n.state.world && weekDay % 7 === 0) await this.writeWorldWeek(n, weekDay, undefined)
         }
         entries.push(...n.state.timeline.slice(from))
         n.gov = { ...n.gov, dockets: {}, lastWorldDay: Math.max(n.gov.lastWorldDay, n.state.day - 1) }

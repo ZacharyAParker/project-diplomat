@@ -1,6 +1,11 @@
 # Disputes, on paper
 
-Not built. This is the first draft of how nations come into conflict, written down so it can be
+Not built, and for single player now replaced: 0.7 built the world, wars, claims and the Assembly
+of Nations differently, in [world.md](world.md). This note stays as the first idea, and as the
+starting point for conflict between players in multiplayer worlds, where postures and bounded
+stakes matter more.
+
+This is the first draft of how nations come into conflict, written down so it can be
 played by hand before any of it turns into code. It's the part of the design I trust least, so the
 point of this page is to be specific enough to be proven wrong.
 

@@ -1,6 +1,6 @@
 # The world: other nations, the Assembly of Nations, war
 
-Status: being built for 0.7. This replaces the dispute track in [disputes.md](disputes.md) for
+Status: built in 0.7. This replaces the dispute track in [disputes.md](disputes.md) for
 single player; that note stays as a record of the first idea.
 
 ## What the player asked for

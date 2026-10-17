@@ -1,6 +1,6 @@
 # Privacy policy
 
-Effective October 17, 2026. Applies to Project Diplomat 0.6.2 as distributed in this repository.
+Effective October 17, 2026. Applies to Project Diplomat 0.7.0 as distributed in this repository.
 
 ## The short version
 
@@ -44,6 +44,10 @@ the Claude Code you installed. A prompt is made of what the body or task needs, 
 - text you wrote: Founder's Words, replies to letters, things you typed when founding the nation
 - with **My own Claude Code**, the documents in that nation's Archive the body chooses to read
 
+The other nations, played once a week, receive the same kind of brief about your nation, plus the
+state of the world beyond its borders (the other nations, wars, pacts, claims and the Assembly's
+business).
+
 The Director receives what you type to it and what it reads through the game's tools, which can
 be anything in that nation's save, Archive and out-of-character log.
 
@@ -80,4 +84,4 @@ privately as described in [SECURITY.md](SECURITY.md), and don't post API keys, s
 private material in public issues.
 
 ---
-Project Diplomat v0.6.2 · © 2026 Zachary Parker
+Project Diplomat v0.7.0 · © 2026 Zachary Parker

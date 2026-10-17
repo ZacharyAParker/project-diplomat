@@ -166,24 +166,32 @@ regime, some policies reset, a scar on the timeline, and play continues.
 
 ### 6.2 The sovereignty guarantee
 
-Players love a nation nobody can ruin, and I want conflict. This is how both hold:
+Players love a nation nobody can ruin, and I want conflict. In single player (0.7) the line is
+drawn here:
 
-- A dispute can cost you a treaty, a project share, standing, or a temporary indicator dip.
-- It can never delete a nation, erase its timeline, remove its owner or impose a permanent penalty.
-- Each nation sets a **posture**: Neutral, Engaged or Contender. Neutral nations can't be targeted
-  and can't target. Higher postures unlock both the risks and the rewards.
-- No accumulating military power. A year-old nation is more storied than a new one, not stronger.
+- **The player's nation is never destroyed, annexed, deleted or locked out of play.** Its
+  timeline is never erased.
+- **Everything short of that is a real stake.** A war can cost a borderland for good, a lasting
+  hit to the economy, reparations and the government's survival. Alliances drag you into wars.
+- **AI nations can be conquered**, by the player or by each other, but not often: only a beaten
+  nation that stands alone, and only one time in four between AI nations.
+- War is still rare and has to be provoked: a hostile neighbour, a festering claim, a temper for
+  it and an edge in strength. [design/world.md](design/world.md) has the rules.
 
-**This is the part I trust least.** NationStates 2 shows that people asking for conflict is not the
-same as people wanting it. Disputes get prototyped on paper and in single-player before any
-multiplayer architecture depends on them.
+**This is still the part I trust least.** NationStates 2 shows that people asking for conflict is
+not the same as people wanting it. For multiplayer worlds, where the other nations are other
+people, the posture idea (Neutral, Engaged, Contender) from [design/disputes.md](design/disputes.md)
+comes back before any of this is turned on between players.
 
 ### 6.3 The single-player world
 
-A solo world is one region of twenty to forty scripted nations with distinct temperaments. A
-rules-based planner scores the legal moves for each one. If an AI provider is connected, the model
-can pick among moves the planner has already scored as legal, and it words the diplomacy. Without
-AI, the planner picks and templates do the talking. NPC nations follow the same rules as the player.
+Built in 0.7: twenty nations with distinct temperaments, five on the player's border. A rules-based
+planner scores the legal moves for each one every week. With the AI on, a model picks among moves
+the planner has already scored as legal and writes the note: one shared session for the nations
+that do not matter to the player, and a session of its own for each one that does (an ally, an
+enemy, a nation at war with the player or pressing a claim on them). Without AI, the planner
+picks and the planner's reason is the note. They sit together in the **Assembly of Nations**.
+See [design/world.md](design/world.md).
 
 ---
 

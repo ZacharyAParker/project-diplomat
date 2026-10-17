@@ -588,7 +588,7 @@ export class FakeServer implements Api {
       backend === 'none'
         ? { backend, ok: true, detail: 'AI is off', models }
         : { backend, ok: backend !== 'anthropic' || apiKeySet, detail: backend === 'anthropic' ? 'Claude API key ending 4f2a' : 'claude 2.3.1, signed in', models }
-    return json({ version: '0.6.2', pack: { id: content.pack.id, name: content.pack.name, version: content.pack.version }, ai })
+    return json({ version: '0.7.0', pack: { id: content.pack.id, name: content.pack.name, version: content.pack.version }, ai })
   }
 
   async settings(): Promise<AiSettings> {

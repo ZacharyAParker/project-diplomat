@@ -1,5 +1,38 @@
 # Changelog
 
+## 0.7.0
+
+The world: twenty nations, the Assembly of Nations, and war.
+
+- Twenty other nations: the five on the border and fifteen further off, each with a leader, a form
+  of government, a temperament, an army and an economy. Once a week each makes a move from those
+  the rules allow: courting another nation, a pact, a claim on a borderland, aid, an appeal, war,
+  or peace.
+- With the AI on, the nations that matter to the player (close friends, enemies, allies, anyone
+  at war with them or claiming their land) each keep their own session and remember their
+  grudges. The rest share one, asked only when one of them has a real choice. Both run on the
+  standard tier (Sonnet) by default; Settings can put the shared one on the bulk tier (Haiku).
+  A model can only choose a legal move, and writes the note that goes with it.
+- War. Each side's strength, its allies, its war-weariness and some luck move the front week by
+  week, until one side wins or both are exhausted. The player's army is their economy, their
+  administration and the government's legitimacy, and more when mobilised. Defeat cedes a
+  borderland for good, with lasting costs and reparations; victory brings reparations, and a
+  beaten AI nation that stands alone may be annexed. The player's own nation can be beaten but
+  never annexed or destroyed. Between AI nations, annexation is rare.
+- The Assembly of Nations sits every two weeks: ceasefires, sanctions, war crimes tribunals,
+  arbitration of border claims, aid funds and routine business. The player votes, or leaves.
+- Foreign matters come to the desk as single cards, decided directly with the Foreign Ministry's
+  advice: border claims, appeals for aid, an ally calling the player into its war, an invasion,
+  war crimes reports (and accusations against the player's own forces), offered pacts and terms,
+  victory, and the Assembly's votes. A matter nobody decides lapses after a week. In found mode
+  the AI executive takes the Foreign Ministry's advice.
+- A declaration of war goes to the legislature first when the constitution gives it the vote, and
+  the division goes into Hansard.
+- A new World page; the Nation page keeps to the border; the desk says when a matter is waiting.
+  A new `world` series in the Archive holds each week abroad and the Assembly's sittings, and the
+  papers report what happens beyond the borders. The Director has a `world_overview` tool.
+- Saves are version 3. Older saves load and gain a world the next time the day ends.
+
 ## 0.6.2
 
 Housekeeping, and the trailer gets a real score.

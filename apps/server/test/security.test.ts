@@ -41,7 +41,7 @@ test('every reply carries the security headers, and the page its policy', async 
   assert.equal(api.headers['x-content-type-options'], 'nosniff')
   assert.equal(api.headers['x-frame-options'], 'DENY')
   assert.match(String(api.headers['content-security-policy']), /default-src 'none'/)
-  assert.equal(api.json.version, '0.6.2')
+  assert.equal(api.json.version, '0.7.0')
   assert.equal(api.json.pack.id, 'core')
   assert.equal(api.json.ai.backend, 'none')
   const page = await h.get('/')

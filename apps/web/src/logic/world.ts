@@ -121,6 +121,11 @@ export function nationRows(state: GameState, content: Content): NationRow[] {
         status.push(together ? 'Fighting beside you' : 'At war with you')
       } else status.push('At war')
     }
+    for (const c of w.claims) {
+      if (c.settled) continue
+      if (c.by === def.id && c.against === HOME) status.push(`Claims ${c.region} from you${c.referred ? ', before the Assembly' : ''}`)
+      if (c.by === HOME && c.against === def.id) status.push(`You claim ${c.region} from it`)
+    }
     if (w.assembly.sanctions.some((s) => s.target === def.id)) status.push('Under sanctions')
     const pactWhy = forbidden(state, content, { pact: def.id })
     const warWhy = forbidden(state, content, { war: def.id })

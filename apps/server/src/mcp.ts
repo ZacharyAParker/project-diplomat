@@ -11,7 +11,7 @@ import { request as httpRequest } from 'node:http'
 import { join, resolve } from 'node:path'
 
 const ROOT = resolve(import.meta.dirname, '../../..')
-const VERSION = '0.6.2'
+const VERSION = '0.7.0'
 const PROTOCOLS = ['2025-06-18', '2025-03-26', '2024-11-05']
 const CALL_TIMEOUT = 45 * 60_000
 

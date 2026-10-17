@@ -455,13 +455,15 @@ function applyMove(state: GameState, content: Content, id: string, move: Move, n
       me.strength = clamp(me.strength + 4)
       me.wealth = clamp(me.wealth - 2)
       remember(state, id, note ?? 'Rearmed.')
-      log(state, week, `${name} spends on its army.`, [id])
+      // Only the papers near home notice an army growing: a neighbour, or a nation that matters.
+      if (defOf(content, id)?.near || w.important.includes(id)) log(state, week, `${name} spends on its army.`, [id], true)
       return
     case 'court':
       if (!target) return
       shift(state, id, target, target === HOME ? 4 : 8, `${name} made friendly overtures.`, week.changes)
       remember(state, id, note ?? `Courted ${them}.`)
-      log(state, week, `${name} courts ${them}.${target === HOME ? said : ''}`, [id, target])
+      // Courtesies between other nations are not news; one paid to the player is.
+      if (target === HOME) log(state, week, `${name} courts ${them}.${said}`, [id, target])
       return
     case 'pact':
       if (!target) return

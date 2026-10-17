@@ -25,7 +25,7 @@ liked and always wished went further. same heart (satirical dilemmas, no right a
 NationStates nation whose whole government was played by Claude agents. that whole thing lives
 in here now, and nothing runs through NationStates anymore
 
-current release is **0.6.2**. [patch notes](CHANGELOG.md) · [terms](TERMS.md) · [privacy](PRIVACY.md) ·
+current release is **0.7.0**. [patch notes](CHANGELOG.md) · [terms](TERMS.md) · [privacy](PRIVACY.md) ·
 [license](LICENSE-SCOPE.md) · [security](SECURITY.md). "Project Diplomat" is a codename till i settle on a
 real name
 
@@ -73,6 +73,25 @@ real name
 
 ![the director page: asking it out of character what parliament is gonna do with the measles petition](docs/screenshots/director.webp)
 
+**the world**
+
+- 20 other nations. 5 on your border, 15 further off, each with its own leader, temper, army and
+  economy. once a week they all make a move: court each other, sign pacts, claim land, send aid,
+  go to war
+- they remember. a nation that matters to you (an ally, an enemy, anyone at war with you or
+  claiming your land) gets its own Claude session and keeps its grudges week to week. the rest
+  share one
+- the **Assembly of Nations** sits every two weeks. ceasefires, sanctions, war crimes tribunals,
+  border arbitration, aid funds. you vote, or leave it if you'd rather not be bound
+- foreign matters come to you as one card, not a whole sitting: a border claim, an appeal for aid,
+  an ally calling you into their war, an invasion, war crimes, terms offered. the foreign ministry
+  tells you what it thinks
+- war is real. pick your allies, mobilise, sue for peace. lose and you cede land for good and pay
+  for it. win and you can take reparations, or the whole country if it stands alone. your own
+  nation can be beaten but never wiped out
+
+![the World page: a vote in the Assembly of Nations waiting with the foreign ministry's advice, and the army](docs/screenshots/world.webp)
+
 **the world and the record**
 
 - after each of your days the world writes one back. weather, events, three newspapers and a
@@ -93,12 +112,12 @@ real name
   installed and signed in to
 - each body keeps its own Claude Code session, so the court actually remembers its own earlier
   rulings. they're sealed into their own archive and can't read anything outside it
-- elections when your form holds them, a crisis now and then, five neighbours, treaties, issues
+- elections when your form holds them, a crisis now and then, treaties, issues
   that settle who the nation even is (the animal, the motto, the faith), a sandbox and an admin
   page
 - the core pack has 120 dilemmas and four crises
 
-not in yet: regional projects, disputes and other players
+not in yet: regional projects, a map, and other players
 
 ## run it
 

@@ -213,9 +213,11 @@ play one from a different pack or pack version is for the caller to decide.
 
 ## Other countries
 
-Five neighbours, defined in `packs/core/neighbours.yaml`. They are not simulated in full: each is a
-name, a leader, what it is short of, what it has to spare, and a **standing** with the nation from
--100 to 100.
+Twenty nations: the five on the border in `packs/core/neighbours.yaml`, fifteen further off in
+`nations.yaml`. Each is a name, a leader, a form of government, what it is short of, what it has to
+spare, a temperament, a strength and a wealth, and a **standing** with the nation from -100 to 100.
+What they do between the player's days (wars, pacts, claims, the Assembly of Nations, foreign
+matters) is in [world.md](world.md); what follows is how they touch the nation's own decisions.
 
 - **Opinions.** Each neighbour notices one or two kinds of decision (option tags), whoever the
   decision was about. Velsa likes `green` and dislikes `surveillance`; Ardune likes `pro_labour`.
@@ -242,5 +244,5 @@ nation, because it is only ending days without deciding anything.
 
 ## Not built yet
 
-Regional projects, offices, disputes and the census of comic rankings. Disputes are sketched in
-[disputes.md](disputes.md) and still need testing on paper.
+Regional projects and offices. Conflict between nations is built for single player (see
+[world.md](world.md)); between players it is still only sketched, in [disputes.md](disputes.md).
