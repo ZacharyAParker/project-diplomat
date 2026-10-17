@@ -103,15 +103,30 @@
   --founder-field: #fbf8ee;
   --founder-field-ink: #131d30;
 
-  /* The world map: a pale sea, parchment land, green for friends and red for foes. */
-  --map-sea: #b9d3df;
-  --map-land: #ece8d8;
-  --map-border: #6e6b5c;
-  --map-home: #d8ad3a;
+  /* The world map, as an atlas: pale water deepening offshore, soft land colours, sepia ink. */
+  --map-sea: #b6d2e2;
+  --map-deep: #8fb6d0;
+  --map-shallow: #d3e6ef;
+  --map-coast: #4f7488;
+  --map-land: #efe8d2;
+  --map-border: #6b5442;
+  --map-band: rgb(255 255 255 / 0.55);
+  --map-ink: #3a2c20;
+  --map-halo: rgb(252 249 238 / 0.85);
+  --map-frame: #f3ecd8;
+  --map-peak: #e9dcc0;
+  --map-peak-line: #7d6347;
+  --map-home: #e2b54c;
   --map-friend: #3f8f45;
   --map-foe: #b23a2a;
   --map-front: #c0291b;
   --map-ally: #8a6a12;
+  --atlas-1: #efd9a3;
+  --atlas-2: #cfe1b2;
+  --atlas-3: #f2c8a6;
+  --atlas-4: #d8c6e2;
+  --atlas-5: #c3d9e8;
+  --atlas-6: #ecc4c4;
 }
 
 [data-theme='dark'] {
@@ -149,14 +164,29 @@
   --gov-accent: #e6b952;
   --gov-thead: #22345a;
 
-  --map-sea: #1d2c33;
+  --map-sea: #1b2b35;
+  --map-deep: #122029;
+  --map-shallow: #27404d;
+  --map-coast: #7fa3b6;
   --map-land: #3a382f;
-  --map-border: #8b8674;
+  --map-border: #c2ab90;
+  --map-band: rgb(0 0 0 / 0.35);
+  --map-ink: #efe6d2;
+  --map-halo: rgb(20 20 16 / 0.75);
+  --map-frame: #23241e;
+  --map-peak: #59503f;
+  --map-peak-line: #c2ab90;
   --map-home: #b78f2c;
   --map-friend: #5aa860;
   --map-foe: #c95443;
   --map-front: #ef5a45;
   --map-ally: #e6b952;
+  --atlas-1: #5b5034;
+  --atlas-2: #44543a;
+  --atlas-3: #5e4436;
+  --atlas-4: #4c4258;
+  --atlas-5: #3a4f5c;
+  --atlas-6: #5a3d3d;
   --gov-thead-ink: #eef1f7;
   --gov-none: #5a574d;
   --gov-field: #121210;

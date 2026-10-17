@@ -180,6 +180,7 @@ export const neighbour = z.strictObject({
   dislikes: z.array(id).default([]),
   pleased: text,
   displeased: text,
+  capital: text.optional(),
   near: z.boolean().default(true),
   borders: z.array(id).default([]),
   temperament: z
@@ -225,6 +226,10 @@ export const world = z.strictObject({
     .strictObject({
       width: z.number().positive(),
       height: z.number().positive(),
+      spacing: z.number().min(8).max(40).optional(),
+      seed: z.number().int().optional(),
+      warp: z.number().min(0).max(120).optional(),
+      margin: z.number().min(0).max(100).optional(),
       sites: z.record(z.string(), point),
       sea: z.array(point).default([]),
     })

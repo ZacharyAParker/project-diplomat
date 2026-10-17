@@ -205,14 +205,18 @@ The player's nation is never destroyed or annexed. Everything else is on the tab
 
 ## The map
 
-The World page opens with a map of all twenty-one nations. It is the Voronoi diagram of a point
-per nation (`map:` in `packs/core/world.yaml`, drawn by `packages/engine/src/map.ts`): each nation
-is the land nearer its point than any other, with a ring of sea round the coast and a few
-straits. The borders the rules use are the borders the map draws: `scripts/map-fit.ts` writes
-who touches whom back into the pack, and the validator refuses a pack whose map and borders
-disagree. Nations are shaded by how they stand with the player, the player's own in gold, its
-allies outlined, every front of every war in red, annexed nations hatched. Picking a nation
-opens its row below.
+The World page opens with a map of all twenty-one nations, drawn like an atlas. Each nation owns
+a point (`map:` in `packs/core/world.yaml`); the land is a fine jittered grid of small cells, and
+each cell belongs to the nation nearest it once the grid has been warped by noise, so borders and
+coasts wander the way real ones do (`packages/engine/src/map.ts`). The outer coast is carved by
+broader noise into capes, bays and the odd island, and a few seas are placed by hand. The borders
+the rules use are the borders the map draws: `scripts/map-fit.ts` writes who touches whom back
+into the pack, and the validator refuses a pack whose map and borders disagree.
+
+It is drawn with water lines along the coast, soft atlas colours that never match across a
+border, dashed borders, mountain ranges, every capital, a compass rose and a scale. A second view
+shades each nation by how it stands with the player. Fronts of every war are marked in red,
+allies starred, annexed nations hatched. Picking a nation opens its row below.
 
 ## Declaring war, and changing the world by hand
 

@@ -4,6 +4,7 @@
 
 - id: ytterholm
   name: Ytterholm
+  capital: Haldvik
   demonym: Ytterholmer
   leader: Lawspeaker Sigrun Hald
   description: >-
@@ -16,7 +17,7 @@
   likes: [green]
   dislikes: [hawkish]
   form: republic
-  borders: [eskerland]
+  borders: [eskerland, kessmark]
   temperament: { ambition: 15, aggression: 20, loyalty: 45, charity: 40 }
   strength: 35
   wealth: 50
@@ -25,6 +26,7 @@
 
 - id: kessmark
   name: Kessmark
+  capital: Veyburg
   demonym: Kessmarker
   leader: General Ottokar Vey
   description: >-
@@ -37,7 +39,7 @@
   likes: [hawkish, surveillance]
   dislikes: [privacy, dovish]
   form: junta
-  borders: [eskerland, vrana]
+  borders: [eskerland, vrana, ytterholm]
   temperament: { ambition: 80, aggression: 80, loyalty: 30, charity: 10 }
   strength: 66
   wealth: 32
@@ -46,6 +48,7 @@
 
 - id: vrana
   name: Vrana
+  capital: Mrakov
   demonym: Vranish
   leader: First Secretary Ilya Mrak
   description: >-
@@ -58,7 +61,7 @@
   likes: [surveillance, anti_labour]
   dislikes: [privacy, permissive]
   form: one-party state
-  borders: [gorsk, kessmark, tarvos]
+  borders: [gorsk, kessmark]
   temperament: { ambition: 70, aggression: 60, loyalty: 60, charity: 15 }
   strength: 60
   wealth: 40
@@ -67,6 +70,7 @@
 
 - id: gorsk
   name: Gorsk
+  capital: Pellgrad
   demonym: Gorskan
   leader: Colonel Dragan Pell
   description: >-
@@ -88,6 +92,7 @@
 
 - id: brennholt
   name: Brennholt
+  capital: Mollstadt
   demonym: Brennholter
   leader: Federal Chancellor Anke Moll
   description: >-
@@ -109,6 +114,7 @@
 
 - id: tarvos
   name: Tarvos
+  capital: Salthaven
   demonym: Tarvosi
   leader: The High Synod, by its Speaker Bartholomew Cree
   description: >-
@@ -121,7 +127,7 @@
   likes: [paternalist]
   dislikes: [permissive, lenient]
   form: theocracy
-  borders: [gorsk, vrana]
+  borders: [gorsk]
   temperament: { ambition: 65, aggression: 50, loyalty: 55, charity: 50 }
   strength: 50
   wealth: 45
@@ -130,6 +136,7 @@
 
 - id: qasrin
   name: Qasrin
+  capital: Dar Qasir
   demonym: Qasrini
   leader: Sultan Idris al-Maqam
   description: >-
@@ -151,6 +158,7 @@
 
 - id: saint-ivo
   name: Saint Ivo
+  capital: Saint Ivo
   demonym: Ivonian
   leader: Prince-Bishop Clement IX
   description: >-
@@ -163,7 +171,7 @@
   likes: [spending, dovish]
   dislikes: [hawkish]
   form: principality
-  borders: [brennholt, qasrin]
+  borders: [brennholt, pellucia, qasrin]
   temperament: { ambition: 5, aggression: 0, loyalty: 60, charity: 95 }
   strength: 8
   wealth: 55
@@ -172,6 +180,7 @@
 
 - id: pellucia
   name: Pellucia
+  capital: Vitrelle
   demonym: Pellucian
   leader: Speaker Mireille Aubade
   description: >-
@@ -184,7 +193,7 @@
   likes: [privacy, spending]
   dislikes: [surveillance]
   form: council republic
-  borders: [brennholt, velsa]
+  borders: [brennholt, saint-ivo, velsa]
   temperament: { ambition: 20, aggression: 10, loyalty: 60, charity: 70 }
   strength: 30
   wealth: 60
@@ -193,6 +202,7 @@
 
 - id: amaranth
   name: Amaranth
+  capital: Wrenfield
   demonym: Amaranthine
   leader: First Minister Tobias Wren
   description: >-
@@ -214,6 +224,7 @@
 
 - id: duvalle
   name: Duvalle
+  capital: Bellport
   demonym: Duvallois
   leader: President Laurent Ferrand
   description: >-
@@ -235,6 +246,7 @@
 
 - id: cassel-mor
   name: Cassel-Mor
+  capital: Castlemoor
   demonym: Casselan
   leader: Queen Ysolde II
   description: >-
@@ -256,6 +268,7 @@
 
 - id: ostravel
   name: Ostravel
+  capital: Ostra
   demonym: Ostravelian
   leader: Doge Pietro Malvasi
   description: >-
@@ -277,6 +290,7 @@
 
 - id: skerrin
   name: Skerrin
+  capital: Skerholm
   demonym: Skerrish
   leader: Chief Fisherman Rowan Tully
   description: >-
@@ -298,6 +312,7 @@
 
 - id: lunes
   name: Lunes
+  capital: Lune-la-Rade
   demonym: Lunesian
   leader: Princess Regent Céleste
   description: >-

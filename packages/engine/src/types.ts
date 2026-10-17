@@ -214,6 +214,8 @@ export interface NeighbourDef {
   wealth: number
   // What kind of state it is, in a few words, for the papers.
   form: string
+  // Its capital, for the map.
+  capital?: string
 }
 
 export interface Temperament {
@@ -275,6 +277,12 @@ export interface WorldContent {
 export interface WorldMapDef {
   width: number
   height: number
+  // How the land is drawn: the grid's spacing, the seed for its noise, how far the noise moves
+  // borders and coasts, and how wide the rim of open sea round the frame is.
+  spacing?: number
+  seed?: number
+  warp?: number
+  margin?: number
   // A point for every nation, the player's as "home".
   sites: Record<string, [number, number]>
   // Points of open sea: the coast all round, and the straits between nations that do not border.
