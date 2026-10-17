@@ -2,8 +2,12 @@
 // and every nation as a row. Pure, so it can be tested without the page.
 
 import {
+  ASSEMBLY_MOTIONS,
+  COUNCIL_MOTIONS,
   HOME,
+  PROPOSAL_NEEDS,
   activeWars,
+  councilMembers,
   adviseMatter,
   allies,
   forbidden,
@@ -16,6 +20,8 @@ import {
   type Content,
   type GameState,
   type MatterCard,
+  type Motion,
+  type MotionKind,
   type War,
 } from '@diplomat/engine'
 import { temperamentWords } from '@diplomat/government'
@@ -151,34 +157,134 @@ export function nationRows(state: GameState, content: Content): NationRow[] {
   })
 }
 
+export interface PastMotion {
+  id: string
+  title: string
+  passed: boolean
+  ayes: number
+  noes: number
+  ours?: string
+  mine: boolean
+  vetoed: string[]
+}
+
 export interface AssemblyView {
   member: boolean
   next: number
   motion?: string
-  past: { id: string; title: string; passed: boolean; ayes: number; noes: number; ours?: string }[]
+  // The player's own motion, waiting or on the order paper, and its wording.
+  mine?: { title: string; text?: string; when: string }
+  past: PastMotion[]
   sanctions: string[]
+}
+
+const pastOf = (state: GameState, content: Content, list: Motion[]): PastMotion[] => {
+  const count = (votes: Record<string, string> | undefined, v: string) => Object.values(votes ?? {}).filter((x) => x === v).length
+  return [...list]
+    .reverse()
+    .slice(0, 6)
+    .map((m) => ({
+      id: m.id,
+      title: m.title.charAt(0).toUpperCase() + m.title.slice(1),
+      passed: Boolean(m.passed),
+      ayes: count(m.votes, 'aye'),
+      noes: count(m.votes, 'no'),
+      ...(m.votes?.[HOME] ? { ours: m.votes[HOME] } : {}),
+      mine: m.by === HOME,
+      vetoed: (m.vetoed ?? []).map((id) => nameOf(state, content, id)),
+    }))
+}
+
+const mineOf = (motion: Motion | null, queue: Motion[], next: number): AssemblyView['mine'] => {
+  const m = motion?.by === HOME ? motion : queue.find((x) => x.by === HOME)
+  if (!m) return undefined
+  return { title: m.title, ...(m.text ? { text: m.text } : {}), when: m === motion ? `on day ${next}` : 'when there is room on the order paper' }
 }
 
 export function assemblyView(state: GameState, content: Content): AssemblyView | null {
   const a = state.world?.assembly
   if (!a) return null
-  const count = (votes: Record<string, string> | undefined, v: string) => Object.values(votes ?? {}).filter((x) => x === v).length
+  const mine = mineOf(a.motion, a.queue ?? [], a.next)
   return {
     member: a.members.includes(HOME),
     next: a.next,
     ...(a.motion ? { motion: a.motion.title } : {}),
-    past: [...a.past]
-      .reverse()
-      .slice(0, 6)
-      .map((m) => ({
-        id: m.id,
-        title: m.title.charAt(0).toUpperCase() + m.title.slice(1),
-        passed: Boolean(m.passed),
-        ayes: count(m.votes, 'aye'),
-        noes: count(m.votes, 'no'),
-        ...(m.votes?.[HOME] ? { ours: m.votes[HOME] } : {}),
-      })),
-    sanctions: a.sanctions.map((s) => nameOf(state, content, s.target)),
+    ...(mine ? { mine } : {}),
+    past: pastOf(state, content, a.past),
+    sanctions: a.sanctions.map((s) => `${nameOf(state, content, s.target)}${s.hard ? ' (the Council’s)' : s.resource ? ` (an embargo on ${s.resource})` : ''}`),
+  }
+}
+
+export interface CouncilView {
+  seats: { id: string; name: string; permanent: boolean; until?: number; you: boolean }[]
+  member: boolean
+  permanent: boolean
+  standing: boolean
+  election: number
+  next: number
+  motion?: string
+  mine?: { title: string; text?: string; when: string }
+  past: PastMotion[]
+}
+
+export function councilView(state: GameState, content: Content): CouncilView | null {
+  const c = state.world?.council
+  if (!c) return null
+  const sitting = new Set(councilMembers(state))
+  const name = (id: string) => nameOf(state, content, id)
+  const mine = mineOf(c.motion, c.queue, c.next)
+  return {
+    seats: [
+      ...c.permanent.filter((id) => sitting.has(id)).map((id) => ({ id, name: name(id), permanent: true, you: id === HOME })),
+      ...c.elected.filter((e) => sitting.has(e.id)).map((e) => ({ id: e.id, name: name(e.id), permanent: false, until: e.until, you: e.id === HOME })),
+    ],
+    member: sitting.has(HOME),
+    permanent: c.permanent.includes(HOME),
+    standing: c.candidates.includes(HOME),
+    election: c.election,
+    next: c.next,
+    ...(c.motion ? { motion: c.motion.title } : {}),
+    ...(mine ? { mine } : {}),
+    past: pastOf(state, content, c.past),
+  }
+}
+
+// What the player may propose to a body, and what each kind needs naming.
+export interface ProposalChoices {
+  kinds: { kind: MotionKind; label: string; needs: (typeof PROPOSAL_NEEDS)[MotionKind] }[]
+  nations: { id: string; name: string; member: boolean }[]
+  wars: { id: string; name: string }[]
+  claims: { id: string; name: string }[]
+  resources: { id: string; name: string }[]
+}
+
+export const KIND_LABELS: Record<MotionKind, string> = {
+  ceasefire: 'A call for a ceasefire',
+  sanctions: 'Sanctions',
+  tribunal: 'A war crimes tribunal',
+  arbitration: 'Arbitration of a claim',
+  aid: 'A humanitarian fund',
+  condemnation: 'A condemnation',
+  embargo: 'An embargo',
+  admit: 'Admit a nation',
+  expel: 'Expel a member',
+  routine: 'Routine business',
+  'binding-ceasefire': 'A binding ceasefire',
+  'hard-sanctions': 'Hard sanctions',
+  peacekeepers: 'Peacekeepers',
+  force: 'Authorise force',
+}
+
+export function proposalChoices(state: GameState, content: Content, body: 'assembly' | 'council'): ProposalChoices {
+  const w = state.world
+  const kinds = (body === 'council' ? COUNCIL_MOTIONS : ASSEMBLY_MOTIONS.filter((k) => k !== 'routine')).map((kind) => ({ kind, label: KIND_LABELS[kind], needs: PROPOSAL_NEEDS[kind] }))
+  const n = (id: string) => nameOf(state, content, id)
+  return {
+    kinds,
+    nations: content.neighbours.filter((x) => w?.nations[x.id]?.free !== false).map((x) => ({ id: x.id, name: x.name, member: w?.assembly.members.includes(x.id) ?? false })),
+    wars: activeWars(state).map((war) => ({ id: war.id, name: `${war.attackers.map(n).join(' and ')} against ${war.defenders.map(n).join(' and ')}` })),
+    claims: (w?.claims ?? []).filter((c) => !c.settled).map((c) => ({ id: c.id, name: `${n(c.by)}'s claim to ${c.region} from ${n(c.against)}` })),
+    resources: content.resources.map((r) => ({ id: r.id, name: r.name })),
   }
 }
 

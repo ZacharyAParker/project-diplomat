@@ -32,6 +32,13 @@ The world: twenty nations, the Assembly of Nations, and war.
   war crimes reports (and accusations against the player's own forces), offered pacts and terms,
   victory, and the Assembly's votes. A matter nobody decides lapses after a week. In found mode
   the AI executive takes the Foreign Ministry's advice.
+- The Security Council: five permanent members with a veto and four elected by the Assembly for
+  six months. Its resolutions bind: binding ceasefires, hard sanctions, peacekeepers, and force
+  authorised against an aggressor, with a coalition the player may join. The player can stand
+  for a seat.
+- The player can put motions to the Assembly (now also condemnations, embargoes, admitting and
+  expelling members) and, with a seat, resolutions to the Council, naming the kind and target
+  and giving its own wording if it likes. Friends lean its way.
 - A declaration of war goes to the legislature first when the constitution gives it the vote: the
   members sit on it as a motion, debate it (the AI plays them) and divide, into Hansard.
 - The Director's `cheat_world` tool and the Sandbox can start and end wars, set relations between

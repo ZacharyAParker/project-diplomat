@@ -131,6 +131,37 @@ and temperament. A simple majority of the votes cast carries.
 | Aid fund | the nation in need recovers; members pay a little in |
 | Routine | a line in the record and nothing else |
 
+## The Security Council
+
+Five permanent members, the strongest nations when the world began, each with a veto; and four
+elected by the Assembly for six months, two seats at a time every three months. Each member of
+the Assembly votes for the candidates it likes best; the player stands only by putting itself
+forward from the World page, and is elected if enough members like it.
+
+The Council sits a week after each sitting of the Assembly, and only when there is something
+worth its time: a war that has gone on, war crimes, an aggressor already under sanctions. Its
+resolutions bind:
+
+| Resolution | If it carries |
+|---|---|
+| A binding ceasefire | the war ends there and then |
+| Hard sanctions | twice as deep as the Assembly's, for twelve weeks; members' treaties with the target are suspended |
+| Peacekeepers | the front freezes and both sides tire faster |
+| Force authorised | Council members who dislike the aggressor join the war against it; the player is asked to join the coalition |
+
+Five votes carry a resolution, and any permanent member's vote against it is a veto. In
+simulation the permanent five veto about half of what comes before them.
+
+## Proposals
+
+The player may put a motion down: to the Assembly (a ceasefire, sanctions, a tribunal,
+arbitration of a claim, an aid fund, a condemnation, an embargo on one resource, admitting a
+nation, expelling a member, which takes two thirds), or, while it holds a Council seat, a
+resolution to the Council. It names its kind and target, and may give its own wording, which is
+read out, kept in the record and shown to the other nations' AI. One of the player's motions
+waits per body, taken at the next sitting with room. Votes stay with the rules, but nations that
+like the player lean its way and nations that dislike it lean the other.
+
 ## Foreign matters
 
 Light decisions: one card, two to four options, decided directly by the executive (or the AI

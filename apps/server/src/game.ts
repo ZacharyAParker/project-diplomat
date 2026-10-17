@@ -16,6 +16,9 @@ import {
   openMatters,
   worldAct,
   worldCheat,
+  ASSEMBLY_MOTIONS,
+  COUNCIL_MOTIONS,
+  type Proposal,
   type WorldAction,
   type WorldChoices,
   availableOptions,
@@ -1196,7 +1199,7 @@ export class Game {
 
 // The one action a request may carry, checked field by field.
 function parseAction(raw: unknown): WorldAction {
-  if (typeof raw !== 'object' || raw === null || Array.isArray(raw)) throw new HttpError(400, 'Send the action as an object: { "pact": id }, { "war": id }, { "peace": warId }, { "assembly": "join" | "leave" } or { "mobilise": true | false }.')
+  if (typeof raw !== 'object' || raw === null || Array.isArray(raw)) throw new HttpError(400, 'Send the action as an object: { "pact": id }, { "war": id }, { "peace": warId }, { "assembly": "join" | "leave" }, { "mobilise": true | false }, { "propose": {...} } or { "council": "stand" }.')
   const a = raw as Record<string, unknown>
   const keys = Object.keys(a)
   if (keys.length !== 1) throw new HttpError(400, 'An action has exactly one field.')
@@ -1214,6 +1217,22 @@ function parseAction(raw: unknown): WorldAction {
   if ('mobilise' in a) {
     if (typeof a['mobilise'] !== 'boolean') throw new HttpError(400, 'mobilise must be true or false.')
     return { mobilise: a['mobilise'] }
+  }
+  if ('council' in a) {
+    if (a['council'] !== 'stand') throw new HttpError(400, 'council must be "stand".')
+    return { council: 'stand' }
+  }
+  if ('propose' in a) {
+    const p = a['propose']
+    if (typeof p !== 'object' || p === null || Array.isArray(p)) throw new HttpError(400, 'propose must be { body, kind, target?, war?, claim?, resource?, text? }.')
+    const v = p as Record<string, unknown>
+    if (v['body'] !== 'assembly' && v['body'] !== 'council') throw new HttpError(400, 'propose.body must be assembly or council.')
+    const kind = v['kind']
+    if (typeof kind !== 'string' || ![...ASSEMBLY_MOTIONS, ...COUNCIL_MOTIONS].includes(kind as never)) throw new HttpError(400, 'That is not a kind of motion.')
+    const opt = (k: string) => (v[k] === undefined ? {} : { [k]: id(v[k]) })
+    // The wording is the player's own: one paragraph, no control characters, a fair length.
+    const text = v['text'] === undefined || v['text'] === '' ? undefined : prose(v['text'], 'The wording', 600, true)?.replace(/\s+/g, ' ').trim()
+    return { propose: { body: v['body'], kind: kind as Proposal['kind'], ...opt('target'), ...opt('war'), ...opt('claim'), ...opt('resource'), ...(text ? { text } : {}) } }
   }
   throw new HttpError(400, `${keys[0]} is not an action.`)
 }

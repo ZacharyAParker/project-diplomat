@@ -333,6 +333,56 @@ matters:
         headline: '{nation} will abstain on {motion}'
         lapse: true
 
+  - kind: council
+    title: 'The Security Council: {motion}'
+    description: >-
+      {nation} has a seat on the Security Council, and the Council sits in a week on {motion}.
+      Its resolutions bind. Five votes carry one, and any permanent member's vote against is a
+      veto.
+    options:
+      - id: aye
+        label: Vote for it
+        does: aye
+        effects: []
+        result: '{nation} will vote aye in the Council.'
+        headline: '{nation} will vote for {motion} in the Security Council'
+      - id: no
+        label: Vote against it
+        does: no
+        effects: []
+        result: '{nation} will vote no in the Council.'
+        headline: '{nation} will vote against {motion} in the Security Council'
+      - id: abstain
+        label: Abstain
+        does: abstain
+        effects: []
+        result: '{nation} will abstain in the Council.'
+        headline: '{nation} will abstain on {motion} in the Security Council'
+        lapse: true
+
+  - kind: coalition
+    title: 'The Security Council authorises force against {subject}'
+    description: >-
+      The Security Council has authorised force against {subject}, and a coalition of its
+      members is going to war. {nation} is asked to join. Nobody can make it.
+    options:
+      - id: join
+        label: Join the coalition
+        does: join
+        effects:
+          - { standing: -15, why: '{nation} joined the war against {subject}.' }
+          - { indicator: legitimacy, by: 2, why: 'Fighting under the Council''s banner.' }
+        result: '{nation} goes to war against {subject} beside the coalition.'
+        headline: '{nation} joins the coalition against {subject}'
+      - id: decline
+        label: Stay out
+        does: none
+        effects:
+          - { indicator: legitimacy, by: -1, why: 'Others answered the Council''s call and {nation} did not.' }
+        result: '{nation} wishes the coalition well and keeps its army at home.'
+        headline: '{nation} stays out of the coalition against {subject}'
+        lapse: true
+
 # Where everything lies, for the map: a point for each nation (the player's is home), and points
 # of open sea around the coast and between nations that do not border. The map is the Voronoi
 # diagram of these points (packages/engine/src/map.ts), and the validator checks that it is true

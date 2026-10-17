@@ -150,3 +150,20 @@ test('an absolute monarch declares war alone', async () => {
     await h.close()
   }
 })
+
+test('a motion is put down over HTTP with its wording cleaned, and a bad one is refused', async () => {
+  const h = await harness()
+  try {
+    const { id } = (await found(h)).json
+    const ok = await h.post(`/api/nations/${id}/world/act`, { action: { propose: { body: 'assembly', kind: 'aid', target: 'amaranth', text: '  Help   Amaranth,\nnow.  ' } } })
+    assert.equal(ok.status, 200)
+    const queued = h.running.game.store.open(id).state.world!.assembly.queue
+    assert.equal(queued.at(-1)!.text, 'Help Amaranth, now.')
+    assert.equal((await h.post(`/api/nations/${id}/world/act`, { action: { propose: { body: 'assembly', kind: 'nonsense' } } })).status, 400)
+    assert.equal((await h.post(`/api/nations/${id}/world/act`, { action: { propose: { body: 'council', kind: 'force', target: 'gorsk' } } })).status, 409, 'not on the Council')
+    assert.equal((await h.post(`/api/nations/${id}/world/act`, { action: { propose: { body: 'assembly', kind: 'aid', target: 'velsa', text: 'x'.repeat(700) } } })).status, 400)
+    assert.equal((await h.post(`/api/nations/${id}/world/act`, { action: { council: 'stand' } })).status, 200)
+  } finally {
+    await h.close()
+  }
+})

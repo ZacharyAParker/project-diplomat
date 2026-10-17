@@ -82,7 +82,11 @@ real name
   claiming your land) gets its own Claude session and keeps its grudges week to week. the rest
   share one
 - the **Assembly of Nations** sits every two weeks. ceasefires, sanctions, war crimes tribunals,
-  border arbitration, aid funds. you vote, or leave it if you'd rather not be bound
+  border arbitration, aid funds. you vote, put your own motions down (in your own words if you
+  want), or leave it if you'd rather not be bound
+- there's a **Security Council** too. five permanent members with vetoes, four elected seats you
+  can run for. it can end a war, sanction someone properly, send peacekeepers or authorise a
+  coalition against an aggressor. and yeah, the big five veto a lot
 - foreign matters come to you as one card, not a whole sitting: a border claim, an appeal for aid,
   an ally calling you into their war, an invasion, war crimes, terms offered. the foreign ministry
   tells you what it thinks

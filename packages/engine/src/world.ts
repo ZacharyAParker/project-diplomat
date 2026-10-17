@@ -10,6 +10,8 @@
 import { applyEffects, recordEntry, render, type GameState } from './engine.ts'
 import { pick, rngFor, type Rng } from './rng.ts'
 import {
+  ASSEMBLY_MOTIONS,
+  COUNCIL_MOTIONS,
   HOME,
   type Change,
   type Claim,
@@ -81,6 +83,38 @@ export type WorldAction =
   | { peace: string }
   | { assembly: 'join' | 'leave' }
   | { mobilise: boolean }
+  | { propose: Proposal }
+  | { council: 'stand' }
+
+// A motion the player puts down: to the Assembly, or to the Security Council while it holds a
+// seat. The kind and its target are what the rules act on; the wording is read out and kept.
+export interface Proposal {
+  body: 'assembly' | 'council'
+  kind: MotionKind
+  target?: string
+  war?: string
+  claim?: string
+  resource?: string
+  text?: string
+}
+
+// What each kind of proposal needs to name.
+export const PROPOSAL_NEEDS: Record<MotionKind, 'nation' | 'war' | 'claim' | 'nation+resource' | 'none'> = {
+  ceasefire: 'war',
+  sanctions: 'nation',
+  tribunal: 'nation',
+  arbitration: 'claim',
+  aid: 'nation',
+  condemnation: 'nation',
+  embargo: 'nation+resource',
+  admit: 'nation',
+  expel: 'nation',
+  routine: 'none',
+  'binding-ceasefire': 'war',
+  'hard-sanctions': 'nation',
+  peacekeepers: 'war',
+  force: 'nation',
+}
 
 const clamp = (n: number, lo = 0, hi = 100) => Math.round(Math.min(hi, Math.max(lo, n)) * 10) / 10
 const clampStanding = (n: number) => clamp(n, -100, 100)
@@ -102,7 +136,8 @@ export function ensureWorld(state: GameState, content: Content) {
       wars: [],
       pacts: [],
       claims: [],
-      assembly: { members: [HOME], next: nextSitting(state.day), motion: null, past: [], sanctions: [] },
+      assembly: { members: [HOME], next: nextSitting(state.day), motion: null, past: [], sanctions: [], queue: [] },
+      council: { permanent: [], elected: [], next: nextCouncil(state.day), motion: null, past: [], queue: [], election: nextSitting(state.day + 12 * WEEK), candidates: [] },
       matters: [],
       home: { mobilised: false, lost: 0, reparations: [] },
       important: [],
@@ -111,6 +146,9 @@ export function ensureWorld(state: GameState, content: Content) {
     }
   }
   const w = state.world
+  // Worlds made before the Security Council existed gain one.
+  if (!w.assembly.queue) w.assembly.queue = []
+  if (!w.council) w.council = { permanent: [], elected: [], next: nextCouncil(state.day), motion: null, past: [], queue: [], election: nextSitting(state.day + 12 * WEEK), candidates: [] }
   const added: string[] = []
   for (const n of content.neighbours) {
     if (w.nations[n.id]) continue
@@ -129,6 +167,30 @@ export function ensureWorld(state: GameState, content: Content) {
     }
   }
   if (added.length === content.neighbours.length) formFirstPacts(state, content)
+  if (!w.council.permanent.length) seatCouncil(state, content)
+}
+
+// The five strongest nations hold the permanent seats; the next four are the first elected,
+// two of them for three months and two for six, so that two seats come up at each election.
+function seatCouncil(state: GameState, content: Content) {
+  const w = state.world!
+  const ranked = content.neighbours.map((n) => n.id).filter((id) => w.nations[id]?.free).sort((a, b) => {
+    const score = (id: string) => w.nations[id]!.strength + w.nations[id]!.wealth / 2
+    return score(b) - score(a) || a.localeCompare(b)
+  })
+  w.council.permanent = ranked.slice(0, 5)
+  w.council.elected = ranked.slice(5, 9).map((id, i) => ({ id, until: state.day + (i < 2 ? 13 : 26) * WEEK }))
+}
+
+export function nextCouncil(day: number): number {
+  // Between the Assembly's sittings: a week after each.
+  return nextSitting(day) + WEEK
+}
+
+export function councilMembers(state: GameState): string[] {
+  const c = state.world?.council
+  if (!c) return []
+  return [...c.permanent, ...c.elected.map((e) => e.id)].filter((id) => isFree(state, id))
 }
 
 function initialRelation(state: GameState, a: NeighbourDef, b: NeighbourDef): number {
@@ -483,6 +545,7 @@ export function worldWeek(state: GameState, content: Content, choices?: WorldCho
   sanctionsWeek(state, content, week)
   drift(state, content)
   assemblyWeek(state, content, week, rng)
+  councilWeek(state, content, week)
   w.important = importantNations(state)
   if (week.lines.length || week.changes.length) {
     recordEntry(state, content, 'world', 'The world this week', week.changes, week.lines.join(' '))
@@ -946,14 +1009,16 @@ function sanctionsWeek(state: GameState, content: Content, week: Week) {
   const w = state.world!
   w.assembly.sanctions = w.assembly.sanctions.filter((s) => s.until >= state.day)
   for (const s of w.assembly.sanctions) {
+    const depth = s.hard ? 2 : s.resource ? 0.5 : 1
     if (s.target === HOME) {
-      applyEffects(state, [{ indicator: 'fiscal', by: -1, why: 'The Assembly’s sanctions bite.' }, { indicator: 'capacity', by: -1, why: 'Exports are blocked.' }], week.changes)
+      const why = s.hard ? 'The Security Council’s sanctions bite.' : s.resource ? `The embargo on ${s.resource} bites.` : 'The Assembly’s sanctions bite.'
+      applyEffects(state, [{ indicator: 'fiscal', by: -Math.max(1, Math.round(depth)), why }, { indicator: 'capacity', by: -1, why: 'Exports are blocked.' }], week.changes)
       continue
     }
     const n = w.nations[s.target]
     if (n) {
-      n.wealth = clamp(n.wealth - 2)
-      n.stability = clamp(n.stability - 1)
+      n.wealth = clamp(n.wealth - 2 * depth)
+      n.stability = clamp(n.stability - depth)
     }
   }
   void content
@@ -1017,9 +1082,12 @@ function assemblyWeek(state: GameState, content: Content, week: Week, rng: Rng) 
     a.motion = null
     a.next = nextSitting(state.day)
   }
+  if (state.day >= state.world!.council.election) councilElection(state, content, week)
   if (!a.motion && a.next - state.day <= WEEK) {
-    a.motion = chooseMotion(state, content, rng)
-    if (a.members.includes(HOME)) raise(state, content, 'vote', a.motion.target ?? HOME, { motion: a.motion.id, vars: { motion: a.motion.title } })
+    // A proposal put down waits its turn; otherwise the Assembly sets its own business.
+    const queued = a.queue.shift()
+    a.motion = queued ? { ...queued, day: a.next } : chooseMotion(state, content, rng)
+    if (a.members.includes(HOME) && a.motion.by !== HOME) raise(state, content, 'vote', a.motion.target ?? HOME, { motion: a.motion.id, vars: { motion: a.motion.title } })
   }
 }
 
@@ -1052,10 +1120,23 @@ function chooseMotion(state: GameState, content: Content, rng: Rng): Motion {
 }
 
 function voteOf(state: GameState, content: Content, member: string, motion: Motion): 'aye' | 'no' | 'abstain' {
+  const own = interestOf(state, content, member, motion)
+  // The player's own proposal: friends lean its way, enemies against, unless it touches them.
+  if (motion.by && motion.by !== member && motion.target !== member && !allies(state, motion.target ?? '').includes(member)) {
+    const r = rel(state, member, motion.by)
+    if (r >= 40 && own !== 'no') return 'aye'
+    if (r <= -40 && own !== 'aye') return 'no'
+  }
+  return own
+}
+
+function interestOf(state: GameState, content: Content, member: string, motion: Motion): 'aye' | 'no' | 'abstain' {
   const t = defOf(content, member)?.temperament ?? { ambition: 50, aggression: 30, loyalty: 50, charity: 50 }
   const w = state.world!
   const war = motion.war ? w.wars.find((x) => x.id === motion.war) : undefined
   switch (motion.kind) {
+    case 'binding-ceasefire':
+    case 'peacekeepers':
     case 'ceasefire': {
       if (!war) return 'aye'
       const side = sideOf(war, member)
@@ -1063,6 +1144,18 @@ function voteOf(state: GameState, content: Content, member: string, motion: Moti
       const ahead = side === 'attackers' ? war.front > 20 : war.front < -20
       return ahead ? 'no' : 'aye'
     }
+    case 'force': {
+      // War on someone's behalf: only against a nation it already dislikes.
+      const target = motion.target!
+      if (member === target || allies(state, target).includes(member)) return 'no'
+      const r = rel(state, member, target)
+      if (r <= -10 && t.aggression >= 25) return 'aye'
+      return r >= 30 ? 'no' : 'abstain'
+    }
+    case 'expel':
+    case 'condemnation':
+    case 'embargo':
+    case 'hard-sanctions':
     case 'sanctions':
     case 'tribunal': {
       const target = motion.target!
@@ -1081,6 +1174,8 @@ function voteOf(state: GameState, content: Content, member: string, motion: Moti
     }
     case 'aid':
       return t.charity >= 30 || rel(state, member, motion.target!) >= 0 ? 'aye' : 'abstain'
+    case 'admit':
+      return rel(state, member, motion.target!) <= -40 ? 'no' : 'aye'
     case 'routine':
       return t.ambition >= 75 ? 'abstain' : 'aye'
   }
@@ -1098,10 +1193,12 @@ function sit(state: GameState, content: Content, motion: Motion, week: Week) {
   const ayes = Object.values(votes).filter((v) => v === 'aye').length
   const noes = Object.values(votes).filter((v) => v === 'no').length
   motion.votes = votes
-  motion.passed = ayes > noes
+  // Expelling a member takes two thirds of those voting; everything else a simple majority.
+  motion.passed = motion.kind === 'expel' ? ayes >= ((ayes + noes) * 2) / 3 && ayes > 0 : ayes > noes
   const title = motion.title.charAt(0).toUpperCase() + motion.title.slice(1)
   const changes: Change[] = []
   const lines: string[] = [`The Assembly of Nations ${motion.passed ? 'adopts' : 'rejects'} ${motion.title}, ${ayes} to ${noes}.`]
+  if (motion.text) lines.push(`${motion.by === HOME ? `${state.identity.name}'s` : 'The'} motion read: “${motion.text}”`)
   if (motion.passed) carry(state, content, motion, votes, changes, lines)
   else if (motion.kind === 'arbitration') {
     // The Assembly found against the claimant: the land stays where it is.
@@ -1174,9 +1271,189 @@ function carry(state: GameState, content: Content, motion: Motion, votes: Record
       giveAid(state, HOME, target, 12, 5)
       if (home) applyEffects(state, [{ indicator: 'fiscal', by: -1, why: `Our share of the Assembly’s fund for ${nameOf(state, content, target)}.` }], changes)
       return
+    case 'condemnation':
+      if (!target) return
+      if (target === HOME) {
+        applyEffects(state, [{ indicator: 'legitimacy', by: -2, why: 'The Assembly condemned us.' }], changes)
+        for (const a of ayes) shift(state, HOME, a, -3, 'It voted to condemn us.', changes)
+      } else for (const a of ayes) shift(state, a, target, -4, 'Condemned before the Assembly.')
+      return
+    case 'embargo':
+      if (!target) return
+      w.assembly.sanctions.push({ target, until: state.day + 8 * WEEK, resource: motion.resource ?? 'trade' })
+      if (target !== HOME && home && state.treaties.some((t) => t.with === target && (motion.resource ? t.kind.startsWith(motion.resource) : true))) {
+        state.treaties = state.treaties.filter((t) => !(t.with === target && (motion.resource ? t.kind.startsWith(motion.resource) : true)))
+        lines.push(`${state.identity.name}'s ${motion.resource ?? 'trade'} treaty with ${nameOf(state, content, target)} is suspended under the embargo.`)
+      }
+      return
+    case 'admit':
+      if (target && !w.assembly.members.includes(target)) w.assembly.members.push(target)
+      return
+    case 'expel':
+      if (!target) return
+      w.assembly.members = w.assembly.members.filter((m) => m !== target)
+      if (target === HOME) {
+        applyEffects(state, [{ indicator: 'legitimacy', by: -5, why: 'Expelled from the Assembly of Nations.' }], changes)
+        for (const m of w.matters) if (!m.decided && m.kind === 'vote') m.expires = state.day
+      }
+      lines.push(`${nameOf(state, content, target)} is expelled from the Assembly.`)
+      return
     case 'routine':
       return
+    default:
+      return
   }
+}
+
+// ---------------------------------------------------------------------------------------
+// The Security Council
+// ---------------------------------------------------------------------------------------
+
+function councilWeek(state: GameState, content: Content, week: Week) {
+  const c = state.world!.council
+  if (c.motion && state.day >= c.next) {
+    councilSit(state, content, c.motion, week)
+    c.past.push(c.motion)
+    if (c.past.length > 30) c.past = c.past.slice(-30)
+    c.motion = null
+    c.next = nextCouncil(state.day)
+  }
+  if (!c.motion && c.next - state.day <= WEEK) {
+    const queued = c.queue.shift()
+    const motion = queued ? { ...queued, day: c.next } : councilBusiness(state, content)
+    if (!motion) {
+      // Nothing worth the Council's time: it does not sit this fortnight.
+      if (c.next - state.day <= 0) c.next = nextCouncil(state.day)
+      return
+    }
+    c.motion = motion
+    if (councilMembers(state).includes(HOME) && motion.by !== HOME) raise(state, content, 'council', motion.target ?? HOME, { motion: motion.id, vars: { motion: motion.title } })
+  }
+  if (!c.motion && c.next <= state.day) c.next = nextCouncil(state.day)
+}
+
+// What the Council takes up by itself: only war, and only when it has gone on long enough.
+function councilBusiness(state: GameState, content: Content): Motion | null {
+  const w = state.world!
+  const n = (id: string) => nameOf(state, content, id)
+  const recently = (war: War) => w.council.past.some((m) => m.war === war.id && state.day - m.day < 8 * WEEK)
+  for (const war of activeWars(state)) {
+    if (recently(war)) continue
+    const aggressor = war.attackers[0]!
+    const make = (kind: MotionKind, title: string, target?: string): Motion => ({ id: nextId(w, 'motion'), kind, title, day: w.council.next, war: war.id, ...(target ? { target } : {}) })
+    const between = `${war.attackers.map(n).join(' and ')} and ${war.defenders.map(n).join(' and ')}`
+    if (war.crimes.length >= 2 || (war.cause === 'conquest' && war.front >= 60)) return make('force', `force authorised against ${n(aggressor)}`, aggressor)
+    if (war.weeks >= 6) return make('binding-ceasefire', `a binding ceasefire between ${between}`)
+    if (w.assembly.sanctions.some((s) => s.target === aggressor) && war.weeks >= 3) return make('hard-sanctions', `hard sanctions on ${n(aggressor)}`, aggressor)
+    if (war.weeks >= 3 && !war.peacekeepers) return make('peacekeepers', `peacekeepers between ${between}`)
+  }
+  return null
+}
+
+function councilSit(state: GameState, content: Content, motion: Motion, week: Week) {
+  const w = state.world!
+  const members = councilMembers(state)
+  const votes: Record<string, 'aye' | 'no' | 'abstain'> = {}
+  for (const m of members) votes[m] = m === HOME ? (motion.votes?.[HOME] ?? 'abstain') : voteOf(state, content, m, motion)
+  const ayes = Object.values(votes).filter((v) => v === 'aye').length
+  const noes = Object.values(votes).filter((v) => v === 'no').length
+  const vetoed = w.council.permanent.filter((p) => votes[p] === 'no')
+  motion.votes = votes
+  motion.vetoed = vetoed
+  motion.passed = ayes >= 5 && vetoed.length === 0
+  const n = (id: string) => nameOf(state, content, id)
+  const title = motion.title.charAt(0).toUpperCase() + motion.title.slice(1)
+  const changes: Change[] = []
+  const lines = [
+    vetoed.length
+      ? `The Security Council fails to adopt ${motion.title}: ${ayes} for, ${noes} against, vetoed by ${vetoed.map(n).join(' and ')}.`
+      : `The Security Council ${motion.passed ? 'adopts' : 'rejects'} ${motion.title}, ${ayes} to ${noes}.`,
+  ]
+  if (motion.text) lines.push(`${motion.by === HOME ? `${state.identity.name}'s` : 'The'} resolution read: “${motion.text}”`)
+  if (motion.passed) councilCarry(state, content, motion, changes, lines, week)
+  log(state, week, lines[0]!, motion.target ? [motion.target] : [], true)
+  recordEntry(state, content, 'world', `The Security Council: ${title} ${motion.passed ? 'adopted' : vetoed.length ? 'vetoed' : 'defeated'}`, changes, lines.join(' '))
+}
+
+function councilCarry(state: GameState, content: Content, motion: Motion, changes: Change[], lines: string[], week: Week) {
+  const w = state.world!
+  const war = motion.war ? w.wars.find((x) => x.id === motion.war && !x.ended) : undefined
+  const n = (id: string) => nameOf(state, content, id)
+  switch (motion.kind) {
+    case 'binding-ceasefire':
+      if (war) endWar(state, content, war, 'ceasefire', false, week, rngFor(state.seed, state.day, `council:${motion.id}`))
+      lines.push('The guns are to stop, and they do.')
+      return
+    case 'peacekeepers':
+      if (war) {
+        war.peacekeepers = true
+        war.weariness.attackers = clamp(war.weariness.attackers + 30)
+        war.weariness.defenders = clamp(war.weariness.defenders + 30)
+      }
+      lines.push('Peacekeepers deploy along the front.')
+      return
+    case 'hard-sanctions':
+      if (!motion.target) return
+      w.assembly.sanctions.push({ target: motion.target, until: state.day + 12 * WEEK, hard: true })
+      if (motion.target === HOME) applyEffects(state, [{ indicator: 'legitimacy', by: -3, why: 'The Security Council put us under sanctions.' }], changes)
+      else if (state.treaties.some((t) => t.with === motion.target)) {
+        state.treaties = state.treaties.filter((t) => t.with !== motion.target)
+        lines.push(`${state.identity.name}'s treaties with ${n(motion.target)} are suspended.`)
+      }
+      return
+    case 'force': {
+      const target = motion.target
+      if (!target) return
+      const fight = war ?? activeWars(state).find((x) => sideOf(x, target))
+      if (!fight) return
+      const enemySide = sideOf(fight, target) === 'attackers' ? 'defenders' : 'attackers'
+      for (const m of councilMembers(state)) {
+        if (m === HOME || m === target || sideOf(fight, m) || allies(state, target).includes(m)) continue
+        if ((defOf(content, m)?.temperament.aggression ?? 0) < 25 || rel(state, m, target) > -10) continue
+        fight[enemySide].push(m)
+        shift(state, m, target, -25, 'At war under the Council.')
+        lines.push(`${n(m)} joins the coalition.`)
+      }
+      if (!sideOf(fight, HOME)) raise(state, content, 'coalition', target, { war: fight.id })
+      return
+    }
+    default:
+      return
+  }
+}
+
+// Every three months the Assembly fills the Council seats that are up. Each member votes for
+// the candidate it likes best; the player stands only if it put itself forward.
+function councilElection(state: GameState, content: Content, week: Week) {
+  const w = state.world!
+  const c = w.council
+  c.election = nextSitting(state.day + 12 * WEEK)
+  const up = c.elected.filter((e) => e.until <= state.day + WEEK || !isFree(state, e.id))
+  const seats = up.length
+  if (!seats) return
+  const sitting = new Set(councilMembers(state).filter((m) => !up.some((e) => e.id === m)))
+  const free = content.neighbours.map((x) => x.id).filter((id) => isFree(state, id) && !sitting.has(id) && w.assembly.members.includes(id))
+  const ranked = free.sort((a, b) => strengthOf(state, b) + (w.nations[b]?.wealth ?? 0) / 2 - (strengthOf(state, a) + (w.nations[a]?.wealth ?? 0) / 2) || a.localeCompare(b))
+  const candidates = [...new Set([...c.candidates.filter((x) => x === HOME && w.assembly.members.includes(HOME) && !sitting.has(HOME)), ...ranked.slice(0, seats + 3)])]
+  const tally = new Map(candidates.map((x) => [x, 0]))
+  for (const m of w.assembly.members) {
+    if (m === HOME) {
+      if (tally.has(HOME)) tally.set(HOME, tally.get(HOME)! + 1)
+      continue
+    }
+    if (!isFree(state, m)) continue
+    // A member votes for as many as there are seats: the candidates it likes best.
+    const liked = candidates.filter((x) => x !== m).sort((a, b) => rel(state, m, b) - rel(state, m, a) || a.localeCompare(b)).slice(0, seats)
+    for (const x of liked) tally.set(x, tally.get(x)! + 1)
+  }
+  const winners = [...tally].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])).slice(0, seats).map(([x]) => x)
+  c.elected = [...c.elected.filter((e) => !up.includes(e)), ...winners.map((id) => ({ id, until: state.day + 26 * WEEK }))]
+  const n = (id: string) => nameOf(state, content, id)
+  const stood = c.candidates.includes(HOME)
+  c.candidates = []
+  const text = `Elected to the Security Council for six months: ${winners.map((x) => `${n(x)} (${tally.get(x)} votes)`).join(', ')}.${stood && !winners.includes(HOME) ? ` ${state.identity.name} stood and was not elected, with ${tally.get(HOME) ?? 0} votes.` : ''}`
+  log(state, week, text, winners, stood)
+  if (stood || winners.includes(HOME)) recordEntry(state, content, 'world', winners.includes(HOME) ? `${state.identity.name} is elected to the Security Council` : `${state.identity.name} fails to win a seat on the Security Council`, [], text)
 }
 
 // ---------------------------------------------------------------------------------------
@@ -1319,7 +1596,12 @@ function settleMatter(state: GameState, content: Content, matter: Matter, option
       giveAid(state, HOME, subject, 3, 1)
       break
     case 'join':
-      if (war && !war.ended && !sideOf(war, HOME)) war.defenders.push(HOME)
+      if (war && !war.ended && !sideOf(war, HOME)) {
+        // Called by an ally, or by the Council: either way, against the subject's enemy, or the subject.
+        const against = matter.kind === 'coalition' ? subject : matter.other
+        const side = against && sideOf(war, against) === 'attackers' ? 'defenders' : 'attackers'
+        war[matter.kind === 'coalition' ? side : 'defenders'].push(HOME)
+      }
       break
     case 'arms': {
       const n = w.nations[subject]
@@ -1355,7 +1637,7 @@ function settleMatter(state: GameState, content: Content, matter: Matter, option
     case 'aye':
     case 'no':
     case 'abstain': {
-      const motion = w.assembly.motion
+      const motion = matter.kind === 'council' ? w.council.motion : w.assembly.motion
       if (motion && motion.id === matter.motion) motion.votes = { ...(motion.votes ?? {}), [HOME]: option.does }
       break
     }
@@ -1432,11 +1714,18 @@ export function adviseMatter(state: GameState, content: Content, matter: Matter)
     case 'victory':
       if (matter.vars['annexable'] && state.indicators.liberty < 45) return take('annex', 'They stand alone. Take the country, and hold it.')
       return take('reparations', 'Make them pay, and leave them a country to pay from.')
-    case 'vote': {
-      const motion = w.assembly.motion
+    case 'vote':
+    case 'council': {
+      const motion = matter.kind === 'vote' ? w.assembly.motion : w.council.motion
       if (!motion || motion.id !== matter.motion) return take('abstain', 'Nothing to vote on.')
-      const v = voteOf(state, content, HOME, motion)
-      return take(v, v === 'aye' ? 'In our interest, and right.' : v === 'no' ? 'Against our interest and our friends.' : 'Nothing in it for us either way.')
+      const v = interestOf(state, content, HOME, motion)
+      const veto = matter.kind === 'council' && v === 'no' && w.council.permanent.includes(HOME)
+      return take(v, v === 'aye' ? 'In our interest, and right.' : veto ? 'Against our interest: our no is a veto.' : v === 'no' ? 'Against our interest and our friends.' : 'Nothing in it for us either way.')
+    }
+    case 'coalition': {
+      const enemy = strengthOf(state, subject)
+      if (mine >= enemy * 0.6 && (state.neighbours[subject] ?? 0) < 0) return take('join', 'The Council has spoken, and the coalition is strong enough to win.')
+      return take('none', 'Others can carry this one; our army is needed at home.')
     }
   }
 }
@@ -1477,8 +1766,70 @@ export function forbidden(state: GameState, content: Content, action: WorldActio
     if (action.assembly === 'leave' && !member) return 'Not a member.'
     return null
   }
+  if ('council' in action) {
+    if (!w.assembly.members.includes(HOME)) return 'Only a member of the Assembly can stand for the Security Council.'
+    if (councilMembers(state).includes(HOME)) return `${state.identity.name} already sits on the Security Council.`
+    if (w.council.candidates.includes(HOME)) return `${state.identity.name} is already standing.`
+    return null
+  }
+  if ('propose' in action) return proposalProblem(state, content, action.propose)
   if (action.mobilise === w.home.mobilised) return action.mobilise ? 'Already mobilised.' : 'Not mobilised.'
   return null
+}
+
+function proposalProblem(state: GameState, content: Content, p: Proposal): string | null {
+  const w = state.world!
+  const council = p.body === 'council'
+  if (council) {
+    if (!(COUNCIL_MOTIONS as readonly string[]).includes(p.kind)) return `The Security Council takes ${COUNCIL_MOTIONS.join(', ')}.`
+    if (!councilMembers(state).includes(HOME)) return `Only a member of the Security Council can put a resolution to it. Stand for a seat at the next election.`
+    if (w.council.queue.some((m) => m.by === HOME) || w.council.motion?.by === HOME) return 'A resolution of yours is already before the Council.'
+  } else {
+    if (!(ASSEMBLY_MOTIONS as readonly string[]).includes(p.kind) || p.kind === 'routine') return `The Assembly takes ${ASSEMBLY_MOTIONS.filter((k) => k !== 'routine').join(', ')}.`
+    if (!w.assembly.members.includes(HOME)) return `${state.identity.name} has left the Assembly; rejoin it to put down a motion.`
+    if (w.assembly.queue.some((m) => m.by === HOME) || w.assembly.motion?.by === HOME) return 'A motion of yours is already before the Assembly.'
+  }
+  const need = PROPOSAL_NEEDS[p.kind]
+  if (need === 'war') {
+    if (!p.war || !w.wars.some((x) => x.id === p.war && !x.ended)) return 'Name a war that is going on.'
+  } else if (need === 'claim') {
+    if (!p.claim || !w.claims.some((c) => c.id === p.claim && !c.settled)) return 'Name a claim that is still open.'
+  } else if (need === 'nation' || need === 'nation+resource') {
+    if (!p.target || p.target === HOME || !w.nations[p.target]) return 'Name a nation.'
+    if (!isFree(state, p.target)) return `${nameOf(state, content, p.target)} is no longer a nation.`
+    if (p.kind === 'admit' && w.assembly.members.includes(p.target)) return `${nameOf(state, content, p.target)} is already a member.`
+    if (p.kind === 'expel' && !w.assembly.members.includes(p.target)) return `${nameOf(state, content, p.target)} is not a member.`
+    if (p.kind === 'force' && !warsOf(state, p.target).length) return `${nameOf(state, content, p.target)} is not at war: there is nothing to authorise force over.`
+    if (need === 'nation+resource' && (!p.resource || !content.resources.some((r) => r.id === p.resource))) return `Name what to embargo: ${content.resources.map((r) => r.id).join(', ')}.`
+  }
+  if (p.text !== undefined && p.text.length > 600) return 'The wording is too long: keep it under 600 characters.'
+  return null
+}
+
+// The title a proposal is known by on the order paper.
+export function proposalTitle(state: GameState, content: Content, p: Proposal): string {
+  const n = (id: string) => nameOf(state, content, id)
+  const war = p.war ? state.world?.wars.find((x) => x.id === p.war) : undefined
+  const between = war ? `${war.attackers.map(n).join(' and ')} and ${war.defenders.map(n).join(' and ')}` : ''
+  const claim = p.claim ? state.world?.claims.find((c) => c.id === p.claim) : undefined
+  const t = p.target ? n(p.target) : ''
+  const resource = content.resources.find((r) => r.id === p.resource)?.name.toLowerCase() ?? p.resource ?? ''
+  switch (p.kind) {
+    case 'ceasefire': return `a call for a ceasefire between ${between}`
+    case 'sanctions': return `sanctions on ${t}`
+    case 'tribunal': return `a tribunal for war crimes by ${t}`
+    case 'arbitration': return claim ? `arbitration of ${n(claim.by)}'s claim to ${claim.region}` : 'arbitration of a claim'
+    case 'aid': return `a humanitarian fund for ${t}`
+    case 'condemnation': return `a condemnation of ${t}`
+    case 'embargo': return `an embargo on ${resource} for ${t}`
+    case 'admit': return `admitting ${t} to the Assembly`
+    case 'expel': return `expelling ${t} from the Assembly`
+    case 'routine': return 'routine business'
+    case 'binding-ceasefire': return `a binding ceasefire between ${between}`
+    case 'hard-sanctions': return `hard sanctions on ${t}`
+    case 'peacekeepers': return `peacekeepers between ${between}`
+    case 'force': return `force authorised against ${t}`
+  }
 }
 
 export function worldAct(input: GameState, content: Content, action: WorldAction): GameState {
@@ -1531,6 +1882,31 @@ export function worldAct(input: GameState, content: Content, action: WorldAction
       headline = `${nameOf(state, content, enemy)} rejects ${state.identity.name}'s offer of peace`
       text = 'It thinks it is winning. The war goes on.'
     }
+  } else if ('propose' in action) {
+    const p = action.propose
+    const title = proposalTitle(state, content, p)
+    const wording = p.text?.trim()
+    const motion: Motion = {
+      id: nextId(w, 'motion'),
+      kind: p.kind,
+      title,
+      day: p.body === 'council' ? w.council.next : w.assembly.next,
+      by: HOME,
+      ...(p.target ? { target: p.target } : {}),
+      ...(p.war ? { war: p.war } : {}),
+      ...(p.claim ? { claim: p.claim } : {}),
+      ...(p.resource ? { resource: p.resource } : {}),
+      ...(wording ? { text: wording } : {}),
+      votes: { [HOME]: 'aye' },
+    }
+    ;(p.body === 'council' ? w.council.queue : w.assembly.queue).push(motion)
+    const where = p.body === 'council' ? 'the Security Council' : 'the Assembly of Nations'
+    headline = `${state.identity.name} puts ${title} before ${where}`
+    text = wording ? `The wording: “${wording}”` : 'It will be taken at the next sitting with room on the order paper.'
+  } else if ('council' in action) {
+    w.council.candidates.push(HOME)
+    headline = `${state.identity.name} stands for the Security Council`
+    text = `The Assembly elects to the Council on day ${w.council.election}. Every member that likes ${state.identity.name} is a vote.`
   } else if ('assembly' in action) {
     if (action.assembly === 'leave') {
       w.assembly.members = w.assembly.members.filter((m) => m !== HOME)
@@ -1675,7 +2051,12 @@ export function worldLines(state: GameState, content: Content): string[] {
     lines.push(`${n(c.by)} claims ${c.region} from ${n(c.against)}${c.referred ? ', referred to the Assembly' : ''}.`)
   }
   for (const s of w.assembly.sanctions) lines.push(`${n(s.target)} is under the Assembly’s sanctions.`)
-  if (w.assembly.motion) lines.push(`The Assembly of Nations sits on day ${w.assembly.next}: ${w.assembly.motion.title}.`)
+  if (w.assembly.motion) lines.push(`The Assembly of Nations sits on day ${w.assembly.next}: ${w.assembly.motion.title}${w.assembly.motion.by ? `, put down by ${n(w.assembly.motion.by)}` : ''}.${w.assembly.motion.text ? ` Its wording: “${w.assembly.motion.text}”` : ''}`)
+  for (const m of w.assembly.queue) lines.push(`Waiting for the Assembly: ${m.title}${m.by ? `, put down by ${n(m.by)}` : ''}.${m.text ? ` Its wording: “${m.text}”` : ''}`)
+  const council = councilMembers(state)
+  if (council.length) lines.push(`The Security Council: ${w.council.permanent.filter((x) => council.includes(x)).map(n).join(', ')} (permanent, with a veto); ${w.council.elected.filter((e) => council.includes(e.id)).map((e) => n(e.id)).join(', ')} (elected).`)
+  if (w.council.motion) lines.push(`The Security Council sits on day ${w.council.next}: ${w.council.motion.title}${w.council.motion.by ? `, put down by ${n(w.council.motion.by)}` : ''}.${w.council.motion.text ? ` Its wording: “${w.council.motion.text}”` : ''}`)
+  if (w.council.candidates.includes(HOME)) lines.push(`${state.identity.name} is standing for the Security Council, elected on day ${w.council.election}.`)
   if (!w.assembly.members.includes(HOME)) lines.push(`${state.identity.name} has left the Assembly of Nations.`)
   if (w.home.mobilised) lines.push(`${state.identity.name} is mobilised.`)
   if (w.home.lost) lines.push(`${state.identity.name} has lost ${w.home.lost === 1 ? 'a borderland' : `${w.home.lost} borderlands`} to its neighbours.`)

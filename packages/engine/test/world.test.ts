@@ -8,6 +8,7 @@ import {
   HOME,
   activeWars,
   allies,
+  councilMembers,
   decideMatter,
   deserialize,
   endDay,
@@ -274,4 +275,59 @@ test('war comes from feelings: a weak nation in a fury may still attack a strong
   // An autocrat resents a free neighbour's government; a free nation thinks less of a junta.
   assert.equal(regimeOf(s, content, 'kessmark'), 'autocratic')
   assert.equal(regimeOf(s, content, 'velsa'), 'free')
+})
+
+test('the Security Council: five permanent seats and four elected, and a permanent member’s no is a veto', () => {
+  let s = fresh(43)
+  const c = s.world!.council
+  assert.equal(c.permanent.length, 5)
+  assert.equal(c.elected.length, 4)
+  assert.ok(!c.permanent.includes(HOME))
+  // Put a resolution against one permanent member's ally to the Council, and let it sit.
+  const target = Object.keys(s.world!.nations).find((id) => !councilMembers(s).includes(id))!
+  const vetoer = c.permanent[0]!
+  s.world!.pacts = [{ id: 'pact-v', members: [vetoer, target], since: 1 }]
+  c.queue.push({ id: 'motion-v', kind: 'hard-sanctions', title: 'hard sanctions', target, day: c.next })
+  s = days(s, c.next - s.day + 7)
+  const sat = s.world!.council.past.find((m) => m.id === 'motion-v')
+  assert.ok(sat, 'the Council sat on it')
+  assert.ok(sat.vetoed!.includes(vetoer), 'the ally vetoed it')
+  assert.equal(sat.passed, false)
+})
+
+test('the player stands for the Council, and with friends in the Assembly is elected', () => {
+  let s = fresh(47)
+  for (const id of Object.keys(s.neighbours)) s.neighbours[id] = 90
+  s = worldAct(s, content, { council: 'stand' })
+  assert.ok(s.world!.council.candidates.includes(HOME))
+  assert.match(forbidden(s, content, { council: 'stand' })!, /already standing/)
+  s = days(s, s.world!.council.election - s.day + 1)
+  assert.ok(councilMembers(s).includes(HOME), 'elected')
+  assert.ok(s.timeline.some((e) => e.headline === 'Testland is elected to the Security Council'))
+})
+
+test('the player’s motion is taken at the next sitting with its wording, and friends lean its way', () => {
+  let s = fresh(53)
+  for (const id of Object.keys(s.neighbours)) s.neighbours[id] = 60
+  assert.match(forbidden(s, content, { propose: { body: 'council', kind: 'force', target: 'gorsk' } })!, /Only a member of the Security Council/)
+  s = worldAct(s, content, { propose: { body: 'assembly', kind: 'condemnation', target: 'gorsk', text: 'Gorsk has disgraced the continent.' } })
+  assert.match(forbidden(s, content, { propose: { body: 'assembly', kind: 'aid', target: 'velsa' } })!, /already before the Assembly/)
+  s = days(s, s.world!.assembly.next - s.day + 8)
+  const sat = s.world!.assembly.past.find((m) => m.by === HOME)!
+  assert.ok(sat, 'the motion was taken')
+  assert.equal(sat.text, 'Gorsk has disgraced the continent.')
+  assert.equal(sat.votes![HOME], 'aye')
+  assert.equal(sat.passed, true)
+  assert.ok(s.timeline.some((e) => e.text?.includes('Gorsk has disgraced the continent.')))
+})
+
+test('expelling a member takes two thirds', () => {
+  let s = fresh(59)
+  s.world!.assembly.queue.push({ id: 'motion-x', kind: 'expel', title: 'expelling Velsa', target: 'velsa', day: s.world!.assembly.next })
+  s = days(s, s.world!.assembly.next - s.day + 8)
+  const sat = s.world!.assembly.past.find((m) => m.id === 'motion-x')!
+  const ayes = Object.values(sat.votes!).filter((v) => v === 'aye').length
+  const noes = Object.values(sat.votes!).filter((v) => v === 'no').length
+  assert.equal(sat.passed, ayes >= ((ayes + noes) * 2) / 3 && ayes > 0)
+  assert.equal(s.world!.assembly.members.includes('velsa'), !sat.passed)
 })

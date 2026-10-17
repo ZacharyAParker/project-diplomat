@@ -1,9 +1,10 @@
 import { HOME, homeStrength, type WorldAction } from '@diplomat/engine'
 import { useMemo, useState } from 'react'
-import { assemblyView, matterViews, nationRows, strengthWord, warViews, worldNews, type MatterView, type NationRow } from '../logic/world.ts'
+import { assemblyView, councilView, matterViews, nationRows, strengthWord, warViews, worldNews, type MatterView, type NationRow, type PastMotion } from '../logic/world.ts'
 import { useGame, type Current } from '../store/game.tsx'
 import { Bar, Button, Notice, Screen, Sheet, Tag, useAnnounce } from '../ui/index.ts'
 import { WorldMap } from './WorldMap.tsx'
+import { ProposalForm } from './WorldProposal.tsx'
 
 // The world beyond the borders: foreign matters to decide, the player's wars, the Assembly
 // of Nations, and every other nation, with what the player may do about each.
@@ -18,6 +19,7 @@ export function World({ current }: { current: Current }) {
   const matters = useMemo(() => matterViews(state, content), [state, content])
   const wars = useMemo(() => warViews(state, content), [state, content])
   const assembly = useMemo(() => assemblyView(state, content), [state, content])
+  const council = useMemo(() => councilView(state, content), [state, content])
   const rows = useMemo(() => nationRows(state, content), [state, content])
   const news = useMemo(() => worldNews(state), [state])
 
@@ -149,21 +151,64 @@ export function World({ current }: { current: Current }) {
             </p>
           )}
           {assembly.sanctions.length > 0 && <p className="small">Under its sanctions: {assembly.sanctions.join(', ')}.</p>}
-          {assembly.past.length > 0 && (
-            <ul className="small stack world__resolutions">
-              {assembly.past.map((m) => (
-                <li key={m.id}>
-                  {m.title}: <Tag tone={m.passed ? 'good' : 'plain'}>{m.passed ? 'carried' : 'defeated'}</Tag> {m.ayes} to {m.noes}
-                  {m.ours ? `. ${state.identity.name} voted ${m.ours}.` : '.'}
-                </li>
-              ))}
-            </ul>
+          {assembly.past.length > 0 && <Resolutions past={assembly.past} nation={state.identity.name} />}
+          {assembly.mine ? (
+            <Notice title="Your motion">
+              <p>
+                {assembly.mine.title.charAt(0).toUpperCase() + assembly.mine.title.slice(1)}, to be taken {assembly.mine.when}.
+                {assembly.mine.text && ` “${assembly.mine.text}”`}
+              </p>
+            </Notice>
+          ) : (
+            assembly.member && <ProposalForm state={state} content={content} body="assembly" busy={busy} onPropose={(p) => void acting({ propose: p }, 'The motion is put down.')} />
           )}
           <p>
             <Button size="small" look="quiet" disabled={busy} onClick={() => void acting({ assembly: assembly.member ? 'leave' : 'join' }, assembly.member ? 'Left the Assembly.' : 'Rejoined the Assembly.')}>
               {assembly.member ? 'Leave the Assembly' : 'Rejoin the Assembly'}
             </Button>
           </p>
+        </Sheet>
+      )}
+
+      {council && (
+        <Sheet title="The Security Council" kicker={council.member ? (council.permanent ? 'Permanent member, with a veto' : 'Elected member') : `Next election on day ${council.election}`}>
+          <p className="small soft">Five permanent members, each with a veto, and four elected by the Assembly for six months. Its resolutions bind: five votes and no veto carry one.</p>
+          <ul className="small world__seats">
+            {council.seats.map((seat) => (
+              <li key={seat.id}>
+                <strong>{seat.you ? `${seat.name} (you)` : seat.name}</strong>
+                {seat.permanent ? <Tag tone="accent">Permanent</Tag> : <span className="soft"> until day {seat.until}</span>}
+              </li>
+            ))}
+          </ul>
+          {council.motion && (
+            <p>
+              Sits on day {council.next}: <strong>{council.motion}</strong>.
+            </p>
+          )}
+          {council.past.length > 0 && <Resolutions past={council.past} nation={state.identity.name} />}
+          {council.member ? (
+            council.mine ? (
+              <Notice title="Your resolution">
+                <p>
+                  {council.mine.title.charAt(0).toUpperCase() + council.mine.title.slice(1)}, to be taken {council.mine.when}.
+                  {council.mine.text && ` “${council.mine.text}”`}
+                </p>
+              </Notice>
+            ) : (
+              <ProposalForm state={state} content={content} body="council" busy={busy} onPropose={(p) => void acting({ propose: p }, 'The resolution is put to the Council.')} />
+            )
+          ) : council.standing ? (
+            <p className="small">{state.identity.name} is standing for a seat. The Assembly votes on day {council.election}.</p>
+          ) : (
+            assembly?.member && (
+              <p>
+                <Button size="small" disabled={busy} onClick={() => void acting({ council: 'stand' }, 'Standing for the Security Council.')}>
+                  Stand for a seat
+                </Button>
+              </p>
+            )
+          )}
         </Sheet>
       )}
 
@@ -200,6 +245,22 @@ export function World({ current }: { current: Current }) {
         )}
       </Sheet>
     </Screen>
+  )
+}
+
+function Resolutions({ past, nation }: { past: PastMotion[]; nation: string }) {
+  return (
+    <ul className="small stack world__resolutions">
+      {past.map((m) => (
+        <li key={m.id}>
+          {m.title}
+          {m.mine && <span className="soft"> ({nation}’s)</span>}:{' '}
+          <Tag tone={m.passed ? 'good' : m.vetoed.length ? 'bad' : 'plain'}>{m.passed ? 'carried' : m.vetoed.length ? 'vetoed' : 'defeated'}</Tag> {m.ayes} to {m.noes}
+          {m.vetoed.length > 0 && `, vetoed by ${m.vetoed.join(' and ')}`}
+          {m.ours ? `. ${nation} voted ${m.ours}.` : '.'}
+        </li>
+      ))}
+    </ul>
   )
 }
 

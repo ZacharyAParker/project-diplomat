@@ -92,6 +92,23 @@ describe('the World page', () => {
     expect(row.querySelector('details')!.open).toBe(true)
   })
 
+  it('puts a motion down with its wording, and stands for the Security Council', async () => {
+    const user = userEvent.setup()
+    window.location.hash = '#/n/kept/world'
+    const { store } = mount(holding(founded()))
+    await heading('The world')
+    const form = screen.getByRole('group', { name: 'Put down a motion' })
+    await user.selectOptions(within(form).getByRole('combobox', { name: 'Kind' }), 'condemnation')
+    await user.selectOptions(within(form).getByRole('combobox', { name: 'Nation' }), 'gorsk')
+    await user.type(within(form).getByRole('textbox', { name: /The wording/ }), 'Gorsk has disgraced the continent.')
+    await user.click(within(form).getByRole('button', { name: 'Put it down' }))
+    const queued = store.get().nation!.state.world!.assembly.queue
+    expect(queued.at(-1)).toMatchObject({ kind: 'condemnation', target: 'gorsk', by: 'home', text: 'Gorsk has disgraced the continent.' })
+    expect(screen.getByText('Your motion')).toBeDefined()
+    await user.click(screen.getByRole('button', { name: 'Stand for a seat' }))
+    expect(store.get().nation!.state.world!.council.candidates).toContain('home')
+  })
+
   it('is pointed to from the desk when a matter is waiting', async () => {
     window.location.hash = '#/n/kept/desk'
     mount(holding(claimed(), { noDockets: true }))

@@ -929,3 +929,25 @@ h3:focus:not(:focus-visible) {
 .world-map__key--annexed {
   background: repeating-linear-gradient(45deg, var(--map-land) 0 3px, var(--map-border) 3px 5px);
 }
+
+/* The Security Council's seats, and the form for putting a motion down. */
+.world__seats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-4);
+  padding: 0;
+  list-style: none;
+}
+
+.world__seats .tag {
+  margin-left: var(--space-1);
+}
+
+.world__propose {
+  border: var(--hair) solid var(--rule-soft);
+  padding: var(--space-3) var(--space-4);
+}
+
+.world__propose textarea {
+  width: 100%;
+}

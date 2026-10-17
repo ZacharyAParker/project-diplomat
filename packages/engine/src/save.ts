@@ -1,5 +1,5 @@
 import type { GameState } from './engine.ts'
-import { ENTRY_KINDS, IDENTITY_FIELDS, INDICATORS, MATTER_KINDS } from './types.ts'
+import { ASSEMBLY_MOTIONS, COUNCIL_MOTIONS, ENTRY_KINDS, IDENTITY_FIELDS, INDICATORS, MATTER_KINDS } from './types.ts'
 
 export const SAVE_VERSION = 3
 
@@ -73,14 +73,18 @@ const isSide = listOf(isString)
 const isVote = oneOf(['aye', 'no', 'abstain'])
 const isMotion = shaped({
   id: isString,
-  kind: oneOf(['ceasefire', 'sanctions', 'tribunal', 'arbitration', 'aid', 'routine']),
+  kind: oneOf([...ASSEMBLY_MOTIONS, ...COUNCIL_MOTIONS]),
   title: isText,
   target: optional(isString),
   war: optional(isString),
   claim: optional(isString),
+  resource: optional(isString),
   day: isDay,
+  by: optional(isString),
+  text: optional(isText),
   votes: optional(mapOf(isVote)),
   passed: optional(isBoolean),
+  vetoed: optional(listOf(isString)),
 })
 
 // The world beyond the borders (world.ts), checked as closely as the rest.
@@ -108,6 +112,7 @@ const isWorld = shaped({
       region: optional(isString),
       odds: optional(isNumber),
       front: isStanding,
+      peacekeepers: optional(isBoolean),
       weeks: isCount,
       weariness: shaped({ attackers: isScore, defenders: isScore }),
       crimes: listOf(shaped({ day: isDay, by: isString, text: isText })),
@@ -131,8 +136,21 @@ const isWorld = shaped({
     next: isDay,
     motion: (value) => value === null || isMotion(value),
     past: listOf(isMotion),
-    sanctions: listOf(shaped({ target: isString, until: isDay })),
+    sanctions: listOf(shaped({ target: isString, until: isDay, hard: optional(isBoolean), resource: optional(isString) })),
+    queue: optional(listOf(isMotion)),
   }),
+  council: optional(
+    shaped({
+      permanent: isSide,
+      elected: listOf(shaped({ id: isString, until: isDay })),
+      next: isDay,
+      motion: (value) => value === null || isMotion(value),
+      past: listOf(isMotion),
+      queue: listOf(isMotion),
+      election: isDay,
+      candidates: isSide,
+    }),
+  ),
   matters: listOf(
     shaped({
       id: isString,

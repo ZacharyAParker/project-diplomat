@@ -225,7 +225,7 @@ export interface Temperament {
 
 // What a foreign matter's option does in the world, beyond its effects. Which of these a
 // matter may use depends on its kind (MATTER_ACTIONS).
-export const MATTER_KINDS = ['claim', 'aid', 'called', 'attacked', 'crimes', 'accused', 'pact', 'terms', 'victory', 'vote'] as const
+export const MATTER_KINDS = ['claim', 'aid', 'called', 'attacked', 'crimes', 'accused', 'pact', 'terms', 'victory', 'vote', 'council', 'coalition'] as const
 export type MatterKind = (typeof MATTER_KINDS)[number]
 
 export const MATTER_ACTIONS: Record<MatterKind, readonly string[]> = {
@@ -239,6 +239,8 @@ export const MATTER_ACTIONS: Record<MatterKind, readonly string[]> = {
   terms: ['peace', 'none'],
   victory: ['reparations', 'annex', 'peace'],
   vote: ['aye', 'no', 'abstain'],
+  council: ['aye', 'no', 'abstain'],
+  coalition: ['join', 'none'],
 }
 
 export interface MatterOptionDef {
@@ -524,6 +526,8 @@ export interface War {
   odds?: number
   // -100 to 100. Positive means the attackers are winning.
   front: number
+  // Peacekeepers sent by the Security Council: the front barely moves while they are there.
+  peacekeepers?: boolean
   weeks: number
   weariness: { attackers: number; defenders: number }
   crimes: { day: number; by: string; text: string }[]
@@ -547,7 +551,11 @@ export interface Claim {
   settled?: { day: number; to: string; how: string }
 }
 
-export type MotionKind = 'ceasefire' | 'sanctions' | 'tribunal' | 'arbitration' | 'aid' | 'routine'
+// The Assembly's motions, then the Security Council's: a binding ceasefire, hard sanctions,
+// peacekeepers to freeze a front, and force authorised against an aggressor.
+export const ASSEMBLY_MOTIONS = ['ceasefire', 'sanctions', 'tribunal', 'arbitration', 'aid', 'condemnation', 'embargo', 'admit', 'expel', 'routine'] as const
+export const COUNCIL_MOTIONS = ['binding-ceasefire', 'hard-sanctions', 'peacekeepers', 'force'] as const
+export type MotionKind = (typeof ASSEMBLY_MOTIONS)[number] | (typeof COUNCIL_MOTIONS)[number]
 
 export interface Motion {
   id: string
@@ -556,9 +564,16 @@ export interface Motion {
   target?: string
   war?: string
   claim?: string
+  // For an embargo: the resource cut off.
+  resource?: string
   day: number
+  // Who put it down, when a nation did (the player's are "home"), and the wording they gave.
+  by?: string
+  text?: string
   votes?: Record<string, 'aye' | 'no' | 'abstain'>
   passed?: boolean
+  // In the Security Council: the permanent members who vetoed it.
+  vetoed?: string[]
 }
 
 export interface Matter {
@@ -587,7 +602,23 @@ export interface WorldState {
     next: number
     motion: Motion | null
     past: Motion[]
-    sanctions: { target: string; until: number }[]
+    // Sanctions in force: the Assembly's, an embargo on one resource, or the Security Council's
+    // hard ones, which bite twice as deep.
+    sanctions: { target: string; until: number; hard?: boolean; resource?: string }[]
+    // Proposals waiting for a sitting, in the order they were put down.
+    queue: Motion[]
+  }
+  // The Security Council: five permanent members with a veto, four elected by the Assembly.
+  council: {
+    permanent: string[]
+    elected: { id: string; until: number }[]
+    next: number
+    motion: Motion | null
+    past: Motion[]
+    queue: Motion[]
+    // The next election to the Council, and who has put themselves forward.
+    election: number
+    candidates: string[]
   }
   matters: Matter[]
   home: { mobilised: boolean; lost: number; reparations: { to: string; until: number; by: number }[] }

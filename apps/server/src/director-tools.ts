@@ -405,7 +405,8 @@ export class DirectorTools {
       wars: activeWars(s),
       pacts: w.pacts,
       claims: w.claims.filter((c) => !c.settled),
-      assembly: { members: w.assembly.members, next: w.assembly.next, motion: w.assembly.motion, recent: w.assembly.past.slice(-4), sanctions: w.assembly.sanctions },
+      assembly: { members: w.assembly.members, next: w.assembly.next, motion: w.assembly.motion, queue: w.assembly.queue, recent: w.assembly.past.slice(-4), sanctions: w.assembly.sanctions },
+      council: { ...w.council, past: w.council.past.slice(-4) },
       matters: openMatters(s).map((m) => ({ ...matterCard(s, this.content, m), advice: adviseMatter(s, this.content, m) })),
       recent: w.log.slice(-15),
     }
