@@ -106,6 +106,7 @@ const isWorld = shaped({
       defenders: isSide,
       cause: oneOf(['claim', 'conquest', 'punitive']),
       region: optional(isString),
+      odds: optional(isNumber),
       front: isStanding,
       weeks: isCount,
       weariness: shaped({ attackers: isScore, defenders: isScore }),

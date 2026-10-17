@@ -14,7 +14,7 @@ const hawk = process.argv[4] === 'hawk'
 const HAWKISH = ['firm', 'fight', 'join', 'condemn', 'ally', 'reparations', 'annex', 'none', 'deny', 'aye']
 const identity = { name: 'Testland', capital: 'Testby', currency: 'mark', demonym: 'Testlander', leaderTitle: 'Premier', flag: { layout: 'plain', colours: ['#000'] } }
 
-const totals = { claimsOnHome: 0, wars: 0, homeWars: 0, annexed: 0, homeLost: 0, matters: {} as Record<string, number>, motions: {} as Record<string, number>, passed: 0 }
+const totals = { underdog: 0, claimsOnHome: 0, wars: 0, homeWars: 0, annexed: 0, homeLost: 0, matters: {} as Record<string, number>, motions: {} as Record<string, number>, passed: 0 }
 for (let seed = 1; seed <= seeds; seed++) {
   let state: GameState = newNation(content, identity, seed * 7919)
   for (let d = 0; d < years * 364; d++) {
@@ -29,6 +29,8 @@ for (let seed = 1; seed <= seeds; seed++) {
   }
   const w = state.world!
   totals.wars += w.wars.length
+  // Wars started by the weaker side, at the odds when they began.
+  totals.underdog += w.wars.filter((x) => (x.odds ?? 1) < 0.9).length
   totals.homeWars += w.wars.filter((x) => x.attackers.includes(HOME) || x.defenders.includes(HOME)).length
   totals.annexed += Object.values(w.nations).filter((n) => !n.free).length
   totals.homeLost += w.home.lost
@@ -39,7 +41,7 @@ for (let seed = 1; seed <= seeds; seed++) {
     if (m.passed) totals.passed++
   }
   if (seed === 1) {
-    console.log('seed 1 wars:', w.wars.map((x) => `${x.attackers.join('+')} v ${x.defenders.join('+')} d${x.since} ${x.weeks}w ${x.ended?.outcome ?? 'on'}`).join('; '))
+    console.log('seed 1 wars:', w.wars.map((x) => `${x.attackers.join('+')} v ${x.defenders.join('+')} d${x.since} odds ${x.odds} ${x.weeks}w ${x.ended?.outcome ?? 'on'}`).join('; '))
     console.log('seed 1 pacts:', w.pacts.map((p) => p.members.join('+')).join('; '))
     console.log('seed 1 home standing:', JSON.stringify(state.neighbours))
     console.log('seed 1 indicators:', JSON.stringify(state.indicators))
@@ -47,6 +49,6 @@ for (let seed = 1; seed <= seeds; seed++) {
 }
 const per = (n: number) => (n / seeds / years).toFixed(2)
 console.log(`per nation-year over ${seeds} seeds x ${years} years:`)
-console.log(`  wars ${per(totals.wars)}, involving the player ${per(totals.homeWars)}, annexations ${per(totals.annexed)}, borderlands lost ${per(totals.homeLost)}, claims on the player ${per(totals.claimsOnHome)}`)
+console.log(`  wars ${per(totals.wars)} (${per(totals.underdog)} started by the weaker side), involving the player ${per(totals.homeWars)}, annexations ${per(totals.annexed)}, borderlands lost ${per(totals.homeLost)}, claims on the player ${per(totals.claimsOnHome)}`)
 console.log('  matters (last 4 weeks kept only):', JSON.stringify(totals.matters))
 console.log('  motions (last 30 kept):', JSON.stringify(totals.motions), 'passed', totals.passed)

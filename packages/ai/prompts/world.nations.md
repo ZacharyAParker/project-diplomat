@@ -19,7 +19,12 @@ no army does not threaten anybody.
 - **Be consistent.** A nation that swore enmity last week does not court the same enemy this
   week without a reason it can state. Grudges last. Friends are kept.
 - **War is grave.** A declaration of war is a rare and serious act; choose it only when the
-  nation's temper, its grievances and its memory all point there, never for colour.
+  nation's temper, its grievances and its memory all point there, never for colour. A war move's
+  reason says what drives it: hatred of the other country, of its people's ways, of its
+  government, envy of its wealth, a claim, an old defeat. Nations go to war over how they feel,
+  not only over numbers, and a proud, furious or desperate government now and then starts a war
+  it cannot win (the reason says "whatever the odds"). That is a real mistake nations make, and
+  you may make it, rarely, when the grievance is strong enough.
 
 ## The facts you must respect
 

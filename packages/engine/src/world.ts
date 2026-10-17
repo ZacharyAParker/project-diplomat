@@ -35,14 +35,14 @@ const LOG = 120
 // How a nation's standing with the player makes it a close friend or an enemy.
 export const FRIEND = 60
 export const ENEMY = -40
-// One beaten nation in four that stands alone is annexed; the rest pay and survive.
-const ANNEX_CHANCE = 0.25
+// About one beaten nation in seven that stands alone is annexed; the rest pay and survive.
+const ANNEX_CHANCE = 0.15
 // A nation appeals to the player for aid at most this often.
 const APPEAL_DAYS = 28
-// A nation that has just fought cannot start another war for half a year, and two nations
-// that fought each other cannot for a year.
-const REST_DAYS = 26 * WEEK
-const FEUD_DAYS = 52 * WEEK
+// A nation that has just fought cannot start another war for nine months, and two nations
+// that fought each other cannot for a year and a half.
+const REST_DAYS = 39 * WEEK
+const FEUD_DAYS = 78 * WEEK
 
 export type MoveKind = 'court' | 'pact' | 'claim' | 'war' | 'aid' | 'appeal' | 'peace' | 'rearm' | 'wait'
 
@@ -281,7 +281,10 @@ export function planWorld(state: GameState, content: Content): WorldPlan {
   const nations: NationPlan[] = []
   for (const def of content.neighbours) {
     if (!w.nations[def.id]?.free) continue
-    const moves = movesFor(state, content, def).sort((a, b) => b.score - a.score || a.id.localeCompare(b.id)).slice(0, 6)
+    // The best six, and any war it could start however poor its odds: a government in a fury
+    // may choose one the arithmetic advises against. The rules alone rarely will.
+    const all = movesFor(state, content, def).sort((a, b) => b.score - a.score || a.id.localeCompare(b.id))
+    const moves = all.filter((m, i) => i < 6 || m.kind === 'war')
     const big = (m: Move) => m.kind === 'war' || m.kind === 'pact' || m.kind === 'claim' || m.kind === 'aid' || m.kind === 'peace'
     const choice = moves.length > 1 && (moves[0]!.score - moves[1]!.score < 4 || moves.slice(0, 3).some(big))
     nations.push({ nation: def.id, important: important.has(def.id), choice, moves })
@@ -325,13 +328,25 @@ function movesFor(state: GameState, content: Content, def: NeighbourDef): Move[]
       moves.push({ id: `claim:${x}`, kind: 'claim', target: x, score: t.ambition / 6 + t.aggression / 10 - 6 + (me.strength > strengthOf(state, x) ? 5 : 0), because: 'old maps say the land is ours' })
     }
 
-    // War is uncommon: a hostile neighbour, a reason, a temper for it, an edge, and no war already.
-    // A claim left to fester for a month is reason enough, and lowers the bar for hostility.
-    const claim = openClaim(state, def.id, x)
-    const festering = claim !== undefined && !claim.referred && state.day - claim.since >= 4 * WEEK
-    const reason = claim !== undefined || t.aggression >= 75
-    if (border && !enemies && !myWars.length && rested(state, def.id, x) && r <= (festering ? -25 : -50) && t.aggression >= 50 && reason && me.stability >= 30 && weightOf(state, def.id) >= weightOf(state, x) * 1.15) {
-      moves.push({ id: `war:${x}`, kind: 'war', target: x, score: t.aggression / 5 + t.ambition / 8 - 10 + (openClaim(state, def.id, x) ? 10 : 0), because: openClaim(state, def.id, x) ? 'the claim will not settle itself' : 'they are weak and we are not' })
+    // War comes from how a nation feels: about the other country, its people, its government,
+    // its wealth, an old defeat, a claim left to fester. Strength only shifts the odds: a weak
+    // nation in a fury will now and then attack a stronger one, and usually regret it.
+    if (border && !enemies && !myWars.length && rested(state, def.id, x) && me.stability >= 30 && t.aggression >= 30) {
+      const grudge = grievances(state, content, def, x)
+      if (grudge.animus >= WAR_ANIMUS) {
+        const ratio = weightOf(state, def.id) / Math.max(1, weightOf(state, x))
+        // An edge encourages; a disadvantage discourages, but never forbids.
+        const power = ratio >= 1.15 ? 6 : ratio >= 0.9 ? 0 : -15 - (1 - ratio) * 35
+        // Temper: some weeks a government is angrier than the arithmetic.
+        const temper = rngFor(state.seed, state.day, `temper:${def.id}:${x}`)() * 14
+        moves.push({
+          id: `war:${x}`,
+          kind: 'war',
+          target: x,
+          score: t.aggression / 5 + (grudge.animus - WAR_ANIMUS) / 3 + power + temper - 10,
+          because: [...grudge.reasons.slice(0, 2), ratio < 0.9 ? 'whatever the odds' : ratio >= 1.15 ? 'and they are weaker' : ''].filter(Boolean).join('; '),
+        })
+      }
     }
 
     if (x !== HOME && !enemies && t.charity >= 50 && r >= 0 && me.wealth >= 40) {
@@ -369,6 +384,69 @@ function rested(state: GameState, a: string, b: string): boolean {
     if (ago < FEUD_DAYS && sideOf(war, a) && sideOf(war, b) && sideOf(war, a) !== sideOf(war, b)) return false
   }
   return true
+}
+
+// How far a nation's feelings towards another would carry it to war, and why, in its own terms.
+const WAR_ANIMUS = 68
+
+// Autocratic, free or somewhere between. The player's is read from the state of liberty.
+export function regimeOf(state: GameState, content: Content, id: string): 'free' | 'mixed' | 'autocratic' {
+  if (id === HOME) return state.indicators.liberty >= 55 ? 'free' : state.indicators.liberty <= 35 ? 'autocratic' : 'mixed'
+  const form = defOf(content, id)?.form ?? ''
+  if (/junta|one-party|theocracy|absolute/.test(form)) return 'autocratic'
+  if (/monarchy|principality|kingdom|merchant|crowned/.test(form)) return 'mixed'
+  return 'free'
+}
+
+export function grievances(state: GameState, content: Content, me: NeighbourDef, x: string): { animus: number; reasons: string[] } {
+  const reasons: string[] = []
+  let animus = 0
+  const r = rel(state, me.id, x)
+  // How it feels about the country: the plainest part.
+  if (r < 0) animus += -r * 0.9
+  if (r <= -40) reasons.push('they have wronged us too often')
+  // Its government.
+  const mine = regimeOf(state, content, me.id)
+  const theirs = regimeOf(state, content, x)
+  if (mine === 'autocratic' && theirs === 'free') {
+    animus += 10 + me.temperament.aggression / 10
+    reasons.push('their government is a standing insult to ours')
+  } else if (mine === 'free' && theirs === 'autocratic') {
+    animus += 6
+    reasons.push('they rule their people by fear')
+  }
+  // Its people: what they prize is what we despise.
+  const them = x === HOME ? undefined : defOf(content, x)
+  const offended = them ? them.likes.filter((tag) => me.dislikes.includes(tag)).length : 0
+  if (offended) {
+    animus += offended * 8
+    reasons.push('their people’s ways offend ours')
+  }
+  // Its wealth, to an ambitious and poorer nation.
+  const gap = wealthOf(state, x) - wealthOf(state, me.id)
+  if (gap >= 25 && me.temperament.ambition >= 50) {
+    animus += gap / 2
+    reasons.push('their wealth would be better spent by us')
+  }
+  // A claim, and longer still, one left to fester.
+  const claim = openClaim(state, me.id, x)
+  if (claim) {
+    animus += 15 + (!claim.referred && state.day - claim.since >= 4 * WEEK ? 20 : 0)
+    reasons.push(`${claim.region} is ours`)
+  }
+  // An old defeat at their hands.
+  const lost = state.world!.wars.some((war) => war.ended && state.day - war.ended.day < 156 * WEEK && enemiesIn(war, me.id).includes(x) && ((war.ended.outcome === 'attackers' && war.defenders.includes(me.id)) || (war.ended.outcome === 'defenders' && war.attackers.includes(me.id))))
+  if (lost) {
+    animus += 15
+    reasons.push('an old defeat to avenge')
+  }
+  // Votes to shame it in the Assembly.
+  const shamed = state.world!.assembly.past.filter((m) => (m.kind === 'tribunal' || m.kind === 'sanctions') && m.target === me.id && m.passed && m.votes?.[x] === 'aye').length
+  if (shamed) {
+    animus += shamed * 8
+    reasons.push('they voted to shame us before the Assembly')
+  }
+  return { animus, reasons }
 }
 
 function wealthOf(state: GameState, id: string): number {
@@ -629,6 +707,7 @@ function startWar(state: GameState, content: Content, attacker: string, defender
     weeks: 0,
     weariness: { attackers: 0, defenders: 0 },
     crimes: [],
+    odds: Math.round((weightOf(state, attacker) / Math.max(1, weightOf(state, defender))) * 100) / 100,
   }
   w.wars.push(war)
   const a = nameOf(state, content, attacker)

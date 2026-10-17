@@ -12,6 +12,7 @@ import {
   deserialize,
   endDay,
   forbidden,
+  grievances,
   homeStrength,
   importantNations,
   matterCard,
@@ -19,6 +20,7 @@ import {
   newNation,
   openMatters,
   planWorld,
+  regimeOf,
   serialize,
   worldAct,
   type GameState,
@@ -250,4 +252,26 @@ test('a save with a world loads, and a damaged world is refused', () => {
   old.version = 2
   delete old.world
   assert.equal(deserialize(JSON.stringify(old)).version, 3)
+})
+
+test('war comes from feelings: a weak nation in a fury may still attack a stronger one', () => {
+  const s = fresh(41)
+  const w = s.world!
+  w.pacts = []
+  // Gorsk, poor and quick to anger, hates rich Brennholt next door, which is far stronger.
+  w.nations['gorsk']!.relations['brennholt'] = -95
+  w.nations['brennholt']!.relations['gorsk'] = -95
+  w.nations['gorsk']!.strength = 30
+  w.nations['brennholt']!.strength = 80
+  const gorsk = content.neighbours.find((n) => n.id === 'gorsk')!
+  const grudge = grievances(s, content, gorsk, 'brennholt')
+  assert.ok(grudge.reasons.includes('their wealth would be better spent by us'))
+  assert.ok(grudge.reasons.includes('they have wronged us too often'))
+  const plan = planWorld(s, content).nations.find((p) => p.nation === 'gorsk')!
+  const war = plan.moves.find((m) => m.id === 'war:brennholt')
+  assert.ok(war, 'the war is on the table even against the odds')
+  assert.match(war.because, /whatever the odds/)
+  // An autocrat resents a free neighbour's government; a free nation thinks less of a junta.
+  assert.equal(regimeOf(s, content, 'kessmark'), 'autocratic')
+  assert.equal(regimeOf(s, content, 'velsa'), 'free')
 })

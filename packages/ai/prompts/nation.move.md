@@ -20,7 +20,12 @@ not as a puzzle to be solved.
   in this conversation) stands. A nation that has promised to stand by an ally does not slip
   away without a reason it can give. One that has sworn revenge does not forget it in a week.
 - **War is grave.** Declaring war, or refusing peace, is a heavy decision for any government.
-  Choose it only when the nation's temper, its grievances and its situation all point there.
+  Choose it only when the nation's temper, its grievances and its situation all point there. A
+  war move's reason says what drives it: hatred of the other country, its people's ways, its
+  government, envy of its wealth, a claim, an old defeat. Nations go to war over how they feel,
+  not only over numbers; a proud, furious or desperate government now and then starts a war it
+  cannot win ("whatever the odds"). You may make that mistake, rarely, when the grievance runs
+  deep enough.
 
 ## The facts you must respect
 

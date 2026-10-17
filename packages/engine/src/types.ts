@@ -509,6 +509,8 @@ export interface War {
   defenders: string[]
   cause: 'claim' | 'conquest' | 'punitive'
   region?: string
+  // The attackers' strength against the defenders' when it began: under 1 is a gamble.
+  odds?: number
   // -100 to 100. Positive means the attackers are winning.
   front: number
   weeks: number
