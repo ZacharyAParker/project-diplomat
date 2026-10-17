@@ -167,7 +167,7 @@ export class Dockets {
   view(n: Nation): Docket[] {
     return Object.values(n.gov.dockets).filter((d) => d.status !== 'decided').map((d) => {
       const lines = this.lines(n.id, d.dilemma)
-      return lines && UNFINISHED.includes(d.status) ? { ...structuredClone(d), progress: [...lines] } : structuredClone(d)
+      return lines && UNFINISHED.includes(d.status) && d.status !== 'deciding' ? { ...structuredClone(d), progress: [...lines] } : structuredClone(d)
     })
   }
 

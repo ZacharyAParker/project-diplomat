@@ -597,8 +597,17 @@ export class Game {
     const { docket, fresh } = this.docketFor(n, dilemmaId)
     if (docket.status === 'decided') return []
     if (fresh) n.gov = fileDocket(n.gov, docket)
+    const standing = this.standingOf(n, n.gov.dockets[dilemmaId]!)
+    // The screen polls while the executive thinks, so it says so rather than "ready".
+    const executive = n.gov.institutions.constitution.rules.executive.title
+    n.gov = {
+      ...n.gov,
+      dockets: {
+        ...n.gov.dockets,
+        [dilemmaId]: { ...n.gov.dockets[dilemmaId]!, status: 'deciding', progress: [...n.gov.dockets[dilemmaId]!.progress, `The ${executive} is considering the petition`] },
+      },
+    }
     const filed = n.gov.dockets[dilemmaId]!
-    const standing = this.standingOf(n, filed)
     const ctx = contextFor(n, this.content, this.ai, { onProblem: (l) => problems.push(l) })
     const decision = await runExecutive(ctx, { ...filed, standing })
     const dilemma = this.content.dilemmas.find((d) => d.id === dilemmaId)!
