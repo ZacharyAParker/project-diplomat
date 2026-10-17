@@ -62,6 +62,8 @@ export type AiErrorCode =
   | 'not-json'
   | 'unavailable'
   | 'bad-request'
+  | 'session-missing' // claude-cli: no conversation with that id to resume
+  | 'session-taken' // claude-cli: a conversation with that id already exists
 
 // Every failure a provider throws is one of these, with a message a player can act on.
 export class AiError extends Error {

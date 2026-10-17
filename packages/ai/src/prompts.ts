@@ -36,4 +36,22 @@ export function allPrompts(): Record<Task, string> {
 
 export function clearPromptCache(): void {
   cache.clear()
+  director = undefined
+}
+
+// The Director's prompt (prompts/director.md). Not a task: the Director is the player's own
+// out-of-character Claude Code session, which the server starts with this as its appended
+// system prompt, and which the terminal skill points at.
+export const DIRECTOR_PROMPT_PATH = fileURLToPath(new URL('../prompts/director.md', import.meta.url))
+
+let director: string | undefined
+
+export function directorPrompt(): string {
+  if (director !== undefined) return director
+  try {
+    director = readFileSync(DIRECTOR_PROMPT_PATH, 'utf8').replace(/\r\n/g, '\n').trim() + '\n'
+  } catch {
+    throw new Error(`The Director's prompt is missing (expected ${DIRECTOR_PROMPT_PATH}).`)
+  }
+  return director
 }

@@ -8,7 +8,7 @@ import { claudeCliProvider } from './providers/claude-cli.ts'
 import { noneProvider } from './providers/none.ts'
 
 export { AiError, DEFAULT_MODELS, EFFORT, MAX_TOKENS, TIMEOUTS, extractJson, resolveModels, type AiErrorCode } from './common.ts'
-export { allPrompts, promptFor, promptPath, PROMPTS_DIR } from './prompts.ts'
+export { allPrompts, directorPrompt, promptFor, promptPath, DIRECTOR_PROMPT_PATH, PROMPTS_DIR } from './prompts.ts'
 export { TASK_SCHEMAS, councilSitsAsCourt, schemaFor, type JsonSchema } from './schemas.ts'
 export { anthropicProvider, buildRequest, keyHint, type AnthropicSettings } from './providers/anthropic.ts'
 export {
@@ -17,9 +17,15 @@ export {
   childEnv,
   parseEnvelope,
   resolveCommand,
+  hasSessions,
   DENIED_TOOLS,
   READ_TOOLS,
+  type BranchSession,
+  type ClaudeCliProvider,
   type ClaudeCliSettings,
+  type SessionProvider,
+  type SessionResult,
+  type SessionRunOptions,
   type SpawnFn,
 } from './providers/claude-cli.ts'
 export { noneProvider } from './providers/none.ts'

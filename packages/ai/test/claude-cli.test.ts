@@ -80,7 +80,7 @@ test('the call is print mode, JSON out, the tier model, the task prompt appended
   const denied = flag(call.args, '--disallowedTools')!.split(',')
   for (const tool of ['Write', 'Edit', 'Bash', 'PowerShell', 'WebFetch', 'mcp__*']) assert.ok(denied.includes(tool), tool)
   assert.equal(flag(call.args, '--permission-mode'), 'dontAsk')
-  for (const f of ['--strict-mcp-config', '--safe-mode', '--disable-slash-commands', '--no-session-persistence']) assert.ok(call.args.includes(f), f)
+  for (const f of ['--strict-mcp-config', '--safe-mode', '--restricted', '--disable-slash-commands', '--no-session-persistence']) assert.ok(call.args.includes(f), f)
   assert.equal(JSON.parse(flag(call.args, '--json-schema')!).type, 'object')
   assert.ok(!call.args.includes('--bare'), 'bare mode would ignore the subscription login')
   assert.ok(!call.args.includes('--dangerously-skip-permissions'))

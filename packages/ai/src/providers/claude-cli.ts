@@ -9,12 +9,14 @@
 // - ANTHROPIC_API_KEY and ANTHROPIC_AUTH_TOKEN are removed from the child's environment, so
 //   the player's subscription login is what the call uses (in -p mode a key in the
 //   environment would otherwise always win, and bill the player's API account).
-// - Read-only: the built-in tools are cut down to Read, Grep and Glob (or none at all when
-//   there is no archive to read), everything else is disallowed, permissions that would
+// - Read-only and sealed in: the built-in tools are cut down to Read, Grep and Glob (or none
+//   when there is no archive), confined to the archive by --restricted (so ooc/, a sibling
+//   of archive/, is out of reach), everything else is disallowed, permissions that would
 //   prompt are refused, MCP servers, hooks, skills, plugins and CLAUDE.md files are not
 //   loaded, and nothing is saved as a resumable session.
 
 import { spawn as nodeSpawn, type ChildProcess, type SpawnOptions } from 'node:child_process'
+import { randomUUID } from 'node:crypto'
 import { existsSync, mkdtempSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { delimiter, dirname, extname, isAbsolute, join } from 'node:path'
@@ -52,9 +54,39 @@ export interface ClaudeCliSettings {
   env?: NodeJS.ProcessEnv
 }
 
+// A branch's own Claude Code conversation, carried on between calls: `--session-id <id>` the
+// first time, `--resume <id>` after. The id is a UUID the caller keeps (ooc/sessions.json).
+export interface BranchSession {
+  id: string
+  resume: boolean
+}
+
+export interface SessionRunOptions {
+  archivePath?: string
+  signal?: AbortSignal
+  session?: BranchSession
+}
+
+export interface SessionResult {
+  output: unknown
+  // The session the call actually used: the one given, or a new one when the given session
+  // could not be resumed (or none was given). Store it and resume it next time.
+  sessionId: string
+}
+
 export interface ClaudeCliProvider extends Provider {
   selfTest(): Promise<ProviderStatus>
+  runWithSession<T extends Task>(task: T, input: TaskInput[T], options?: SessionRunOptions): Promise<SessionResult>
 }
+
+// Providers that keep a branch's conversation between calls. Only claude-cli does.
+export type SessionProvider = Provider & Pick<ClaudeCliProvider, 'runWithSession'>
+
+export function hasSessions(provider: Provider | null | undefined): provider is SessionProvider {
+  return typeof (provider as Partial<SessionProvider> | null | undefined)?.runWithSession === 'function'
+}
+
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
 // Tools the agent may use, when it has an archive to read, and tools it may never use.
 export const READ_TOOLS = ['Read', 'Grep', 'Glob'] as const
@@ -138,7 +170,7 @@ export function buildCall<T extends Task>(
   task: T,
   input: TaskInput[T],
   settings: Pick<ClaudeCliSettings, 'models' | 'jsonSchema' | 'env'> = {},
-  options: { archivePath?: string } = {},
+  options: { archivePath?: string; session?: BranchSession } = {},
 ): CliCall {
   const models = resolveModels(settings.models)
   const archive = archivePathOf(input, options)
@@ -167,18 +199,29 @@ export function buildCall<T extends Task>(
     // No MCP servers from anywhere, and no CLAUDE.md, hooks, skills, plugins or agents.
     '--strict-mcp-config',
     '--safe-mode',
+    // Confines Read, Grep and Glob to the working directory (the archive), so a branch cannot
+    // read ooc/ or anything else beside it; also drops the user's settings files.
+    '--restricted',
     '--disable-slash-commands',
-    '--no-session-persistence',
   )
+  // A branch session is kept on disk by Claude Code so it can be resumed; a one-off call is not.
+  const session = options.session
+  if (!session) args.push('--no-session-persistence')
+  else args.push(session.resume ? '--resume' : '--session-id', session.id)
   if (settings.jsonSchema !== false) args.push('--json-schema', JSON.stringify(schemaFor(task, input)))
   const how = archive
     ? 'You may read your own past record in the working directory first. Then reply with the JSON object only.'
     : 'Reply with the JSON object only.'
   const { json, instruction } = userMessage(task, input, how)
+  // In a carried-on conversation the earlier turns were earlier business. Say what this is.
+  const date = (input as { brief?: { date?: unknown } } | null)?.brief?.date
+  const heading = session
+    ? `New business: ${task}${typeof date === 'string' && date ? `, ${date}` : ''}. Earlier turns in this conversation were earlier business and are settled; answer this one only, as your system prompt for ${task} says. Today's brief below is the current truth: where it and anything you remember disagree, the brief wins.\n\n`
+    : ''
   return {
     args,
     ...(archive ? { cwd: archive } : {}),
-    stdin: `${json}\n\n${instruction}\n`,
+    stdin: `${heading}${json}\n\n${instruction}\n`,
     env: childEnv(settings.env),
   }
 }
@@ -221,6 +264,12 @@ export function parseEnvelope(stdout: string): Record<string, unknown> {
 // Turn what Claude Code said when it failed into something the player can act on.
 export function failure(said: string): AiError {
   const text = said.trim().slice(0, 400)
+  if (/no conversation found|session .*not found|could not find (a )?session/i.test(text)) {
+    return new AiError('session-missing', `Claude Code has no conversation to resume: ${text}`)
+  }
+  if (/session id .*(already in use|already exists)/i.test(text)) {
+    return new AiError('session-taken', `Claude Code already has a conversation with that id: ${text}`)
+  }
   if (/not logged in|log ?in expired|please run \/login|\/login|invalid api key|authenticat|oauth token/i.test(text)) {
     return new AiError(
       'auth',
@@ -347,6 +396,35 @@ export function claudeCliProvider(settings: ClaudeCliSettings = {}): ClaudeCliPr
     return ran.stdout.trim().split(/\r?\n/)[0] ?? ''
   }
 
+  async function once<T extends Task>(task: T, input: TaskInput[T], options: SessionRunOptions): Promise<Record<string, unknown>> {
+    const call = buildCall(task, input, { ...settings, env }, options)
+    const target = resolved()
+    if (platform === 'win32' && commandLineLength(target.file, [...target.prefix, ...call.args]) > 32_000) {
+      // The schema is the part that can go; the prompt cannot.
+      const at = call.args.indexOf('--json-schema')
+      if (at >= 0) call.args.splice(at, 2)
+      if (commandLineLength(target.file, [...target.prefix, ...call.args]) > 32_000) {
+        throw new AiError('bad-request', `The ${task} prompt is too long to pass to Claude Code on Windows.`)
+      }
+    }
+    // With no archive to read, run in an empty folder the game owns.
+    const scratch = call.cwd ? undefined : mkdtempSync(join(tmpdir(), 'diplomat-ai-'))
+    try {
+      const timeoutMs = settings.timeouts?.[TASK_TIERS[task]] ?? TIMEOUTS[TASK_TIERS[task]]
+      const ran = await runChild(spawn, target, call.args, {
+        cwd: call.cwd ?? scratch,
+        env: call.env,
+        stdin: call.stdin,
+        timeoutMs,
+        ...(options.signal ? { signal: options.signal } : {}),
+      })
+      if (!ran.stdout.trim()) throw failure(ran.stderr || `Claude Code exited with code ${ran.code} and printed nothing.`)
+      return parseEnvelope(ran.stdout)
+    } finally {
+      if (scratch) rmSync(scratch, { recursive: true, force: true })
+    }
+  }
+
   return {
     async status(): Promise<ProviderStatus> {
       try {
@@ -403,33 +481,31 @@ export function claudeCliProvider(settings: ClaudeCliSettings = {}): ClaudeCliPr
       }
     },
 
-    run<T extends Task>(task: T, input: TaskInput[T], options: { archivePath?: string; signal?: AbortSignal } = {}) {
+    run<T extends Task>(task: T, input: TaskInput[T], options: SessionRunOptions = {}) {
+      return queue(() => once(task, input, options))
+    },
+
+    // One call in a branch's own conversation. A session Claude Code cannot resume is
+    // replaced once by a fresh one with a new id; an id it already holds is resumed instead.
+    runWithSession<T extends Task>(task: T, input: TaskInput[T], options: SessionRunOptions = {}): Promise<SessionResult> {
       return queue(async () => {
-        const call = buildCall(task, input, { ...settings, env }, options)
-        const target = resolved()
-        if (platform === 'win32' && commandLineLength(target.file, [...target.prefix, ...call.args]) > 32_000) {
-          // The schema is the part that can go; the prompt cannot.
-          const at = call.args.indexOf('--json-schema')
-          if (at >= 0) call.args.splice(at, 2)
-          if (commandLineLength(target.file, [...target.prefix, ...call.args]) > 32_000) {
-            throw new AiError('bad-request', `The ${task} prompt is too long to pass to Claude Code on Windows.`)
-          }
+        if (!archivePathOf(input, options)) {
+          // Claude Code files a conversation under its working directory. Without the archive
+          // each call runs in a new scratch folder, and nothing could ever be resumed.
+          throw new AiError('bad-request', "A branch session needs the nation's archive folder as its working directory.")
         }
-        // With no archive to read, run in an empty folder the game owns.
-        const scratch = call.cwd ? undefined : mkdtempSync(join(tmpdir(), 'diplomat-ai-'))
-        try {
-          const timeoutMs = settings.timeouts?.[TASK_TIERS[task]] ?? TIMEOUTS[TASK_TIERS[task]]
-          const ran = await runChild(spawn, target, call.args, {
-            cwd: call.cwd ?? scratch,
-            env: call.env,
-            stdin: call.stdin,
-            timeoutMs,
-            ...(options.signal ? { signal: options.signal } : {}),
-          })
-          if (!ran.stdout.trim()) throw failure(ran.stderr || `Claude Code exited with code ${ran.code} and printed nothing.`)
-          return parseEnvelope(ran.stdout)
-        } finally {
-          if (scratch) rmSync(scratch, { recursive: true, force: true })
+        let session: BranchSession =
+          options.session && UUID.test(options.session.id) ? options.session : { id: randomUUID(), resume: false }
+        for (let attempt = 0; ; attempt++) {
+          try {
+            const output = await once(task, input, { ...options, session })
+            return { output, sessionId: session.id }
+          } catch (error) {
+            if (attempt > 0 || !(error instanceof AiError)) throw error
+            if (error.code === 'session-missing' && session.resume) session = { id: randomUUID(), resume: false }
+            else if (error.code === 'session-taken' && !session.resume) session = { id: session.id, resume: true }
+            else throw error
+          }
         }
       })
     },
