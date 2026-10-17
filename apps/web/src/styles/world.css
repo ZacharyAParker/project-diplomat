@@ -1623,6 +1623,24 @@ html {
   margin-top: var(--space-3);
 }
 
+/* base.css takes the markers off every list; a list in written text keeps them */
+.md ul,
+.md ol {
+  padding-left: var(--space-5);
+}
+
+.md ul {
+  list-style: disc;
+}
+
+.md ol {
+  list-style: decimal;
+}
+
+.md li + li {
+  margin-top: var(--space-1);
+}
+
 .md blockquote {
   margin-left: 0;
   padding-left: var(--space-4);
