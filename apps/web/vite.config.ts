@@ -52,7 +52,8 @@ export default defineConfig({
   // warning about a large chunk would fire on every build and mean nothing.
   build: { target: 'es2023', chunkSizeWarningLimit: 1200 },
   preview: { headers: HEADERS },
-  server: { headers: HEADERS },
+  // The game's server does everything; the dev server only proxies to it (pnpm dev:server).
+  server: { headers: HEADERS, proxy: { '/api': { target: 'http://127.0.0.1:8150', changeOrigin: true } } },
   test: {
     environment: 'jsdom',
     include: ['src/**/*.test.{ts,tsx}'],

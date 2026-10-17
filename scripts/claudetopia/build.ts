@@ -1097,7 +1097,7 @@ export function buildImport(source: string, repo: string, id: string): ImportRes
     directions: parsedDirections.map((d) => ({ day: dayFrom(d.iso, 1), from: d.from, text: d.text, document: directionsDoc?.id ?? '', done: d.done })),
     factbooks,
     worldDays: [...worldDays].sort((a, b) => a - b),
-    lastWorldDay: currentDay,
+    lastWorldDay: Math.max(0, ...worldDays),
     origin: 'claudetopia-archive',
   }
   const save: SaveFile2 = {

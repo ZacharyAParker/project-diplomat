@@ -12,9 +12,11 @@
     "build:pack": "node scripts/build-pack.ts",
     "dev": "node scripts/build-pack.ts && node apps/web/node_modules/vite/bin/vite.js apps/web",
     "build": "node scripts/build-pack.ts && node apps/web/node_modules/vite/bin/vite.js build apps/web",
-    "start": "node apps/web/node_modules/vite/bin/vite.js preview apps/web",
-    "test": "node --test \"packages/*/test/*.test.ts\" && node scripts/build-pack.ts && node apps/web/node_modules/vitest/vitest.mjs run --root apps/web",
-    "typecheck": "tsc --noEmit && node scripts/build-pack.ts && tsc --noEmit -p apps/web"
+    "start": "node apps/server/src/main.ts",
+    "test": "node --test \"packages/*/test/*.test.ts\" \"apps/server/test/*.test.ts\" && node scripts/build-pack.ts && node apps/web/node_modules/vitest/vitest.mjs run --root apps/web",
+    "typecheck": "tsc --noEmit && node scripts/build-pack.ts && tsc --noEmit -p apps/web",
+    "serve": "pnpm build && pnpm start",
+    "dev:server": "node apps/server/src/main.ts --dev-origin http://localhost:5173 --dev-origin http://127.0.0.1:5173"
   },
   "devDependencies": {
     "@types/node": "^24.0.0",

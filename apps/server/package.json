@@ -8,5 +8,9 @@
     "@diplomat/content": "workspace:*",
     "@diplomat/government": "workspace:*",
     "@diplomat/ai": "workspace:*"
+  },
+  "scripts": {
+    "start": "node src/main.ts",
+    "test": "node --test \"test/*.test.ts\""
   }
 }

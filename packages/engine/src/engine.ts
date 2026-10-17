@@ -9,6 +9,7 @@ import {
   type EntryKind,
   type Identity,
   IDENTITY_LIMITS,
+  INDICATORS,
   type IdentityField,
   type IndicatorId,
   type NationState,
@@ -877,6 +878,7 @@ export function adjust(input: GameState, content: Content, adjustments: readonly
   const why = 'Set by hand in the sandbox.'
   for (const a of adjustments) {
     if ('indicator' in a) {
+      if (!INDICATORS.includes(a.indicator)) throw new Error(`unknown indicator ${a.indicator}`)
       const by = clamp(a.to) - state.indicators[a.indicator]
       apply(state, [{ indicator: a.indicator, by, why }], changes)
     } else if ('faction' in a) {
