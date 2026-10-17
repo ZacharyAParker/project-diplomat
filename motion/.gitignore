@@ -1,3 +1,11 @@
 node_modules/
 out/
+
+# made by music.py: the score, and the SoundFont it fetches the first time
 public/music.wav
+public/GeneralUser-GS.sf2
+public/GeneralUser-GS-LICENSE.txt
+
+# python for music.py, which it doesn't share with anything
+.venv-music/
+__pycache__/

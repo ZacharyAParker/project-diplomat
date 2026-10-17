@@ -31,7 +31,7 @@ The MIT and CC BY-SA grants don't cover:
 - **Claudetopia**: the Commonwealth of Claudetopia, its name, its people, its institutions, its
   charter and constitution, and the records written for it, wherever they appear in this
   repository (screenshots, the trailer, test fixtures and examples)
-- **the trailer and its score** (`docs/media/trailer.mp4`, the music made by `motion/music.mjs`
+- **the trailer and its score** (`docs/media/trailer.mp4`, the music made by `motion/music.py`
   and the copy uploaded to GitHub), the README loop (`docs/media/demo.gif`) and the screenshots
   in `docs/screenshots/` and `motion/public/shots/`
 - **the Project Diplomat name and the flag mark**

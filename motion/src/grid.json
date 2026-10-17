@@ -1,0 +1,41 @@
+{
+ "fps": 30,
+ "bpm": 120,
+ "beat": 15,
+ "bar": 60,
+ "frames": 1680,
+ "scenes": {
+  "cold": {
+   "from": 0,
+   "length": 300
+  },
+  "title": {
+   "from": 300,
+   "length": 120
+  },
+  "desk": {
+   "from": 420,
+   "length": 240
+  },
+  "forms": {
+   "from": 660,
+   "length": 240
+  },
+  "world": {
+   "from": 900,
+   "length": 180
+  },
+  "director": {
+   "from": 1080,
+   "length": 240
+  },
+  "archive": {
+   "from": 1320,
+   "length": 180
+  },
+  "end": {
+   "from": 1500,
+   "length": 180
+  }
+ }
+}

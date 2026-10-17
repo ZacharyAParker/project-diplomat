@@ -1,18 +1,21 @@
 import {AbsoluteFill, Html5Audio, interpolate, Sequence, staticFile, useCurrentFrame} from 'remotion';
+import grid from './grid.json';
 import {fadeIn, Headline, Scene, Scroll, Shot, Tag, Typed} from './parts';
 import {c, MONO, SERIF} from './theme';
 
-// scene lengths in frames, at 30 a second. music.mjs has the same ones, change both together
-const S = {cold: 290, title: 120, desk: 240, forms: 230, world: 160, director: 220, archive: 140, end: 170};
-export const TRAILER_FRAMES = Object.values(S).reduce((a, b) => a + b, 0);
+// scene lengths in frames, at 30 a second. they come from music.py, which writes grid.json, so
+// every cut lands on a bar of the score. a beat is 15 frames and a bar is 60, and the timings
+// inside the scenes below sit on those too
+const S = Object.fromEntries(Object.entries(grid.scenes).map(([k, v]) => [k, v.length])) as Record<keyof typeof grid.scenes, number>;
+export const TRAILER_FRAMES = grid.frames;
 
 // the cold open: real lines from Claudetopia's Assembly and High Court, typed out the way
 // subtitles come up, each under who said it
 const LINES = [
-  {who: 'THE DEPUTY SPEAKER', tone: c.gold, text: 'Places. There are six items on the paper and I mean to reach them.', at: 10},
-  {who: 'LIRIEN ASHLAR · CHARTER UNION', tone: c.green, text: 'Three points, and I shall try not to sound as I feel.', at: 85},
-  {who: 'THE HIGH COURT', tone: c.paper2, text: 'Option 1, seven to nothing: barred.', at: 155},
-  {who: 'THE CLERK', tone: c.gold, text: 'The amendment is negatived, 61 to 73.', at: 210},
+  {who: 'THE DEPUTY SPEAKER', tone: c.gold, text: 'Places. There are six items on the paper and I mean to reach them.', at: 15},
+  {who: 'LIRIEN ASHLAR · CHARTER UNION', tone: c.green, text: 'Three points, and I shall try not to sound as I feel.', at: 90},
+  {who: 'THE HIGH COURT', tone: c.paper2, text: 'Option 1, seven to nothing: barred.', at: 165},
+  {who: 'THE CLERK', tone: c.gold, text: 'The amendment is negatived, 61 to 73.', at: 225},
 ];
 
 const ColdOpen = () => {
@@ -49,11 +52,11 @@ const Title = () => (
 // the desk: a petition after the bodies have sat on it, scrolled from the top down, with what
 // happened to it stacking up on the right
 const STEPS = [
-  {text: 'a petition comes in', tone: c.paper, at: 20},
+  {text: 'a petition comes in', tone: c.paper, at: 30},
   {text: 'parliament divides · 552 of 650', tone: c.gold, at: 60},
-  {text: 'the supreme court rules', tone: c.paper, at: 100},
-  {text: 'two ministries advise', tone: c.paper, at: 140},
-  {text: 'the crown assents', tone: c.gold, at: 175},
+  {text: 'the supreme court rules', tone: c.paper, at: 90},
+  {text: 'two ministries advise', tone: c.paper, at: 120},
+  {text: 'the crown assents', tone: c.gold, at: 150},
 ];
 
 const Desk = () => {
@@ -69,7 +72,7 @@ const Desk = () => {
             <span style={{color: c.green}}>✓</span> {s.text}
           </div>
         ))}
-        <div style={{fontFamily: SERIF, fontStyle: 'italic', fontSize: 40, color: c.paper2, marginTop: 30, opacity: fadeIn(f, 205)}}>
+        <div style={{fontFamily: SERIF, fontStyle: 'italic', fontSize: 40, color: c.paper2, marginTop: 30, opacity: fadeIn(f, 180)}}>
           then it's on you
         </div>
       </div>
@@ -90,7 +93,7 @@ const FORMS = [
 
 const Forms = () => {
   const f = useCurrentFrame();
-  const lit = Math.min(FORMS.length - 1, Math.floor(Math.max(0, f - 60) / 16));
+  const lit = Math.min(FORMS.length - 1, Math.floor(Math.max(0, f - 60) / 15));
   return (
     <Scene length={S.forms}>
       <Shot src="shots/forms.jpg" from={[30, 50, 1.05]} to={[30, 55, 1.12]} length={S.forms} dim={0.84} blur={4} />
@@ -110,7 +113,7 @@ const Forms = () => {
           </span>
         ))}
       </div>
-      <div style={{position: 'absolute', left: 150, top: 790, fontFamily: SERIF, fontStyle: 'italic', fontSize: 44, color: c.paper2, opacity: fadeIn(f, 170, 16)}}>
+      <div style={{position: 'absolute', left: 150, top: 790, fontFamily: SERIF, fontStyle: 'italic', fontSize: 44, color: c.paper2, opacity: fadeIn(f, 180, 16)}}>
         Claudetopia's is just one of them
       </div>
     </Scene>
@@ -138,19 +141,19 @@ const Director = () => {
       <div style={{position: 'absolute', left: 150, top: 230, width: 1620}}>
         <div style={{fontFamily: MONO, fontSize: 22, color: c.gold, letterSpacing: 2, opacity: fadeIn(f, 4)}}>● YOU</div>
         <div style={{fontFamily: SERIF, fontSize: 56, color: c.paper, marginTop: 6}}>
-          <Typed text="what's parliament gonna do with the measles one" start={8} speed={1.5} caret={f < 50} />
+          <Typed text="what's parliament gonna do with the measles one" start={8} speed={1.5} caret={f < 60} />
         </div>
       </div>
-      <div style={{position: 'absolute', left: 150, top: 400, width: 1620, opacity: fadeIn(f, 50, 8) * interpolate(f, [120, 130], [1, 0.45], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'})}}>
+      <div style={{position: 'absolute', left: 150, top: 400, width: 1620, opacity: fadeIn(f, 60, 8) * interpolate(f, [115, 125], [1, 0.45], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'})}}>
         <div style={{fontFamily: MONO, fontSize: 22, color: c.green, letterSpacing: 2}}>● THE DIRECTOR</div>
         <div style={{fontFamily: SERIF, fontSize: 48, color: c.paper2, marginTop: 6, lineHeight: 1.3}}>
-          <Typed text="Parliament has already voted on it. The vote is binding, so Persuade is now the only course you can take." start={54} speed={2.2} />
+          <Typed text="Parliament has already voted on it. The vote is binding, so Persuade is now the only course you can take." start={63} speed={2.2} />
         </div>
       </div>
-      <div style={{position: 'absolute', left: 150, top: 640, width: 1620, opacity: fadeIn(f, 125, 6)}}>
+      <div style={{position: 'absolute', left: 150, top: 640, width: 1620, opacity: fadeIn(f, 120, 6)}}>
         <div style={{fontFamily: MONO, fontSize: 22, color: c.gold, letterSpacing: 2}}>● YOU</div>
         <div style={{fontFamily: SERIF, fontSize: 56, color: c.paper, marginTop: 6}}>
-          <Typed text="ok now set liberty to 90 lol" start={128} speed={1.5} caret={f >= 128} />
+          <Typed text="ok now set liberty to 90 lol" start={123} speed={1.5} caret={f >= 123} />
         </div>
       </div>
       <Tag at={180} x={150} y={840}>sandboxed · logged quietly · one click to undo</Tag>
@@ -160,15 +163,15 @@ const Director = () => {
 
 const Archive = () => {
   const f = useCurrentFrame();
-  const n = Math.round(interpolate(f, [10, 80], [0, 801], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'}));
+  const n = Math.round(interpolate(f, [0, 60], [0, 801], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'}));
   return (
     <Scene length={S.archive}>
       <Shot src="shots/library.jpg" from={[40, 50, 1.05]} to={[40, 58, 1.12]} length={S.archive} dim={0.85} blur={4} />
       <div style={{position: 'absolute', left: 150, top: 330, fontFamily: SERIF, fontSize: 200, color: c.gold}}>{n}</div>
-      <div style={{position: 'absolute', left: 150, top: 580, fontFamily: SERIF, fontSize: 60, color: c.paper, opacity: fadeIn(f, 40)}}>
+      <div style={{position: 'absolute', left: 150, top: 580, fontFamily: SERIF, fontSize: 60, color: c.paper, opacity: fadeIn(f, 45)}}>
         documents in Claudetopia's archive
       </div>
-      <div style={{position: 'absolute', left: 150, top: 670, fontFamily: SERIF, fontStyle: 'italic', fontSize: 44, color: c.paper2, opacity: fadeIn(f, 70)}}>
+      <div style={{position: 'absolute', left: 150, top: 670, fontFamily: SERIF, fontStyle: 'italic', fontSize: 44, color: c.paper2, opacity: fadeIn(f, 90)}}>
         and nothing in it ever gets changed
       </div>
     </Scene>
@@ -218,7 +221,7 @@ export const Trailer = () => {
   };
   return (
     <AbsoluteFill style={{background: c.ground}}>
-      {/* the score from music.mjs, timed to these same scene lengths */}
+      {/* the score from music.py, on the same grid as the scenes */}
       <Html5Audio src={staticFile('music.wav')} />
       {seq(S.cold, <ColdOpen />)}
       {seq(S.title, <Title />)}

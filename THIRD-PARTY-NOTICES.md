@@ -41,7 +41,15 @@ game.
   it. See `motion/node_modules/remotion/LICENSE.md` after installing
 - IBM Plex Mono — SIL Open Font License 1.1 — © 2017 IBM Corp., with Reserved Font Name "Plex".
   Loaded from Google Fonts while rendering, and drawn into the trailer's labels
-- the trailer's score is synthesised by `motion/music.mjs` and uses no samples or recordings
+- GeneralUser GS v2.0.3 — GeneralUser GS License v2.0 — © S. Christian Collins
+  (https://www.schristiancollins.com/generaluser). The SoundFont whose sampled instruments play
+  the trailer's score. "You may use GeneralUser GS without restriction for your own music
+  creation, private or commercial." `motion/music.py` downloads it with its license text the
+  first time; neither is committed. The score itself (the notes, the playing and the mix) is
+  original and reserved with the trailer
+- tinysoundfont 0.3.7 — MIT — © 2024 Nathan Whitehead. Plays the SoundFont for `music.py`
+- numpy 2.5.4 — BSD-3-Clause, with parts under 0BSD, MIT, Zlib and CC0-1.0 — © NumPy Developers
+- Python — PSF License. Runs `music.py`; not bundled
 - ffmpeg, if you have it, cuts the README loop. It isn't bundled
 
 ## Programs the game can use

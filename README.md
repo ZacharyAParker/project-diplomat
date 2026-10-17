@@ -13,9 +13,9 @@ found the country and watch it run itself
 
 ![a quick loop: the cold open, a petition going through parliament and the court, the eight forms of government, the director and the archive](docs/media/demo.gif)
 
-and the full trailer if you want it. 52 seconds, sound on
+and the full trailer if you want it. 56 seconds, sound on
 
-https://github.com/user-attachments/assets/6f4a2c8d-0c76-4958-b395-e0a5ea763289
+https://github.com/user-attachments/assets/e1860551-756c-44d1-a973-87e83877ada8
 
 ![the desk: a petition after parliament, the supreme court and two ministries have sat on it, with the division by party and the morning paper next to it](docs/screenshots/desk.webp)
 
@@ -151,8 +151,10 @@ pnpm typecheck
 ```
 
 the trailer and the loop up top are made with [Remotion](https://www.remotion.dev) in `motion/`, music
-included. the music gets synthesised from scratch in `motion/music.mjs` so there's nothing to license.
-run `pnpm install --ignore-workspace` in there, then `pnpm render`
+included. the score is written in `motion/music.py` and played on sampled instruments from the
+[GeneralUser GS](https://www.schristiancollins.com/generaluser) SoundFont, same as Defalt's.
+run `pnpm install --ignore-workspace` in there, make the python venv the top of `music.py` asks for,
+then `pnpm render`
 
 ## where things are
 

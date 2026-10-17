@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "studio": "remotion studio",
-    "music": "node music.mjs",
+    "music": ".venv-music/Scripts/python.exe music.py",
     "render": "node render.mjs"
   },
   "dependencies": {
