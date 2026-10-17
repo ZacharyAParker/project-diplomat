@@ -3,18 +3,20 @@
 // needs ffmpeg on PATH for the gif, and the venv music.py names at its top
 import {execFileSync} from 'node:child_process';
 import {existsSync, mkdirSync} from 'node:fs';
+import {fileURLToPath} from 'node:url';
 
 const OUT = '../docs/media';
-// npx is a script on Windows and needs a shell; ffmpeg is a plain program and must not have one,
-// or the filter graph gets split on its semicolons
-const run = (cmd, args, shell = false) => execFileSync(cmd, args, {stdio: 'inherit', shell});
+// nothing here runs through a shell: remotion is started with node itself, and ffmpeg's filter
+// graph would be split on its semicolons by one
+const run = (cmd, args) => execFileSync(cmd, args, {stdio: 'inherit'});
+const remotion = fileURLToPath(new URL('./node_modules/@remotion/cli/remotion-cli.js', import.meta.url));
 
 mkdirSync(OUT, {recursive: true});
 const python = ['.venv-music/Scripts/python.exe', '.venv-music/bin/python'].find((p) => existsSync(p));
 if (!python) throw new Error('make the venv first: see the top of music.py');
 run(python, ['music.py']);
 // crf 22 keeps the trailer under the 10MB GitHub takes for a video in a README
-run('npx', ['remotion', 'render', 'src/index.ts', 'Trailer', `${OUT}/trailer.mp4`, '--codec=h264', '--crf=22', '--audio-codec=aac', '--audio-bitrate=192k', '--color-space=bt709'], process.platform === 'win32');
+run(process.execPath, [remotion, 'render', 'src/index.ts', 'Trailer', `${OUT}/trailer.mp4`, '--codec=h264', '--crf=22', '--audio-codec=aac', '--audio-bitrate=192k', '--color-space=bt709']);
 
 // the loop: the end of the cold open, the desk, the forms and the director, cut together
 const CUTS = [

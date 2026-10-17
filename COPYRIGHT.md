@@ -24,11 +24,10 @@ trademark, and the name is used only to say what the game was inspired by and wh
 from.
 
 The core pack's dilemmas are original and none of them is taken from NationStates. The repository
-includes no NationStates artwork and no full issue texts. A few NationStates issue titles and
-short opening phrases of their options appear as test data for the Claudetopia importer and in
-screenshots of Claudetopia's records, to show what the game reads; they remain NationStates'
-material. The research notes in `docs/research/` describe how NationStates works, in their own
-words and with links to their sources.
+includes no NationStates artwork and no NationStates issue text; the importer's tests use made-up
+petitions. The research notes in `docs/research/` describe how NationStates works in their own
+words, with links to their sources, and quote a few of NationStates' own short labels and names
+to identify what they're describing; those remain NationStates' material.
 
 The Claudetopia importer (`scripts/import-claudetopia.ts`) reads an archive the player already
 keeps on their own computer. Anything it brings across, including any text that came from
@@ -60,4 +59,4 @@ Nations, archives and imports that a player keeps with their own copy of the gam
 computer, not in this repository, and the maintainer has no access to them.
 
 ---
-Project Diplomat v0.6.1 · © 2026 Zachary Parker
+Project Diplomat v0.6.2 · © 2026 Zachary Parker

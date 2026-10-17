@@ -142,12 +142,12 @@ A document file is front matter then Markdown:
 ---
 id: hansard-00012
 series: hansard
-title: Petition #17, Corporations Demand Political Say — first sitting
+title: Petition #17, The Harbour Board Wants a Vote — first sitting
 day: 12
 date: Thursday 22 October 2026
 issuer: The Commonwealth Assembly
 kind: sitting
-refs: ["petition-00017", "corporations_say"]
+refs: ["petition-00017", "harbour_board_vote"]
 data: {"ladder":["2","1","dismiss"], ...}
 ---
 The debate...

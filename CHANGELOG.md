@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.6.2
+
+Housekeeping, and the trailer gets a real score.
+
+- The trailer's music is played on sampled instruments: a small orchestra from the GeneralUser GS
+  SoundFont, written in `motion/music.py` on a 120 BPM grid. The scenes now cut on its bars, so
+  the trailer runs 56 seconds.
+- `pnpm render` runs Remotion and ffmpeg without a shell, and the unused trailer poster is gone.
+- The Claudetopia importer's tests and the design notes use made-up petitions instead of
+  NationStates issue titles, and the copyright notice says so.
+
 ## 0.6.1
 
 The Director, and a round of fixes.

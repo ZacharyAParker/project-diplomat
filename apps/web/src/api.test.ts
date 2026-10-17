@@ -19,7 +19,7 @@ describe('the client', () => {
   })
 
   it('does not mark a read', async () => {
-    const fetcher = vi.fn<Fetch>(async () => respond(200, { version: '0.6.1' }))
+    const fetcher = vi.fn<Fetch>(async () => respond(200, { version: '0.6.2' }))
     await createHttpApi(fetcher).status()
     expect((fetcher.mock.calls[0]![1]!.headers as Record<string, string>)['X-Diplomat']).toBeUndefined()
   })

@@ -154,7 +154,7 @@ A JSON object:
     "description": ""
   },
   "petition": {
-    "number": 17, "dilemma": "corporations_say", "title": "", "description": "", "kind": "major", "neighbour": "",
+    "number": 17, "dilemma": "harbour_board_vote", "title": "", "description": "", "kind": "major", "neighbour": "",
     "options": [{ "course": "1", "number": 1, "advocate": "", "speech": "", "forecast": ["Liberty down a fair amount"], "tags": [""] }]
   },
   "kind": "first | reconciliation | exchange",

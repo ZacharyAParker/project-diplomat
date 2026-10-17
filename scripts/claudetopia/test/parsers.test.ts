@@ -223,17 +223,17 @@ test('court: a split within a split is read whole, not from the dissent column',
 })
 
 test('petitions: number, options, the Assembly, the Court and the decision', () => {
-  const text = `# Petition #17 — Corporations Demand Political Say
+  const text = `# Petition #17 — The Harbour Board Wants a Vote
 
 - **Received:** real date 2026-10-11; in-world Friday 16 October 2026
 
 ## The options (verbatim)
 
-**Option 1.** “This is supposed to be a democratic country,”
+**Option 1.** “The board moves half the island's freight,”
 
-**Option 2.** “You say political freedom, I hear vote-buying,”
+**Option 2.** “Give them a seat and they'll buy the rest,”
 
-**Option 3.** “Frankly, I don’t see why we need to have elections at all,”
+**Option 3.** “Why stop at the harbour? Let the lighthouse vote too,”
 
 **Dismiss.**
 
@@ -262,7 +262,7 @@ test('petitions: number, options, the Assembly, the Court and the decision', () 
     { course: '1', verdict: 'permitted', split: [6, 1] },
     { course: '3', verdict: 'barred', split: [7, 0] },
   ])
-  const dismissed = parsePetition('# Petition #27 — Cash for Colons?\n\n## The Steward\'s decision\n\n**Dismissed.** 12 October 2026.\n')
+  const dismissed = parsePetition('# Petition #27 — Lamps for Hire?\n\n## The Steward\'s decision\n\n**Dismissed.** 12 October 2026.\n')
   assert.deepEqual(dismissed.decision, { course: 'dismiss', date: '2026-10-12', decree: false })
 })
 
