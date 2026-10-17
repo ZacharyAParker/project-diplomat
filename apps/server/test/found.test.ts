@@ -19,7 +19,8 @@ test('in found mode the AI executive runs the nation for three days', async () =
   const r = await h.post(`/api/nations/${id}/run`, { days: 3 })
   assert.equal(r.status, 200, r.json.error)
   assert.equal(deserialize(r.json.nation.state).day, day + 3)
-  assert.ok(r.json.entries.some((e: any) => e.kind === 'decision'), 'the executive decided')
+  // The executive decides each petition as soon as its bodies finish, and run ends the days.
+  assert.ok(deserialize(r.json.nation.state).timeline.some((e) => e.kind === 'decision' && e.day >= day), 'the executive decided')
   const papers = await h.get(`/api/nations/${id}/archive?series=papers`)
   assert.ok(papers.json.documents.some((d: any) => d.kind === 'decision'), 'the executive wrote its papers')
   const almanac = await h.get(`/api/nations/${id}/archive?series=almanac`)

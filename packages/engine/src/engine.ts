@@ -368,6 +368,7 @@ export function applyExternal(
   headline: string,
   effects: readonly Effect[],
   text?: string,
+  opts: Quiet = {},
 ): GameState {
   const state = structuredClone(input)
   const allowed = effects.filter(
@@ -375,7 +376,9 @@ export function applyExternal(
   )
   const changes: Change[] = []
   apply(state, allowed, changes)
-  record(state, content, kind, headline, changes, text)
+  // Quiet: a sandbox change the in-world record never hears about. The badge says so.
+  if (opts.quiet) state.sandbox = true
+  else record(state, content, kind, headline, changes, text)
   return state
 }
 
@@ -872,7 +875,12 @@ export type Adjustment =
   | { neighbour: string; to: number }
   | { policy: string; to: boolean | number }
 
-export function adjust(input: GameState, content: Content, adjustments: readonly Adjustment[]): GameState {
+// Quiet cheats (the Director's, out of character) set the sandbox badge and write no entry.
+export interface Quiet {
+  quiet?: boolean
+}
+
+export function adjust(input: GameState, content: Content, adjustments: readonly Adjustment[], opts: Quiet = {}): GameState {
   const state = structuredClone(input)
   const changes: Change[] = []
   const why = 'Set by hand in the sandbox.'
@@ -896,12 +904,12 @@ export function adjust(input: GameState, content: Content, adjustments: readonly
     }
   }
   state.sandbox = true
-  record(state, content, 'sandbox', 'Figures changed in the sandbox', changes.filter((c) => c.by !== 0))
+  if (!opts.quiet) record(state, content, 'sandbox', 'Figures changed in the sandbox', changes.filter((c) => c.by !== 0))
   return state
 }
 
 // Puts any dilemma on today's desk, whether or not it is due or its conditions hold.
-export function callUp(input: GameState, content: Content, dilemmaId: string): GameState {
+export function callUp(input: GameState, content: Content, dilemmaId: string, opts: Quiet = {}): GameState {
   const state = structuredClone(input)
   const dilemma = findDilemma(content, dilemmaId)
   if (dilemma.kind === 'major') state.agenda.major = dilemma.id
@@ -912,18 +920,18 @@ export function callUp(input: GameState, content: Content, dilemmaId: string): G
     if (neighbour) state.agenda.bound = { ...state.agenda.bound, [dilemma.id]: neighbour }
   }
   state.sandbox = true
-  record(state, content, 'sandbox', `Called up in the sandbox: ${dilemma.title}`, [])
+  if (!opts.quiet) record(state, content, 'sandbox', `Called up in the sandbox: ${dilemma.title}`, [])
   return state
 }
 
 // Starts any crisis now, at its first stage, in place of any that is running.
-export function startCrisis(input: GameState, content: Content, situationId: string): GameState {
+export function startCrisis(input: GameState, content: Content, situationId: string, opts: Quiet = {}): GameState {
   const state = structuredClone(input)
   const situation = findSituation(content, situationId)
   state.situation = { id: situation.id, stage: 0, gauge: situation.start }
   state.situationsDone = state.situationsDone.filter((id) => id !== situation.id)
   state.agenda.situation = true
   state.sandbox = true
-  record(state, content, 'sandbox', `Crisis started in the sandbox: ${situation.title}`, [], situation.description)
+  if (!opts.quiet) record(state, content, 'sandbox', `Crisis started in the sandbox: ${situation.title}`, [], situation.description)
   return state
 }

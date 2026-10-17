@@ -2,6 +2,7 @@
 // through the bodies by default, and the player's API key. The key is written here and
 // nowhere else, and never sent back: GET says only whether one is set.
 
+import { randomBytes } from 'node:crypto'
 import { chmodSync, existsSync, readFileSync } from 'node:fs'
 import { mkdir, rename, writeFile, chmod } from 'node:fs/promises'
 import { dirname } from 'node:path'
@@ -17,6 +18,8 @@ export interface Settings {
   backend: Backend
   models: Partial<Record<Tier, string>>
   minorsThroughBodies: boolean
+  // The Director: the player's out-of-character partner, always on Claude Code.
+  director: DirectorSettings
   apiKey?: string
   // The claude binary, for the claude-cli back end. Only ever set by hand in the file: a
   // command is never accepted over HTTP.
@@ -28,9 +31,17 @@ export interface PublicSettings {
   apiKeySet: boolean
   models: Record<Tier, string>
   minorsThroughBodies: boolean
+  director: DirectorSettings
 }
 
-const DEFAULTS: Settings = { backend: 'none', models: {}, minorsThroughBodies: false }
+export interface DirectorSettings {
+  enabled: boolean
+  model: string
+}
+
+export const DEFAULT_DIRECTOR: DirectorSettings = { enabled: true, model: 'claude-opus-5-5' }
+
+const DEFAULTS: Settings = { backend: 'none', models: {}, minorsThroughBodies: false, director: { ...DEFAULT_DIRECTOR } }
 
 const isObject = (v: unknown): v is Record<string, unknown> => typeof v === 'object' && v !== null && !Array.isArray(v)
 const MODEL = /^[A-Za-z0-9._:/@[\]-]{1,100}$/
@@ -60,6 +71,10 @@ export class SettingsStore {
         }
       }
       if (typeof raw['minorsThroughBodies'] === 'boolean') out.minorsThroughBodies = raw['minorsThroughBodies']
+      if (isObject(raw['director'])) {
+        if (typeof raw['director']['enabled'] === 'boolean') out.director.enabled = raw['director']['enabled']
+        if (typeof raw['director']['model'] === 'string' && MODEL.test(raw['director']['model'])) out.director.model = raw['director']['model']
+      }
       if (typeof raw['apiKey'] === 'string' && raw['apiKey']) out.apiKey = raw['apiKey']
       if (typeof raw['command'] === 'string' && raw['command']) out.command = raw['command']
       // Keep the file private even if it was copied in loosely.
@@ -84,15 +99,25 @@ export class SettingsStore {
       apiKeySet: Boolean(this.value.apiKey),
       models: resolveModels(this.value.models),
       minorsThroughBodies: this.value.minorsThroughBodies,
+      director: { ...this.value.director },
     }
   }
 
-  async update(change: unknown): Promise<PublicSettings> {
+  private chain: Promise<unknown> = Promise.resolve()
+
+  // One update at a time, each built on the one before.
+  update(change: unknown): Promise<PublicSettings> {
+    const run = this.chain.then(() => this.apply(change))
+    this.chain = run.catch(() => undefined)
+    return run
+  }
+
+  private async apply(change: unknown): Promise<PublicSettings> {
     if (!isObject(change)) throw new HttpError(400, 'Send the settings to change as a JSON object.')
     const next = structuredClone(this.value)
     for (const key of Object.keys(change)) {
-      if (!['backend', 'apiKey', 'models', 'minorsThroughBodies'].includes(key)) {
-        throw new HttpError(400, `“${key}” is not a setting. The settings are backend, apiKey, models and minorsThroughBodies.`)
+      if (!['backend', 'apiKey', 'models', 'minorsThroughBodies', 'director'].includes(key)) {
+        throw new HttpError(400, `“${key}” is not a setting. The settings are backend, apiKey, models, minorsThroughBodies and director.`)
       }
     }
     if (change['backend'] !== undefined) {
@@ -124,8 +149,21 @@ export class SettingsStore {
       if (typeof change['minorsThroughBodies'] !== 'boolean') throw new HttpError(400, 'minorsThroughBodies must be true or false.')
       next.minorsThroughBodies = change['minorsThroughBodies']
     }
+    if (change['director'] !== undefined) {
+      const d = change['director']
+      if (!isObject(d)) throw new HttpError(400, 'director must be an object with enabled and model.')
+      for (const k of Object.keys(d)) if (k !== 'enabled' && k !== 'model') throw new HttpError(400, `director.${k} is not a setting. The Director's settings are enabled and model.`)
+      if (d['enabled'] !== undefined) {
+        if (typeof d['enabled'] !== 'boolean') throw new HttpError(400, 'director.enabled must be true or false.')
+        next.director.enabled = d['enabled']
+      }
+      if (d['model'] !== undefined) {
+        if (typeof d['model'] !== 'string' || !MODEL.test(d['model'])) throw new HttpError(400, 'director.model is not a model name.')
+        next.director.model = d['model']
+      }
+    }
     await mkdir(dirname(this.file), { recursive: true })
-    const temp = `${this.file}.${process.pid}.tmp`
+    const temp = `${this.file}.${process.pid}.${randomBytes(6).toString('hex')}.tmp`
     await writeFile(temp, `${JSON.stringify(next, null, 2)}\n`, { encoding: 'utf8', mode: 0o600 })
     try {
       await chmod(temp, 0o600)

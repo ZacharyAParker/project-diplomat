@@ -4,7 +4,7 @@
 
 import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import { mkdir, rename, writeFile } from 'node:fs/promises'
-import { dirname, join } from 'node:path'
+import { dirname, join, resolve, sep } from 'node:path'
 import {
   documentPath,
   docId,
@@ -55,7 +55,27 @@ export const extractOf = (body: string, size = EXTRACT) =>
     .trim()
     .slice(0, size)
 
+// Nation folders that have been moved to the trash. Nothing may be written under one again,
+// so a write still in flight when a nation was deleted can never recreate its folder.
+const removed = new Set<string>()
+
+export function markRemoved(dir: string) {
+  removed.add(resolve(dir).toLowerCase())
+}
+
+export function unmarkRemoved(dir: string) {
+  removed.delete(resolve(dir).toLowerCase())
+}
+
+export function guard(path: string) {
+  const p = resolve(path).toLowerCase()
+  for (const dir of removed) {
+    if (p === dir || p.startsWith(dir + sep)) throw new Error('That nation has been deleted.')
+  }
+}
+
 async function writeAtomic(path: string, text: string) {
+  guard(path)
   await mkdir(dirname(path), { recursive: true })
   const temp = `${path}.${process.pid}.${Math.random().toString(36).slice(2)}.tmp`
   await writeFile(temp, text, 'utf8')
@@ -127,8 +147,11 @@ export class Archive {
     const text = serializeDocument(full)
     const back = parseDocument(text)
     if (!back.ok) throw new Error(`a document could not be written: ${back.problem}`)
-    this.index(back.document)
+    // The number is taken at once, so two writes in flight never share it; the document is
+    // indexed only once its file is on disk, so nothing cites a document that is not there.
+    this.seqs.set(doc.series, seq)
     await writeAtomic(join(this.dir, documentPath(full)), text)
+    this.index(back.document)
     return full.id
   }
 

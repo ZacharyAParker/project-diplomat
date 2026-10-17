@@ -1,7 +1,8 @@
 // The server as a whole: the pack, the data folder, the AI, the routes. main.ts starts it
 // from the command line; the tests start it on an ephemeral port.
 
-import { readFileSync } from 'node:fs'
+import { randomBytes, timingSafeEqual } from 'node:crypto'
+import { chmodSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { createServer, type Server } from 'node:http'
 import { join, resolve } from 'node:path'
 import { checkPack } from '@diplomat/content'
@@ -9,6 +10,8 @@ import type { Content } from '@diplomat/engine'
 import type { Series } from '@diplomat/government'
 import { SERIES } from '@diplomat/government'
 import { Ai } from './ai.ts'
+import { Director } from './director.ts'
+import { DirectorTools } from './director-tools.ts'
 import { Dockets } from './dockets.ts'
 import { Game } from './game.ts'
 import { handler, HttpError, Router, type Request } from './http.ts'
@@ -36,7 +39,37 @@ export interface Running {
   port: number
   game: Game
   ai: Ai
+  director: Director
+  tools: DirectorTools
+  data: string
   close(): Promise<void>
+}
+
+// data/director-token: what the MCP server shows to use the Director's endpoints. Made at
+// first start, readable by the player's account only, and never sent in any response.
+export const TOKEN_FILE = 'director-token'
+
+export function ensureToken(data: string): string {
+  const file = join(data, TOKEN_FILE)
+  if (existsSync(file)) {
+    const token = readFileSync(file, 'utf8').trim()
+    if (/^[0-9a-f]{64}$/.test(token)) return token
+  }
+  mkdirSync(data, { recursive: true })
+  const token = randomBytes(32).toString('hex')
+  writeFileSync(file, `${token}
+`, { mode: 0o600 })
+  try {
+    chmodSync(file, 0o600)
+  } catch {
+    // Windows keeps only the read-only bit; the file sits in the player's own data folder.
+  }
+  return token
+}
+
+function tokenMatches(given: unknown, token: string): boolean {
+  if (typeof given !== 'string' || given.length !== token.length) return false
+  return timingSafeEqual(Buffer.from(given), Buffer.from(token))
 }
 
 let packCache: { dir: string; content: Content } | null = null
@@ -56,9 +89,30 @@ const int = (v: string | null, what: string): number | undefined => {
   return n
 }
 
-export function routes(game: Game, ai: Ai, settings: SettingsStore, content: Content): Router {
+export function routes(game: Game, ai: Ai, settings: SettingsStore, content: Content, extra?: { tools: DirectorTools; director: Director; token: string }): Router {
   const r = new Router()
   const id = (req: Request) => req.params['id']!
+  if (extra) {
+    const { tools, director, token } = extra
+    // The MCP server's calls. Each needs the token; a wrong one says so and nothing more.
+    const tool = async (req: Request, nation: string | null) => {
+      if (!tokenMatches(req.headers['x-director-token'], token)) throw new HttpError(401, 'The Director’s token is missing or wrong. Start the MCP server with the same data folder as the game server.')
+      return { json: await tools.call(req.params['tool']!, nation, req.body) }
+    }
+    r.on('POST', '/api/director/:tool', (req) => tool(req, null))
+    r.on('POST', '/api/director/:nation/:tool', (req) => tool(req, req.params['nation']!))
+    r.on('GET', '/api/nations/:id/ooc', (req) => ({ json: tools.oocLog(id(req)) }))
+    r.on('POST', '/api/nations/:id/ooc/:n/undo', async (req) => {
+      const n = Number(req.params['n'])
+      if (!Number.isSafeInteger(n) || n < 1) throw new HttpError(400, 'n must be the number of an entry in the OOC log.')
+      const b = req.body as { request?: unknown } | undefined
+      return { json: await tools.undo(id(req), n, typeof b?.request === 'string' ? b.request : 'Undone from the Founder’s page.') }
+    })
+    r.on('GET', '/api/nations/:id/director', async (req) => ({ json: await director.view(id(req)) }))
+    r.on('POST', '/api/nations/:id/director', async (req) => ({ status: 202, json: await director.send(id(req), req.body) }))
+    r.on('POST', '/api/nations/:id/director/stop', (req) => ({ json: director.stop(id(req)) }))
+    r.on('POST', '/api/nations/:id/director/reset', async (req) => ({ json: await director.reset(id(req)) }))
+  }
 
   r.on('GET', '/api/status', async () => ({ json: { version: VERSION, pack: { id: content.pack.id, name: content.pack.name, version: content.pack.version }, ai: await ai.status() } }))
   r.on('GET', '/api/settings', () => ({ json: settings.public() }))
@@ -69,7 +123,10 @@ export function routes(game: Game, ai: Ai, settings: SettingsStore, content: Con
   r.on('POST', '/api/nations', async (req) => ({ status: 201, json: await game.found(req.body) }))
   r.on('POST', '/api/nations/import', async (req) => ({ status: 201, json: await game.importText(req.body) }), { maxBody: 200 * 1024 * 1024 })
   r.on('GET', '/api/nations/:id', (req) => ({ json: game.view(id(req)) }))
-  r.on('DELETE', '/api/nations/:id', async (req) => ({ json: await game.remove(id(req)) }))
+  r.on('DELETE', '/api/nations/:id', async (req) => {
+    if (extra && game.store.exists(id(req)) && extra.director.busy(id(req))) extra.director.stop(id(req), 'The nation was deleted.')
+    return { json: await game.remove(id(req)) }
+  })
   r.on('GET', '/api/nations/:id/export', (req) => {
     const { text, filename } = game.exportText(id(req))
     return { text, type: 'application/json; charset=utf-8', headers: { 'Content-Disposition': `attachment; filename="${filename}"` } }
@@ -132,12 +189,15 @@ export async function start(opts: Options = {}): Promise<Running> {
   const store = new Store(data, content)
   const dockets = new Dockets(store, ai, content, settings)
   const game = new Game(store, ai, dockets, content)
+  const tools = new DirectorTools(game, content)
+  const token = ensureToken(data)
   const log = opts.log ?? (() => {})
   dockets.log = log
   dockets.onReady = (nation, dilemma) => game.autoDecide(nation, dilemma)
   let port = opts.port ?? 8150
+  const director = new Director({ data, port: () => port, settings, store, log })
   const web = opts.web === undefined ? join(ROOT, 'apps/web/dist') : opts.web
-  const server = createServer(handler({ port: () => port, router: routes(game, ai, settings, content), web, devOrigins: opts.devOrigins ?? [], log }))
+  const server = createServer(handler({ port: () => port, router: routes(game, ai, settings, content, { tools, director, token }), web, devOrigins: opts.devOrigins ?? [], log }))
   server.keepAliveTimeout = 5_000
   await new Promise<void>((ok, fail) => {
     server.once('error', fail)
@@ -155,7 +215,11 @@ export async function start(opts: Options = {}): Promise<Running> {
     port,
     game,
     ai,
+    director,
+    tools,
+    data,
     close: async () => {
+      director.close()
       for (const nid of store.ids()) dockets.cancel(nid)
       server.closeAllConnections()
       await new Promise<void>((ok) => server.close(() => ok()))

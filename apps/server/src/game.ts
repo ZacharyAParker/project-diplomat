@@ -43,6 +43,8 @@ import {
   FORM_IDS,
   founderDocuments,
   newGovernment,
+  renewInstitutions,
+  formatDate,
   petitionBrief,
   runEvening,
   runExecutive,
@@ -62,6 +64,7 @@ import {
 } from '@diplomat/government'
 import type { Ai } from './ai.ts'
 import { contextFor } from './context.ts'
+import { OocLog, Sessions } from './ooc.ts'
 import type { Dockets } from './dockets.ts'
 import { HttpError } from './http.ts'
 import { ID, readDocument, readSave, readState, snapshot, toSave, withDayEnd, type Nation, type Store, type TodayDecision } from './store.ts'
@@ -206,7 +209,7 @@ export class Game {
     return this.payload(this.store.open(id))
   }
 
-  private act<T>(id: string, fn: (n: Nation) => Promise<T>): Promise<T> {
+  act<T>(id: string, fn: (n: Nation) => Promise<T>): Promise<T> {
     if (!ID.test(id)) throw new HttpError(400, 'A nation id is lower-case letters, digits and hyphens.')
     // An action that fails leaves the nation as it was: what it had changed in memory is
     // put back (documents it wrote stay, as the Archive never takes anything out).
@@ -222,11 +225,11 @@ export class Game {
     })
   }
 
-  private async write(n: Nation, doc: Omit<ArchiveDocument, 'id' | 'date'>): Promise<string> {
+  async write(n: Nation, doc: Omit<ArchiveDocument, 'id' | 'date'>): Promise<string> {
     return contextFor(n, this.content, this.ai).write(doc)
   }
 
-  private founderName(n: Nation) {
+  founderName(n: Nation) {
     const f = n.gov.institutions.founder
     return `${f.name}, ${/^the /i.test(f.title) ? f.title.replace(/^The /, 'the ') : `the ${f.title}`}`
   }
@@ -252,11 +255,14 @@ export class Game {
     const gov = engine(() => newGovernment(form, mode, state, this.content, { founder, calendarStart: todayIso(), seed: s, answers: answers as Record<string, string> }))
     const id = this.store.freshId(identity.name)
     const now = new Date().toISOString()
-    const n = await this.store.create({ id, createdAt: now, updatedAt: now, state, history: [snapshot(state, 0)], gov, today: { day: state.day, decisions: [] } })
+    // Made whole under the nation's lock, documents and first dockets included, before
+    // anything can see it.
     return this.store.lock(id, async () => {
-      for (const doc of founderDocuments(n.gov, n.state)) await n.archive.write(doc)
-      const opened = this.dockets.openFor(n)
-      await this.store.save(n)
+      let opened: string[] = []
+      const n = await this.store.create({ id, createdAt: now, updatedAt: now, state, history: [snapshot(state, 0)], gov, today: { day: state.day, decisions: [] } }, [], async (made) => {
+        for (const doc of founderDocuments(made.gov, made.state)) await made.archive.write(doc)
+        opened = this.dockets.openFor(made)
+      })
       this.dockets.start(id, opened)
       return { id, ...this.payload(n) }
     })
@@ -291,13 +297,18 @@ export class Game {
       seen.add(d.id)
     }
     const id = ID.test(parts.id) && !this.store.exists(parts.id) ? parts.id : this.store.freshId(parts.state.identity.name)
-    const n = await this.store.create({ ...parts, id }, documents)
     const notice = id === parts.id ? undefined : `A nation “${parts.id}” was already here, so this one was stored as “${id}”.`
-    const left = Object.values(n.gov.dockets).filter((d) => ['waiting', 'sitting', 'reconciling', 'exchanging'].includes(d.status) && d.day === n.state.day)
-    const fresh = this.dockets.openFor(n)
-    if (fresh.length) await this.store.save(n)
-    this.dockets.start(id, [...left.map((d) => d.dilemma), ...fresh])
-    return { id, name: n.state.identity.name, ...(notice ? { notice } : {}), ...this.payload(n) }
+    return this.store.lock(id, async () => {
+      let send: string[] = []
+      const n = await this.store.create({ ...parts, id }, documents, async (made) => {
+        const left = Object.values(made.gov.dockets).filter((d) => ['waiting', 'sitting', 'reconciling', 'exchanging'].includes(d.status) && d.day === made.state.day)
+        send = [...left.map((d) => d.dilemma), ...this.dockets.openFor(made)]
+      })
+      this.dockets.start(id, send)
+      // A found-mode nation's executive takes up what its bodies had already finished.
+      this.dockets.decideReady(id, n)
+      return { id, name: n.state.identity.name, ...(notice ? { notice } : {}), ...this.payload(n) }
+    })
   }
 
   private async import05(file: Record<string, unknown>, now: string) {
@@ -317,19 +328,16 @@ export class Game {
     })
     const wanted = typeof file['id'] === 'string' ? file['id'] : ''
     const id = ID.test(wanted) && !this.store.exists(wanted) ? wanted : this.store.freshId(state.identity.name)
-    const n = await this.store.create({
-      id,
-      createdAt: typeof file['createdAt'] === 'string' ? file['createdAt'] : now,
-      updatedAt: now,
-      state,
-      history,
-      gov,
-      today: { day: state.day, decisions: [] },
-    })
     return this.store.lock(id, async () => {
-      for (const doc of founderDocuments(n.gov, n.state)) await n.archive.write(doc)
-      const opened = this.dockets.openFor(n)
-      await this.store.save(n)
+      let opened: string[] = []
+      const n = await this.store.create(
+        { id, createdAt: typeof file['createdAt'] === 'string' ? file['createdAt'] : now, updatedAt: now, state, history, gov, today: { day: state.day, decisions: [] } },
+        [],
+        async (made) => {
+          for (const doc of founderDocuments(made.gov, made.state)) await made.archive.write(doc)
+          opened = this.dockets.openFor(made)
+        },
+      )
       this.dockets.start(id, opened)
       return {
         id,
@@ -350,10 +358,14 @@ export class Game {
 
   async remove(id: string) {
     this.store.dirOf(id)
+    // Whatever is sitting is set aside and waited for (briefly: a model mid-call is not), so
+    // no background work writes into the folder as it goes.
     this.dockets.cancel(id)
+    await Promise.race([this.dockets.idle(id), new Promise((ok) => setTimeout(ok, 10_000).unref())])
     await this.store.lock(id, async () => {
       await this.store.remove(id)
     })
+    this.dockets.cancel(id)
     return { ok: true }
   }
 
@@ -361,36 +373,40 @@ export class Game {
   // The desk
   // ---------------------------------------------------------------------------------------
 
-  private onAgenda(n: Nation, dilemmaId: string) {
+  onAgenda(n: Nation, dilemmaId: string) {
     const a = n.state.agenda
     return a.major === dilemmaId || a.minors.includes(dilemmaId)
   }
 
-  private courses(n: Nation, dilemmaId: string, number: number): Course[] {
+  courses(n: Nation, dilemmaId: string, number: number): Course[] {
     return petitionBrief(n.state, this.content, dilemmaId, number).options.map((o) => o.course)
   }
 
-  private standingOf(n: Nation, docket: Docket): Standing {
+  standingOf(n: Nation, docket: Docket): Standing {
     return docket.standing ?? standingOf(docket, n.gov.institutions, this.courses(n, docket.dilemma, docket.number))
   }
 
   // The Word the Founder has confirmed overruling this petition, if any.
+  // A confirmed Word given for this petition today, not yet spent on a decision. A Word from
+  // an earlier day does not carry over to the same issue coming round again.
   private wordFor(n: Nation, dilemmaId: string) {
-    return [...n.gov.words].reverse().find((w) => w.overrules === dilemmaId && w.confirmed)
+    const spent = (text: string, day: number) => Object.values(n.gov.dockets).some((d) => d.decision?.word === text && d.decision.day === day)
+    return [...n.gov.words].reverse().find((w) => w.overrules === dilemmaId && w.confirmed && w.day === n.state.day && !spent(w.text, w.day))
   }
 
-  private pushToday(n: Nation, summary: TodayDecision) {
+  pushToday(n: Nation, summary: TodayDecision) {
     n.today = n.today.day === n.state.day ? { day: n.today.day, decisions: [...n.today.decisions, summary] } : { day: n.state.day, decisions: [summary] }
   }
 
   // Enacts a course for a docketed petition: the engine, any Word's cost, the petition
   // document, the docket filed. n.state and n.gov are the morning's until this returns.
-  private async enact(
+  async enact(
     n: Nation,
     docket: Docket,
     standing: Standing,
     course: Course,
     opts: { text?: string; reasons: string; veto?: string; word?: string },
+    problems: string[] = [],
   ): Promise<TimelineEntry[]> {
     const pre = n.state
     const dilemma = this.content.dilemmas.find((d) => d.id === docket.dilemma)!
@@ -410,18 +426,35 @@ export class Game {
       ...(opts.veto && vetoable && course !== vetoable ? { veto: { course: vetoable, reasons: opts.veto } } : {}),
       ...(opts.word ? { word: opts.word } : {}),
     })
+    // The petition document is written from the morning's state, so its context is made
+    // before the decision is enacted.
     const ctx = contextFor(n, this.content, this.ai)
-    const done = await completeDocket(ctx, { ...docket, standing }, decision, entry)
-    const summary = decisionSummary(done, entry, { state: pre, content: this.content })
-    n.gov = fileDocket(n.gov, done)
+    // The decision is saved first, and only then written into the record: a crash between
+    // the two leaves a decided petition missing its document, never a document for a
+    // petition that was not decided.
+    const decided: Docket = { ...docket, standing, status: 'decided', decision }
+    const summary = decisionSummary(decided, entry, { state: pre, content: this.content })
+    n.gov = fileDocket(n.gov, decided)
     n.state = next
     this.pushToday(n, summary)
+    await this.store.save(n)
+    try {
+      const done = await completeDocket(ctx, { ...docket, standing }, decision, entry)
+      n.gov = fileDocket(n.gov, done)
+      await this.store.save(n)
+    } catch (error) {
+      const line = `Petition #${docket.number} was decided, but its record could not be written: ${(error as Error).message}`
+      problems.push(line)
+      await OocLog.of(n.dir)
+        .append({ day: pre.day, action: 'record-failure', detail: line, request: '' })
+        .catch(() => undefined)
+    }
     return entries
   }
 
   // The docket a decision is filed on: the one the bodies sat on, or for a petition that
   // goes to the executive alone, a new one with nothing sat.
-  private docketFor(n: Nation, dilemmaId: string): { docket: Docket; fresh: boolean } {
+  docketFor(n: Nation, dilemmaId: string): { docket: Docket; fresh: boolean } {
     const existing = n.gov.dockets[dilemmaId]
     if (existing) return { docket: existing, fresh: false }
     return { docket: this.dockets.open(n, dilemmaId), fresh: true }
@@ -441,15 +474,19 @@ export class Game {
       if (course !== DISMISS && !availableOptions(dilemma.options, n.state).some((o) => o.id === course)) {
         throw new HttpError(400, `“${course}” is not one of the courses open on this petition.`)
       }
-      const through = this.dockets.throughBodies(n, dilemmaId)
       const { docket, fresh } = this.docketFor(n, dilemmaId)
       const word = wordText ?? this.wordFor(n, dilemmaId)?.text
+      if (docket.status === 'decided') throw new HttpError(409, `Petition #${docket.number} has already been decided.`)
+      if (n.gov.mode === 'found' && !word) {
+        throw new HttpError(409, `In found mode the AI executive holds the office of ${n.gov.institutions.constitution.rules.executive.title.replace(/^The /, 'the ')} and decides each petition itself. Give a Founder’s Word to decide this one, or switch the nation to govern mode.`)
+      }
       if (!word) {
-        if (docket.status === 'decided') throw new HttpError(409, `Petition #${docket.number} has already been decided.`)
-        if (through && fresh) throw new HttpError(409, 'The bodies have not been convened on this petition. Convene them first, or decide it by a Founder’s Word.')
+        // Every petition has a docket, minors included: the rules decide which bodies sit
+        // on it. A standing is only ever read from a docket the bodies have finished.
+        if (fresh) throw new HttpError(409, 'The bodies have not been convened on this petition. Convene them first, or decide it by a Founder’s Word.')
         if (docket.status === 'failed') throw new HttpError(409, `The bodies could not finish Petition #${docket.number} (${docket.error ?? 'no reason given'}). Convene them again, or decide it by a Founder’s Word.`)
         if (!fresh && docket.status !== 'ready') throw new HttpError(409, `The bodies are still sitting on Petition #${docket.number}. Wait for them to finish, or decide it by a Founder’s Word.`)
-      } else if (docket.status === 'decided') throw new HttpError(409, `Petition #${docket.number} has already been decided.`)
+      }
       const standing = this.standingOf(n, docket)
       if (!word) {
         const ok = check(standing, course, { ...(veto ? { veto } : {}) })
@@ -461,9 +498,10 @@ export class Game {
       const exec = n.gov.institutions.constitution.rules.executive.title
       const said = reasons ?? veto ?? (word ? 'By the Founder’s Word.' : `Taken by ${exec.replace(/^The /, 'the ')}${course === DISMISS ? ', who let the matter rest' : ''}.`)
       if (fresh) n.gov = fileDocket(n.gov, docket)
-      const entries = await this.enact(n, n.gov.dockets[dilemmaId]!, standing, course, { ...(text ? { text } : {}), reasons: said, ...(veto ? { veto } : {}), ...(word ? { word } : {}) })
+      const problems: string[] = []
+      const entries = await this.enact(n, n.gov.dockets[dilemmaId]!, standing, course, { ...(text ? { text } : {}), reasons: said, ...(veto ? { veto } : {}), ...(word ? { word } : {}) }, problems)
       await this.store.save(n)
-      return { entry: entries[0], entries, ...this.payload(n) }
+      return { entry: entries[0], entries, ...(problems.length ? { problems } : {}), ...this.payload(n) }
     })
   }
 
@@ -513,6 +551,8 @@ export class Game {
         if (bill.effects.length) state = applyExternal(state, this.content, 'law', `${bill.title} becomes law`, bill.effects, bill.summary)
         if (bill.amendment) {
           gov = { ...gov, institutions: amend(gov.institutions, bill.amendment, state.day) }
+          // A new constitution: every branch starts a fresh session and reads it afresh.
+          await Sessions.of(n.dir).reset()
           await this.write({ ...n, gov }, {
             series: 'law',
             title: `${bill.title}: the constitution amended`,
@@ -526,8 +566,29 @@ export class Game {
         }
       }
     }
+    const night = state.timeline.length
     state = endDay(state, this.content)
     n.history = withDayEnd(n.history, state)
+    // The engine may have replaced ministers or held an election overnight: the government's
+    // own account of itself follows, and the record says so.
+    const renewal = renewInstitutions(gov.institutions, state, state.timeline.slice(night))
+    if (renewal.changes.length) {
+      gov = { ...gov, institutions: renewal.institutions }
+      try {
+        await this.write({ ...n, state, gov }, {
+          series: 'papers',
+          title: `The government renewed: ${formatDate(gov.institutions.calendar.start, state.day)}`,
+          day: state.day,
+          issuer: gov.institutions.constitution.stateName,
+          kind: 'renewal',
+          refs: [],
+          body: ['# The government renewed', '', ...renewal.changes.map((c) => `- ${c}`)].join(String.fromCharCode(10)),
+          data: { changes: renewal.changes },
+        })
+      } catch (error) {
+        problems.push(`The renewal of the government could not be written into the record: ${(error as Error).message}`)
+      }
+    }
     // Yesterday's dockets are done with: decided ones are in the record, and any left
     // undecided lapse with the day.
     gov = { ...gov, dockets: {} }
@@ -549,12 +610,13 @@ export class Game {
 
   // Found mode: the AI executive decides every petition on the desk, the crisis if there is
   // one, and the day is ended; up to seven days.
-  async run(id: string, input: unknown) {
+  // force: the Director runs the nation whatever the mode.
+  async run(id: string, input: unknown, opts: { force?: boolean } = {}) {
     const v = body(input)
     const days = v['days'] === undefined ? 1 : v['days']
     if (!Number.isSafeInteger(days) || (days as number) < 1 || (days as number) > 7) throw new HttpError(400, 'days must be a whole number from 1 to 7.')
     const first = this.store.open(id)
-    if (first.gov.mode !== 'found') throw new HttpError(409, 'Run the nation is for found mode, where the AI holds the executive. Switch the mode on the nation’s settings first.')
+    if (first.gov.mode !== 'found' && !opts.force) throw new HttpError(409, 'Run the nation is for found mode, where the AI holds the executive. Switch the mode on the nation’s settings first.')
     const entries: TimelineEntry[] = []
     const problems: string[] = []
     for (let day = 0; day < (days as number); day++) {
@@ -566,8 +628,17 @@ export class Game {
         this.dockets.start(id, [...opened, ...stuck.map((d) => d.dilemma).filter((d) => !opened.includes(d))])
       })
       await this.dockets.idle(id)
+      // A docket that failed is sent back to the bodies once more, and waited for.
+      const failed = await this.act(id, async (n) => {
+        const list = Object.values(n.gov.dockets).filter((d) => d.status === 'failed' && this.onAgenda(n, d.dilemma))
+        for (const d of list) n.gov = fileDocket(n.gov, this.dockets.open(n, d.dilemma, d.number))
+        if (list.length) await this.store.save(n)
+        this.dockets.start(id, list.map((d) => d.dilemma))
+        return list.length
+      })
+      if (failed) await this.dockets.idle(id)
       const result = await this.act(id, async (n) => {
-        if (n.gov.mode !== 'found') throw new HttpError(409, 'The mode was changed to govern, so the run stopped.')
+        if (n.gov.mode !== 'found' && !opts.force) throw new HttpError(409, 'The mode was changed to govern, so the run stopped.')
         const out: TimelineEntry[] = []
         for (const dilemmaId of this.dockets.agendaOf(n)) out.push(...(await this.executiveDecides(n, dilemmaId, problems)))
         const items = agendaItems(n.state, this.content)
@@ -596,6 +667,16 @@ export class Game {
   private async executiveDecides(n: Nation, dilemmaId: string, problems: string[]): Promise<TimelineEntry[]> {
     const { docket, fresh } = this.docketFor(n, dilemmaId)
     if (docket.status === 'decided') return []
+    if (fresh) {
+      problems.push(`Petition ${dilemmaId} was not decided today: no body had been convened on it.`)
+      return []
+    }
+    // Only what the bodies have finished is decided: a failed docket lacks a ruling or a
+    // vote the rules need. It waits, and the day goes on without it.
+    if (docket.status !== 'ready') {
+      problems.push(`Petition #${docket.number} was not decided today: ${docket.status === 'failed' ? `the bodies could not finish it (${docket.error ?? 'no reason given'})` : `the bodies were still ${docket.status}`}.`)
+      return []
+    }
     if (fresh) n.gov = fileDocket(n.gov, docket)
     const standing = this.standingOf(n, n.gov.dockets[dilemmaId]!)
     // The screen polls while the executive thinks, so it says so rather than "ready".
@@ -604,7 +685,7 @@ export class Game {
       ...n.gov,
       dockets: {
         ...n.gov.dockets,
-        [dilemmaId]: { ...n.gov.dockets[dilemmaId]!, status: 'deciding', progress: [...n.gov.dockets[dilemmaId]!.progress, `The ${executive} is considering the petition`] },
+        [dilemmaId]: { ...n.gov.dockets[dilemmaId]!, status: 'deciding', progress: [...n.gov.dockets[dilemmaId]!.progress, `${/^the /i.test(executive) ? executive : `The ${executive}`} is considering the petition`] },
       },
     }
     const filed = n.gov.dockets[dilemmaId]!
@@ -613,11 +694,18 @@ export class Game {
     const dilemma = this.content.dilemmas.find((d) => d.id === dilemmaId)!
     const option = dilemma.options.find((o) => o.id === decision.course)
     const text = option?.custom ? nameFor(option.custom.field, decision.reasons, n.state) : undefined
-    return this.enact(n, filed, standing, decision.course, {
-      reasons: decision.reasons,
-      ...(text ? { text } : {}),
-      ...(decision.veto ? { veto: decision.veto.reasons } : {}),
-    })
+    return this.enact(
+      n,
+      filed,
+      standing,
+      decision.course,
+      {
+        reasons: decision.reasons,
+        ...(text ? { text } : {}),
+        ...(decision.veto ? { veto: decision.veto.reasons } : {}),
+      },
+      problems,
+    )
   }
 
   // Found mode: as soon as the bodies have finished, the executive decides.
@@ -708,11 +796,35 @@ export class Game {
         n.gov = { ...n.gov, dockets: {}, lastWorldDay: Math.max(n.gov.lastWorldDay, n.state.day - 1) }
         n.today = { day: n.state.day, decisions: [] }
       }
-      const opened = this.dockets.openFor(n)
+      // Changed figures, an issue or a crisis put on the desk: no sitting may rest on what is
+      // no longer true, so the day's open petitions go back to the bodies.
+      const send = v['skip'] === undefined ? await this.reconvene(n) : this.dockets.openFor(n)
       await this.store.save(n)
-      this.dockets.start(id, opened)
+      this.dockets.start(id, send)
       return { ...(entries.length ? { entries } : {}), ...this.payload(n) }
     })
+  }
+
+  // The day's open, undecided petitions are sent back to the bodies (keeping their numbers),
+  // any no longer on the desk dropped, new ones opened, and every branch starts a fresh
+  // session. Changes n; the caller saves, then starts what this returns.
+  async reconvene(n: Nation, keep: readonly string[] = []): Promise<string[]> {
+    this.dockets.cancel(n.id)
+    const onDesk = new Set(this.dockets.agendaOf(n))
+    const dockets = { ...n.gov.dockets }
+    for (const [dilemma, d] of Object.entries(dockets)) {
+      if (d.status !== 'decided' && !onDesk.has(dilemma)) delete dockets[dilemma]
+    }
+    n.gov = { ...n.gov, dockets }
+    const send: string[] = []
+    for (const d of Object.values(n.gov.dockets)) {
+      if (d.status === 'decided' || keep.includes(d.dilemma)) continue
+      n.gov = fileDocket(n.gov, this.dockets.open(n, d.dilemma, d.number))
+      send.push(d.dilemma)
+    }
+    send.push(...this.dockets.openFor(n))
+    await Sessions.of(n.dir).reset()
+    return send
   }
 
   async identity(id: string, input: unknown) {
@@ -721,7 +833,9 @@ export class Game {
       const next = { ...n.state, identity }
       engine(() => deserialize(serialize(next)))
       n.state = next
+      const send = await this.reconvene(n)
       await this.store.save(n)
+      this.dockets.start(id, send)
       return this.payload(n)
     })
   }
@@ -732,6 +846,8 @@ export class Game {
     return this.act(id, async (n) => {
       n.gov = { ...n.gov, mode }
       await this.store.save(n)
+      // Into found mode: the executive takes up whatever the bodies have already finished.
+      if (mode === 'found') this.dockets.decideReady(id, n)
       return this.payload(n)
     })
   }
@@ -740,7 +856,7 @@ export class Game {
   // The Founder
   // ---------------------------------------------------------------------------------------
 
-  private async enterWord(n: Nation, w: { text: string; overrules?: string; silence: boolean; confirmed: boolean }) {
+  async enterWord(n: Nation, w: { text: string; overrules?: string; silence: boolean; confirmed: boolean }) {
     const number = Math.max(0, ...n.gov.words.map((x) => x.number)) + 1
     const document = await this.write(n, {
       series: 'words',
@@ -919,8 +1035,10 @@ export class Game {
     const summary = prose(v['summary'], 'The bill’s summary', 5000)!
     const movedBy = line(v['moved'], 'The member moving it', { max: 100, optional: true })
     return this.act(id, async (n) => {
-      const house = n.gov.institutions.bodies.find((b) => b.kind === 'legislature') ?? n.gov.institutions.bodies.find((b) => b.kind === 'council')
-      if (!house) throw new HttpError(409, `${n.state.identity.name} has no legislature to move a bill in.`)
+      // Only a legislature sits on bills (the evening's order paper); with none, a bill
+      // would lie on the table for ever.
+      const house = n.gov.institutions.bodies.find((b) => b.kind === 'legislature')
+      if (!house) throw new HttpError(409, `${n.state.identity.name} has no legislature, so there is nobody to move a bill before. Change the law by a Founder’s Word, or by amending the constitution.`)
       const number = Math.max(0, ...n.gov.bills.map((b) => b.number)) + 1
       const moved = movedBy ?? this.founderName(n)
       const document = await this.write(n, {

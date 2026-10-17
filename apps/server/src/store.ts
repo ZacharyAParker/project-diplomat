@@ -28,7 +28,7 @@ import {
   type SaveFile2,
   type TaskInput,
 } from '@diplomat/government'
-import { Archive, writeAtomic } from './archive.ts'
+import { Archive, markRemoved, unmarkRemoved, writeAtomic } from './archive.ts'
 import { HttpError } from './http.ts'
 
 export interface Snapshot {
@@ -187,8 +187,12 @@ export class Store {
       .map((d) => d.name)
   }
 
+  // Ids being created right now: reserved before the first await, so two foundings or
+  // imports with the same name never write into one folder.
+  private creating = new Set<string>()
+
   exists(id: string) {
-    return this.cache.has(id) || (ID.test(id) && existsSync(join(this.nationsDir, id, 'save.json')))
+    return this.cache.has(id) || this.creating.has(id) || (ID.test(id) && existsSync(join(this.nationsDir, id, 'save.json')))
   }
 
   summary(n: Pick<Nation, 'id' | 'state' | 'updatedAt' | 'gov'>): Summary {
@@ -257,16 +261,25 @@ export class Store {
   }
 
   // A new nation's folder, its documents and its save. Never overwrites.
-  async create(parts: Omit<Nation, 'dir' | 'archive'>, documents: readonly ArchiveDocument[] = []): Promise<Nation> {
+  // init runs before the nation is visible to anyone: its founding documents, its first
+  // morning's dockets. Only then is save.json written and the nation listed.
+  async create(parts: Omit<Nation, 'dir' | 'archive'>, documents: readonly ArchiveDocument[] = [], init?: (n: Nation) => Promise<void>): Promise<Nation> {
     const dir = this.dirOf(parts.id)
     if (this.exists(parts.id) || existsSync(dir)) throw new HttpError(409, `A nation “${parts.id}” already exists.`)
-    await mkdir(join(dir, 'archive'), { recursive: true })
-    const archive = new Archive(join(dir, 'archive'))
-    await archive.writeExisting(documents)
-    const nation: Nation = { ...parts, dir, archive }
-    this.cache.set(nation.id, nation)
-    await writeAtomic(join(dir, 'save.json'), JSON.stringify(toSave(nation)))
-    return nation
+    this.creating.add(parts.id)
+    unmarkRemoved(dir)
+    try {
+      await mkdir(join(dir, 'archive'), { recursive: true })
+      const archive = new Archive(join(dir, 'archive'))
+      await archive.writeExisting(documents)
+      const nation: Nation = { ...parts, dir, archive }
+      if (init) await init(nation)
+      await writeAtomic(join(dir, 'save.json'), JSON.stringify(toSave(nation)))
+      this.cache.set(nation.id, nation)
+      return nation
+    } finally {
+      this.creating.delete(parts.id)
+    }
   }
 
   // A fresh id from a name: its slug, with a number after it if that is taken.
@@ -285,8 +298,15 @@ export class Store {
     if (!existsSync(dir)) throw new HttpError(404, `There is no nation “${id}”.`)
     await mkdir(this.trashDir, { recursive: true })
     const stamp = new Date().toISOString().replace(/[:.]/g, '-')
+    // From here nothing may write under the folder, so nothing in flight can recreate it.
+    markRemoved(dir)
     this.cache.delete(id)
-    await rename(dir, join(this.trashDir, `${id}-${stamp}`))
+    try {
+      await rename(dir, join(this.trashDir, `${id}-${stamp}`))
+    } catch (error) {
+      unmarkRemoved(dir)
+      throw error
+    }
   }
 
   forget(id: string) {

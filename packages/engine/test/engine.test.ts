@@ -1200,3 +1200,20 @@ test('the sandbox can call up any dilemma and start any crisis', () => {
   state = decide(state, content, 'later', 'a')
   assert.equal(state.answered['later'], 1)
 })
+
+test('quiet cheats change the nation, set the badge and write nothing in the record', () => {
+  const content = abroadPack({ dilemmas: [gasOffer(), dilemma('later', [option('a'), option('b')], { when: { day: { gte: 99 } } })] })
+  const state = newNation(content, identity, 1)
+  const before = state.timeline.length
+  let after = adjust(state, content, [{ indicator: 'debt', to: 90 }, { faction: 'labour', to: 10 }], { quiet: true })
+  assert.equal(after.indicators.debt, 90)
+  assert.equal(after.factions['labour']!.approval, 10)
+  assert.equal(after.sandbox, true)
+  after = callUp(after, content, 'later', { quiet: true })
+  assert.equal(after.agenda.major, 'later')
+  after = applyExternal(after, content, 'event', 'A storm', [{ indicator: 'health', by: -9, why: 'The storm.' }], undefined, { quiet: true })
+  assert.equal(after.indicators.health, state.indicators.health - 9)
+  assert.equal(after.timeline.length, before, 'no timeline entry')
+  assert.deepEqual(deserialize(serialize(after)), after)
+  assert.throws(() => adjust(state, content, [{ indicator: 'nonsense' as never, to: 1 }]), /unknown indicator/)
+})

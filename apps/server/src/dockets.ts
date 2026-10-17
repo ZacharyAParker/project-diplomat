@@ -59,7 +59,10 @@ export class Dockets {
   openFor(n: Nation): string[] {
     const opened: string[] = []
     for (const id of this.agendaOf(n)) {
-      if (!this.throughBodies(n, id) || n.gov.dockets[id]) continue
+      // Every petition gets a docket. The rules say which bodies sit on it: a minor that does
+      // not go through the bodies still goes before the court, and with no court it is
+      // ready at once.
+      if (n.gov.dockets[id]) continue
       n.gov = fileDocket(n.gov, this.open(n, id))
       opened.push(id)
     }
@@ -139,6 +142,7 @@ export class Dockets {
         .catch((error: unknown) => this.log(`progress ${id}/${dilemma}: ${(error as Error).message}`))
     }
     const ctx = contextFor(n, this.content, this.ai, {
+      minorsThroughBodies: this.settings.get().minorsThroughBodies,
       progress,
       onProblem: (line) => {
         problems.push(line)
@@ -171,6 +175,25 @@ export class Dockets {
     })
   }
 
+  // Found mode: the executive decides the day's dockets the bodies have finished, through
+  // the nation's queue. For a restart, a switch into found mode, or an import.
+  decideReady(id: string, n: Nation) {
+    if (n.gov.mode !== 'found' || !this.onReady) return
+    const ready = Object.values(n.gov.dockets).filter((d) => d.status === 'ready' && d.day === n.state.day).map((d) => d.dilemma)
+    if (!ready.length) return
+    const decide = this.onReady
+    const before = this.queues.get(id) ?? Promise.resolve()
+    const next = before
+      .then(async () => {
+        for (const dilemma of ready) await decide(id, dilemma)
+      })
+      .catch((error: unknown) => this.log(`decide ${id}: ${(error as Error).message}`))
+    this.queues.set(id, next)
+    void next.then(() => {
+      if (this.queues.get(id) === next) this.queues.delete(id)
+    })
+  }
+
   // On start: dockets left sitting when the server stopped are sent back to the bodies.
   resumeAll() {
     for (const id of this.store.ids()) {
@@ -182,6 +205,9 @@ export class Dockets {
         // A nation that arrived by import, or was last saved before its morning was
         // convened, has petitions on the desk that no body has seen. Convene them now.
         const fresh = this.openFor(n)
+        // In found mode, a docket filed ready just before the server stopped never reached
+        // the executive. It decides now.
+        this.decideReady(id, n)
         const send = () => this.start(id, [...left, ...fresh])
         if (fresh.length) {
           this.store.save(n).then(send, (error: unknown) => this.log(`resume ${id}: ${(error as Error).message}`))

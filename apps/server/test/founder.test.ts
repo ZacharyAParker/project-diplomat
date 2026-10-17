@@ -138,7 +138,7 @@ test('the archive is searched, filtered and paged, newest first, and documents s
   assert.ok(q.json.documents.some((d: any) => d.kind === 'constitution'))
   assert.equal((await h.get(`/api/nations/${id}/archive?series=nonsense`)).status, 400)
   assert.equal((await h.get(`/api/nations/${id}/archive?limit=x`)).status, 400)
-  const petition = all.json.documents.find((d: any) => d.series === 'petition')
+  const petition = all.json.documents.find((d: any) => d.series === 'petition' && d.refs.some((r: string) => r.startsWith('hansard-')))
   const sitting = petition.refs.find((r: string) => r.startsWith('hansard-'))
   const doc = await h.get(`/api/nations/${id}/archive/${sitting}`)
   assert.equal(doc.status, 200)

@@ -4,8 +4,9 @@
 // if it still fails. The record says which.
 
 import { createHash } from 'node:crypto'
-import { AiError, createProvider, resolveModels, selfTest } from '@diplomat/ai'
+import { AiError, createProvider, hasSessions, resolveModels, selfTest } from '@diplomat/ai'
 import { standIn, validate, type Context, type Provider, type ProviderStatus, type Task, type TaskInput, type TaskOutput } from '@diplomat/government'
+import type { Sessions } from './ooc.ts'
 import type { SettingsStore } from './settings.ts'
 
 const STATUS_FOR = 15_000
@@ -25,6 +26,9 @@ export interface RunOptions {
   // Checked before each call: true when the work is no longer wanted (the day ended).
   cancelled?: () => boolean
   signal?: AbortSignal
+  // Branch memory (claude-cli only): the nation's session store, which branch a task is,
+  // and the term and day the call falls in.
+  sessions?: { store: Sessions; branch: (task: Task, input: unknown) => string | null; term: string; day: number }
 }
 
 export class Ai {
@@ -36,13 +40,14 @@ export class Ai {
   problem: Problem | null = null
   // For the tests: a provider to use instead of the one the settings would make.
   override: Provider | null = null
+  overrideBackend: 'anthropic' | 'claude-cli' = 'anthropic'
 
   constructor(settings: SettingsStore) {
     this.settings = settings
   }
 
   backend() {
-    return this.override ? 'anthropic' : this.settings.get().backend
+    return this.override ? this.overrideBackend : this.settings.get().backend
   }
 
   provider(): Provider {
@@ -109,12 +114,23 @@ export class Ai {
       if (this.backend() !== 'none') {
         const provider = this.provider()
         const options = { ...(opts.archivePath ? { archivePath: opts.archivePath } : {}), ...(opts.signal ? { signal: opts.signal } : {}) }
+        const key = opts.sessions?.branch(task, input) ?? null
+        const sessions = opts.sessions && key && opts.archivePath && hasSessions(provider) ? opts.sessions : null
+        // In a branch's own conversation: resume it (or start one), and keep the id it used.
+        const call = async (sent: TaskInput[T]): Promise<unknown> => {
+          if (!sessions || !key || !hasSessions(provider)) return provider.run(task, sent, options)
+          const session = sessions.store.current(key, sessions.term)
+          const result = await provider.runWithSession(task, sent, { ...options, ...(session ? { session } : {}) })
+          await sessions.store.record(key, result.sessionId, sessions.day, sessions.term)
+          return result.output
+        }
+        const attempts = async (): Promise<{ output: TaskOutput[T]; ai: boolean } | null> => {
         let problems: string[] = []
         let reported = false
         for (let attempt = 0; attempt < 2; attempt++) {
           try {
             const sent = attempt === 0 ? input : ({ ...input, __retry: `Your last reply could not be used: ${problems.join('; ')}. Answer again, fixing these.` } as TaskInput[T])
-            const raw = await provider.run(task, sent, options)
+            const raw = await call(sent)
             if (opts.cancelled?.()) throw new Error('The work was set aside: the day it was for has ended.')
             const checked = validate(task, input, raw)
             if (checked.ok) {
@@ -134,6 +150,11 @@ export class Ai {
         if (problems.length && !reported) {
           opts.onProblem?.(`The AI's answer for ${task} did not hold up (${problems.slice(0, 3).join('; ')}). The stand-in sat in its place.`)
         }
+        return null
+        }
+        // One writer per session: a branch's calls run one at a time, whoever asked.
+        const done = sessions && key ? await sessions.store.lock(key, attempts) : await attempts()
+        if (done) return done
       }
       return { output: standIn(task, input, opts.seed(task, input)), ai: false }
     }
