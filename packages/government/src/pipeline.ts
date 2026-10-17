@@ -171,7 +171,7 @@ async function sit(ctx: Context, d: Docket, step: Step, kind: Sitting['kind'], p
   ctx.progress(kind === 'first' ? `${body.name} is sitting` : `${body.name} is sitting again`)
   let ladder: Course[]
   let division: Sitting['division']
-  let extra: Pick<Sitting, 'remonstrance' | 'address'> = {}
+  let extra: Pick<Sitting, 'remonstrance' | 'address' | 'canon'> = {}
   let text: string
   let ai: boolean
   if (body.kind === 'electorate') {
@@ -205,6 +205,7 @@ async function sit(ctx: Context, d: Docket, step: Step, kind: Sitting['kind'], p
     division = out.division
     extra = { ...(out.remonstrance ? { remonstrance: out.remonstrance } : {}), ...(out.address ? { address: out.address } : {}) }
     text = out.debate
+    if (out.canon?.length) extra = { ...extra, canon: out.canon }
   }
   const fp = ladder[0]!
   const isCarried = carried(division, step, body.size)
@@ -253,7 +254,7 @@ async function review(ctx: Context, d: Docket, step: Step, p: PetitionBrief): Pr
     body: out.opinion + (run.ai ? '' : '\n\n*(Sat without the AI.)*'),
     data: { rulings, cautions: out.cautions, directions: out.directions },
   })
-  const r: Review = { body: body.id, kind: 'first', rulings, binding: step.binding !== false, cautions: out.cautions, directions: out.directions, document, ai: run.ai }
+  const r: Review = { body: body.id, kind: 'first', rulings, binding: step.binding !== false, cautions: out.cautions, directions: out.directions, document, ai: run.ai, ...(out.canon?.length ? { canon: out.canon } : {}) }
   const barred = rulings.filter((x) => x.verdict === 'barred').length
   return (x) => ({ ...x, reviews: [...x.reviews, r], progress: [...x.progress, `${body.name} has ruled: ${barred ? `${barred} barred` : 'every course permitted'}`] })
 }
@@ -527,7 +528,28 @@ export function fileDocket(gov: GovernmentState, docket: Docket): GovernmentStat
       if (!directions.some((x) => x.document === r.document && x.text === text)) directions.push({ day: docket.day, from, text, document: r.document, done: false })
     }
   }
-  return { ...gov, dockets: { ...gov.dockets, [docket.dilemma]: structuredClone(docket) }, petitions: Math.max(gov.petitions, docket.number), directions }
+  const canon = withCanon(gov.institutions.canon, [...docket.sittings, ...docket.reviews].flatMap((x) => x.canon ?? []))
+  return {
+    ...gov,
+    dockets: { ...gov.dockets, [docket.dilemma]: structuredClone(docket) },
+    petitions: Math.max(gov.petitions, docket.number),
+    directions,
+    ...(canon === gov.institutions.canon ? {} : { institutions: { ...gov.institutions, canon } }),
+  }
+}
+
+// Facts a body or the world had to invent join the canon, so the next sitting does not
+// contradict them. Each is one line, said once, and the canon is kept to a readable size:
+// the oldest invented facts give way first, never the founding ones.
+const CANON_LIMIT = 600
+const CANON_EACH = 6
+export function withCanon(canon: readonly string[], invented: readonly string[]): string[] {
+  const fresh = [...new Set(invented.map((c) => c.replace(/\s+/g, ' ').trim()).filter((c) => c.length > 0 && c.length <= 300))]
+    .filter((c) => !canon.includes(c))
+    .slice(0, CANON_EACH)
+  if (fresh.length === 0) return canon as string[]
+  const next = [...canon, ...fresh]
+  return next.length <= CANON_LIMIT ? next : next.slice(next.length - CANON_LIMIT)
 }
 
 export interface Evening {
@@ -583,6 +605,7 @@ export async function runEvening(ctx: Context, todaysDecisions: TaskInput['world
     effects: kept.effects,
     document,
     ai,
+    ...(output.canon?.length ? { canon: output.canon } : {}),
   }
 
   const founder = inst.founder
@@ -612,11 +635,17 @@ export async function runEvening(ctx: Context, todaysDecisions: TaskInput['world
     let spent = spend({}, kept.effects)
     let number = Math.max(0, ...gov.bills.map((x) => x.number))
     for (const o of run.output.bills) {
-      const effects = o.effects ? bound(o.effects, DEFAULT_BOUNDS, spent).effects : undefined
-      if (effects) spent = spend(spent, effects)
       const division = o.division ? [{ day, ...o.division }] : []
       const was = o.number === undefined ? undefined : gov.bills.find((x) => x.number === o.number)
       const stage = billStage(o.stage, was?.stage ?? 'introduced', o.division)
+      // A bill's effects are what it proposes until it passes; they are bounded, and count
+      // against the day, only when it becomes law.
+      const proposed = o.effects ?? was?.effects
+      let effects = o.effects
+      if (stage === 'passed' && proposed) {
+        effects = bound(proposed, DEFAULT_BOUNDS, spent, { policies: ctx.content.policies }).effects
+        spent = spend(spent, effects)
+      }
       if (was) {
         bills.push({ ...structuredClone(was), stage, divisions: [...was.divisions, ...division], ...(effects ? { effects } : {}) })
       } else {
@@ -643,6 +672,7 @@ export function fileEvening(gov: GovernmentState, evening: Evening): GovernmentS
     ...gov,
     worldDays: gov.worldDays.includes(evening.world.day) ? gov.worldDays : [...gov.worldDays, evening.world.day],
     lastWorldDay: Math.max(gov.lastWorldDay, evening.world.day),
+    institutions: { ...gov.institutions, canon: withCanon(gov.institutions.canon, evening.world.canon ?? []) },
     questions: [...gov.questions, ...evening.questions],
     letters: [...gov.letters, ...evening.letters],
     bills,

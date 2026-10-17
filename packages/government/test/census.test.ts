@@ -101,12 +101,18 @@ test('effects are bounded: kinds, size, daily totals, count and reasons', () => 
     { indicator: 'liberty', by: 3, why: 'A march.' },
     { indicator: 'liberty', by: 2, why: 'Another march.' },
     { faction: 'labour', by: -0.5, why: 'A strike.' },
-    { policy: 'wealth_tax', to: true },
   ])
   assert.ok(out.dropped.some((d) => /no reason/.test(d)))
   assert.ok(out.dropped.some((d) => /not a kind/.test(d)))
-  assert.ok(out.dropped.some((d) => /over the limit/.test(d)))
+  // Found in review: the world could set a law or a flag. Neither passes without leave.
+  assert.ok(out.dropped.some((d) => /a policy this cannot set/.test(d)))
+  assert.ok(out.dropped.some((d) => /a flag, which only a dilemma may set/.test(d)))
   assert.deepEqual(spend({}, out.effects), { 'indicator:liberty': 5, 'faction:labour': 0.5 })
   const full = bound([{ indicator: 'liberty', by: 1, why: 'Again.' }], b, { 'indicator:liberty': 5 })
   assert.deepEqual(full.effects, [])
+  // A law may set a policy the pack defines, to a value of its own kind, and no other.
+  const policies = [{ id: 'wealth_tax', name: 'Wealth tax', description: '', default: false }]
+  const law = bound([{ policy: 'wealth_tax', to: true }, { policy: 'wealth_tax', to: 3 }, { policy: 'nonsense', to: true }], b, {}, { policies })
+  assert.deepEqual(law.effects, [{ policy: 'wealth_tax', to: true }])
+  assert.equal(law.dropped.length, 2)
 })

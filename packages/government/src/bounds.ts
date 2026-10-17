@@ -2,7 +2,7 @@
 // the engine; none of them may steer it. Every effect the AI proposes passes through here
 // before applyExternal sees it, and whatever is cut is named so the record can say so.
 
-import type { Effect } from '@diplomat/engine'
+import type { Effect, PolicyDef } from '@diplomat/engine'
 import type { EffectBounds } from './types.ts'
 
 const round = (n: number) => Math.round(n * 10) / 10
@@ -21,6 +21,9 @@ export function bound(
   effects: readonly Effect[],
   bounds: EffectBounds,
   spentToday: Partial<Record<string, number>> = {},
+  // A law may set a policy the pack defines, to a value of the policy's own kind. The world
+  // and a Word may not set any. Flags belong to dilemmas alone, so nobody here may set one.
+  options: { policies?: readonly PolicyDef[] } = {},
 ): { effects: Effect[]; dropped: string[] } {
   const spent: Record<string, number> = { ...spentToday } as Record<string, number>
   const kept: Effect[] = []
@@ -39,6 +42,11 @@ export function bound(
       continue
     }
     if (setting) {
+      const def = 'policy' in effect ? options.policies?.find((p) => p.id === effect.policy) : undefined
+      if (!def || !('to' in effect) || typeof effect.to !== typeof def.default) {
+        dropped.push(`${'flag' in effect && !('policy' in effect) ? 'a flag, which only a dilemma may set' : 'a policy this cannot set'}: ${describe(effect)}`)
+        continue
+      }
       kept.push(structuredClone(effect))
       continue
     }

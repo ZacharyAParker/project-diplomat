@@ -221,3 +221,23 @@ test('advise steps are narrowed to the advisers asked', () => {
   const two = nextSteps(docket(), i, 'major', { advisers: ['ministry-health'] })!
   assert.deepEqual(two.steps.filter((s) => s.role === 'advise').map((s) => s.body), ['ministry-health'])
 })
+
+// Found in review: a House that sat beside the Court and put dismissal first was passed over,
+// and the executive made to take the one course the Court left, though the House never sat
+// knowing that course was the only one.
+test('a house that put dismissal first beside a barring court sits again, and its rejection then stands', () => {
+  const i = institutions('commonwealth')
+  const house = i.constitution.rules.steps.find((s) => s.role === 'recommend')!.body
+  const court = i.constitution.rules.steps.find((s) => s.role === 'review')!.body
+  const bar = i.constitution.rules.steps.find((s) => s.role === 'review')!.barVotes!
+  const first = docket({ sittings: [sat(i, house, DISMISS, 120)], reviews: [ruled(i, court, { a: bar, b: bar })] })
+  const next = nextSteps(first, i, 'major', { advisers: [] })
+  assert.equal(next?.kind, 'reconciliation')
+  const again = docket({ ...first, sittings: [...first.sittings, sat(i, house, DISMISS, 120, 'reconciliation')] })
+  const s = standing(again, i, OPTIONS)
+  assert.equal(s.standstill, true)
+  assert.equal(s.mustTake, DISMISS)
+  // Short of the binding share, the rejection does not stand and the course left is taken.
+  const weak = docket({ ...first, sittings: [...first.sittings, sat(i, house, DISMISS, 90, 'reconciliation')] })
+  assert.equal(standing(weak, i, OPTIONS).standstill, false)
+})

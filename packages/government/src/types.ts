@@ -231,6 +231,8 @@ export interface Sitting {
   address?: string
   document: string // the Hansard document id
   ai: boolean // false when the rules-based stand-in sat
+  // Facts the sitting had to invent, to be added to the nation's canon.
+  canon?: string[]
 }
 
 export interface Ruling {
@@ -253,6 +255,7 @@ export interface Review {
   directions: string[]
   document: string
   ai: boolean
+  canon?: string[]
 }
 
 export interface Advice {
@@ -466,6 +469,7 @@ export interface WorldDay {
   effects: Effect[]
   document: string
   ai: boolean
+  canon?: string[]
 }
 
 // ---------------------------------------------------------------------------------------

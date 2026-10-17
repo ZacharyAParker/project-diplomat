@@ -114,7 +114,10 @@ export function standing(docket: Docket, institutions: Institutions, options: Co
       continue
     }
     if (fp === DISMISS) {
-      const rejects = sitting.kind !== 'first' && open.length === 1 && bind !== undefined && aye >= bind
+      // Rejecting the sole permitted course counts once the body has sat knowing it is the only
+      // one: on reconciliation, or at once where the rules hold no reconciliation.
+      const knew = sitting.kind !== 'first' || !rules.reconciliation
+      const rejects = knew && open.length === 1 && bind !== undefined && aye >= bind
       if (rules.dismissOnlyAtStandstill && rejects) {
         lines.push(`${who}, sitting again, rejected the only permitted course by ${by}, past the ${bind} that binds. That is a standstill, and the petition is dismissed.`)
         return { permitted: [DISMISS], barred: barredList, mustTake: DISMISS, standstill: true, explanation: lines.join(' '), ...extra }
@@ -218,7 +221,12 @@ export function nextSteps(
     const anyOpen = [...options].some((c) => !barred.has(c))
     for (const step of steps.filter((s) => s.role === 'recommend')) {
       const last = latestSitting(docket, step.body)
-      if (!last || last.kind !== 'first' || !barred.has(last.firstPreference) || !anyOpen) continue
+      if (!last || last.kind !== 'first' || !anyOpen) continue
+      // It sat beside the court, so it chose without knowing what would be barred. It sits
+      // again if its choice was barred, or if it would sooner let the petition lie when that
+      // is open only at a standstill: it must say so knowing what is left.
+      const rejected = last.firstPreference === DISMISS && rules.dismissOnlyAtStandstill && barred.size > 0
+      if (!barred.has(last.firstPreference) && !rejected) continue
       return { stage: step.stage, steps: [step], kind: 'reconciliation' }
     }
   }
