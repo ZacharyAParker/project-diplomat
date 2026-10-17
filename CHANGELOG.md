@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.7.1
+
+The map, drawn like an atlas.
+
+- Borders and coasts wander the way real ones do, drawn from a warped grid of small cells: capes,
+  bays, islands and inland seas, and countries of every shape and size.
+- Water lines along the coast, soft atlas colours that never match across a border, dashed
+  borders, mountain ranges, every nation's capital, a compass rose and a scale. A second view
+  shades each nation by how it feels about you.
+- Every nation has a capital. The borders between nations were fitted to the new map; yours are
+  the same five.
+
 ## 0.7.0
 
 The world: twenty nations, the Assembly of Nations, and war.

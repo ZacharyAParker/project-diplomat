@@ -59,4 +59,4 @@ Nations, archives and imports that a player keeps with their own copy of the gam
 computer, not in this repository, and the maintainer has no access to them.
 
 ---
-Project Diplomat v0.7.0 · © 2026 Zachary Parker
+Project Diplomat v0.7.1 · © 2026 Zachary Parker

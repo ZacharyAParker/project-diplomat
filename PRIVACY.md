@@ -1,6 +1,6 @@
 # Privacy policy
 
-Effective October 17, 2026. Applies to Project Diplomat 0.7.0 as distributed in this repository.
+Effective October 17, 2026. Applies to Project Diplomat 0.7.1 as distributed in this repository.
 
 ## The short version
 
@@ -84,4 +84,4 @@ privately as described in [SECURITY.md](SECURITY.md), and don't post API keys, s
 private material in public issues.
 
 ---
-Project Diplomat v0.7.0 · © 2026 Zachary Parker
+Project Diplomat v0.7.1 · © 2026 Zachary Parker

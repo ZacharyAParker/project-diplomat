@@ -73,4 +73,4 @@ don't open a public issue for something that could hurt players before it's fixe
 include real API keys or saves in a report. Anything else can go in an ordinary issue.
 
 ---
-Project Diplomat v0.7.0 · © 2026 Zachary Parker
+Project Diplomat v0.7.1 · © 2026 Zachary Parker

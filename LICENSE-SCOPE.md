@@ -56,4 +56,4 @@ Dependencies, fonts and tools keep their own licenses. See
 licenses; see [COPYRIGHT.md](COPYRIGHT.md).
 
 ---
-Project Diplomat v0.7.0 · © 2026 Zachary Parker
+Project Diplomat v0.7.1 · © 2026 Zachary Parker
