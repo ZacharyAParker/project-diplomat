@@ -44,19 +44,22 @@ test('the imported Claudetopia loads, sits on its agenda and ends a day', { skip
 
   // Its current agenda went to the bodies when the server started, though nobody had
   // convened them: it arrived by import. Convening again keeps the petition's number.
-  const major = state.agenda.major!
-  assert.ok(major)
-  const govern = await h.put('/api/nations/claudetopia/mode', { mode: 'govern' })
-  assert.equal(govern.status, 200)
-  const convened = await h.post(`/api/nations/claudetopia/dockets/${major}/convene`)
-  assert.equal(convened.status, 200, convened.json.error)
-  const dockets = await settle(h, 'claudetopia', 400)
-  const docket = dockets.find((d) => d.dilemma === major)
-  assert.equal(docket.status, 'ready', docket.error)
-  assert.equal(docket.number, got.json.government.petitions)
-  assert.ok(got.json.government.dockets[major], 'the morning was convened on start')
-  assert.ok(docket.sittings.length >= 1 && docket.reviews.length >= 1)
-  assert.ok(docket.standing.explanation)
+  // Once the nation has been played the day's petition may already be decided, and then
+  // there is nothing on the agenda to convene.
+  const major = state.agenda.major
+  if (major) {
+    const govern = await h.put('/api/nations/claudetopia/mode', { mode: 'govern' })
+    assert.equal(govern.status, 200)
+    const convened = await h.post(`/api/nations/claudetopia/dockets/${major}/convene`)
+    assert.equal(convened.status, 200, convened.json.error)
+    const dockets = await settle(h, 'claudetopia', 400)
+    const docket = dockets.find((d) => d.dilemma === major)
+    assert.equal(docket.status, 'ready', docket.error)
+    assert.equal(docket.number, got.json.government.petitions)
+    assert.ok(got.json.government.dockets[major], 'the morning was convened on start')
+    assert.ok(docket.sittings.length >= 1 && docket.reviews.length >= 1)
+    assert.ok(docket.standing.explanation)
+  }
 
   const almanacBefore = (await h.get('/api/nations/claudetopia/archive?series=almanac&limit=1')).json.total
   const end = await h.post('/api/nations/claudetopia/end-day')
