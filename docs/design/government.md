@@ -291,7 +291,7 @@ made it, and the in-world record never hears about it.
   given. It can be overruled.
 - Cheats happen only when the Founder asks. Running the government does not need asking.
 
-### Hardening (from the Codex and Antigravity reviews)
+### Hardening
 
 - **No free text from the Director to a branch.** It has no tool to put words of its own before a
   body. In-world references, messages and addresses come only from the executive (the AI executive

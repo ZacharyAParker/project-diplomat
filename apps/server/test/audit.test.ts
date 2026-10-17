@@ -1,4 +1,4 @@
-// The second round of audit findings (Antigravity, Muse), each held to.
+// The second round of review findings, each held to.
 
 import assert from 'node:assert/strict'
 import { existsSync, mkdtempSync, rmSync } from 'node:fs'

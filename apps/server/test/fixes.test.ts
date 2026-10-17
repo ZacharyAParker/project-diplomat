@@ -1,4 +1,4 @@
-// The audit's findings, each held to.
+// The review's findings, each held to.
 
 import assert from 'node:assert/strict'
 import { mkdtempSync, rmSync } from 'node:fs'

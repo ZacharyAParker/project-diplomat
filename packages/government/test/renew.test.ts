@@ -3,7 +3,7 @@ import { test } from 'node:test'
 import { renewInstitutions } from '../src/renew.ts'
 import { government, nation } from './fixtures.ts'
 
-// Found in review (Meta, Antigravity): the ministries and the seats were drawn at founding
+// Found in review: the ministries and the seats were drawn at founding
 // and never followed the engine through resignations and elections.
 
 test('a ministry follows the engine cabinet when a minister is replaced', () => {
@@ -36,7 +36,7 @@ test('after an election the legislature is reseated by its factions, and its siz
   assert.ok(r.changes.some((c) => /reseated/.test(c)))
 })
 
-// Found in review (Antigravity): facts a body had to invent were thrown away.
+// Found in review: facts a body had to invent were thrown away.
 test('invented facts join the canon once each, a few at a time, and never crowd out founding ones', async () => {
   const { withCanon } = await import('../src/pipeline.ts')
   const canon = ['The capital is Owlsreach.']
