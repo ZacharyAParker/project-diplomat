@@ -269,7 +269,7 @@ Claude session talking to the Founder and sending work out to the branch agents.
 | Kind | Tools | In the record |
 |---|---|---|
 | Read everything, OOC | the nation's state, every docket, the Archive, the OOC log, the rules' standing, forecasts | nothing |
-| Run the government | convene a petition, ask a body a question, send a reference or message between branches, run the world's day, end the day, run the nation for N days | as normal: the bodies' own documents |
+| Run the government | convene a petition, run the world's day, end the day, run the nation for N days | as normal: the bodies' own documents |
 | Advise | (it just talks) | nothing |
 | Cheat | set any figure, faction, neighbour, policy or census base; call up any issue; start any crisis; skip days; force a docket's outcome; add or remove a law; amend the constitution or change the form; inject a world event with any effects; edit identity; decide a petition outright | **quietly**: the OOC log only, and the nation's sandbox badge |
 
@@ -291,13 +291,34 @@ made it, and the in-world record never hears about it.
   given. It can be overruled.
 - Cheats happen only when the Founder asks. Running the government does not need asking.
 
+### Hardening (from the Codex and Antigravity reviews)
+
+- **No free text from the Director to a branch.** It has no tool to put words of its own before a
+  body. In-world references, messages and addresses come only from the executive (the AI executive
+  in found mode, the player in govern mode, through the desk) and from the bodies themselves. The
+  Director's only channel into the fiction is a Founder's Word, verbatim, given when the Founder
+  asks.
+- **Branches are sealed in by the CLI, not by trust**: `--safe-mode`, `--strict-mcp-config`, no
+  MCP, read-only tools confined to `archive/`. `ooc/` is a sibling of `archive/`, never inside it.
+  A test proves a branch cannot read `ooc/`.
+- **Every cheat is undoable.** The OOC log keeps the figures before and after, and
+  `POST /api/nations/:id/ooc/:n/undo` (tool `undo_cheat`) puts them back, and logs that too. A cheat
+  tool must be given `request`: the Founder's words asking for it, quoted. The panel shows each
+  cheat as it happens.
+- **A cheat invalidates what it touches.** Any open docket for the day is reconvened, so no ruling
+  or vote rests on figures that are no longer true, and every branch session starts afresh.
+- **One writer per branch session.** Calls to a branch go through the nation's queue and a lock per
+  session id, whoever asked for them, so a session is never resumed twice at once.
+
 ### Branch memory
 
 Each branch (the legislature, the court, each council, the world, the executive, each ministry)
 keeps its own Claude Code session per nation, resumed on each call (`--session-id` the first time,
 then `--resume`). Session ids are in `data/nations/<id>/ooc/sessions.json`, OOC. A branch's session
-starts afresh at the start of each **term**: every election, or every 30 days in a nation that holds
-none. The Archive stays the source of truth, and a fresh session re-reads it. Sessions are never
+starts afresh at the start of each **term** (every election, or every 30 days in a nation that
+holds none), when the constitution is amended, after any cheat, and after 12 calls, whichever
+comes first. Every call's brief says that it is the current truth: where a branch's memory and
+the brief disagree, the brief wins. The Archive stays the source of truth, and a fresh session re-reads it. Sessions are never
 shared: no branch sees another's, or the Director's. The `anthropic` back end has no sessions and
 behaves as before.
 
@@ -310,6 +331,7 @@ behaves as before.
 | `POST /api/nations/:id/director/stop` | stops the turn in progress |
 | `POST /api/nations/:id/director/reset` | starts a new session; the transcript so far is kept |
 | `GET /api/nations/:id/ooc` | `{ log: OocEntry[] }`, newest first |
+| `POST /api/nations/:id/ooc/:n/undo` | reverses cheat number n, logs the undo, returns the nation payload |
 | `POST /api/director/:id/<tool>` | the MCP server's calls, one per tool. Each needs the header `X-Director-Token` matching `data/director-token` (made at first start, never sent to the browser) |
 
 ```ts
@@ -320,5 +342,5 @@ interface DirectorMessage {
   at: string // ISO time
   streaming?: boolean
 }
-interface OocEntry { at: string; day: number; action: string; detail: string; changes?: { target: string; from: unknown; to: unknown }[] }
+interface OocEntry { n: number; at: string; day: number; action: string; detail: string; request: string; changes?: { target: string; from: unknown; to: unknown }[]; undone?: boolean; undoes?: number }
 ```
