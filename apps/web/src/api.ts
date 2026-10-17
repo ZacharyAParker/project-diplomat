@@ -1,4 +1,4 @@
-import type { Adjustment, Identity, TimelineEntry } from '@diplomat/engine'
+import type { Adjustment, Identity, TimelineEntry, WorldAction } from '@diplomat/engine'
 import type {
   ArchiveDocument,
   CensusFigure,
@@ -65,15 +65,21 @@ export interface AiSettings {
   apiKeySet: boolean
   models: Record<Tier, string>
   minorsThroughBodies: boolean
+  // The shared session that plays the nations that do not matter to the player. Absent from
+  // a server that predates the world.
+  worldTier?: WorldTier
   // Absent from a server that predates the Director.
   director?: DirectorSettings
 }
+
+export type WorldTier = 'standard' | 'bulk'
 
 export interface AiSettingsChange {
   backend?: Backend
   apiKey?: string
   models?: Partial<Record<Tier, string>>
   minorsThroughBodies?: boolean
+  worldTier?: WorldTier
   director?: DirectorSettings
 }
 
@@ -200,6 +206,9 @@ export interface Api {
   convene(id: string, dilemmaId: string): Promise<Changed>
   dockets(id: string): Promise<Docket[]>
   sandbox(id: string, request: SandboxRequest): Promise<Changed>
+  // The world: decide a foreign matter, or act abroad (a pact, a war, peace, the Assembly).
+  decideMatter(id: string, matter: string, option: string): Promise<Changed & { entry?: TimelineEntry }>
+  worldAct(id: string, action: WorldAction): Promise<Changed & { entry?: TimelineEntry; vote?: WarVoteResult }>
   identity(id: string, identity: Identity): Promise<Changed>
   mode(id: string, mode: Mode): Promise<Changed>
 
@@ -316,6 +325,8 @@ export function createHttpApi(fetcher: Fetch = (input, init) => fetch(input, ini
       return isObject(list) ? (Object.values(list) as Docket[]) : []
     },
     sandbox: async (id, request) => (await post(`${n(id)}/sandbox`, request)) as Changed,
+    decideMatter: async (id, matter, option) => (await post(`${n(id)}/world/matter`, { matter, option })) as Changed & { entry?: TimelineEntry },
+    worldAct: async (id, action) => (await post(`${n(id)}/world/act`, { action })) as Changed & { entry?: TimelineEntry; vote?: WarVoteResult },
     identity: async (id, identity) => (await put(`${n(id)}/identity`, identity)) as Changed,
     mode: async (id, mode) => (await put(`${n(id)}/mode`, { mode })) as Changed,
 
@@ -378,4 +389,13 @@ export function createHttpApi(fetcher: Fetch = (input, init) => fetch(input, ini
     draftFactbook: async (id, request) =>
       (await post(`${n(id)}/factbooks/draft`, request)) as { title: string; body: string },
   }
+}
+
+// The legislature's division on a declaration of war, when the constitution gives it one.
+export interface WarVoteResult {
+  carried: boolean
+  aye: number
+  no: number
+  abstain: number
+  body: string
 }

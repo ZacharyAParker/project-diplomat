@@ -6,6 +6,10 @@ import {
   availableOptions,
   callUp,
   decide,
+  decideMatter as decideWorldMatter,
+  forbidden,
+  worldAct,
+  type WorldAction,
   decideSituation,
   dismiss,
   endDay,
@@ -253,6 +257,7 @@ export class FakeServer implements Api {
     apiKeySet: false,
     models: { bulk: 'claude-haiku-5-5', standard: 'claude-sonnet-5-5', strategic: 'claude-opus-5-5' },
     minorsThroughBodies: false,
+    worldTier: 'standard',
     director: { ...DEFAULT_DIRECTOR },
   }
   private ids = 0
@@ -763,6 +768,24 @@ export class FakeServer implements Api {
       }
     }
     return json(Object.values(held.government.dockets).filter((d) => d.status !== 'decided'))
+  }
+
+  async decideMatter(id: string, matter: string, option: string) {
+    this.log('decideMatter', id, { matter, option })
+    const held = this.held(id)
+    held.state = decideWorldMatter(held.state, content, matter, option)
+    held.updatedAt = this.time()
+    return { ...this.changed(held), entry: held.state.timeline.at(-1)! }
+  }
+
+  async worldAct(id: string, action: WorldAction) {
+    this.log('worldAct', id, action)
+    const held = this.held(id)
+    const why = forbidden(held.state, content, action)
+    if (why) throw new Error(why)
+    held.state = worldAct(held.state, content, action)
+    held.updatedAt = this.time()
+    return { ...this.changed(held), entry: held.state.timeline.at(-1)! }
   }
 
   async sandbox(id: string, request: Parameters<Api['sandbox']>[1]) {

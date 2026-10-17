@@ -317,8 +317,9 @@ export function moodWord(standing: number): string {
 const resourceNames = (ids: readonly string[], content: Content) =>
   listWords(ids.map((id) => (content.resources.find((r) => r.id === id)?.name ?? id).toLowerCase()))
 
+// The nations on the border, still free. The rest of the world is on the World page.
 export function neighbourRows(state: GameState, content: Content): NeighbourRow[] {
-  return content.neighbours.map((n) => {
+  return content.neighbours.filter((n) => n.near && state.world?.nations[n.id]?.free !== false).map((n) => {
     const standing = standingWith(state, content, n.id)
     return {
       id: n.id,

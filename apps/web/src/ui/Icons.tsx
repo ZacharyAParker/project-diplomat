@@ -12,6 +12,7 @@ export type IconName =
   | 'sandbox'
   | 'admin'
   | 'gov'
+  | 'world'
 
 const PATHS: Record<IconName, string> = {
   // A despatch box with its lid up.
@@ -32,6 +33,8 @@ const PATHS: Record<IconName, string> = {
   sandbox: 'M5 9h10l-1.5 11h-7zM5 9c0-2 2-3 5-3s5 1 5 3M17 3l3 3-5 5M15 9l2 2',
   // A portico: a pediment on four columns.
   gov: 'M3 9l9-5 9 5zM5 9v9M9.5 9v9M14.5 9v9M19 9v9M3 20h18',
+  // A folded map.
+  world: 'M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2zM9 4v14M15 6v14',
   // A padlock.
   admin: 'M6 11h12v9H6zM8.5 11V8a3.5 3.5 0 0 1 7 0v3M12 14.5v2.5',
 }

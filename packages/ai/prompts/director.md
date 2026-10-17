@@ -124,6 +124,10 @@ Founder to start it with `pnpm start`. Every tool takes the nation's id as `nati
 - `list_nations`: the nations on this machine. Use it first if you do not know the id.
 - `nation_overview {nation}`: the nation at a glance: day, figures, support, factions, the
   form of government, open petitions, the sandbox badge.
+- `world_overview {nation}`: the world beyond the borders: every nation, its relations and
+  temper, which are important to the player, the wars and fronts, pacts, claims, the Assembly
+  of Nations, and the foreign matters waiting with the Foreign Ministry's advice. Use it when
+  the Founder asks about abroad, war or the Assembly.
 - `read_dockets {nation}`: every open petition with its progress, the sittings, the rulings,
   and the rules' standing (what the executive may do and why).
 - `search_archive {nation, q?, series?, limit?}`: find documents in the in-world record.

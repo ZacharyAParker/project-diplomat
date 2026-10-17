@@ -1,4 +1,4 @@
-import type { Adjustment, Content, Identity, TimelineEntry } from '@diplomat/engine'
+import type { Adjustment, Content, Identity, TimelineEntry, WorldAction } from '@diplomat/engine'
 import type { CensusFigure, Factbook, GovernmentState, Mode, ProviderStatus } from '@diplomat/government'
 import type {
   AiSettings,
@@ -16,6 +16,7 @@ import type {
   NationPayload,
   QuestionAnswer,
   ServerStatus,
+  WarVoteResult,
   WordRequest,
 } from '../api.ts'
 import { anyActive, stillWorking, withDockets } from '../logic/docket.ts'
@@ -100,6 +101,9 @@ export interface GameStore {
   pollDockets(): Promise<boolean>
 
   adjust(adjustments: readonly Adjustment[]): Promise<void>
+  decideMatter(matter: string, option: string): Promise<void>
+  // Resolves with the legislature's division when a declaration of war went to a vote.
+  worldAct(action: WorldAction): Promise<WarVoteResult | undefined>
   callUp(dilemmaId: string): Promise<void>
   startCrisis(situationId: string): Promise<void>
   skipDays(days: number): Promise<void>
@@ -433,6 +437,13 @@ export function createGameStore(api: Api, content: Content, options: StoreOption
     },
 
     adjust: (adjustments) => act((id) => api.sandbox(id, { adjust: adjustments })),
+    decideMatter: (matter, option) => act((id) => api.decideMatter(id, matter, option)),
+    async worldAct(action) {
+      const id = playing().id
+      const reply = await api.worldAct(id, action)
+      take(id, reply)
+      return reply.vote
+    },
     callUp: (dilemmaId) => act((id) => api.sandbox(id, { callUp: dilemmaId })),
     startCrisis: (situationId) => act((id) => api.sandbox(id, { crisis: situationId })),
     skipDays: (days) => act((id) => api.sandbox(id, { skip: days })),

@@ -256,14 +256,15 @@ describe('ordinal', () => {
 })
 
 describe('the neighbours', () => {
-  it('lists every neighbour in the pack with its mood, needs and treaties', () => {
+  it('lists the neighbours on the border with their mood, needs and treaties', () => {
     const state: GameState = {
       ...founded(),
       neighbours: { ...founded().neighbours, eskerland: 30 },
       treaties: [{ kind: 'energy-supply', with: 'eskerland', since: 1, until: 40 }],
     }
     const rows = neighbourRows(state, content)
-    expect(rows.map((r) => r.id)).toEqual(content.neighbours.map((n) => n.id))
+    expect(rows.map((r) => r.id)).toEqual(content.neighbours.filter((n) => n.near).map((n) => n.id))
+    expect(rows).toHaveLength(5)
     const esk = rows.find((r) => r.id === 'eskerland')!
     expect(esk.mood).toBe('Warm')
     expect(esk.treaties).toEqual([`Energy Agreement, ${40 - state.day} days left`])

@@ -81,6 +81,7 @@ function OocMenu({ nation, page, gov }: { nation: MastheadNation; page?: NationP
 const PAGES: readonly { page: NationPage; label: string; icon: IconName }[] = [
   { page: 'desk', label: 'Issues', icon: 'desk' },
   { page: 'nation', label: 'Nation', icon: 'nation' },
+  { page: 'world', label: 'World', icon: 'world' },
   { page: 'record', label: 'Record', icon: 'record' },
   { page: 'settings', label: 'Settings', icon: 'settings' },
   { page: 'sandbox', label: 'Sandbox', icon: 'sandbox' },

@@ -25,6 +25,7 @@ const numbers = (what: string): Schema => ({ type: 'object', description: what, 
 export const TOOL_DEFS: { name: string; description: string; inputSchema: Schema }[] = [
   { name: 'list_nations', description: 'The nations on this machine: id, name, day, form, mode.', inputSchema: obj({}) },
   { name: 'nation_overview', description: 'The nation at a glance, out of character: day, figures, support, factions, neighbours, census, the form of government, the agenda and open petitions with their standing, the sandbox badge.', inputSchema: obj({ nation }, ['nation']) },
+  { name: 'world_overview', description: 'The world beyond the borders, out of character: every nation with its relations, strength, temperament and status, which are important (on their own sessions), the wars and fronts, pacts, claims, the Assembly of Nations, and the foreign matters waiting with the Foreign Ministry’s advice.', inputSchema: obj({ nation }, ['nation']) },
   { name: 'read_dockets', description: 'Every open petition: progress, advice, sittings, rulings, exchanges, the rules’ standing (what the executive may do and why), and each option’s forecast.', inputSchema: obj({ nation }, ['nation']) },
   {
     name: 'search_archive',

@@ -13,6 +13,7 @@ import { Morning } from './screens/Morning.tsx'
 import { Nation } from './screens/Nation.tsx'
 import { Lost, Unreadable } from './screens/Other.tsx'
 import { TheRecord } from './screens/Record.tsx'
+import { World } from './screens/World.tsx'
 import { Sandbox } from './screens/Sandbox.tsx'
 import { Settings } from './screens/Settings.tsx'
 import { useGame, type Current } from './store/game.tsx'
@@ -42,6 +43,7 @@ function NationPages({ current, page }: { current: Current; page: NationPage }) 
   if (page === 'morning') return <Morning current={current} />
   if (page === 'desk') return <Desk current={current} />
   if (page === 'nation') return <Nation current={current} />
+  if (page === 'world') return <World current={current} />
   if (page === 'record') return <TheRecord current={current} />
   if (page === 'sandbox') return <Sandbox current={current} />
   if (page === 'director') return <DirectorScreen current={current} tab="talk" />

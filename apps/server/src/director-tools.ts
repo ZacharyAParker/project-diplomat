@@ -11,7 +11,13 @@ import {
   applyExternal,
   availableOptions,
   callUp,
+  activeWars,
+  adviseMatter,
   classify,
+  homeStrength,
+  matterCard,
+  openMatters,
+  worldLines,
   decide,
   dismiss,
   endDay,
@@ -59,6 +65,7 @@ const isObject = (v: unknown): v is Record<string, unknown> => typeof v === 'obj
 export const TOOLS = [
   'list_nations',
   'nation_overview',
+  'world_overview',
   'read_dockets',
   'search_archive',
   'read_document',
@@ -248,6 +255,8 @@ export class DirectorTools {
         return { nations: this.game.store.list() }
       case 'nation_overview':
         return this.overview(this.open(id))
+      case 'world_overview':
+        return this.worldOverview(this.open(id))
       case 'read_dockets':
         return this.readDockets(this.open(id))
       case 'search_archive': {
@@ -365,6 +374,31 @@ export class DirectorTools {
       bills: n.gov.bills.filter((b) => !['law', 'failed'].includes(b.stage)).map((b) => ({ number: b.number, title: b.title, stage: b.stage })),
       cheats: OocLog.of(n.dir).all().filter((e) => e.undoes === undefined && !e.undone && e.action.startsWith('cheat_')).length,
       recent: s.timeline.slice(-8).map(entryOf),
+    }
+  }
+
+  // The world as the Director sees it: everything, including what the nations would do and
+  // what the Foreign Ministry would advise. Out of character; never for a branch.
+  private worldOverview(n: Nation) {
+    const s = n.state
+    const w = s.world
+    if (!w) return { world: null, note: 'This pack has no world beyond the borders.' }
+    return {
+      lines: worldLines(s, this.content),
+      homeStrength: homeStrength(s),
+      mobilised: w.home.mobilised,
+      borderlandsLost: w.home.lost,
+      important: w.important,
+      nations: this.content.neighbours.map((d) => {
+        const x = w.nations[d.id]
+        return { id: d.id, name: d.name, near: d.near, free: x?.free ?? true, ruler: x?.ruler ?? null, standing: s.neighbours[d.id], strength: x?.strength, wealth: x?.wealth, stability: x?.stability, temperament: d.temperament, memory: x?.memory ?? [] }
+      }),
+      wars: activeWars(s),
+      pacts: w.pacts,
+      claims: w.claims.filter((c) => !c.settled),
+      assembly: { members: w.assembly.members, next: w.assembly.next, motion: w.assembly.motion, recent: w.assembly.past.slice(-4), sanctions: w.assembly.sanctions },
+      matters: openMatters(s).map((m) => ({ ...matterCard(s, this.content, m), advice: adviseMatter(s, this.content, m) })),
+      recent: w.log.slice(-15),
     }
   }
 

@@ -1,4 +1,4 @@
-import type { TimelineEntry } from '@diplomat/engine'
+import { openMatters, type TimelineEntry } from '@diplomat/engine'
 import type { Docket } from '@diplomat/government'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { dayLabel } from '../logic/changes.ts'
@@ -22,6 +22,7 @@ import {
   Button,
   Dialog,
   EntrySheet,
+  LinkTo,
   Notice,
   Screen,
   Sheet,
@@ -166,6 +167,7 @@ export function Desk({ current }: { current: Current }) {
       focusKey={`day ${state.day}`}
       className="desk"
     >
+      <ForeignMatters current={current} />
       <Day
         key={state.day}
         current={current}
@@ -519,5 +521,24 @@ function Decided({ docket, entry, current }: { docket: Docket; entry: TimelineEn
         </div>
       </details>
     </EntrySheet>
+  )
+}
+
+// Foreign matters wait on the World page; the desk says so, so none lapses unseen.
+function ForeignMatters({ current }: { current: Current }) {
+  const open = openMatters(current.state)
+  if (!open.length) return null
+  const soonest = Math.min(...open.map((m) => m.expires - current.state.day))
+  return (
+    <Notice
+      title={open.length === 1 ? 'A foreign matter is waiting' : `${open.length} foreign matters are waiting`}
+      actions={
+        <LinkTo to={{ name: 'nation', id: current.id, page: 'world' }} size="small">
+          To the World page
+        </LinkTo>
+      }
+    >
+      <p>{soonest <= 1 ? 'One lapses tonight if nobody decides it.' : `The first lapses in ${soonest} days if nobody decides it.`}</p>
+    </Notice>
   )
 }

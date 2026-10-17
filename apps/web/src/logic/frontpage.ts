@@ -58,6 +58,7 @@ export const KICKERS: Record<EntryKind, string> = {
   situation: 'Crisis',
   budget: 'Treasury',
   treaty: 'Abroad',
+  world: 'Abroad',
   sandbox: 'Sandbox',
   event: 'Home news',
   law: 'The statute book',

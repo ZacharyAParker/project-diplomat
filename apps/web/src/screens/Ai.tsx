@@ -1,9 +1,9 @@
 import type { ProviderStatus, Tier } from '@diplomat/government'
 import { useEffect, useId, useState, type FormEvent } from 'react'
-import { DEFAULT_DIRECTOR, type AiSettings, type Backend } from '../api.ts'
+import { DEFAULT_DIRECTOR, type AiSettings, type Backend, type WorldTier } from '../api.ts'
 import { useGame } from '../store/game.tsx'
 import { useAction } from '../store/useAction.ts'
-import { Button, ChoiceList, Notice, Screen, Sheet, TextField, useAnnounce } from '../ui/index.ts'
+import { Button, ChoiceList, Notice, Screen, Segmented, Sheet, TextField, useAnnounce } from '../ui/index.ts'
 
 const BACKENDS: readonly { id: Backend; name: string; line: string }[] = [
   {
@@ -49,6 +49,7 @@ export function AiSettingsSheet() {
   const [key, setKey] = useState('')
   const [models, setModels] = useState<Record<Tier, string>>({ bulk: '', standard: '', strategic: '' })
   const [minors, setMinors] = useState(false)
+  const [worldTier, setWorldTier] = useState<WorldTier>('standard')
   const [director, setDirector] = useState(DEFAULT_DIRECTOR)
   const directorId = useId()
   const [tested, setTested] = useState<ProviderStatus | null>(null)
@@ -64,6 +65,7 @@ export function AiSettingsSheet() {
       setBackend(settings.backend)
       setModels(settings.models)
       setMinors(settings.minorsThroughBodies)
+      setWorldTier(settings.worldTier ?? 'standard')
       setDirector(settings.director ?? DEFAULT_DIRECTOR)
     })
   }, [aiSettings, run])
@@ -76,6 +78,7 @@ export function AiSettingsSheet() {
         backend,
         models,
         minorsThroughBodies: minors,
+        worldTier,
         director: { enabled: director.enabled, model: director.model.trim() || DEFAULT_DIRECTOR.model },
         ...(key.trim() ? { apiKey: key.trim() } : {}),
       }),
@@ -156,6 +159,22 @@ export function AiSettingsSheet() {
                 <span className="small soft"> Slower and dearer, and the record is fuller. New nations start with this.</span>
               </span>
             </label>
+            <div className="stack">
+              <Segmented<WorldTier>
+                legend="The other nations"
+                options={[
+                  { value: 'standard', label: 'Standard tier' },
+                  { value: 'bulk', label: 'Bulk tier' },
+                ]}
+                value={worldTier}
+                onChange={setWorldTier}
+              />
+              <p className="small soft">
+                The nations that matter to you (allies, enemies, anyone at war with you) each keep their own session on
+                the standard tier. The rest share one, once a week, on whichever tier is chosen here. The bulk tier is
+                cheaper and quicker; the standard tier keeps their voices apart.
+              </p>
+            </div>
             <fieldset className="ai__director stack">
               <legend className="label">The Director</legend>
               <p className="small soft">

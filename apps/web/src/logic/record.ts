@@ -14,7 +14,7 @@ export const FILTERS = [
   { id: 'aftermath', label: 'Aftermath', kinds: ['consequence'] },
   { id: 'promises', label: 'Promises', kinds: ['promise'] },
   { id: 'treasury', label: 'Treasury', kinds: ['budget'] },
-  { id: 'abroad', label: 'Abroad', kinds: ['treaty'] },
+  { id: 'abroad', label: 'Abroad', kinds: ['treaty', 'world'] },
   { id: 'events', label: 'Events', kinds: ['event'] },
   { id: 'laws', label: 'Laws', kinds: ['law'] },
   { id: 'words', label: 'Words', kinds: ['word'] },
