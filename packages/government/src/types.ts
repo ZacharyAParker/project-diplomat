@@ -295,6 +295,8 @@ export interface Standing {
   // In plain words, for the screen: "The Assembly carried Option 2 by 112 of 151, so the
   // Steward must take it."
   explanation: string
+  // Courses a non-binding review ruled against. They stay open; the screen marks them.
+  advisedAgainst?: Course[]
 }
 
 export type DocketStatus =
@@ -590,6 +592,8 @@ export interface Brief {
   date: string
   day: number
   form: { id: FormId; name: string; executive: string }
+  // The player, above every branch, so a body can name the Founder when it answers a Word.
+  founder?: { name: string; title: string }
   // Indicators and support as words ("Liberty: high, 72"), the census headline figures.
   standing: string[]
   canon: string[]
@@ -610,6 +614,8 @@ export interface PetitionBrief {
   description: string
   kind: 'major' | 'minor'
   neighbour?: string
+  // The dilemma's own tags. The rules-based Court reads them with each option's tags.
+  tags?: string[]
   options: {
     course: Course
     number: number
@@ -618,6 +624,9 @@ export interface PetitionBrief {
     // The engine's forecast in words: "Liberty down a fair amount: cameras on every corner."
     forecast: string[]
     tags: string[]
+    // The same forecast as numbers, for the rules-based stand-ins. Absent for dismissal.
+    effects?: { faction: string; by: number }[]
+    indicators?: { indicator: IndicatorId; by: number }[]
   }[]
 }
 
@@ -651,6 +660,8 @@ export interface TaskInput {
     body: Body
     petition: PetitionBrief
     kind: Sitting['kind']
+    // The thresholds this sitting is tested against, so members can vote with them in mind.
+    step?: { bindAt?: number; carryAt?: number; decisive?: boolean }
     // For reconciliation: only these may be ranked first, and the review that barred the rest.
     permitted?: Course[]
     review?: { document: string; summary: string }
@@ -673,7 +684,8 @@ export interface TaskInput {
     brief: Brief
     petition: PetitionBrief
     standing: Standing
-    sittings: { body: string; summary: string }[]
+    // ladder: the body's ranking, best first, when it sat on the petition.
+    sittings: { body: string; summary: string; ladder?: Course[] }[]
     reviews: { body: string; summary: string }[]
     advice: { body: string; summary: string }[]
     // The executive's own standing priorities, if the nation has written them down.
@@ -696,6 +708,8 @@ export interface TaskInput {
     exchange: { from: string; kind: Exchange['kind']; text: string }
     petition?: PetitionBrief
     own: { document: string; summary: string }
+    // For a court answering a remonstrance: the courses it barred that it could read down.
+    barred?: Course[]
   }
   'bill.sitting': { brief: Brief; body: Body; bills: Bill[]; bounds: EffectBounds }
 }
