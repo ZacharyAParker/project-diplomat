@@ -69,6 +69,32 @@ Once a week (the same night the treaties pay out) the engine runs the world:
 Every move that touches the player, every war, every sitting and every annexation goes on the
 timeline and into the Archive.
 
+## Why nations go to war
+
+War comes from how a nation feels, not from the arithmetic alone. Before a nation may choose war
+against a neighbour, its **grievance** against that neighbour has to run high. The grievance adds
+up:
+
+- how it feels about the country: its relations with it, the plainest part;
+- its government: an autocracy resents a free neighbour as a standing insult, and a free nation
+  thinks less of a junta;
+- its people: what the other nation prizes is what this one despises (their likes against its
+  dislikes);
+- its wealth: an ambitious, poorer nation envies a much richer neighbour;
+- a claim to a borderland, and more when the claim has been left to fester a month;
+- an old defeat at that neighbour's hands, within three years;
+- votes in the Assembly to try or sanction it.
+
+Strength only shifts the odds: an edge encourages, a disadvantage discourages but never forbids.
+Each week a government's temper rolls too. So a weak nation in a fury will now and then attack a
+stronger one, and usually regret it (about one war in six begins that way). A move to war is
+always shown to the AI, however poor its odds, with the grievance as its reason, and the prompts
+say a government may make that mistake, rarely.
+
+A nation that has just fought cannot start another war for nine months, nor attack the same
+enemy for a year and a half. In simulation the world sees four or five wars a year; a peaceful
+player is rarely attacked, a hawkish one every two or three years.
+
 ## Who plays which nation
 
 A nation is **important** to the player when any of these holds: standing 60 or more (a close
@@ -146,8 +172,32 @@ The player's nation is never destroyed or annexed. Everything else is on the tab
 - **Alliances** cut both ways: a pact brings its members to your side, and drags you into their
   wars.
 
+## The map
+
+The World page opens with a map of all twenty-one nations. It is the Voronoi diagram of a point
+per nation (`map:` in `packs/core/world.yaml`, drawn by `packages/engine/src/map.ts`): each nation
+is the land nearer its point than any other, with a ring of sea round the coast and a few
+straits. The borders the rules use are the borders the map draws: `scripts/map-fit.ts` writes
+who touches whom back into the pack, and the validator refuses a pack whose map and borders
+disagree. Nations are shaded by how they stand with the player, the player's own in gold, its
+allies outlined, every front of every war in red, annexed nations hatched. Picking a nation
+opens its row below.
+
+## Declaring war, and changing the world by hand
+
+When the constitution gives a legislature (or the people, or a council) a vote that binds, a
+declaration of war is put to it as a motion: the declaration as the one course and refusal as
+the other. The legislature sits on it as on a petition, with the AI playing the members (or the
+rules-based stand-in, by the parties' factions: a provoked war rallies them, an unprovoked one
+does not). The debate and the division go into Hansard, and the division decides.
+
+The Director's `cheat_world` tool, and the Sandbox, can start a war between any two nations, end
+one with a winner or a ceasefire, set relations between two nations, annex or free a nation, and
+make or break a pact. What happens then is real: the war is fought and reported, allies join.
+The player's nation can never be annexed this way either. Every such cheat can be undone.
+
 ## Not yet
 
-A map; trade between AI nations; AI nations with their own governments and elections; the
+Trade between AI nations; AI nations with their own governments and elections; the
 player's own regional offices from the blueprint. The neighbours' notes are as long as a
 paragraph; a full diplomatic exchange of letters is for later.

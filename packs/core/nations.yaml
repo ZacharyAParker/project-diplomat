@@ -16,7 +16,7 @@
   likes: [green]
   dislikes: [hawkish]
   form: republic
-  borders: [eskerland, kessmark]
+  borders: [eskerland]
   temperament: { ambition: 15, aggression: 20, loyalty: 45, charity: 40 }
   strength: 35
   wealth: 50
@@ -37,7 +37,7 @@
   likes: [hawkish, surveillance]
   dislikes: [privacy, dovish]
   form: junta
-  borders: [eskerland, ytterholm, vrana]
+  borders: [eskerland, vrana]
   temperament: { ambition: 80, aggression: 80, loyalty: 30, charity: 10 }
   strength: 66
   wealth: 32
@@ -58,7 +58,7 @@
   likes: [surveillance, anti_labour]
   dislikes: [privacy, permissive]
   form: one-party state
-  borders: [kessmark, gorsk, tarvos]
+  borders: [gorsk, kessmark, tarvos]
   temperament: { ambition: 70, aggression: 60, loyalty: 60, charity: 15 }
   strength: 60
   wealth: 40
@@ -79,7 +79,7 @@
   likes: [hawkish]
   dislikes: [redistribution]
   form: junta
-  borders: [vrana, ardune, brennholt]
+  borders: [ardune, brennholt, tarvos, vrana]
   temperament: { ambition: 75, aggression: 85, loyalty: 25, charity: 5 }
   strength: 58
   wealth: 18
@@ -100,7 +100,7 @@
   likes: [growth, free_trade]
   dislikes: [austerity]
   form: federal republic
-  borders: [ardune, gorsk, tarvos, qasrin]
+  borders: [gorsk, pellucia, qasrin, saint-ivo]
   temperament: { ambition: 50, aggression: 25, loyalty: 70, charity: 45 }
   strength: 64
   wealth: 76
@@ -121,7 +121,7 @@
   likes: [paternalist]
   dislikes: [permissive, lenient]
   form: theocracy
-  borders: [vrana, brennholt, qasrin]
+  borders: [gorsk, vrana]
   temperament: { ambition: 65, aggression: 50, loyalty: 55, charity: 50 }
   strength: 50
   wealth: 45
@@ -142,7 +142,7 @@
   likes: [free_trade, growth]
   dislikes: [green]
   form: monarchy
-  borders: [tarvos, brennholt, saint-ivo]
+  borders: [brennholt, saint-ivo]
   temperament: { ambition: 55, aggression: 30, loyalty: 50, charity: 55 }
   strength: 48
   wealth: 85
@@ -163,7 +163,7 @@
   likes: [spending, dovish]
   dislikes: [hawkish]
   form: principality
-  borders: [qasrin, pellucia]
+  borders: [brennholt, qasrin]
   temperament: { ambition: 5, aggression: 0, loyalty: 60, charity: 95 }
   strength: 8
   wealth: 55
@@ -184,7 +184,7 @@
   likes: [privacy, spending]
   dislikes: [surveillance]
   form: council republic
-  borders: [velsa, saint-ivo, amaranth]
+  borders: [brennholt, velsa]
   temperament: { ambition: 20, aggression: 10, loyalty: 60, charity: 70 }
   strength: 30
   wealth: 60
@@ -205,7 +205,7 @@
   likes: [dovish, redistribution]
   dislikes: [hawkish, austerity]
   form: commonwealth
-  borders: [velsa, pellucia]
+  borders: [lunes, velsa]
   temperament: { ambition: 15, aggression: 5, loyalty: 75, charity: 90 }
   strength: 22
   wealth: 48
@@ -226,7 +226,7 @@
   likes: [free_trade, growth]
   dislikes: [pro_labour]
   form: presidential republic
-  borders: [morvaine, caravel, cassel-mor, ostravel]
+  borders: [caravel, cassel-mor, morvaine, ostravel]
   temperament: { ambition: 55, aggression: 30, loyalty: 50, charity: 35 }
   strength: 55
   wealth: 78
@@ -247,7 +247,7 @@
   likes: [paternalist]
   dislikes: [permissive]
   form: monarchy
-  borders: [morvaine, duvalle]
+  borders: [duvalle, morvaine]
   temperament: { ambition: 40, aggression: 40, loyalty: 65, charity: 30 }
   strength: 38
   wealth: 42
@@ -289,7 +289,7 @@
   likes: [green]
   dislikes: [polluting]
   form: island council
-  borders: [ostravel, lunes]
+  borders: [ostravel]
   temperament: { ambition: 35, aggression: 35, loyalty: 55, charity: 40 }
   strength: 28
   wealth: 35
@@ -310,7 +310,7 @@
   likes: [permissive, privacy]
   dislikes: [surveillance]
   form: principality
-  borders: [caravel, skerrin]
+  borders: [amaranth, caravel]
   temperament: { ambition: 10, aggression: 5, loyalty: 30, charity: 50 }
   strength: 12
   wealth: 70

@@ -266,6 +266,17 @@ export interface WorldContent {
   // Names for the land nations quarrel over.
   borderlands: string[]
   matters: MatterDef[]
+  // Where each nation lies, for the map (map.ts). Optional: a pack without one has no map.
+  map?: WorldMapDef
+}
+
+export interface WorldMapDef {
+  width: number
+  height: number
+  // A point for every nation, the player's as "home".
+  sites: Record<string, [number, number]>
+  // Points of open sea: the coast all round, and the straits between nations that do not border.
+  sea: [number, number][]
 }
 
 export interface ResourceDef {

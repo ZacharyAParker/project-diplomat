@@ -217,8 +217,18 @@ const matterOption = z.strictObject({
   lapse: z.boolean().optional(),
 })
 
+const point = z.tuple([z.number(), z.number()])
+
 export const world = z.strictObject({
   borderlands: z.array(text).min(8),
+  map: z
+    .strictObject({
+      width: z.number().positive(),
+      height: z.number().positive(),
+      sites: z.record(z.string(), point),
+      sea: z.array(point).default([]),
+    })
+    .optional(),
   matters: z.array(
     z.strictObject({ kind: z.enum(MATTER_KINDS), title: text, description: text, options: z.array(matterOption).min(2).max(4) }),
   ),

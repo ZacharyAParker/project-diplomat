@@ -102,6 +102,16 @@
   --founder-draft: #a9c1ea;
   --founder-field: #fbf8ee;
   --founder-field-ink: #131d30;
+
+  /* The world map: a pale sea, parchment land, green for friends and red for foes. */
+  --map-sea: #b9d3df;
+  --map-land: #ece8d8;
+  --map-border: #6e6b5c;
+  --map-home: #d8ad3a;
+  --map-friend: #3f8f45;
+  --map-foe: #b23a2a;
+  --map-front: #c0291b;
+  --map-ally: #8a6a12;
 }
 
 [data-theme='dark'] {
@@ -138,6 +148,15 @@
   --gov-link: #9fbdf2;
   --gov-accent: #e6b952;
   --gov-thead: #22345a;
+
+  --map-sea: #1d2c33;
+  --map-land: #3a382f;
+  --map-border: #8b8674;
+  --map-home: #b78f2c;
+  --map-friend: #5aa860;
+  --map-foe: #c95443;
+  --map-front: #ef5a45;
+  --map-ally: #e6b952;
   --gov-thead-ink: #eef1f7;
   --gov-none: #5a574d;
   --gov-field: #121210;

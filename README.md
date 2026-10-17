@@ -89,8 +89,14 @@ real name
 - war is real. pick your allies, mobilise, sue for peace. lose and you cede land for good and pay
   for it. win and you can take reparations, or the whole country if it stands alone. your own
   nation can be beaten but never wiped out
+- nations go to war over how they feel. hating your government, wanting your money, an old
+  defeat, a claim you ignored. sometimes a small country loses its temper and picks a fight it
+  can't win
+- there's a map. borders on it are the borders the game uses, fronts show in red
+- declaring war goes to your parliament first if your constitution says so, and they actually
+  debate it
 
-![the World page: a vote in the Assembly of Nations waiting with the foreign ministry's advice, and the army](docs/screenshots/world.webp)
+![the World page: a map of the twenty-one nations, the player's in gold, an ally outlined, a hostile neighbour in red and a war front marked](docs/screenshots/world.webp)
 
 **the world and the record**
 

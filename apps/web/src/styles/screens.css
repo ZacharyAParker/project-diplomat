@@ -816,3 +816,116 @@ h3:focus:not(:focus-visible) {
 .kit .nav {
   position: static;
 }
+
+/* The world map, at the head of the World page. */
+.world-map {
+  margin: 0 0 var(--space-5);
+}
+
+.world-map svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: var(--hair) solid var(--rule-soft);
+  background: var(--map-sea);
+}
+
+.world-map__sea {
+  fill: var(--map-sea);
+  stroke: var(--map-sea);
+  stroke-width: 1;
+}
+
+.world-map__land {
+  stroke: var(--map-border);
+  stroke-width: 1.2;
+  stroke-linejoin: round;
+}
+
+.world-map__land--ally {
+  stroke: var(--map-ally);
+  stroke-width: 4;
+}
+
+.world-map__nation {
+  cursor: pointer;
+  outline: none;
+}
+
+.world-map__nation:hover .world-map__land,
+.world-map__nation:focus-visible .world-map__land {
+  stroke: var(--ink);
+  stroke-width: 3;
+}
+
+.world-map__front {
+  stroke: var(--map-front);
+  stroke-width: 5;
+  stroke-dasharray: 9 5;
+  stroke-linecap: round;
+  pointer-events: none;
+}
+
+.world-map__battle {
+  fill: var(--map-front);
+  stroke: var(--paper);
+  stroke-width: 2;
+  pointer-events: none;
+}
+
+.world-map__name {
+  font-family: var(--font-text);
+  font-size: 15px;
+  text-anchor: middle;
+  dominant-baseline: middle;
+  fill: var(--ink);
+  paint-order: stroke;
+  stroke: var(--map-land);
+  stroke-width: 3px;
+  pointer-events: none;
+}
+
+.world-map__name--home {
+  font-weight: bold;
+  stroke: var(--map-home);
+}
+
+.world-map__legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-4);
+  margin-top: var(--space-2);
+  color: var(--ink-soft);
+}
+
+.world-map__key {
+  display: inline-block;
+  width: 0.9em;
+  height: 0.9em;
+  margin-right: 0.3em;
+  vertical-align: -0.1em;
+  border: var(--hair) solid var(--map-border);
+}
+
+.world-map__key--friend {
+  background: color-mix(in srgb, var(--map-friend) 60%, var(--map-land));
+}
+
+.world-map__key--foe {
+  background: color-mix(in srgb, var(--map-foe) 60%, var(--map-land));
+}
+
+.world-map__key--ally {
+  background: var(--map-land);
+  border: 3px solid var(--map-ally);
+}
+
+.world-map__key--front {
+  height: 0;
+  border: 0;
+  border-top: 4px dashed var(--map-front);
+}
+
+.world-map__key--annexed {
+  background: repeating-linear-gradient(45deg, var(--map-land) 0 3px, var(--map-border) 3px 5px);
+}

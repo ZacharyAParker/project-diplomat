@@ -1,8 +1,9 @@
-import { homeStrength, type WorldAction } from '@diplomat/engine'
+import { HOME, homeStrength, type WorldAction } from '@diplomat/engine'
 import { useMemo, useState } from 'react'
 import { assemblyView, matterViews, nationRows, strengthWord, warViews, worldNews, type MatterView, type NationRow } from '../logic/world.ts'
 import { useGame, type Current } from '../store/game.tsx'
 import { Bar, Button, Notice, Screen, Sheet, Tag, useAnnounce } from '../ui/index.ts'
+import { WorldMap } from './WorldMap.tsx'
 
 // The world beyond the borders: foreign matters to decide, the player's wars, the Assembly
 // of Nations, and every other nation, with what the player may do about each.
@@ -52,6 +53,16 @@ export function World({ current }: { current: Current }) {
       return vote ? `${vote.body} agreed, ${vote.aye} to ${vote.no}. ${what}` : what
     })
 
+  // A nation picked on the map: its row below is opened and brought into view.
+  function pick(id: string) {
+    const target = id === HOME ? document.querySelector<HTMLElement>('.world__army') : document.getElementById(`nation-${id}`)
+    if (!target) return
+    const details = target.querySelector('details')
+    if (details) details.open = true
+    target.scrollIntoView?.({ block: 'center', behavior: 'smooth' })
+    ;(target.querySelector('summary') ?? target).focus?.()
+  }
+
   const near = rows.filter((r) => r.near)
   const far = rows.filter((r) => !r.near)
 
@@ -67,6 +78,8 @@ export function World({ current }: { current: Current }) {
           <p>{problem}</p>
         </Notice>
       )}
+
+      <WorldMap state={state} content={content} onPick={pick} />
 
       <Sheet title="Foreign matters" kicker={matters.length ? `${matters.length} waiting` : 'Nothing waiting'}>
         {matters.length === 0 ? (
@@ -108,7 +121,7 @@ export function World({ current }: { current: Current }) {
         </Sheet>
       )}
 
-      <Sheet title="The army" kicker={strengthWord(homeStrength(state))}>
+      <Sheet title="The army" kicker={strengthWord(homeStrength(state))} className="world__army">
         <p>
           {state.identity.name}’s army is {strengthWord(homeStrength(state)).toLowerCase()}, on the strength of the
           economy, the state behind it and the government’s legitimacy.
@@ -220,7 +233,7 @@ function NationList({ rows, busy, onAct }: { rows: NationRow[]; busy: boolean; o
   return (
     <ul className="indicators">
       {rows.map((row) => (
-        <li key={row.id}>
+        <li key={row.id} id={`nation-${row.id}`}>
           <details className="fold fold--row">
             <summary>
               <Bar

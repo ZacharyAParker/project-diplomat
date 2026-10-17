@@ -16,7 +16,7 @@
   likes: [hawkish]
   dislikes: [green]
   form: one-party state
-  borders: [morvaine, ytterholm, kessmark]
+  borders: [kessmark, morvaine, ytterholm]
   temperament: { ambition: 60, aggression: 55, loyalty: 50, charity: 25 }
   strength: 62
   wealth: 55
@@ -36,7 +36,7 @@
   likes: [paternalist]
   dislikes: [permissive]
   form: crowned republic
-  borders: [eskerland, cassel-mor, duvalle]
+  borders: [caravel, cassel-mor, duvalle, eskerland]
   temperament: { ambition: 30, aggression: 25, loyalty: 70, charity: 60 }
   strength: 45
   wealth: 58
@@ -56,7 +56,7 @@
   likes: [free_trade]
   dislikes: [redistribution]
   form: island commonwealth
-  borders: [ostravel, lunes, duvalle]
+  borders: [duvalle, lunes, morvaine, ostravel]
   temperament: { ambition: 45, aggression: 10, loyalty: 35, charity: 20 }
   strength: 25
   wealth: 80
@@ -76,7 +76,7 @@
   likes: [green]
   dislikes: [surveillance, polluting]
   form: republic
-  borders: [ardune, pellucia, amaranth]
+  borders: [amaranth, ardune, pellucia]
   temperament: { ambition: 25, aggression: 15, loyalty: 65, charity: 80 }
   strength: 40
   wealth: 62
@@ -96,7 +96,7 @@
   likes: [pro_labour]
   dislikes: [anti_labour]
   form: federal republic
-  borders: [velsa, gorsk, brennholt]
+  borders: [gorsk, velsa]
   temperament: { ambition: 70, aggression: 45, loyalty: 55, charity: 35 }
   strength: 70
   wealth: 60

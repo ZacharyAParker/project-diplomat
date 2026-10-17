@@ -70,13 +70,26 @@ describe('the World page', () => {
     const s = founded()
     const { store } = mount(holding({ ...s, neighbours: { ...s.neighbours, velsa: 80 } }))
     await heading('The world')
-    await user.click(screen.getByText('Velsa'))
-    const offers = screen.getAllByRole('button', { name: 'Offer a pact' }).filter((b) => !(b as HTMLButtonElement).disabled)
-    await user.click(offers.find((b) => b.closest('li')?.textContent?.includes('Velsa'))!)
+    const row = document.getElementById('nation-velsa')!
+    await user.click(row.querySelector('summary')!)
+    await user.click(within(row).getByRole('button', { name: 'Offer a pact' }))
     expect(store.get().nation!.state.world!.pacts.some((p) => p.members.includes(HOME) && p.members.includes('velsa'))).toBe(true)
     await user.click(screen.getByRole('button', { name: 'Mobilise' }))
     expect(store.get().nation!.state.world!.home.mobilised).toBe(true)
     expect(screen.getByRole('button', { name: 'Stand the army down' })).toBeDefined()
+  })
+
+  it('draws the map, and picking a nation on it opens its row', async () => {
+    const user = userEvent.setup()
+    window.location.hash = '#/n/kept/world'
+    mount(holding(founded()))
+    await heading('The world')
+    const map = screen.getByRole('group', { name: /A map of the world/ })
+    const nations = within(map).getAllByRole('button')
+    expect(nations).toHaveLength(21)
+    await user.click(within(map).getByRole('button', { name: /^Velsa: / }))
+    const row = document.getElementById('nation-velsa')!
+    expect(row.querySelector('details')!.open).toBe(true)
   })
 
   it('is pointed to from the desk when a matter is waiting', async () => {

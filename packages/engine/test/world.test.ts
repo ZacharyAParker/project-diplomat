@@ -63,14 +63,14 @@ test('a new nation finds a world of twenty nations, all in the Assembly with it'
 
 test('the planner only offers legal moves, and war only against a hostile neighbour', () => {
   let s = fresh(3)
-  // Make Kessmark and Ytterholm bitter enemies, and Kessmark much the stronger.
-  s.world!.nations['kessmark']!.relations['ytterholm'] = -90
-  s.world!.nations['ytterholm']!.relations['kessmark'] = -90
+  // Make Eskerland and Ytterholm bitter enemies, and Eskerland much the stronger.
+  s.world!.nations['eskerland']!.relations['ytterholm'] = -90
+  s.world!.nations['ytterholm']!.relations['eskerland'] = -90
   s.world!.nations['ytterholm']!.strength = 10
   s.world!.pacts = []
   const plan = planWorld(s, content)
-  const kess = plan.nations.find((p) => p.nation === 'kessmark')!
-  assert.ok(kess.moves.some((m) => m.id === 'war:ytterholm'), 'Kessmark may go to war with Ytterholm')
+  const kess = plan.nations.find((p) => p.nation === 'eskerland')!
+  assert.ok(kess.moves.some((m) => m.id === 'war:ytterholm'), 'Eskerland may go to war with Ytterholm')
   for (const p of plan.nations) {
     for (const m of p.moves) {
       if (m.kind !== 'war') continue
@@ -101,12 +101,12 @@ test('a war between two nations is fought week by week and ends', () => {
   let s = fresh(7)
   const w = s.world!
   w.pacts = []
-  w.nations['kessmark']!.relations['ytterholm'] = -90
-  w.nations['ytterholm']!.relations['kessmark'] = -90
+  w.nations['eskerland']!.relations['ytterholm'] = -90
+  w.nations['ytterholm']!.relations['eskerland'] = -90
   w.nations['ytterholm']!.strength = 15
   s = toWeek(s)
-  s = endDay(clear(s), content, { world: { moves: { kessmark: 'war:ytterholm' }, notes: {} } })
-  const war = s.world!.wars.find((x) => x.attackers.includes('kessmark') && x.defenders.includes('ytterholm'))
+  s = endDay(clear(s), content, { world: { moves: { eskerland: 'war:ytterholm' }, notes: {} } })
+  const war = s.world!.wars.find((x) => x.attackers.includes('eskerland') && x.defenders.includes('ytterholm'))
   assert.ok(war, 'the war began')
   s = days(s, 7 * 30)
   const done = s.world!.wars.find((x) => x.id === war.id)!

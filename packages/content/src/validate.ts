@@ -2,6 +2,7 @@ import {
   INDICATORS,
   LOWER_IS_BETTER,
   MATTER_ACTIONS,
+  mapProblems,
   MATTER_KINDS,
   START_INDICATORS,
   type Condition,
@@ -285,6 +286,7 @@ export function validate(content: Content): Problem[] {
     }
     abroad = false
     matter = false
+    for (const problem of mapProblems(content)) say('world/map', problem)
   }
 
   for (const r of content.resources) {

@@ -13,6 +13,12 @@ The world: twenty nations, the Assembly of Nations, and war.
   grudges. The rest share one, asked only when one of them has a real choice. Both run on the
   standard tier (Sonnet) by default; Settings can put the shared one on the bulk tier (Haiku).
   A model can only choose a legal move, and writes the note that goes with it.
+- Nations go to war over how they feel: about the other country, its people's ways, its
+  government, its wealth, a claim left to fester, an old defeat, votes to shame them in the
+  Assembly. Strength only shifts the odds, so a weak nation in a fury now and then attacks a
+  stronger one.
+- A map of the world on the World page, true to the borders the rules use: relations shaded,
+  allies outlined, fronts in red, annexed nations hatched. Pick a nation to read about it.
 - War. Each side's strength, its allies, its war-weariness and some luck move the front week by
   week, until one side wins or both are exhausted. The player's army is their economy, their
   administration and the government's legitimacy, and more when mobilised. Defeat cedes a
@@ -26,8 +32,10 @@ The world: twenty nations, the Assembly of Nations, and war.
   war crimes reports (and accusations against the player's own forces), offered pacts and terms,
   victory, and the Assembly's votes. A matter nobody decides lapses after a week. In found mode
   the AI executive takes the Foreign Ministry's advice.
-- A declaration of war goes to the legislature first when the constitution gives it the vote, and
-  the division goes into Hansard.
+- A declaration of war goes to the legislature first when the constitution gives it the vote: the
+  members sit on it as a motion, debate it (the AI plays them) and divide, into Hansard.
+- The Director's `cheat_world` tool and the Sandbox can start and end wars, set relations between
+  any two nations, annex and free nations, and make and break pacts. Each can be undone.
 - A new World page; the Nation page keeps to the border; the desk says when a matter is waiting.
   A new `world` series in the Archive holds each week abroad and the Assembly's sittings, and the
   papers report what happens beyond the borders. The Director has a `world_overview` tool.
