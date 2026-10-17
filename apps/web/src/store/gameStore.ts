@@ -1,4 +1,4 @@
-import type { Adjustment, Content, Identity, TimelineEntry, WorldAction } from '@diplomat/engine'
+import type { Adjustment, Content, Identity, TimelineEntry, WorldAction, WorldCheat } from '@diplomat/engine'
 import type { CensusFigure, Factbook, GovernmentState, Mode, ProviderStatus } from '@diplomat/government'
 import type {
   AiSettings,
@@ -106,6 +106,7 @@ export interface GameStore {
   worldAct(action: WorldAction): Promise<WarVoteResult | undefined>
   callUp(dilemmaId: string): Promise<void>
   startCrisis(situationId: string): Promise<void>
+  changeWorld(cheat: WorldCheat): Promise<void>
   skipDays(days: number): Promise<void>
   setIdentity(identity: Identity): Promise<void>
   setMode(mode: Mode): Promise<void>
@@ -446,6 +447,7 @@ export function createGameStore(api: Api, content: Content, options: StoreOption
     },
     callUp: (dilemmaId) => act((id) => api.sandbox(id, { callUp: dilemmaId })),
     startCrisis: (situationId) => act((id) => api.sandbox(id, { crisis: situationId })),
+    changeWorld: (cheat) => act((id) => api.sandbox(id, { world: cheat })),
     skipDays: (days) => act((id) => api.sandbox(id, { skip: days })),
     setIdentity: (identity) => act((id) => api.identity(id, identity)),
     setMode: (mode) => act((id) => api.mode(id, mode)),

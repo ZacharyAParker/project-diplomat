@@ -17,6 +17,7 @@ import {
   homeStrength,
   matterCard,
   openMatters,
+  worldCheat,
   worldLines,
   decide,
   dismiss,
@@ -59,6 +60,7 @@ import { readIdentity, type Game } from './game.ts'
 import { HttpError } from './http.ts'
 import { OocLog, Sessions, type OocChange, type OocEntry } from './ooc.ts'
 import { withDayEnd, type Nation } from './store.ts'
+import { readWorldCheat } from './world-cheat.ts'
 
 const isObject = (v: unknown): v is Record<string, unknown> => typeof v === 'object' && v !== null && !Array.isArray(v)
 
@@ -87,6 +89,7 @@ export const TOOLS = [
   'cheat_world_event',
   'cheat_amend',
   'cheat_identity',
+  'cheat_world',
 ] as const
 
 export type Tool = (typeof TOOLS)[number]
@@ -141,6 +144,8 @@ function read(n: Nation, target: string): unknown {
       return { situation: structuredClone(s.situation), situationsDone: [...s.situationsDone], onDesk: s.agenda.situation }
     case 'sandbox':
       return s.sandbox
+    case 'world':
+      return s.world === undefined ? undefined : structuredClone(s.world)
     case 'institutions':
       return structuredClone(n.gov.institutions)
     case 'docket':
@@ -197,6 +202,10 @@ function write(n: Nation, target: string, value: unknown) {
     case 'sandbox':
       if (value === undefined) delete s.sandbox
       else s.sandbox = value as boolean
+      break
+    case 'world':
+      if (value === undefined) delete s.world
+      else s.world = structuredClone(value) as NonNullable<typeof s.world>
       break
     case 'institutions':
       n.gov = { ...n.gov, institutions: structuredClone(value) as typeof n.gov.institutions }
@@ -686,6 +695,30 @@ export class DirectorTools {
         const identity = readIdentity({ ...n.state.identity, ...fields })
         return { detail: `Identity: ${Object.keys(fields).join(', ')}`, targets: ['identity'], apply: () => void (n.state = { ...n.state, identity }) }
       }
+      case 'cheat_world': {
+        const cheat = readWorldCheat(args)
+        // A war with or a peace for the player moves their own figures too: everything it could
+        // touch is snapshotted, so the undo is exact.
+        const targets = ['world', ...c.neighbours.map((x) => `neighbour:${x.id}`), ...INDICATORS.map((i) => `indicator:${i}`), 'flag:war_lost', 'agenda']
+        let detail = ''
+        return {
+          // Read after the cheat is applied, so the log says what actually happened.
+          get detail() {
+            return detail || 'The world changed'
+          },
+          targets,
+          apply: () => {
+            const before = n.state.timeline.length
+            try {
+              n.state = worldCheat(n.state, c, cheat, { quiet: true })
+            } catch (error) {
+              throw new HttpError(400, (error as Error).message)
+            }
+            detail = n.state.timeline.slice(before).map((e) => e.headline).join('; ')
+          },
+          result: () => ({ what: detail || 'Done.', world: worldLines(n.state, c) }),
+        }
+      }
       default:
         throw new HttpError(404, `There is no Director tool “${tool}”.`)
     }
@@ -796,3 +829,4 @@ export class DirectorTools {
     return { entry: r.entry, ...r.payload }
   }
 }
+

@@ -9,6 +9,7 @@ import {
   decideMatter as decideWorldMatter,
   forbidden,
   worldAct,
+  worldCheat,
   type WorldAction,
   decideSituation,
   dismiss,
@@ -796,6 +797,7 @@ export class FakeServer implements Api {
       held.state = callUp(held.state, content, request.callUp)
       this.openDockets(held)
     } else if ('crisis' in request) held.state = startCrisis(held.state, content, request.crisis)
+    else if ('world' in request) held.state = worldCheat(held.state, content, request.world)
     else for (let i = 0; i < request.skip; i++) this.endOneDay(held)
     held.updatedAt = this.time()
     return this.changed(held)

@@ -55,7 +55,7 @@ test('the Director’s endpoints need the token, and the token is never sent bac
 })
 
 test('every cheat refuses without the Founder’s request', async () => {
-  for (const name of ['cheat_set_figures', 'cheat_call_up', 'cheat_start_crisis', 'cheat_skip_days', 'cheat_force_outcome', 'cheat_decide', 'cheat_world_event', 'cheat_amend', 'cheat_identity']) {
+  for (const name of ['cheat_set_figures', 'cheat_call_up', 'cheat_start_crisis', 'cheat_skip_days', 'cheat_force_outcome', 'cheat_decide', 'cheat_world_event', 'cheat_amend', 'cheat_identity', 'cheat_world']) {
     const r = await tool(name, { indicators: { liberty: 10 } })
     assert.equal(r.status, 400, name)
     assert.match(r.json.error, /request/)
@@ -189,4 +189,29 @@ test('running the government needs no request, and a Word goes in verbatim', asy
   const end = await tool('end_day')
   assert.equal(end.status, 200, end.json.error)
   assert.equal(end.json.day, day + 2)
+})
+
+test('the world can be changed by cheat: a war started, ended, and the whole of it undone', async () => {
+  const overview = (await tool('world_overview')).json
+  assert.equal(overview.nations.length, 20)
+  const before = await engineState()
+  const r = await tool('cheat_world', { request: '"Have Kessmark invade Ytterholm."', war: { attacker: 'kessmark', defender: 'ytterholm' } })
+  assert.equal(r.status, 200, JSON.stringify(r.json))
+  let s = await engineState()
+  const war = s.world!.wars.find((w) => w.attackers.includes('kessmark') && w.defenders.includes('ytterholm') && !w.ended)!
+  assert.ok(war, 'the war is on')
+  assert.equal(s.sandbox, true)
+  assert.equal((await tool('cheat_world', { request: '"No."', war: { attacker: 'kessmark', defender: 'kessmark' } })).status, 400)
+  assert.equal((await tool('cheat_world', { request: '"Annex us."', annex: { target: 'home', ruler: 'kessmark' } })).status, 400, 'the player is never annexed')
+  const ended = await tool('cheat_world', { request: '"End it, Kessmark wins."', peace: { war: war.id, outcome: 'attackers' } })
+  assert.equal(ended.status, 200)
+  s = await engineState()
+  assert.equal(s.world!.wars.find((w) => w.id === war.id)!.ended?.outcome, 'attackers')
+  // Undo the peace, then the war: the world is as it was.
+  const log = (await tool('read_ooc_log')).json.log
+  for (const e of log.filter((x: { action: string; undone?: boolean }) => x.action === 'cheat_world' && !x.undone)) {
+    assert.equal((await tool('undo_cheat', { n: e.n, request: '"Take it back."' })).status, 200)
+  }
+  s = await engineState()
+  assert.deepEqual(s.world!.wars, before.world!.wars)
 })

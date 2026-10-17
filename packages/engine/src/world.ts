@@ -1566,6 +1566,98 @@ export function worldAct(input: GameState, content: Content, action: WorldAction
 }
 
 // ---------------------------------------------------------------------------------------
+// The sandbox and the Director's cheats: the world changed by hand
+// ---------------------------------------------------------------------------------------
+
+export type WorldCheat =
+  | { war: { attacker: string; defender: string } }
+  | { peace: { war: string; outcome: 'attackers' | 'defenders' | 'ceasefire'; total?: boolean } }
+  | { relation: { a: string; b: string; to: number } }
+  | { annex: { target: string; ruler: string } }
+  | { free: string }
+  | { pact: { a: string; b: string } }
+  | { unpact: { a: string; b: string } }
+
+// What happens in the world happens: a war started this way is fought, reported and joined by
+// allies like any other. The nation is marked as sandboxed; quiet (the Director's cheats) writes
+// no sandbox entry of its own.
+export function worldCheat(input: GameState, content: Content, cheat: WorldCheat, opts: { quiet?: boolean } = {}): GameState {
+  const state = structuredClone(input)
+  const w = state.world
+  if (!w) throw new Error('This pack has no world beyond the borders.')
+  const known = (id: string, home = true) => {
+    if (id === HOME && home) return
+    if (!w.nations[id]) throw new Error(`There is no nation “${id}”.`)
+  }
+  const free = (id: string) => {
+    known(id)
+    if (!isFree(state, id)) throw new Error(`${nameOf(state, content, id)} is no longer a nation.`)
+  }
+  const week: Week = { changes: [], lines: [] }
+  const rng = rngFor(state.seed, state.day, `cheat:${JSON.stringify(cheat)}`)
+  let what = ''
+  if ('war' in cheat) {
+    const { attacker, defender } = cheat.war
+    free(attacker)
+    free(defender)
+    if (attacker === defender) throw new Error('A nation cannot go to war with itself.')
+    if (atWar(state, attacker, defender)) throw new Error('They are already at war.')
+    const claim = openClaim(state, attacker, defender)
+    startWar(state, content, attacker, defender, claim ? 'claim' : 'conquest', claim?.region, week)
+    what = `War started between ${nameOf(state, content, attacker)} and ${nameOf(state, content, defender)}`
+  } else if ('peace' in cheat) {
+    const war = w.wars.find((x) => x.id === cheat.peace.war && !x.ended)
+    if (!war) throw new Error(`There is no war “${cheat.peace.war}” going on.`)
+    endWar(state, content, war, cheat.peace.outcome, cheat.peace.total ?? cheat.peace.outcome !== 'ceasefire', week, rng)
+    what = `War ended: ${cheat.peace.outcome}`
+  } else if ('relation' in cheat) {
+    const { a, b, to } = cheat.relation
+    known(a)
+    known(b)
+    if (a === b) throw new Error('Pick two different nations.')
+    shift(state, a, b, clampStanding(to) - rel(state, a, b), 'Set by hand in the sandbox.', week.changes)
+    what = `Relations between ${nameOf(state, content, a)} and ${nameOf(state, content, b)} set to ${clampStanding(to)}`
+  } else if ('annex' in cheat) {
+    const { target, ruler } = cheat.annex
+    if (target === HOME) throw new Error('The player’s nation can never be annexed.')
+    free(target)
+    free(ruler)
+    if (target === ruler) throw new Error('A nation cannot annex itself.')
+    for (const war of warsOf(state, target)) war.ended = { day: state.day, outcome: 'annexed' }
+    annex(state, content, target, ruler, week)
+    what = `${nameOf(state, content, target)} annexed by ${nameOf(state, content, ruler)}`
+  } else if ('free' in cheat) {
+    known(cheat.free, false)
+    const n = w.nations[cheat.free]!
+    if (n.free) throw new Error(`${nameOf(state, content, cheat.free)} is already free.`)
+    n.free = true
+    delete n.ruler
+    delete n.annexed
+    if (!w.assembly.members.includes(n.id)) w.assembly.members.push(n.id)
+    log(state, week, `${nameOf(state, content, n.id)} is a nation again.`, [n.id], true)
+    what = `${nameOf(state, content, n.id)} restored to independence`
+  } else if ('pact' in cheat) {
+    const { a, b } = cheat.pact
+    free(a)
+    free(b)
+    if (atWar(state, a, b)) throw new Error('Not while they are at war with each other.')
+    joinPact(state, a, b)
+    if (!allies(state, a).includes(b)) throw new Error('Each is already in a full pact; break one first.')
+    what = `${nameOf(state, content, a)} and ${nameOf(state, content, b)} put in a pact`
+  } else {
+    const { a, b } = cheat.unpact
+    if (!allies(state, a).includes(b)) throw new Error('They are not in a pact.')
+    leavePacts(state, a, b)
+    leavePacts(state, b, a)
+    what = `The pact between ${nameOf(state, content, a)} and ${nameOf(state, content, b)} broken`
+  }
+  w.important = importantNations(state)
+  state.sandbox = true
+  if (!opts.quiet) recordEntry(state, content, 'sandbox', `The world changed in the sandbox: ${what.charAt(0).toLowerCase() + what.slice(1)}`, week.changes, week.lines.join(' ') || undefined)
+  return state
+}
+
+// ---------------------------------------------------------------------------------------
 // For the AI and the papers: the world in a few lines
 // ---------------------------------------------------------------------------------------
 

@@ -1,4 +1,4 @@
-import type { Adjustment, Identity, TimelineEntry, WorldAction } from '@diplomat/engine'
+import type { Adjustment, Identity, TimelineEntry, WorldAction, WorldCheat } from '@diplomat/engine'
 import type {
   ArchiveDocument,
   CensusFigure,
@@ -142,7 +142,7 @@ export interface DecideRequest {
 }
 
 export type SandboxRequest =
-  { adjust: readonly Adjustment[] } | { callUp: string } | { crisis: string } | { skip: number }
+  { adjust: readonly Adjustment[] } | { callUp: string } | { crisis: string } | { skip: number } | { world: WorldCheat }
 
 export type WordRequest =
   { text: string; overrules?: string; silence?: boolean } | { number: number; confirm: true }

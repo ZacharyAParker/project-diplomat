@@ -172,6 +172,12 @@ one also takes a required `request`: the Founder's words asking for it, quoted.
   form of government directly.
 - `cheat_identity {nation, ...fields}`: change the nation's name, capital, currency, motto
   and the rest.
+- `cheat_world {nation, war? | peace? | relation? | annex? | free? | pact? | unpact?}`: change the
+  world beyond the borders: start a war between any two nations (`home` is the player's), end
+  one with a winner or a ceasefire, set relations between two nations, annex a nation or free
+  one (the player's can never be annexed), make or break a pact. What happens in the world is
+  then real: a war started this way is fought, reported and joined by allies. Ids are in
+  `world_overview`.
 - `undo_cheat {nation, n}`: put back the figures from OOC log entry `n`, as they were before
   that cheat. The undo is logged too. Use it when the Founder asks to take a cheat back.
 

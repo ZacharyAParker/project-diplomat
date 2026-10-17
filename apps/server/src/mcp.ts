@@ -113,6 +113,24 @@ export const TOOL_DEFS: { name: string; description: string; inputSchema: Schema
     ),
   },
   {
+    name: 'cheat_world',
+    description: 'Cheat: change the world beyond the borders. Exactly one of: war {attacker, defender} (start a war; "home" is the player\'s nation), peace {war, outcome: attackers|defenders|ceasefire, total?} (end one), relation {a, b, to} (set relations between two nations, -100 to 100), annex {target, ruler} (never the player\'s nation), free (restore an annexed nation), pact {a, b} or unpact {a, b}. A war started this way is fought, reported and joined by allies like any other.',
+    inputSchema: obj(
+      {
+        nation,
+        request,
+        war: { type: 'object', properties: { attacker: { type: 'string' }, defender: { type: 'string' } } },
+        peace: { type: 'object', properties: { war: { type: 'string' }, outcome: { type: 'string', enum: ['attackers', 'defenders', 'ceasefire'] }, total: { type: 'boolean' } } },
+        relation: { type: 'object', properties: { a: { type: 'string' }, b: { type: 'string' }, to: { type: 'number' } } },
+        annex: { type: 'object', properties: { target: { type: 'string' }, ruler: { type: 'string' } } },
+        free: { type: 'string' },
+        pact: { type: 'object', properties: { a: { type: 'string' }, b: { type: 'string' } } },
+        unpact: { type: 'object', properties: { a: { type: 'string' }, b: { type: 'string' } } },
+      },
+      ['nation', 'request'],
+    ),
+  },
+  {
     name: 'cheat_identity',
     description: 'Cheat: change the nation’s name, capital, currency, demonym, leader’s title, animal, motto, faith or flag.',
     inputSchema: obj(

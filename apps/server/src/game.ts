@@ -15,6 +15,7 @@ import {
   nameOf,
   openMatters,
   worldAct,
+  worldCheat,
   type WorldAction,
   type WorldChoices,
   availableOptions,
@@ -78,6 +79,7 @@ import type { Ai } from './ai.ts'
 import { contextFor } from './context.ts'
 import { OocLog, Sessions } from './ooc.ts'
 import type { Dockets } from './dockets.ts'
+import { readWorldCheat } from './world-cheat.ts'
 import { HttpError } from './http.ts'
 import { ID, readDocument, readSave, readState, snapshot, toSave, withDayEnd, type Nation, type Store, type TodayDecision } from './store.ts'
 
@@ -903,8 +905,8 @@ export class Game {
 
   async sandbox(id: string, input: unknown) {
     const v = body(input)
-    const keys = ['adjust', 'callUp', 'crisis', 'skip'].filter((k) => v[k] !== undefined)
-    if (keys.length !== 1) throw new HttpError(400, 'Send one of adjust, callUp, crisis or skip.')
+    const keys = ['adjust', 'callUp', 'crisis', 'skip', 'world'].filter((k) => v[k] !== undefined)
+    if (keys.length !== 1) throw new HttpError(400, 'Send one of adjust, callUp, crisis, skip or world.')
     return this.act(id, async (n) => {
       const entries: TimelineEntry[] = []
       if (v['adjust'] !== undefined) {
@@ -926,6 +928,10 @@ export class Game {
       } else if (v['crisis'] !== undefined) {
         const situation = line(v['crisis'], 'The crisis to start', { max: 100 })!
         n.state = engine(() => startCrisis(n.state, this.content, situation))
+      } else if (v['world'] !== undefined) {
+        if (!isObject(v['world'])) throw new HttpError(400, 'world must be one change to the world.')
+        const cheat = readWorldCheat(v['world'] as Record<string, unknown>)
+        n.state = engine(() => worldCheat(n.state, this.content, cheat))
       } else {
         const days = v['skip']
         if (!Number.isSafeInteger(days) || (days as number) < 1 || (days as number) > 60) throw new HttpError(400, 'skip must be a whole number of days from 1 to 60.')

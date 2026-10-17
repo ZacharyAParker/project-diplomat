@@ -1,4 +1,4 @@
-import { INDICATORS, INDICATOR_INFO, standingWith, type Adjustment } from '@diplomat/engine'
+import { HOME, INDICATORS, INDICATOR_INFO, activeWars, nameOf, standingWith, type Adjustment } from '@diplomat/engine'
 import { useMemo, useState } from 'react'
 import { useGame, type Current } from '../store/game.tsx'
 import { Button, Notice, Screen, Sheet, useAnnounce } from '../ui/index.ts'
@@ -43,6 +43,10 @@ export function Sandbox({ current }: { current: Current }) {
   const [policyDrafts, setPolicyDrafts] = useState<Record<string, string>>({})
   const [dilemma, setDilemma] = useState(content.dilemmas[0]?.id ?? '')
   const [crisis, setCrisis] = useState(content.situations[0]?.id ?? '')
+  const [attacker, setAttacker] = useState(content.neighbours[0]?.id ?? '')
+  const [defender, setDefender] = useState(HOME)
+  const [annexed, setAnnexed] = useState(content.neighbours[1]?.id ?? '')
+  const [ruler, setRuler] = useState(HOME)
   const [problem, setProblem] = useState<string | null>(null)
 
   const rows = useMemo<{ title: string; rows: Row[] }[]>(
@@ -129,6 +133,23 @@ export function Sandbox({ current }: { current: Current }) {
     setPolicyDrafts({})
   }
 
+  const freeIds = content.neighbours.filter((n) => state.world?.nations[n.id]?.free !== false).map((n) => n.id)
+  const nationOptions = [HOME, ...freeIds].map((id) => (
+    <option key={id} value={id}>
+      {nameOf(state, content, id)}
+    </option>
+  ))
+  const foreignOptions = freeIds.map((id) => (
+    <option key={id} value={id}>
+      {nameOf(state, content, id)}
+    </option>
+  ))
+  const wars = activeWars(state).map((w) => ({
+    id: w.id,
+    title: `${w.attackers.map((x) => nameOf(state, content, x)).join(' and ')} against ${w.defenders.map((x) => nameOf(state, content, x)).join(' and ')}`,
+  }))
+  const annexedNow = content.neighbours.filter((n) => state.world?.nations[n.id]?.free === false).map((n) => n.id)
+
   const sorted = useMemo(
     () => [...content.dilemmas].sort((a, b) => a.title.localeCompare(b.title)),
     [content.dilemmas],
@@ -192,6 +213,79 @@ export function Sandbox({ current }: { current: Current }) {
           Apply the figures
         </Button>
       </Sheet>
+
+      {state.world && (
+        <Sheet title="The world">
+          <p className="soft small">
+            What happens here then happens for real: a war started here is fought week by week, reported, and joined
+            by each side's allies.
+          </p>
+          <div className="row sandbox__world">
+            <label className="field">
+              <span className="label">Attacker</span>
+              <select className="field__input" value={attacker} onChange={(e) => setAttacker(e.target.value)}>
+                {nationOptions}
+              </select>
+            </label>
+            <label className="field">
+              <span className="label">Defender</span>
+              <select className="field__input" value={defender} onChange={(e) => setDefender(e.target.value)}>
+                {nationOptions}
+              </select>
+            </label>
+            <Button disabled={busy || attacker === defender} onClick={() => void run('A war has begun.', () => game.changeWorld({ war: { attacker, defender } }))}>
+              Start the war
+            </Button>
+          </div>
+          {wars.length > 0 && (
+            <ul className="stack small">
+              {wars.map((war) => (
+                <li key={war.id} className="row">
+                  <span>{war.title}</span>
+                  <Button size="small" disabled={busy} onClick={() => void run('The attackers won.', () => game.changeWorld({ peace: { war: war.id, outcome: 'attackers' } }))}>
+                    Attackers win
+                  </Button>
+                  <Button size="small" disabled={busy} onClick={() => void run('The defenders won.', () => game.changeWorld({ peace: { war: war.id, outcome: 'defenders' } }))}>
+                    Defenders win
+                  </Button>
+                  <Button size="small" disabled={busy} onClick={() => void run('A ceasefire.', () => game.changeWorld({ peace: { war: war.id, outcome: 'ceasefire' } }))}>
+                    Ceasefire
+                  </Button>
+                </li>
+              ))}
+            </ul>
+          )}
+          <div className="row sandbox__world">
+            <label className="field">
+              <span className="label">Annex</span>
+              <select className="field__input" value={annexed} onChange={(e) => setAnnexed(e.target.value)}>
+                {foreignOptions}
+              </select>
+            </label>
+            <label className="field">
+              <span className="label">To</span>
+              <select className="field__input" value={ruler} onChange={(e) => setRuler(e.target.value)}>
+                {nationOptions}
+              </select>
+            </label>
+            <Button disabled={busy || annexed === ruler} onClick={() => void run('Annexed.', () => game.changeWorld({ annex: { target: annexed, ruler } }))}>
+              Annex
+            </Button>
+          </div>
+          {annexedNow.length > 0 && (
+            <ul className="stack small">
+              {annexedNow.map((id) => (
+                <li key={id} className="row">
+                  <span>{nameOf(state, content, id)}</span>
+                  <Button size="small" disabled={busy} onClick={() => void run('A nation again.', () => game.changeWorld({ free: id }))}>
+                    Free it
+                  </Button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </Sheet>
+      )}
 
       <Sheet title="Laws">
         <ul className="sandbox__laws">

@@ -33,6 +33,23 @@ describe('the sandbox', () => {
     expect(screen.getByText('Sandboxed (see the OOC log)', { selector: '.sandbox-mark' })).toBeDefined()
   })
 
+  it('starts a war in the world and ends it', async () => {
+    const user = userEvent.setup()
+    window.location.hash = '#/n/kept/sandbox'
+    const { store } = mount(holding(founded()))
+    await heading('Sandbox')
+    await user.selectOptions(screen.getByRole('combobox', { name: 'Attacker' }), 'kessmark')
+    await user.selectOptions(screen.getByRole('combobox', { name: 'Defender' }), 'ytterholm')
+    await user.click(screen.getByRole('button', { name: 'Start the war' }))
+    let state = store.get().nation!.state
+    const war = state.world!.wars.find((w) => w.attackers.includes('kessmark') && !w.ended)!
+    expect(war.defenders).toContain('ytterholm')
+    expect(state.sandbox).toBe(true)
+    await user.click(screen.getByRole('button', { name: 'Ceasefire' }))
+    state = store.get().nation!.state
+    expect(state.world!.wars.find((w) => w.id === war.id)!.ended?.outcome).toBe('ceasefire')
+  })
+
   it('skips days without marking the nation', async () => {
     const user = userEvent.setup()
     window.location.hash = '#/n/kept/sandbox'
