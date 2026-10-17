@@ -243,3 +243,82 @@ to the data folder:
 
 The mapping and everything it could not carry over are written to the import's own report
 document (`other` series).
+
+## The Director (0.6.1)
+
+The Director is a Claude Code session that sits outside the fiction. It is the player's
+out-of-character partner: it runs the branch agents, advises the player candidly, and does the
+sandbox for testing, for fun, or for cheating. It is how Claudetopia was actually run: one main
+Claude session talking to the Founder and sending work out to the branch agents.
+
+### What it is
+
+- **One Director per nation**: a Claude Code session (`claude -p --resume <id>`) that carries on
+  between visits. Its session id is kept in `data/nations/<id>/ooc/director.json`. "New session"
+  starts a fresh one; the old transcript is kept.
+- **Two places to talk to it.** A Director panel in the web page (the server runs the session and
+  streams its replies), and plain Claude Code in a terminal: `claude` in the repo, where `.mcp.json`
+  gives it the same tools and `.claude/skills/director` gives it the same role.
+- **Its tools are an MCP server**, `apps/server/src/mcp.ts` (stdio, no dependencies), which calls the
+  running game server's Director endpoints. The game server must be running.
+- **It always uses Claude Code**, whatever back end the branches use. Its model is a setting,
+  `claude-opus-5-5` by default.
+
+### What it may do
+
+| Kind | Tools | In the record |
+|---|---|---|
+| Read everything, OOC | the nation's state, every docket, the Archive, the OOC log, the rules' standing, forecasts | nothing |
+| Run the government | convene a petition, ask a body a question, send a reference or message between branches, run the world's day, end the day, run the nation for N days | as normal: the bodies' own documents |
+| Advise | (it just talks) | nothing |
+| Cheat | set any figure, faction, neighbour, policy or census base; call up any issue; start any crisis; skip days; force a docket's outcome; add or remove a law; amend the constitution or change the form; inject a world event with any effects; edit identity; decide a petition outright | **quietly**: the OOC log only, and the nation's sandbox badge |
+
+**The OOC log** is `data/nations/<id>/ooc/log.jsonl`: every cheat, with the day, who asked (the
+Founder through the Director), what changed, and the figures before and after. It sits outside
+`archive/`, so no branch agent can ever read it. The engine's cheats run in a quiet form that sets
+`state.sandbox` (the badge) and writes no timeline entry. The world simply is the way the Director
+made it, and the in-world record never hears about it.
+
+### What it must not do
+
+- **Never speak in character for a branch.** The Assembly, the Court, the Isles and the Steward are
+  separate agents. The Director convenes them and passes them only what the rules pass, never the
+  OOC conversation, never what the Founder wants. A body can learn what the Founder wants only
+  through a Word, which the Founder gives, word for word.
+- **Never pass the OOC log or its own conversation to a branch.**
+- **Push back.** If the Founder's Word contradicts an earlier one, breaks the constitution, or would
+  do harm the Founder hasn't weighed, the Director says so plainly, out of character, before it is
+  given. It can be overruled.
+- Cheats happen only when the Founder asks. Running the government does not need asking.
+
+### Branch memory
+
+Each branch (the legislature, the court, each council, the world, the executive, each ministry)
+keeps its own Claude Code session per nation, resumed on each call (`--session-id` the first time,
+then `--resume`). Session ids are in `data/nations/<id>/ooc/sessions.json`, OOC. A branch's session
+starts afresh at the start of each **term**: every election, or every 30 days in a nation that holds
+none. The Archive stays the source of truth, and a fresh session re-reads it. Sessions are never
+shared: no branch sees another's, or the Director's. The `anthropic` back end has no sessions and
+behaves as before.
+
+### Server endpoints (Director)
+
+| Method and path | Does |
+|---|---|
+| `GET /api/nations/:id/director` | `{ messages: DirectorMessage[], busy, session: { id?, startedAt? }, available, detail }` |
+| `POST /api/nations/:id/director` | `{ text }` → 202 `{ accepted: true }`. Refused 409 while busy. The reply streams into `messages`; the client polls every 1.5 s while `busy` |
+| `POST /api/nations/:id/director/stop` | stops the turn in progress |
+| `POST /api/nations/:id/director/reset` | starts a new session; the transcript so far is kept |
+| `GET /api/nations/:id/ooc` | `{ log: OocEntry[] }`, newest first |
+| `POST /api/director/:id/<tool>` | the MCP server's calls, one per tool. Each needs the header `X-Director-Token` matching `data/director-token` (made at first start, never sent to the browser) |
+
+```ts
+interface DirectorMessage {
+  id: string
+  role: 'founder' | 'director' | 'activity' // activity: "Used set_figures", "Convened Petition #1728"
+  text: string // Markdown for the director; grows while it streams
+  at: string // ISO time
+  streaming?: boolean
+}
+interface OocEntry { at: string; day: number; action: string; detail: string; changes?: { target: string; from: unknown; to: unknown }[] }
+```
