@@ -1,16 +1,18 @@
 import type { TimelineEntry } from '@diplomat/engine'
+import type { Docket } from '@diplomat/government'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { dayLabel } from '../logic/changes.ts'
 import {
   agendaCards,
   boxNotice,
+  claimDecisions,
   closingLine,
   todaysDecisions,
   type BoxNotice,
   type Card,
   type ForecastView,
 } from '../logic/desk.ts'
-import { anyActive, executiveTitle } from '../logic/docket.ts'
+import { anyActive, decidedBy, executiveTitle } from '../logic/docket.ts'
 import { composeFrontPage, editionEntries } from '../logic/frontpage.ts'
 import { VERDICT_TITLES, nightMoment, termReport, verdictOf } from '../logic/term.ts'
 import { useGame, useStore, type Current } from '../store/game.tsx'
@@ -48,7 +50,11 @@ function useDocketPolling(current: Current): string | null {
   const active = anyActive(current.government)
   const [problem, setProblem] = useState<string | null>(null)
   useEffect(() => {
-    if (!active) return
+    // Nothing is being asked any more, so nothing can be going wrong with the asking.
+    if (!active) {
+      setProblem(null)
+      return
+    }
     let stopped = false
     let asking = false
     const timer = window.setInterval(() => {
@@ -215,12 +221,24 @@ function Day({ current, onEnd, ending: closing, endError, pollError, onReport }:
   const [deciding, setDeciding] = useState<string | null>(null)
   const found = current.mode === 'found'
   const dockets = current.government?.dockets ?? {}
-  // In found mode the executive decides on its own: what it has decided today is shown with
-  // its docket, so the player can read how it got there.
-  const decidedToday = Object.values(dockets).filter((d) => d.status === 'decided' && d.day === state.day)
 
   const placed = Object.values(done).map((d) => d.index)
-  const earlier = decided.filter((d) => !placed.includes(d.index))
+  const unplaced = decided.filter((d) => !placed.includes(d.index))
+  // A petition decided away from the player (by the executive in found mode, by a Word, by
+  // the Director) is shown once, with its docket and the badge of whoever decided it: in its
+  // own slot if it was on the desk when it opened, otherwise with the earlier decisions.
+  const claims = useMemo(
+    () => claimDecisions(state, content, Object.values(dockets), unplaced),
+    // unplaced follows from state and done.
+    [state, content, dockets, done],
+  )
+  const inSlot = new Set(slots.filter((key) => claims.has(key) && !done[key] && !cards.some((c) => c.key === key)))
+  const claimedBySlot = new Set([...inSlot].map((key) => claims.get(key)!))
+  const earlier = unplaced.filter((d) => !claimedBySlot.has(d.index))
+  const docketOf = (index: number) => {
+    for (const [dilemma, at] of claims) if (at === index) return dockets[dilemma]
+    return undefined
+  }
   const total = slots.length + earlier.length
   const undecided = cards.filter((card) => !left.includes(card.key))
 
@@ -314,37 +332,28 @@ function Day({ current, onEnd, ending: closing, endError, pollError, onReport }:
         )}
 
         <div className="desk__cards">
-          {decidedToday.map((docket) => {
-            const dilemma = content.dilemmas.find((d) => d.id === docket.dilemma)
+          {earlier.map(({ index, entry }) => {
+            const docket = docketOf(index)
+            if (docket) return <Decided key={index} docket={docket} entry={entry} current={current} />
             return (
-              <article key={docket.dilemma} className="issue issue--decided">
-                <header className="issue__head">
-                  <h3 className="issue__title">{dilemma?.title ?? `Petition #${docket.number}`}</h3>
-                  <p className="issue__meta">Decided by {executiveTitle(current.government).replace(/^The /, 'the ')}</p>
-                </header>
-                <DocketView
-                  docket={docket}
-                  nation={current.id}
-                  government={current.government}
-                  options={dilemma?.options ?? []}
-                />
-              </article>
+              <EntrySheet
+                key={index}
+                entry={entry}
+                content={content}
+                look="paper"
+                kicker="Decided earlier today"
+                empty="Nothing moved."
+                className="result"
+              />
             )
           })}
-          {earlier.map(({ index, entry }) => (
-            <EntrySheet
-              key={index}
-              entry={entry}
-              content={content}
-              look="paper"
-              kicker="Decided earlier today"
-              empty="Nothing moved."
-              className="result"
-            />
-          ))}
           {slots.map((key) => {
             const card = cards.find((c) => c.key === key)
             const result = done[key]
+            if (inSlot.has(key)) {
+              const index = claims.get(key)!
+              return <Decided key={key} docket={dockets[key]!} entry={state.timeline[index]!} current={current} />
+            }
             const entry = result && state.timeline[result.index]
             if (entry) {
               return (
@@ -486,5 +495,29 @@ function BoxNote({ notice, nation, pack }: { notice: BoxNotice; nation: string; 
         {kept}
       </p>
     </Notice>
+  )
+}
+
+// A petition decided away from the desk's Accept buttons: its entry, the badge of whoever
+// decided it, and the docket that led there, folded.
+function Decided({ docket, entry, current }: { docket: Docket; entry: TimelineEntry; current: Current }) {
+  const { content } = useGame()
+  const dilemma = content.dilemmas.find((d) => d.id === docket.dilemma)
+  return (
+    <EntrySheet
+      entry={entry}
+      content={content}
+      look="paper"
+      kicker={`${dilemma?.title ?? `Petition #${docket.number}`}. ${decidedBy(docket.decision?.by ?? 'executive', current.government)}`}
+      empty="Nothing moved."
+      className="result issue--decided"
+    >
+      <details className="fold">
+        <summary>How Petition #{docket.number} was decided</summary>
+        <div className="fold__body">
+          <DocketView docket={docket} nation={current.id} government={current.government} options={dilemma?.options ?? []} />
+        </div>
+      </details>
+    </EntrySheet>
   )
 }

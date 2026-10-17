@@ -309,7 +309,8 @@ export function AgendaCard({ card, current, content, docket, busy = false, onDec
     return new Map(card.options.map((option) => [option.id, forecastView(forecast(option.id), content)]))
   }, [card, current, content])
 
-  const mode: Mode = docket ? current.mode : 'govern'
+  // In found mode the executive decides every petition; the player may only give a Word.
+  const mode: Mode = card.dilemmaId !== null ? current.mode : 'govern'
   const states = new Map(card.options.map((o) => [o.id, courseState(docket, o.id, card.options, government)]))
   const dismissal = docket && dismissOpen(docket.standing) ? courseState(docket, DISMISS, card.options, government) : null
   const setsAside = docket?.standing?.vetoable ? courseLabel(docket.standing.vetoable, card.options) : null

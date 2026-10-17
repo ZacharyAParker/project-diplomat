@@ -1,4 +1,4 @@
-import { agendaItems, availableOptions } from '@diplomat/engine'
+import { agendaItems, availableOptions, callUp } from '@diplomat/engine'
 import { cleanup, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
@@ -226,5 +226,129 @@ describe('found mode', () => {
     await user.click(screen.getByRole('button', { name: 'Run a week' }))
     await heading('Overnight')
     expect(store.get().nation!.state.day).toBe(9)
+  })
+
+  it('shows a petition the executive decided in the background once, with who decided it, and counts it once', async () => {
+    const fake = new FakeServer({ sittingPolls: 1 })
+    fake.hold(state, { mode: 'found' })
+    mount(fake)
+    await heading('Issues')
+    const total = 1 + agendaItems(state, content).minors.length
+    expect(screen.getByText(`0 of ${total} decided.`)).toBeDefined()
+
+    const badge = await screen.findByText(`${major.title}. Decided by the Steward`, {}, { timeout: 2000 })
+    const box = screen.getByRole('region', { name: "Today's issues" })
+    const entry = fake.held().state.timeline.at(-1)!
+    expect(within(box).getAllByRole('heading', { level: 3, name: entry.headline })).toHaveLength(1)
+    expect(within(box).queryByText('Decided earlier today')).toBeNull()
+    expect(within(box).queryByRole('heading', { level: 3, name: major.title })).toBeNull()
+    expect(within(box).getByText(`1 of ${total} decided.`)).toBeDefined()
+    expect(badge.closest('article')!.querySelector('details')).not.toBeNull()
+  })
+
+  it('offers only a Word under every petition, minor ones included, and the server refuses a plain decision', async () => {
+    const minorId = content.dilemmas.find((d) => d.kind === 'minor' && !d.when && !d.abroad)!.id
+    const withMinor = callUp(state, content, minorId)
+    // The bodies keep sitting, so the executive has not decided anything yet.
+    const fake = holding(withMinor, { mode: 'found', sittingPolls: 1000 })
+    const { store } = mount(fake)
+    await heading('Issues')
+    const minors = agendaItems(withMinor, content).minors
+    expect(minors.length).toBeGreaterThan(0)
+    expect(screen.queryAllByRole('button', { name: /^Accept / })).toHaveLength(0)
+    for (const minor of minors) {
+      const sheet = screen.getByRole('heading', { level: 3, name: minor.title }).closest('article')!
+      expect(within(sheet).getByText('The Court is in conference.')).toBeDefined()
+      expect(within(sheet).getAllByText('Overrule by the Founder’s Word').length).toBeGreaterThan(0)
+    }
+    await expect(store.decide(minors[0]!.id, availableOptions(minors[0]!.options, withMinor)[0]!.id)).rejects.toThrow(/Give a Word/)
+    expect(availableOptions(minors[0]!.options, withMinor).length).toBeGreaterThan(0)
+  })
+})
+
+describe('a minor petition', () => {
+  it('goes to the court alone, says so, and can be accepted in govern mode', async () => {
+    const user = userEvent.setup()
+    const minor = content.dilemmas.find((d) => d.kind === 'minor' && !d.when && !d.abroad)!
+    const withMinor = callUp(state, content, minor.id)
+    const fake = holding(withMinor)
+    const { store } = mount(fake)
+    await heading('Issues')
+    const sheet = screen.getByRole('heading', { level: 3, name: minor.title }).closest('article')!
+    expect(within(sheet).getByText(/the Court alone has seen it, and permitted every course/)).toBeDefined()
+    expect(within(sheet).queryByRole('table', { name: /divided, by party/ })).toBeNull()
+    expect(within(sheet).queryByText(/The ministries’ advice/)).toBeNull()
+    const first = within(sheet).getByRole('button', { name: /^Accept position 1: / }) as HTMLButtonElement
+    expect(first.disabled).toBe(false)
+    await user.click(first)
+    await waitFor(() => expect(store.get().nation!.state.answered[minor.id]).toBe(1))
+  })
+})
+
+describe('a petition decided away from the desk', () => {
+  it('is shown once among the earlier decisions, badged with the Founder’s Word', async () => {
+    const fake = holding(state)
+    await fake.decide('kept', { dilemmaId: major.id, course: options[1]!.id, word: 'Option 2. I have said so.' })
+    mount(fake)
+    await heading('Issues')
+    const box = screen.getByRole('region', { name: "Today's issues" })
+    const entry = fake.held().state.timeline.at(-1)!
+    expect(within(box).getAllByRole('heading', { level: 3, name: entry.headline })).toHaveLength(1)
+    expect(within(box).getByText(`${major.title}. Decided by the Founder’s Word`)).toBeDefined()
+    expect(within(box).queryByText(/Decided by the Steward/)).toBeNull()
+    const minors = agendaItems(state, content).minors.length
+    expect(within(box).getByText(`1 of ${minors + 1} decided.`)).toBeDefined()
+  })
+
+  it('shows a Word given at the desk once, as its own result', async () => {
+    const user = userEvent.setup()
+    const fake = holding(state)
+    fake.bar(major.id, options[1]!.id)
+    mount(fake)
+    await heading('Issues')
+    const position = accept(2).closest('li')!
+    await user.click(within(position).getByText('Overrule by the Founder’s Word'))
+    await user.type(within(position).getByLabelText('Your Word, as it is to be recorded'), 'Take it.')
+    await user.click(within(position).getByRole('button', { name: "Take position 2 by the Founder's Word" }))
+    const entry = await waitFor(() => {
+      const last = fake.held().state.timeline.at(-1)!
+      expect(last.kind).toBe('decision')
+      return last
+    })
+    const box = screen.getByRole('region', { name: "Today's issues" })
+    await within(box).findByText(`The talking point: ${major.title}`)
+    expect(within(box).getAllByRole('heading', { level: 3, name: entry.headline })).toHaveLength(1)
+    expect(within(box).queryByText(/Decided by the Steward/)).toBeNull()
+  })
+})
+
+describe('asking after the bodies', () => {
+  it('says when the bodies could not be asked, and clears it once they answer', async () => {
+    const fake = new FakeServer({ sittingPolls: 3 })
+    fake.hold(state)
+    const real = fake.dockets.bind(fake)
+    let failures = 1
+    fake.dockets = async (id) => {
+      if (failures-- > 0) throw new Error('The server is busy.')
+      return real(id)
+    }
+    mount(fake)
+    await heading('Issues')
+    expect((await screen.findByRole('alert')).textContent).toMatch(/The server is busy\./)
+    await waitFor(() => expect(screen.queryByText(/The server is busy\./)).toBeNull())
+  })
+
+  it('clears the complaint when there is nothing left to ask after', async () => {
+    const fake = new FakeServer({ sittingPolls: 1000 })
+    fake.hold(state)
+    fake.dockets = async () => {
+      throw new Error('The server is busy.')
+    }
+    const { store } = mount(fake)
+    await heading('Issues')
+    expect((await screen.findByRole('alert')).textContent).toMatch(/The server is busy\./)
+    // The petition is settled by Word, so no docket is being worked on any more.
+    await store.decide(major.id, options[0]!.id, { word: 'Enough.' })
+    await waitFor(() => expect(screen.queryByText(/The server is busy\./)).toBeNull())
   })
 })

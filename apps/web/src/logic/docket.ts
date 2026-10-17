@@ -238,6 +238,15 @@ export function withDockets(government: GovernmentState, dockets: readonly Docke
   return { ...government, dockets: next }
 }
 
+// Who decided a petition, for the badge on it: the executive by its title, the vote itself,
+// the Founder's Word, or a standstill.
+export function decidedBy(by: 'executive' | 'body' | 'word' | 'standstill', government: GovernmentState | null): string {
+  if (by === 'executive') return `Decided by ${executiveTitle(government).replace(/^The /, 'the ')}`
+  if (by === 'body') return 'Decided by the vote itself'
+  if (by === 'word') return 'Decided by the Founder’s Word'
+  return 'Dismissed at a standstill'
+}
+
 export const DECIDED_BY: Record<'executive' | 'body' | 'word' | 'standstill', string> = {
   executive: 'by the executive',
   body: 'by the vote itself',

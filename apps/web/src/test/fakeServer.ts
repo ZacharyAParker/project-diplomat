@@ -373,7 +373,9 @@ export class FakeServer implements Api {
       if (docket.status === 'decided' && docket.day < held.state.day) delete gov.dockets[key]
     }
     const agenda = agendaItems(held.state, content)
-    const dilemmas = [agenda.major, ...(gov.institutions.constitution.rules.minorsThroughBodies ? agenda.minors : [])]
+    // Every dilemma on the agenda has a docket. Minors that do not go through the bodies go
+    // to the Court alone.
+    const dilemmas = [agenda.major, ...agenda.minors]
     for (const dilemma of dilemmas) {
       if (!dilemma || gov.dockets[dilemma.id]) continue
       this.makeDocket(held, dilemma.id)
@@ -442,27 +444,44 @@ export class FakeServer implements Api {
       ai: false,
     }
     const sitting_ = this.sittingPolls > 0
+    const courtOnly = dilemma.kind === 'minor' && !gov.institutions.constitution.rules.minorsThroughBodies
+    const parts = courtOnly
+      ? {
+          advice: [],
+          sittings: [],
+          reviews: [review],
+          standing: {
+            permitted: [...options],
+            barred: [],
+            standstill: false,
+            explanation: 'A minor matter: the Court alone has seen it, and permitted every course. The executive may take any of them.',
+          },
+        }
+      : { advice, sittings: [sitting], reviews: [review], standing: standingFor(options) }
     held.polls[dilemmaId] = this.sittingPolls
     gov.dockets[dilemmaId] = {
       dilemma: dilemmaId,
       day: held.state.day,
       number,
       status: sitting_ ? 'sitting' : 'ready',
-      advice: sitting_ ? [] : advice,
-      sittings: sitting_ ? [] : [sitting],
-      reviews: sitting_ ? [] : [review],
+      ...(sitting_ ? { advice: [], sittings: [], reviews: [], standing: null } : parts),
       exchanges: [],
       assents: [],
-      standing: sitting_ ? null : standingFor(options),
-      progress: sitting_ ? ['The ministries are writing their advice.', 'The Assembly is in debate.'] : ['The ministries have reported.', 'The Assembly has divided.', 'The Court has ruled.'],
+      progress: sitting_
+        ? courtOnly
+          ? ['The Court is in conference.']
+          : ['The ministries are writing their advice.', 'The Assembly is in debate.']
+        : courtOnly
+          ? ['The Court has ruled.']
+          : ['The ministries have reported.', 'The Assembly has divided.', 'The Court has ruled.'],
       document: petition,
     }
     // Kept aside for when the sitting ends.
-    this.pending[`${held.id}:${dilemmaId}`] = { advice, sitting, review, standing: standingFor(options) }
+    this.pending[`${held.id}:${dilemmaId}`] = parts
     if (!sitting_) this.foundModeDecides(held, dilemmaId)
   }
 
-  private pending: Record<string, { advice: Docket['advice']; sitting: Docket['sittings'][number]; review: Docket['reviews'][number]; standing: Standing }> = {}
+  private pending: Record<string, Pick<Docket, 'advice' | 'sittings' | 'reviews'> & { standing: Standing }> = {}
 
   // In found mode the executive decides as soon as the bodies have finished.
   private foundModeDecides(held: Held, dilemmaId: string) {
@@ -652,6 +671,8 @@ export class FakeServer implements Api {
     this.log('decide', id, request)
     const held = this.held(id)
     const docket = held.government.dockets[request.dilemmaId]
+    if (held.government.mode === 'found' && !request.word)
+      throw new Error('In found mode the executive decides each petition. Give a Word to take a course yourself.')
     if (docket && !request.word) {
       const s = docket.standing
       if (docket.status === 'decided') throw new Error('That petition has already been decided.')
@@ -707,8 +728,8 @@ export class FakeServer implements Api {
       ...docket,
       status: 'ready',
       advice: kept.advice,
-      sittings: [kept.sitting],
-      reviews: [kept.review],
+      sittings: kept.sittings,
+      reviews: kept.reviews,
       standing: kept.standing,
       progress: [...docket.progress, 'The Court has ruled.'],
     }
@@ -902,6 +923,10 @@ export class FakeServer implements Api {
   // reply, then an activity line and a quiet cheat (debt set to 88, written to the OOC log
   // only), then the rest of the reply, when the turn ends.
   directorAvailable = true
+  // While true, asking after the Director does not move its turn on: a test can look at it busy.
+  directorPaused = false
+  // Pause by itself once the first half of the reply is out.
+  directorHoldsAfterFirst = false
   directorDetail = 'Claude Code 2.3.1, signed in'
   directorReply = 'Done. I have set **debt** to 88, quietly.\n\n- The Assembly will not notice.\n- The OOC log will.'
   readonly directors = new Map<string, { state: DirectorState; steps: (() => void)[] }>()
@@ -927,7 +952,7 @@ export class FakeServer implements Api {
   async director(id: string): Promise<DirectorState> {
     this.log('director', id)
     const director = this.directorOf(id)
-    const step = director.steps.shift()
+    const step = this.directorPaused ? undefined : director.steps.shift()
     if (step) step()
     return json(director.state)
   }
@@ -948,6 +973,7 @@ export class FakeServer implements Api {
       () => {
         answer = this.say('director', reply.slice(0, half), true)
         messages.push(answer)
+        if (this.directorHoldsAfterFirst) this.directorPaused = true
       },
       () => {
         messages.push(this.say('activity', 'Used cheat_set_figures'))

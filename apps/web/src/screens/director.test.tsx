@@ -21,6 +21,7 @@ describe('the Director', () => {
   it('sends with Enter, streams the reply, shows the activity, and fetches the nation again at the end', async () => {
     const user = userEvent.setup()
     const fake = holding(founded())
+    fake.directorHoldsAfterFirst = true
     const { store } = mount(fake)
     await heading('The Director')
     expect(screen.getByText(/Nothing said yet/)).toBeDefined()
@@ -37,6 +38,8 @@ describe('the Director', () => {
     expect(screen.getByRole('button', { name: 'Stop' })).toBeDefined()
     expect((screen.getByRole('button', { name: 'Send' }) as HTMLButtonElement).disabled).toBe(true)
     expect(within(transcript()).getByText('(still writing)')).toBeDefined()
+    fake.directorHoldsAfterFirst = false
+    fake.directorPaused = false
 
     expect(await within(transcript()).findByText('Used cheat_set_figures')).toBeDefined()
     expect(await within(transcript()).findByText('The OOC log will.')).toBeDefined()
@@ -64,16 +67,9 @@ describe('the Director', () => {
     mount(fake)
     await heading('The Director')
     // Hold the Director at its first step so the test can press Stop.
-    const step = fake.director.bind(fake)
-    let release = false
-    fake.director = async (id) => {
-      const state = await step(id)
-      if (!release) fake.directors.get(id)!.steps.unshift(() => undefined)
-      return state
-    }
+    fake.directorHoldsAfterFirst = true
     await user.type(box(), 'Go on.{Enter}')
     await user.click(await screen.findByRole('button', { name: 'Stop' }))
-    release = true
     expect(await within(transcript()).findByText('Stopped by the Founder')).toBeDefined()
     expect(fake.calls.some((c) => c.name === 'stopDirector')).toBe(true)
     await waitFor(() => expect(screen.queryByRole('button', { name: 'Stop' })).toBeNull())

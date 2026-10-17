@@ -136,6 +136,35 @@ export function todaysDecisions(state: GameState): { index: number; entry: Timel
   return found
 }
 
+// Which of today's decision entries belongs to which decided docket. An entry does not say
+// which dilemma it came from, but its headline is the decided option's own headline (or
+// "<title>: dismissed"), so it can be found. Each entry is claimed once, in timeline order.
+export function claimDecisions(
+  state: GameState,
+  content: Content,
+  dockets: readonly { dilemma: string; status: string; day: number; decision?: { course: string } }[],
+  entries: readonly { index: number; entry: TimelineEntry }[],
+): Map<string, number> {
+  const claims = new Map<string, number>()
+  const taken = new Set<number>()
+  for (const docket of dockets) {
+    if (docket.status !== 'decided' || docket.day !== state.day || !docket.decision) continue
+    const dilemma = content.dilemmas.find((d) => d.id === docket.dilemma)
+    if (!dilemma) continue
+    const neighbour = state.agenda.bound[dilemma.id]
+    const course = docket.decision.course
+    const option = dilemma.options.find((o) => o.id === course)
+    const raw = course === 'dismiss' ? `${dilemma.title}: dismissed` : option?.headline
+    if (raw === undefined) continue
+    const wanted = new Set([render(raw, state, content, neighbour), render(raw, state, content)])
+    const match = entries.find((e) => !taken.has(e.index) && e.entry.kind === 'decision' && wanted.has(e.entry.headline))
+    if (!match) continue
+    taken.add(match.index)
+    claims.set(docket.dilemma, match.index)
+  }
+  return claims
+}
+
 export interface BoxNotice {
   // True when every major dilemma that comes only once has been answered.
   exhausted: boolean
