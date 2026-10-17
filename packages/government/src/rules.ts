@@ -58,7 +58,8 @@ export function standing(docket: Docket, institutions: Institutions, options: Co
   const rules = institutions.constitution.rules
   const courses = options.filter((c) => c !== DISMISS)
   const name = (c: Course) => courseName(c, courses)
-  const exec = rules.executive.title.replace(/^The /, 'the ')
+  // "the Steward", whether the title was written "The Steward" or "Steward".
+  const exec = /^the /i.test(rules.executive.title) ? rules.executive.title.replace(/^The /, 'the ') : `the ${rules.executive.title}`
   const lines: string[] = []
   const { barred, advised, reviews } = rulingsSoFar(docket, institutions)
 
