@@ -1,6 +1,6 @@
 # Terms of use
 
-Effective October 17, 2026. Applies to Project Diplomat 0.7.1 as distributed in this repository.
+Effective October 17, 2026. Applies to Project Diplomat 0.8.0 as distributed in this repository.
 
 ## Agreement
 
@@ -153,4 +153,4 @@ Contact the maintainer through the
 privately as described in [SECURITY.md](SECURITY.md).
 
 ---
-Project Diplomat v0.7.1 · © 2026 Zachary Parker
+Project Diplomat v0.8.0 · © 2026 Zachary Parker

@@ -66,4 +66,4 @@ The [terms](TERMS.md), [privacy policy](PRIVACY.md), [license](LICENSE),
 [patch notes](CHANGELOG.md) cover everything else.
 
 ---
-Project Diplomat v0.7.1 · © 2026 Zachary Parker
+Project Diplomat v0.8.0 · © 2026 Zachary Parker

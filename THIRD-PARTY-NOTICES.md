@@ -69,4 +69,4 @@ International legal code, published by Creative Commons. Creative Commons is not
 license and is not affiliated with Project Diplomat.
 
 ---
-Project Diplomat v0.7.1 · © 2026 Zachary Parker
+Project Diplomat v0.8.0 · © 2026 Zachary Parker

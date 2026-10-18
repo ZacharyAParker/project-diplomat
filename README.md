@@ -25,7 +25,7 @@ liked and always wished went further. same heart (satirical dilemmas, no right a
 NationStates nation whose whole government was played by Claude agents. that whole thing lives
 in here now, and nothing runs through NationStates anymore
 
-current release is **0.7.1**. [patch notes](CHANGELOG.md) · [terms](TERMS.md) · [privacy](PRIVACY.md) ·
+current release is **0.8.0**. [patch notes](CHANGELOG.md) · [terms](TERMS.md) · [privacy](PRIVACY.md) ·
 [license](LICENSE-SCOPE.md) · [security](SECURITY.md). "Project Diplomat" is a codename till i settle on a
 real name
 
